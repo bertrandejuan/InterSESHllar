@@ -97,19 +97,7 @@ class OpenSpaceClient {
       console.log(`[Simulation] Set property ${property} = ${value}`);
       return;
     }
-    // 1. Send WebSocket 'set' topic packet
-    const topic = this.nextTopicId++;
-    const payload = {
-      topic: topic,
-      type: "set",
-      payload: {
-        property: property,
-        value: value
-      }
-    };
-    this.ws.send(JSON.stringify(payload));
-
-    // 2. Also execute via Lua script for guaranteed in-engine execution
+    // Safe execution: only set if property actually exists in scene to avoid OpenSpace GUI error popups
     const luaVal = typeof value === "boolean" ? (value ? "true" : "false") : JSON.stringify(value);
     const luaScript = `if openspace.hasProperty('${property}') then openspace.setPropertyValueSingle('${property}', ${luaVal}) end`;
     this.executeLuaScript(luaScript, false);

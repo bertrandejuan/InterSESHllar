@@ -100,9 +100,6 @@ document.addEventListener("DOMContentLoaded", () => {
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true);
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset.Enabled", true);
     openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Curiosity_Roving_Site_Mosaic.Enabled", true);
   });
 
   openSpace.onDisconnect(() => {
@@ -157,8 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true);
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset.Enabled", true);
     openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled", true);
 
     if (siteKey === "mars_gale") {
       renderMarsGaleOverview();
