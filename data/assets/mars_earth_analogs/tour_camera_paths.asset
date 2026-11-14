@@ -146,11 +146,21 @@ local Actions = {
     Identifier = "mars_earth.OrientSideways",
     Name = "Orient Sideways (Ground Topography View)",
     Command = [[
-      local nav = openspace.navigation.getNavigationState()
-      nav.Pitch = 1.35
-      openspace.navigation.setNavigationState(nav)
+      local lat, lon, alt = table.unpack(openspace.globebrowsing.geoPositionForCamera())
+      local lon_rad = math.rad(lon)
+      local upx = -math.sin(lon_rad)
+      local upy = math.cos(lon_rad)
+      local currentNavState = openspace.navigation.getNavigationState()
+      local newNavState = {
+        Pitch = math.pi * 0.92,
+        Anchor = currentNavState["Anchor"],
+        Yaw = currentNavState["Yaw"] or 0.0,
+        Position = currentNavState["Position"],
+        Up = { upx, upy, 0.0 }
+      }
+      openspace.navigation.setNavigationState(newNavState)
     ]],
-    Documentation = "Tilts camera towards the horizon to view 3D topography and relief from ground level",
+    Documentation = "Tilts camera to view 3D topography and relief along the horizon from ground level",
     GuiPath = "/Planetary Analogs/Camera Orientation",
     IsLocal = false
   },
@@ -158,9 +168,9 @@ local Actions = {
     Identifier = "mars_earth.OrientTopDown",
     Name = "Orient Top-Down (Map View)",
     Command = [[
-      local nav = openspace.navigation.getNavigationState()
-      nav.Pitch = math.pi / 2.0
-      openspace.navigation.setNavigationState(nav)
+      local lat, lon, alt = table.unpack(openspace.globebrowsing.geoPositionForCamera())
+      local anchor = openspace.navigation.getNavigationState().Anchor
+      openspace.navigation.flyToGeo(anchor, lat, lon, alt, 1.2)
     ]],
     Documentation = "Levels camera looking straight down at surface map",
     GuiPath = "/Planetary Analogs/Camera Orientation",

@@ -1,11 +1,13 @@
--- Require component assets
+-- OpenSpace Mars & Earth Desert Analogs Visualization Asset
+-- Master Orchestration Asset
+
 local marsGale = asset.require("./mars_gale_crater")
 local earthAnalogs = asset.require("./earth_desert_analogs")
 local cameraPaths = asset.require("./tour_camera_paths")
 local teamDataAsset = asset.require("./data/team_analog_data")
 
 asset.onInitialize(function()
-  openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs with Team 10-Yr In-Situ Climate Data (4,018 daily records/site).")
+  openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs Asset.")
 
   -- "On opening: Set illumination for earth and mars." (Storyboard requirement)
   if openspace.hasProperty("Scene.Earth.Renderable.PerformShading") then
@@ -43,6 +45,37 @@ asset.onInitialize(function()
   end
   if openspace.hasProperty("Scene.Mars.Renderable.LodScaleFactor") then
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.LodScaleFactor", 15.0)
+  end
+
+  -- "we dont need any of the other planets, galaxies, or close ups of stars.
+  -- we really only need earth and mars and the stars around us to make it pretty and nice."
+  local disabledBodies = {
+    "Mercury", "Venus", "Moon", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
+    "SunGlare", "Ceres", "Vesta", "Bennu", "Ryugu", "Io", "Europa", "Ganymede",
+    "Callisto", "Titan", "Enceladus", "Mimas", "Rhea", "Iapetus", "Dione", "Tethys",
+    "Phobos", "Deimos", "LocalDwarfGalaxies", "Galaxies", "Tully", "SloanDigitalSkySurvey",
+    "ConstellationBounds", "Constellations"
+  }
+  for _, b in ipairs(disabledBodies) do
+    if openspace.hasProperty("Scene." .. b .. ".Renderable.Enabled") then
+      openspace.setPropertyValueSingle("Scene." .. b .. ".Renderable.Enabled", false)
+    end
+    if openspace.hasProperty("Scene." .. b .. "Trail.Renderable.Enabled") then
+      openspace.setPropertyValueSingle("Scene." .. b .. "Trail.Renderable.Enabled", false)
+    end
+    if openspace.hasProperty("Scene." .. b .. ".Enabled") then
+      openspace.setPropertyValueSingle("Scene." .. b .. ".Enabled", false)
+    end
+  end
+
+  local trailsToDisable = {
+    "MercuryTrail", "VenusTrail", "EarthTrail", "MarsTrail", "MoonTrail",
+    "JupiterTrail", "SaturnTrail", "UranusTrail", "NeptuneTrail", "PlutoTrail"
+  }
+  for _, t in ipairs(trailsToDisable) do
+    if openspace.hasProperty("Scene." .. t .. ".Renderable.Enabled") then
+      openspace.setPropertyValueSingle("Scene." .. t .. ".Renderable.Enabled", false)
+    end
   end
 
   -- Initial focus on Mars Gale Crater

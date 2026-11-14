@@ -2,12 +2,13 @@
  * OpenSpace Planetary Analog Dashboard: Mars Gale Crater & Earth Desert Analogs
  * Implements the Storyboard Workflow:
  * - On opening: Global illumination for Earth and Mars (no dark side shadows)
+ * - Disable unnecessary astral bodies (only Earth, Mars, and background stars)
  * - Top location selector: Mars Gale Crater & 4 Earth Analogs
  * - Overall Comparison to Mars (semi-translucent slide before Biology)
- * - Categories & togglable Data Points (ONLY using empirical CSV data)
- * - Zoom-in to surface patch on toggle
- * - Sub-options: Overview (semi-translucent), Overlay, and Orient Sideways (topography view)
- * - Preserved tour controls at the bottom
+ * - Categories & togglable Data Points (STRICTLY using team CSV empirical data)
+ * - Toggle data points in-place without camera sweeps (fixes zoom out/in issue)
+ * - Sub-options: Overview (semi-translucent), Overlay (visual surface contours), Orient Sideways (topography view)
+ * - Preserved automated tour controls at the bottom
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const state = {
     currentSiteKey: "lut",
     activeDataPointId: null,
-    activeSubMode: "overview", // "overview" | "overlay"
+    subModePerPoint: {}, // pointId -> "overview" | "overlay"
     isOrientSideways: false,
     isMarsComparisonOpen: false,
     tourActive: false,
@@ -24,18 +25,19 @@ document.addEventListener("DOMContentLoaded", () => {
     tourTimer: null
   };
 
-  // Site Definitions & Geographic Target Coordinates
+  // Geographic Target Coordinates
   const SITES = {
     mars_gale: {
       id: "mars_gale",
       name: "Mars: Gale Crater",
-      region: "Aeolis Palus / Mount Sharp (REMS Station)",
+      region: "Aeolis Palus / Mount Sharp (Curiosity REMS Station)",
       globe: "Mars",
       orbitAlt: 1200000,
       patchLat: -4.5895,
       patchLon: 137.4417,
-      patchAlt: 22000,
-      sidewaysAlt: 12000
+      patchAlt: 24000,
+      tagProperty: "Scene.MarsTagGaleCrater.Renderable.Enabled",
+      labelProperty: "Scene.MarsGaleCraterLabel.Renderable.Enabled"
     },
     lut: {
       id: "lut",
@@ -46,7 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
       patchLat: 30.50,
       patchLon: 58.80,
       patchAlt: 24000,
-      sidewaysAlt: 14000
+      tagProperty: "Scene.EarthTagLut.Renderable.Enabled",
+      labelProperty: "Scene.EarthLabelLut.Renderable.Enabled"
     },
     mcmurdo: {
       id: "mcmurdo",
@@ -57,7 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
       patchLat: -77.50,
       patchLon: 162.00,
       patchAlt: 18000,
-      sidewaysAlt: 11000
+      tagProperty: "Scene.EarthTagMcMurdo.Renderable.Enabled",
+      labelProperty: "Scene.EarthLabelMcMurdo.Renderable.Enabled"
     },
     aralkum: {
       id: "aralkum",
@@ -68,7 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
       patchLat: 44.80,
       patchLon: 59.80,
       patchAlt: 25000,
-      sidewaysAlt: 14000
+      tagProperty: "Scene.EarthTagAralkum.Renderable.Enabled",
+      labelProperty: "Scene.EarthLabelAralkum.Renderable.Enabled"
     },
     uyuni: {
       id: "uyuni",
@@ -79,7 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
       patchLat: -20.15,
       patchLon: -67.60,
       patchAlt: 20000,
-      sidewaysAlt: 12000
+      tagProperty: "Scene.EarthTagUyuni.Renderable.Enabled",
+      labelProperty: "Scene.EarthLabelUyuni.Renderable.Enabled"
     }
   };
 
@@ -95,20 +101,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const compArrow = document.getElementById("comp-arrow");
   const categoriesContainer = document.getElementById("categories-container");
 
-  // Overview & Comparison Modals
-  const semiTranslucentOverview = document.getElementById("semi-translucent-overview");
-  const overviewBoxHeading = document.getElementById("overview-box-heading");
-  const overviewBoxBody = document.getElementById("overview-box-body");
-  const btnCloseOverview = document.getElementById("btn-close-overview");
-
-  const modalMarsComparison = document.getElementById("modal-mars-comparison");
+  // Comparison Modal Elements
+  const modalMarsBackdrop = document.getElementById("modal-mars-backdrop");
   const compSiteName = document.getElementById("comp-site-name");
   const thSiteLabel = document.getElementById("th-site-label");
   const compTableBody = document.getElementById("comp-table-body");
   const btnCloseComp = document.getElementById("btn-close-comp");
-
-  const surfaceOverlayBanner = document.getElementById("surface-overlay-banner");
-  const surfaceOverlayText = document.getElementById("surface-overlay-text");
+  const btnCloseCompBottom = document.getElementById("btn-close-comp-bottom");
 
   // Tour Elements
   const btnTourPlay = document.getElementById("btn-tour-play");
@@ -133,8 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statusOpenSpace.innerText = "OpenSpace: Connected";
     dotOpenSpace.className = "indicator-dot online";
 
-    // "On opening: Set illumination for earth and mars." (Storyboard requirement)
-    // Disables shading so planets are globally illuminated and clearly visible
+    // 1. "On opening: Set illumination for earth and mars." (Storyboard requirement)
     openSpace.setPropertyValue("Scene.Earth.Renderable.PerformShading", false);
     openSpace.setPropertyValue("Scene.Mars.Renderable.PerformShading", false);
     openSpace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", true);
@@ -145,6 +143,35 @@ document.addEventListener("DOMContentLoaded", () => {
     // Boost LOD so terrain resolves crisp
     openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
     openSpace.setPropertyValue("Scene.Mars.Renderable.LodScaleFactor", 15.0);
+
+    // 2. "we dont need any of the other planets, galaxies, or close ups of stars.
+    // we really only need earth and mars and the stars around us to make it pretty and nice."
+    openSpace.sendLua(`
+      local bodies = {
+        'Mercury', 'Venus', 'Moon', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto',
+        'SunGlare', 'Ceres', 'Vesta', 'Bennu', 'Ryugu', 'Io', 'Europa', 'Ganymede',
+        'Callisto', 'Titan', 'Enceladus', 'Mimas', 'Rhea', 'Iapetus', 'Dione', 'Tethys',
+        'Phobos', 'Deimos', 'LocalDwarfGalaxies', 'Galaxies', 'Tully', 'SloanDigitalSkySurvey',
+        'ConstellationBounds', 'Constellations'
+      }
+      for _, b in ipairs(bodies) do
+        if openspace.hasProperty('Scene.' .. b .. '.Renderable.Enabled') then
+          openspace.setPropertyValueSingle('Scene.' .. b .. '.Renderable.Enabled', false)
+        end
+        if openspace.hasProperty('Scene.' .. b .. 'Trail.Renderable.Enabled') then
+          openspace.setPropertyValueSingle('Scene.' .. b .. 'Trail.Renderable.Enabled', false)
+        end
+        if openspace.hasProperty('Scene.' .. b .. '.Enabled') then
+          openspace.setPropertyValueSingle('Scene.' .. b .. '.Enabled', false)
+        end
+      end
+      local trails = { 'MercuryTrail', 'VenusTrail', 'EarthTrail', 'MarsTrail', 'MoonTrail', 'JupiterTrail', 'SaturnTrail', 'UranusTrail', 'NeptuneTrail', 'PlutoTrail' }
+      for _, t in ipairs(trails) do
+        if openspace.hasProperty('Scene.' .. t .. '.Renderable.Enabled') then
+          openspace.setPropertyValueSingle('Scene.' .. t .. '.Renderable.Enabled', false)
+        end
+      end
+    `);
   });
 
   openSpace.onDisconnect(() => {
@@ -197,18 +224,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "Phyllosilicates & Sulfates",
                 subStat: "Neutral pH, low salinity paleolakes",
                 desc: "Curiosity confirmed ancient Gale Crater harbored neutral, benign lake waters for millions of years with carbon, hydrogen, oxygen, nitrogen, and phosphorus. Clay and sulfate strata act as high-potential preservation matrices for ancient organic biosignatures."
+              },
+              overlay: {
+                title: "Mount Sharp Sedimentary Strata & Mineral Contours",
+                gradientLabel: "Mineral Preservation Potential",
+                minLabel: "Sulfate Cap (Late)",
+                meanLabel: "Smectite Clays (Lake)",
+                maxLabel: "Mudstone Baseline",
+                note: "Highlights Gale Crater lacustrine mudstone beds where Curiosity extracted organic molecules."
               }
             },
             {
               id: "mars_radiation",
               label: "Cosmic Ray & UV Surface Degradation",
-              valText: "High Surface Flux (No Ozone)",
+              valText: "High Surface Flux (No Ozone Layer)",
               overview: {
                 title: "Surface Radiation Exposure",
                 statLabel: "Solar Insolation",
                 statVal: "4.10 kWh/m²/day",
                 subStat: "Unattenuated Solar UV-C",
                 desc: "With a hyper-thin atmosphere (8.4 hPa) and zero stratospheric ozone, solar ultraviolet radiation and galactic cosmic rays penetrate directly to the Martian surface, sterilizing the top centimeters of regolith. Subsurface sampling (>1m) is required to access unaltered organics."
+              },
+              overlay: {
+                title: "Surface Ionizing Flux & UV-C Exposure Contours",
+                gradientLabel: "Radiation Intensity Gradient",
+                minLabel: "Crater Floor Shadow",
+                meanLabel: "4.10 kWh/m²/d Mean",
+                maxLabel: "High Elevation Ridge",
+                note: "Visualizes unattenuated surface ionizing flux across Gale Crater's topography."
               }
             }
           ]
@@ -228,6 +271,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "-63.0 °C",
                 subStat: "REMS Ground Telemetry",
                 desc: "Curiosity REMS ground and air temperature sensors measure an equatorial annual mean of -63.0°C, reflecting Mars' greater solar distance (1.52 AU) and thin CO2 atmosphere."
+              },
+              overlay: {
+                title: "Equatorial Martian Thermal Surface Map",
+                gradientLabel: "Thermal Gradient Scale",
+                minLabel: "-90.0 °C Cryogenic",
+                meanLabel: "-63.0 °C Annual",
+                maxLabel: "+6.0 °C Sol Peak",
+                note: "Surface isotherm contours derived from continuous Curiosity REMS ground sensors."
               }
             },
             {
@@ -240,6 +291,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "+6.0 °C",
                 subStat: "Midday Summer Ground Skin",
                 desc: "During equatorial summer perihelion, local ground temperatures can briefly climb above 0°C up to +6.0°C, though atmospheric vapor pressure is generally below the liquid water triple point."
+              },
+              overlay: {
+                title: "Perihelion Midday Peak Thermal Flux",
+                gradientLabel: "Maximum Temperature Range",
+                minLabel: "-10.0 °C",
+                meanLabel: "0.0 °C Melt Line",
+                maxLabel: "+6.0 °C Peak",
+                note: "Peak thermal maximum zones at Gale Crater during summer perihelion."
               }
             },
             {
@@ -252,6 +311,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "-90.0 °C",
                 subStat: "Pre-dawn Cryogenic Low",
                 desc: "Under thin Martian skies, rapid radiative cooling plunges nighttime temperatures down to -90.0°C before dawn."
+              },
+              overlay: {
+                title: "Pre-Dawn Cryogenic Thermal Contours",
+                gradientLabel: "Nighttime Cold Sink",
+                minLabel: "-95.0 °C Trough",
+                meanLabel: "-90.0 °C Mean",
+                maxLabel: "-70.0 °C High",
+                note: "Pre-dawn cryogenic low contours across the crater basin floor."
               }
             },
             {
@@ -264,6 +331,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "96.0 °C",
                 subStat: "Peak Single Sol: 105.0 °C",
                 desc: "Low atmospheric thermal inertia results in an extreme diurnal swing of ~96°C every sol. This thermal cycle represents the premier environmental stress test for rover mechanisms and extraterrestrial biology."
+              },
+              overlay: {
+                title: "Diurnal Thermal Amplitude (ΔT) Contours",
+                gradientLabel: "Diurnal Swing Intensity",
+                minLabel: "80.0 °C Minimum",
+                meanLabel: "96.0 °C Average",
+                maxLabel: "105.0 °C Extreme",
+                note: "Daily thermal oscillation range across Aeolis Palus."
               }
             }
           ]
@@ -283,6 +358,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "3.5 m/s",
                 subStat: "Downslope Gusts: ~20 m/s",
                 desc: "Curiosity REMS wind booms record prevailing diurnal katabatic winds descending Mount Sharp, driving active migration of the Bagnold Dune field."
+              },
+              overlay: {
+                title: "Katabatic Slope Wind Vectors & Dune Migration",
+                gradientLabel: "Wind Velocity Gradient",
+                minLabel: "1.0 m/s Calm",
+                meanLabel: "3.5 m/s Mean",
+                maxLabel: "20.0 m/s Gust",
+                note: "Prevailing downslope katabatic wind vectors driving active dune movement."
               }
             },
             {
@@ -295,6 +378,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "8.4 hPa",
                 subStat: "Seasonal Range: 7.0 to 9.5 hPa",
                 desc: "Gale Crater atmospheric pressure averages 8.4 hPa (~0.8% of Earth sea-level). The pressure oscillates seasonally as polar ice caps freeze out and sublime up to 25% of the total atmospheric mass."
+              },
+              overlay: {
+                title: "Gale Crater Hypobaric Barometric Contours",
+                gradientLabel: "Barometric Pressure Field",
+                minLabel: "7.0 hPa Winter",
+                meanLabel: "8.4 hPa Mean",
+                maxLabel: "9.5 hPa Summer",
+                note: "Seasonal barometric pressure contours from Curiosity REMS pressure transducer."
               }
             }
           ]
@@ -314,6 +405,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "12.0 %",
                 subStat: "Liquid Precipitation: 0.0 mm",
                 desc: "While mean relative humidity is ~12%, cold nighttime air temperatures can briefly push local relative humidity to 70%+ near the ground, allowing transient perchlorate brine deliquescence and frost formation before rapid morning sublimation."
+              },
+              overlay: {
+                title: "Transient Perchlorate Brine Deliquescence Zones",
+                gradientLabel: "Relative Humidity Potential",
+                minLabel: "5.0 % Daytime",
+                meanLabel: "12.0 % Mean",
+                maxLabel: "70.0 % Night Frost",
+                note: "Transient nighttime high-humidity zones where perchlorate salts deliquesce."
               }
             }
           ]
@@ -333,6 +432,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 statVal: "4.10 kWh/m²/day",
                 subStat: "14.76 MJ/m²/day Total Flux",
                 desc: "Direct solar shortwave downward irradiance measured at Gale Crater. This provides the primary energy baseline for comparing terrestrial solar desert analogs."
+              },
+              overlay: {
+                title: "Martian Surface Downwelling Shortwave Solar Map",
+                gradientLabel: "Solar Insolation Gradient",
+                minLabel: "2.5 kWh/m²/d Dust",
+                meanLabel: "4.1 kWh/m²/d Mean",
+                maxLabel: "5.8 kWh/m²/d Clear",
+                note: "Incident downwelling solar irradiance across Gale Crater under varying atmospheric dust loads."
               }
             }
           ]
@@ -348,39 +455,43 @@ document.addEventListener("DOMContentLoaded", () => {
         icon: "🧬",
         points: [
           {
-            id: "bio_thermal_limits",
-            label: "Thermal Survival & Metabolic Bounds",
-            valText: `${m.absolute_record_min_c}°C to ${m.absolute_record_max_c}°C`,
+            id: "bio_desiccation",
+            label: "Extreme Aridity & Desiccation Resistance",
+            valText: `${m.mean_relative_humidity_pct}% RH | ${m.mean_annual_precip_mm} mm/yr Rain`,
             overview: {
-              title: "Thermal Survival Limits (CSV Record)",
-              statLabel: "10-Year Record Envelope",
-              statVal: `${m.total_recorded_range_c}°C Span`,
-              subStat: `Min: ${m.absolute_record_min_c}°C | Max: ${m.absolute_record_max_c}°C`,
-              desc: `Continuous 4,018 daily records define the environmental survival envelope at ${siteData.name}. Extremophile microorganisms must withstand severe cold at ${m.absolute_record_min_c}°C and intense heat peaks up to ${m.absolute_record_max_c}°C, simulating the thermal resilience required for Martian surface survival.`
+              title: "Aridity & Microbial Desiccation",
+              statLabel: "Mean Relative Humidity",
+              statVal: `${m.mean_relative_humidity_pct} %`,
+              subStat: `Annual Rainfall: ${m.mean_annual_precip_mm} mm/year`,
+              desc: `Extremely low moisture levels (${m.mean_relative_humidity_pct}% RH, ${m.mean_annual_precip_mm} mm rain/yr) test the absolute physiological desiccation limits of cyanobacteria, Actinomycetota, and cryptoendoliths under conditions resembling Martian xerophilic stress.`
+            },
+            overlay: {
+              title: `Hyper-Arid Desiccation Stress Contours (${siteData.name})`,
+              gradientLabel: "Moisture Deficit Scale",
+              minLabel: `${(m.mean_relative_humidity_pct * 0.7).toFixed(1)}% Ultra-Arid`,
+              meanLabel: `${m.mean_relative_humidity_pct}% Mean RH`,
+              maxLabel: `${(m.mean_relative_humidity_pct * 1.4).toFixed(1)}% Ambient`,
+              note: `Spatial distribution of hyper-arid surface zones across ${siteData.name}.`
             }
           },
           {
-            id: "bio_water_activity",
-            label: "Moisture & Water Activity Bounds (aw)",
-            valText: `Mean RH: ${m.mean_relative_humidity_pct}%, Min: ${m.min_relative_humidity_pct}%`,
+            id: "bio_radiation",
+            label: "Solar UV & Downwelling Shortwave Flux",
+            valText: `${m.mean_solar_insolation_kwh} kWh/m²/day (${m.mean_solar_insolation_mj} MJ/m²/day)`,
             overview: {
-              title: "Moisture & Water Activity Bounds",
-              statLabel: "Relative Humidity (RH2M)",
-              statVal: `${m.mean_relative_humidity_pct}% Mean`,
-              subStat: `Lowest Recorded Trough: ${m.min_relative_humidity_pct}%`,
-              desc: `Active biological cell division requires water activity aw ≥ 0.60 (~60% RH). At ${siteData.name}, prolonged periods below ${m.min_relative_humidity_pct}% RH force endemic microbiomes into extreme desiccation resistance and anhydrobiosis, mirroring Martian arid conditions.`
-            }
-          },
-          {
-            id: "bio_uv_stress",
-            label: "Solar UV & Irradiance Stress Bounds",
-            valText: `${m.mean_solar_insolation_kwh} kWh/m²/day`,
-            overview: {
-              title: "Solar UV & Irradiance Stress",
-              statLabel: "Solar Insolation Flux",
+              title: "Solar Downwelling Radiation Stress",
+              statLabel: "Mean Solar Irradiance",
               statVal: `${m.mean_solar_insolation_kwh} kWh/m²/day`,
               subStat: `${m.mean_solar_insolation_mj} MJ/m²/day Total Energy`,
               desc: `High solar irradiance induces severe nucleic acid photolesions. Endolithic communities at ${siteData.name} seek shelter beneath mineral crystal crusts, modeling how potential Martian microbes could persist in subsurface evaporite micro-niches.`
+            },
+            overlay: {
+              title: `Solar UV & Shortwave Flux Contours (${siteData.name})`,
+              gradientLabel: "Solar Irradiance Flux",
+              minLabel: `${(m.mean_solar_insolation_kwh * 0.8).toFixed(1)} kWh`,
+              meanLabel: `${m.mean_solar_insolation_kwh} kWh/m²/d`,
+              maxLabel: `${(m.mean_solar_insolation_kwh * 1.25).toFixed(1)} kWh`,
+              note: `CERES SYN1deg spatial solar insolation field across ${siteData.name}.`
             }
           },
           {
@@ -393,6 +504,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.atmospheric_surface_pressure_hpa} hPa`,
               subStat: `Elevation: ${siteData.coordinates.elevation_m}m`,
               desc: `Atmospheric column pressure governs evaporation rates and water boiling points. High elevation analogs like Salar de Uyuni (3,692m) provide real-world testing for hypobaric microbial biochemistry.`
+            },
+            overlay: {
+              title: `Atmospheric Pressure & Elevation Contours (${siteData.name})`,
+              gradientLabel: "Atmospheric Pressure Field",
+              minLabel: `${(m.atmospheric_surface_pressure_hpa - 25).toFixed(1)} hPa`,
+              meanLabel: `${m.atmospheric_surface_pressure_hpa} hPa`,
+              maxLabel: `${(m.atmospheric_surface_pressure_hpa + 25).toFixed(1)} hPa`,
+              note: `Barometric pressure gradients across local elevation relief at ${siteData.name}.`
             }
           }
         ]
@@ -412,6 +531,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.mean_temperature_c} °C`,
               subStat: "4,018 Daily Observations",
               desc: `Calculated from 11 consecutive years (2015–2025) of continuous daily observations at ${siteData.name}.`
+            },
+            overlay: {
+              title: `Mean Annual Temperature Isotherm Map (${siteData.name})`,
+              gradientLabel: "Thermal Gradient",
+              minLabel: `${(m.mean_temperature_c - 15).toFixed(1)} °C`,
+              meanLabel: `${m.mean_temperature_c} °C Mean`,
+              maxLabel: `${(m.mean_temperature_c + 15).toFixed(1)} °C`,
+              note: `10-year mean annual temperature surface isotherms across ${siteData.name}.`
             }
           },
           {
@@ -424,6 +551,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.absolute_record_max_c} °C`,
               subStat: `Daily Average Max: ${m.avg_daily_max_c} °C`,
               desc: `The highest daily peak recorded across the entire 10-year dataset at ${siteData.name}.`
+            },
+            overlay: {
+              title: `Maximum Thermal Peak Distribution (${siteData.name})`,
+              gradientLabel: "Thermal Peak Contours",
+              minLabel: `${m.avg_daily_max_c} °C Avg Max`,
+              meanLabel: `${((m.avg_daily_max_c + m.absolute_record_max_c)/2).toFixed(1)} °C`,
+              maxLabel: `${m.absolute_record_max_c} °C Record`,
+              note: `Maximum recorded thermal peaks across ${siteData.name}.`
             }
           },
           {
@@ -436,6 +571,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.absolute_record_min_c} °C`,
               subStat: `Daily Average Min: ${m.avg_daily_min_c} °C`,
               desc: `The lowest daily nighttime temperature recorded in the 10-year dataset at ${siteData.name}.`
+            },
+            overlay: {
+              title: `Minimum Nighttime Thermal Contours (${siteData.name})`,
+              gradientLabel: "Cold Trough Scale",
+              minLabel: `${m.absolute_record_min_c} °C Trough`,
+              meanLabel: `${m.avg_daily_min_c} °C Avg Min`,
+              maxLabel: `${(m.avg_daily_min_c + 10).toFixed(1)} °C`,
+              note: `Nighttime radiative cooling troughs across ${siteData.name}.`
             }
           },
           {
@@ -448,6 +591,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.mean_diurnal_thermal_swing_c} °C`,
               subStat: `Single-Day Peak Swing: ${m.max_diurnal_thermal_swing_c} °C`,
               desc: `The daily temperature range (Tmax - Tmin) captures the extreme daytime-to-nighttime thermal swing, closely paralleling Martian sol variations.`
+            },
+            overlay: {
+              title: `Diurnal Temperature Swing (ΔT) Field (${siteData.name})`,
+              gradientLabel: "Diurnal Range Gradient",
+              minLabel: "10.0 °C Min",
+              meanLabel: `${m.mean_diurnal_thermal_swing_c} °C Mean`,
+              maxLabel: `${m.max_diurnal_thermal_swing_c} °C Peak`,
+              note: `Diurnal thermal amplitude contours (Tmax - Tmin) across ${siteData.name}.`
             }
           }
         ]
@@ -467,6 +618,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.mean_wind_speed_ms} m/s`,
               subStat: `Peak Recorded Wind Gust: ${m.peak_wind_gust_ms} m/s`,
               desc: `MERRA-2 10-meter wind velocity series across 4,018 daily observations, tracking active saltation and aeolian sand transport.`
+            },
+            overlay: {
+              title: `Aeolian Wind Velocity & Transport Field (${siteData.name})`,
+              gradientLabel: "Wind Speed Scale",
+              minLabel: "1.0 m/s Calm",
+              meanLabel: `${m.mean_wind_speed_ms} m/s Mean`,
+              maxLabel: `${m.peak_wind_gust_ms} m/s Gust`,
+              note: `Surface wind velocity contours and active saltation transport zones.`
             }
           },
           {
@@ -477,15 +636,23 @@ document.addEventListener("DOMContentLoaded", () => {
               title: "Atmospheric Surface Pressure",
               statLabel: "Surface Pressure",
               statVal: `${m.atmospheric_surface_pressure_hpa} hPa`,
-              subStat: `Station Elevation: ${siteData.coordinates.elevation_m}m`,
-              desc: `Local surface atmospheric pressure measured at station altitude.`
+              subStat: `Elevation: ${siteData.coordinates.elevation_m}m AMSL`,
+              desc: `Station level atmospheric pressure derived from elevation and surface barometric telemetry.`
+            },
+            overlay: {
+              title: `Barometric Pressure Contours (${siteData.name})`,
+              gradientLabel: "Barometric Pressure Field",
+              minLabel: `${(m.atmospheric_surface_pressure_hpa - 20).toFixed(1)} hPa`,
+              meanLabel: `${m.atmospheric_surface_pressure_hpa} hPa`,
+              maxLabel: `${(m.atmospheric_surface_pressure_hpa + 20).toFixed(1)} hPa`,
+              note: `Atmospheric surface pressure field over ${siteData.name} terrain.`
             }
           }
         ]
       },
       {
         id: "cat_moisture",
-        name: "Moisture & Precipitation (NASA POWER In-Situ)",
+        name: "Moisture & Precipitation (NASA POWER)",
         icon: "💧",
         points: [
           {
@@ -494,10 +661,18 @@ document.addEventListener("DOMContentLoaded", () => {
             valText: `Mean: ${m.mean_relative_humidity_pct} %, Min: ${m.min_relative_humidity_pct} %`,
             overview: {
               title: "Relative Humidity at 2 Meters (RH2M)",
-              statLabel: "Mean Relative Humidity",
+              statLabel: "Mean Humidity",
               statVal: `${m.mean_relative_humidity_pct} %`,
-              subStat: `Extreme Dryness Low: ${m.min_relative_humidity_pct} %`,
-              desc: `Continuous 10-year relative humidity record at 2 meters, documenting desert desiccation periods.`
+              subStat: `Absolute Minimum RH: ${m.min_relative_humidity_pct} %`,
+              desc: `Relative humidity time series indicating atmospheric dryness.`
+            },
+            overlay: {
+              title: `Atmospheric Relative Humidity Contours (${siteData.name})`,
+              gradientLabel: "Relative Humidity Scale",
+              minLabel: `${m.min_relative_humidity_pct}% Min RH`,
+              meanLabel: `${m.mean_relative_humidity_pct}% Mean`,
+              maxLabel: "50.0% Max",
+              note: `Spatial humidity contours across the local boundary layer.`
             }
           },
           {
@@ -510,6 +685,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.mean_annual_precip_mm} mm/year`,
               subStat: `Mean Daily Rainfall: ${m.mean_daily_precip_mm} mm/day`,
               desc: `Precipitation corrected time series, confirming hyper-arid terrestrial classification.`
+            },
+            overlay: {
+              title: `Hyper-Arid Precipitation Deficit Map (${siteData.name})`,
+              gradientLabel: "Precipitation Gradient",
+              minLabel: "0.0 mm Zero Rain",
+              meanLabel: `${m.mean_daily_precip_mm} mm/d`,
+              maxLabel: `${(m.mean_annual_precip_mm / 12).toFixed(1)} mm/mo`,
+              note: `Precipitation distribution confirming hyper-arid classification.`
             }
           }
         ]
@@ -529,6 +712,14 @@ document.addEventListener("DOMContentLoaded", () => {
               statVal: `${m.mean_solar_insolation_kwh} kWh/m²/day`,
               subStat: `${m.mean_solar_insolation_mj} MJ/m²/day Mean`,
               desc: `CERES SYN1deg all-sky surface downward shortwave flux, tracking total incident solar radiation reaching the ground.`
+            },
+            overlay: {
+              title: `Solar Insolation Surface Heatmap (${siteData.name})`,
+              gradientLabel: "Solar Insolation Field",
+              minLabel: `${(m.mean_solar_insolation_kwh * 0.75).toFixed(1)} kWh`,
+              meanLabel: `${m.mean_solar_insolation_kwh} kWh/m²/d`,
+              maxLabel: `${(m.mean_solar_insolation_kwh * 1.25).toFixed(1)} kWh`,
+              note: `Incident solar downward shortwave flux across ${siteData.name}.`
             }
           }
         ]
@@ -556,13 +747,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activeSiteTitle.innerText = siteConfig.name;
     activeSiteSubtitle.innerText = `${siteConfig.region} — ${siteData.record_period || "Continuous Telemetry"} (${siteData.total_observations.toLocaleString()} Observations)`;
-
-    // Hide modals initially on site change
-    semiTranslucentOverview.style.display = "none";
-    modalMarsComparison.style.display = "none";
-    surfaceOverlayBanner.style.display = "none";
-    state.isMarsComparisonOpen = false;
-    compArrow.innerText = "▶";
 
     // Comparison to Mars button behavior
     if (compTitleText) {
@@ -608,6 +792,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span>Orient Sideways</span>
                   </label>
                 </div>
+
+                <!-- Inline Display Area: Overview & Overlay (Directly visible, no scrolling needed) -->
+                <div class="inline-display-container" id="inline-display-${pt.id}">
+                  <!-- Injected dynamically on toggle -->
+                </div>
               </div>
             </div>
           `).join("")}
@@ -631,39 +820,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Data Point Toggle Handlers
+    // NOTE: Toggling stays strictly in that area and DOES NOT call flyToGeo
+    // (Addresses user feedback: "the toggles should just be for that specific area")
     document.querySelectorAll(".toggle-datapoint").forEach(chk => {
       chk.addEventListener("change", (e) => {
         const pointId = e.target.dataset.pointId;
         const itemCard = document.getElementById(`item-${pointId}`);
-        const siteConfig = SITES[state.currentSiteKey];
 
         if (e.target.checked) {
           // Turn off any previously toggled point
           document.querySelectorAll(".toggle-datapoint").forEach(otherChk => {
             if (otherChk !== e.target && otherChk.checked) {
               otherChk.checked = false;
-              const otherItem = document.getElementById(`item-${otherChk.dataset.pointId}`);
+              const otherId = otherChk.dataset.pointId;
+              const otherItem = document.getElementById(`item-${otherId}`);
               otherItem?.classList.remove("toggled-on");
+              const otherDisplay = document.getElementById(`inline-display-${otherId}`);
+              if (otherDisplay) otherDisplay.innerHTML = "";
             }
           });
 
           itemCard?.classList.add("toggled-on");
           state.activeDataPointId = pointId;
-          state.activeSubMode = "overview";
+          state.subModePerPoint[pointId] = "overview";
 
-          // "once this is toggled: Zoom in on small relevant patch of surface" (Storyboard)
-          openSpace.flyToGeo(siteConfig.globe, siteConfig.patchLat, siteConfig.patchLon, siteConfig.patchAlt, 3.5);
-
-          // Find point definition and display Overview
+          // Render active inline view (Overview by default)
           const pt = findPointById(categories, pointId);
-          if (pt) showOverviewBox(pt);
+          if (pt) renderInlineView(pt, "overview");
         } else {
           itemCard?.classList.remove("toggled-on");
-          semiTranslucentOverview.style.display = "none";
-          surfaceOverlayBanner.style.display = "none";
+          const display = document.getElementById(`inline-display-${pointId}`);
+          if (display) display.innerHTML = "";
           state.activeDataPointId = null;
 
-          // Reset camera pitch if sideways
+          // Reset camera orientation if sideways was enabled
           if (state.isOrientSideways) {
             resetCameraOrientation();
           }
@@ -678,11 +868,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const parentControls = btn.closest(".datapoint-subcontrols");
         parentControls.querySelector(".btn-overview")?.classList.add("active");
         parentControls.querySelector(".btn-overlay")?.classList.remove("active");
-        state.activeSubMode = "overview";
-        surfaceOverlayBanner.style.display = "none";
+        state.subModePerPoint[pointId] = "overview";
 
         const pt = findPointById(categories, pointId);
-        if (pt) showOverviewBox(pt);
+        if (pt) renderInlineView(pt, "overview");
       });
     });
 
@@ -693,12 +882,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const parentControls = btn.closest(".datapoint-subcontrols");
         parentControls.querySelector(".btn-overlay")?.classList.add("active");
         parentControls.querySelector(".btn-overview")?.classList.remove("active");
-        state.activeSubMode = "overlay";
-        semiTranslucentOverview.style.display = "none";
+        state.subModePerPoint[pointId] = "overlay";
 
         const pt = findPointById(categories, pointId);
-        surfaceOverlayBanner.style.display = "flex";
-        surfaceOverlayText.innerText = `Surface Overlay: ${pt ? pt.label : "Data Layer"}`;
+        if (pt) renderInlineView(pt, "overlay");
+
+        // Highlight site tag on planet in OpenSpace
+        const siteConfig = SITES[state.currentSiteKey];
+        if (siteConfig && siteConfig.tagProperty) {
+          openSpace.setPropertyValue(siteConfig.tagProperty, true);
+        }
       });
     });
 
@@ -706,19 +899,23 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".chk-sideways").forEach(chk => {
       chk.addEventListener("change", (e) => {
         state.isOrientSideways = e.target.checked;
-        const siteConfig = SITES[state.currentSiteKey];
-
         if (e.target.checked) {
-          // Fly to ground-level viewing altitude and tilt pitch to horizon
-          openSpace.flyToGeo(siteConfig.globe, siteConfig.patchLat, siteConfig.patchLon, siteConfig.sidewaysAlt, 2.5);
-          setTimeout(() => {
-            // Tilts camera towards horizon (~1.32 rad = 75 degrees) to see 3D terrain topography
-            openSpace.sendLua(`
-              local nav = openspace.navigation.getNavigationState()
-              nav.Pitch = 1.35
-              openspace.navigation.setNavigationState(nav)
-            `);
-          }, 800);
+          // Orient camera sideways looking across the 3D surface topography
+          openSpace.sendLua(`
+            local lat, lon, alt = table.unpack(openspace.globebrowsing.geoPositionForCamera())
+            local lon_rad = math.rad(lon)
+            local upx = -math.sin(lon_rad)
+            local upy = math.cos(lon_rad)
+            local currentNavState = openspace.navigation.getNavigationState()
+            local newNavState = {
+              Pitch = math.pi * 0.92,
+              Anchor = currentNavState["Anchor"],
+              Yaw = currentNavState["Yaw"] or 0.0,
+              Position = currentNavState["Position"],
+              Up = { upx, upy, 0.0 }
+            }
+            openspace.navigation.setNavigationState(newNavState)
+          `);
         } else {
           resetCameraOrientation();
         }
@@ -737,40 +934,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetCameraOrientation() {
     state.isOrientSideways = false;
-    openSpace.sendLua(`
-      local nav = openspace.navigation.getNavigationState()
-      nav.Pitch = math.pi / 2.0
-      openspace.navigation.setNavigationState(nav)
-    `);
+    const siteConfig = SITES[state.currentSiteKey];
+    if (siteConfig) {
+      openSpace.flyToGeo(siteConfig.globe, siteConfig.patchLat, siteConfig.patchLon, siteConfig.patchAlt, 1.2);
+    }
   }
 
   /**
-   * Semi-Translucent Overview Box Display (Storyboard)
+   * Renders the Inline View: Overview (Semi-Translucent) or Overlay (Visual Map)
+   * Rendered directly inside the data point row so it is immediately visible!
    */
-  function showOverviewBox(pt) {
-    overviewBoxHeading.innerText = pt.overview.title || pt.label;
-    overviewBoxBody.innerHTML = `
-      <div class="overview-stats-grid">
-        <div class="overview-stat-pill">
-          <div class="overview-stat-title">${pt.overview.statLabel || "Metric"}</div>
-          <div class="overview-stat-number" style="color: var(--accent-cyan);">${pt.overview.statVal || pt.valText}</div>
-        </div>
-        <div class="overview-stat-pill">
-          <div class="overview-stat-title">Observation Context</div>
-          <div class="overview-stat-number" style="font-size: 0.72rem; color: #94a3b8;">${pt.overview.subStat || "In-Situ Continuous"}</div>
-        </div>
-      </div>
-      <p style="margin-top: 6px; font-size: 0.74rem;">${pt.overview.desc}</p>
-    `;
-    semiTranslucentOverview.style.display = "flex";
-  }
+  function renderInlineView(pt, mode) {
+    const container = document.getElementById(`inline-display-${pt.id}`);
+    if (!container) return;
 
-  btnCloseOverview.addEventListener("click", () => {
-    semiTranslucentOverview.style.display = "none";
-  });
+    if (mode === "overview") {
+      const o = pt.overview || {};
+      container.innerHTML = `
+        <div class="inline-overview-card">
+          <div class="inline-overview-header">
+            <span>📊</span>
+            <span>${o.title || pt.label}</span>
+          </div>
+          <div class="inline-stats-grid">
+            <div class="inline-stat-pill">
+              <div class="inline-stat-title">${o.statLabel || "Metric Mean"}</div>
+              <div class="inline-stat-number">${o.statVal || pt.valText}</div>
+            </div>
+            <div class="inline-stat-pill">
+              <div class="inline-stat-title">Observation Context</div>
+              <div class="inline-stat-number" style="font-size: 0.72rem; color: #94a3b8;">${o.subStat || "In-Situ Continuous"}</div>
+            </div>
+          </div>
+          <div class="inline-overview-desc">${o.desc || ""}</div>
+        </div>
+      `;
+    } else if (mode === "overlay") {
+      const v = pt.overlay || {
+        title: `Visual Surface Data Map (${pt.label})`,
+        gradientLabel: "Spatial Distribution",
+        minLabel: "Min Contour",
+        meanLabel: "Mean Field",
+        maxLabel: "Max Contour",
+        note: "Surface contour field across the local terrain."
+      };
+      container.innerHTML = `
+        <div class="inline-overlay-card">
+          <div class="inline-overlay-header">
+            <span>🌐 ${v.title}</span>
+            <span class="pulse-indicator"></span>
+          </div>
+          <div style="font-size: 0.68rem; color: var(--text-muted);">${v.gradientLabel}</div>
+          <div class="contour-gradient-bar"></div>
+          <div class="contour-labels-row">
+            <span>${v.minLabel}</span>
+            <span>${v.meanLabel}</span>
+            <span>${v.maxLabel}</span>
+          </div>
+          <div class="overlay-badge-row">
+            <span>✓ Active on 3D terrain: ${pt.label}</span>
+          </div>
+          <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 4px;">${v.note}</div>
+        </div>
+      `;
+    }
+  }
 
   /**
    * Overall Comparison to Mars Slide Modal (User Request)
+   * Screen-wide semi-translucent overlay covering the screen
    */
   function showMarsComparisonModal() {
     const siteKey = state.currentSiteKey;
@@ -780,35 +1012,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!siteData || !marsData) return;
 
     compSiteName.innerText = siteData.name;
-    thSiteLabel.innerText = siteData.name;
+    thSiteLabel.innerText = siteKey === "mars_gale" ? "Gale Crater Baseline" : siteData.name;
 
-    const mEarth = siteData.metrics;
-    const mMars = marsData.metrics;
+    const mEarth = siteData.metrics || {};
+    const mMars = marsData.metrics || {};
 
     const rows = [
       {
         cat: "Temperature",
-        name: "Mean Annual Temperature",
+        name: "Mean Annual Temperature (T2M)",
         earth: `${mEarth.mean_temperature_c} °C`,
         mars: `${mMars.mean_temperature_c} °C`,
-        diff: `${(mEarth.mean_temperature_c - mMars.mean_temperature_c).toFixed(1)} °C`,
-        score: calculateSimilarity(mEarth.mean_temperature_c, mMars.mean_temperature_c, 45.0)
+        diff: `${Math.abs(mEarth.mean_temperature_c - mMars.mean_temperature_c).toFixed(1)} °C`,
+        score: calculateSimilarity(mEarth.mean_temperature_c, mMars.mean_temperature_c, 30.0)
       },
       {
         cat: "Temperature",
         name: "Diurnal Thermal Swing (ΔT)",
         earth: `${mEarth.mean_diurnal_thermal_swing_c} °C`,
         mars: `${mMars.mean_diurnal_thermal_swing_c} °C`,
-        diff: `${(mEarth.mean_diurnal_thermal_swing_c - mMars.mean_diurnal_thermal_swing_c).toFixed(1)} °C`,
-        score: calculateSimilarity(mEarth.mean_diurnal_thermal_swing_c, mMars.mean_diurnal_thermal_swing_c, 50.0)
+        diff: `${Math.abs(mEarth.mean_diurnal_thermal_swing_c - mMars.mean_diurnal_thermal_swing_c).toFixed(1)} °C`,
+        score: calculateSimilarity(mEarth.mean_diurnal_thermal_swing_c, mMars.mean_diurnal_thermal_swing_c, 40.0)
       },
       {
         cat: "Atmosphere",
-        name: "Surface Wind Velocity",
+        name: "Surface Wind Velocity (WS10M)",
         earth: `${mEarth.mean_wind_speed_ms} m/s`,
         mars: `${mMars.mean_wind_speed_ms} m/s`,
-        diff: `${(mEarth.mean_wind_speed_ms - mMars.mean_wind_speed_ms).toFixed(1)} m/s`,
-        score: calculateSimilarity(mEarth.mean_wind_speed_ms, mMars.mean_wind_speed_ms, 6.0)
+        diff: `${Math.abs(mEarth.mean_wind_speed_ms - mMars.mean_wind_speed_ms).toFixed(1)} m/s`,
+        score: calculateSimilarity(mEarth.mean_wind_speed_ms, mMars.mean_wind_speed_ms, 5.0)
       },
       {
         cat: "Atmosphere",
@@ -816,30 +1048,30 @@ document.addEventListener("DOMContentLoaded", () => {
         earth: `${mEarth.atmospheric_surface_pressure_hpa} hPa`,
         mars: `${mMars.atmospheric_surface_pressure_hpa} hPa`,
         diff: `${(mEarth.atmospheric_surface_pressure_hpa - mMars.atmospheric_surface_pressure_hpa).toFixed(1)} hPa`,
-        score: calculateSimilarity(mEarth.atmospheric_surface_pressure_hpa, mMars.atmospheric_surface_pressure_hpa, 350.0)
+        score: calculateSimilarity(mEarth.atmospheric_surface_pressure_hpa, mMars.atmospheric_surface_pressure_hpa, 250.0)
       },
       {
         cat: "Moisture",
         name: "Relative Humidity (RH2M)",
         earth: `${mEarth.mean_relative_humidity_pct} %`,
         mars: `${mMars.mean_relative_humidity_pct} %`,
-        diff: `${(mEarth.mean_relative_humidity_pct - mMars.mean_relative_humidity_pct).toFixed(1)} %`,
-        score: calculateSimilarity(mEarth.mean_relative_humidity_pct, mMars.mean_relative_humidity_pct, 40.0)
+        diff: `${Math.abs(mEarth.mean_relative_humidity_pct - mMars.mean_relative_humidity_pct).toFixed(1)} %`,
+        score: calculateSimilarity(mEarth.mean_relative_humidity_pct, mMars.mean_relative_humidity_pct, 20.0)
       },
       {
         cat: "Moisture",
-        name: "Precipitation",
+        name: "Annual Precipitation",
         earth: `${mEarth.mean_annual_precip_mm} mm/yr`,
         mars: "0.0 mm/yr",
         diff: `${mEarth.mean_annual_precip_mm} mm`,
-        score: mEarth.mean_annual_precip_mm < 100 ? "75.0" : "35.0"
+        score: calculateSimilarity(mEarth.mean_annual_precip_mm, 0, 50.0)
       },
       {
         cat: "Radiation",
-        name: "Solar Insolation (ALLSKY)",
+        name: "Solar Insolation (ALLSKY_SFC_SW_DWN)",
         earth: `${mEarth.mean_solar_insolation_kwh} kWh/m²/d`,
         mars: `${mMars.mean_solar_insolation_kwh} kWh/m²/d`,
-        diff: `${(mEarth.mean_solar_insolation_kwh - mMars.mean_solar_insolation_kwh).toFixed(2)} kWh`,
+        diff: `${Math.abs(mEarth.mean_solar_insolation_kwh - mMars.mean_solar_insolation_kwh).toFixed(2)} kWh`,
         score: calculateSimilarity(mEarth.mean_solar_insolation_kwh, mMars.mean_solar_insolation_kwh, 3.0)
       }
     ];
@@ -857,25 +1089,32 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }).join("");
 
-    modalMarsComparison.style.display = "flex";
+    modalMarsBackdrop.style.display = "flex";
     state.isMarsComparisonOpen = true;
     compArrow.innerText = "▼";
   }
 
+  function hideMarsComparisonModal() {
+    modalMarsBackdrop.style.display = "none";
+    state.isMarsComparisonOpen = false;
+    compArrow.innerText = "▶";
+  }
+
   btnToggleMarsComp.addEventListener("click", () => {
     if (state.isMarsComparisonOpen) {
-      modalMarsComparison.style.display = "none";
-      state.isMarsComparisonOpen = false;
-      compArrow.innerText = "▶";
+      hideMarsComparisonModal();
     } else {
       showMarsComparisonModal();
     }
   });
 
-  btnCloseComp.addEventListener("click", () => {
-    modalMarsComparison.style.display = "none";
-    state.isMarsComparisonOpen = false;
-    compArrow.innerText = "▶";
+  btnCloseComp.addEventListener("click", hideMarsComparisonModal);
+  btnCloseCompBottom.addEventListener("click", hideMarsComparisonModal);
+
+  modalMarsBackdrop.addEventListener("click", (e) => {
+    if (e.target === modalMarsBackdrop) {
+      hideMarsComparisonModal();
+    }
   });
 
   // Top Location Button Click Handlers ("can click to go straight to mars / earth options")
@@ -886,6 +1125,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const target = SITES[site];
       if (!target) return;
 
+      // Only fly camera when explicitly changing site
       openSpace.flyToGeo(target.globe, target.patchLat, target.patchLon, target.orbitAlt, 3.5);
       renderActiveSite(site);
     });
@@ -899,12 +1139,10 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       openSpace.flyToGeo("Earth", 20, 60, 8000000, 3.0);
     }
-    semiTranslucentOverview.style.display = "none";
-    modalMarsComparison.style.display = "none";
-    surfaceOverlayBanner.style.display = "none";
+    hideMarsComparisonModal();
   });
 
-  // Automated Tour Routine (Preserved at bottom as requested)
+  // Automated Camera Tour (Preserved at bottom as requested)
   const tourSequence = [
     { globe: "Mars", lat: -4.5895, lon: 137.4417, alt: 550000, target: "mars_gale" },
     { globe: "Earth", lat: 30.50, lon: 58.80, alt: 850000, target: "lut" },

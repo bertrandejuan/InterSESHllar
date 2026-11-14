@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OpenSpace: Mars Gale Crater & Earth Desert Analogs</title>
-  <link rel="stylesheet" href="css/style.css?v=4.1.0">
+  <link rel="stylesheet" href="css/style.css?v=4.2.0">
 </head>
 <body>
 
@@ -75,61 +75,15 @@
     <!-- Overall Comparison to Mars (Right before Biology as requested) -->
     <div class="mars-comparison-bar" id="mars-comparison-bar">
       <button id="btn-toggle-mars-comparison" class="btn btn-comparison-mars" title="Toggle overall cross-category comparison with Mars Gale Crater">
-        <span class="comp-icon">🪐</span>
-        <span class="comp-title" id="comp-title-text">Comparison to Mars</span>
-        <span class="comp-arrow" id="comp-arrow">▶</span>
+        <div class="comp-btn-left">
+          <span class="comp-icon">🪐</span>
+          <span class="comp-title" id="comp-title-text">Comparison to Mars (All Categories)</span>
+        </div>
+        <div class="comp-btn-right">
+          <span class="comp-badge">Semi-Translucent Slide</span>
+          <span class="comp-arrow" id="comp-arrow">▶</span>
+        </div>
       </button>
-    </div>
-
-    <!-- Semi-Translucent Comparison to Mars Slide (Placed right before Biology) -->
-    <div id="modal-mars-comparison" class="modal-mars-comparison" style="display: none;">
-      <div class="comp-modal-header">
-        <div class="comp-modal-title">
-          <span>🪐 Comparison to Mars: <span id="comp-site-name">Lut Desert</span> vs Gale Crater</span>
-        </div>
-        <button id="btn-close-comp" class="overview-close-btn" title="Close comparison">&times;</button>
-      </div>
-      <div class="comp-modal-subtitle">
-        Direct parameter comparison across all categories from 10-year in-situ daily records (2015–2025) vs Curiosity REMS baseline.
-      </div>
-      <div class="comp-table-wrapper">
-        <table class="comp-table">
-          <thead>
-            <tr>
-              <th>Category / Parameter</th>
-              <th id="th-site-label">Earth Site</th>
-              <th>Mars Gale (REMS)</th>
-              <th>Variance (Δ)</th>
-              <th>Match</th>
-            </tr>
-          </thead>
-          <tbody id="comp-table-body">
-            <!-- Populated dynamically -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Semi-Translucent Floating Overview Box (As drawn on storyboard) -->
-    <div id="semi-translucent-overview" class="semi-translucent-overview" style="display: none;">
-      <div class="overview-box-header">
-        <div class="overview-box-title">
-          <span id="overview-tag-icon">📊</span>
-          <span id="overview-box-heading">Data Point Overview</span>
-        </div>
-        <button id="btn-close-overview" class="overview-close-btn" title="Close overview">&times;</button>
-      </div>
-      <div class="overview-box-body" id="overview-box-body">
-        <!-- Populated dynamically -->
-      </div>
-    </div>
-
-    <!-- Visual Surface Overlay Banner (When Overlay is active) -->
-    <div id="surface-overlay-banner" class="surface-overlay-banner" style="display: none;">
-      <div class="surface-overlay-badge">
-        <span class="pulse-indicator"></span>
-        <span id="surface-overlay-text">Surface Data Overlay Active</span>
-      </div>
     </div>
 
     <!-- Data Categories & Points Container (Populated dynamically) -->
@@ -138,6 +92,41 @@
     </div>
 
   </main>
+
+  <!-- Semi-Translucent Screen-Wide Modal for Comparison to Mars -->
+  <div id="modal-mars-backdrop" class="modal-backdrop-overlay" style="display: none;">
+    <div class="modal-semi-translucent-card" id="modal-mars-card">
+      <div class="comp-modal-header">
+        <div class="comp-modal-title">
+          <span>🪐 Comparison to Mars: <span id="comp-site-name">Lut Desert</span> vs Gale Crater</span>
+        </div>
+        <button id="btn-close-comp" class="overview-close-btn" title="Close comparison">&times;</button>
+      </div>
+      <div class="comp-modal-subtitle">
+        Semi-translucent cross-category parameter overview derived from 10-year in-situ daily records (2015–2025) vs Curiosity REMS baseline.
+      </div>
+      <div class="comp-table-wrapper">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Category / Parameter</th>
+              <th id="th-site-label">Earth Site</th>
+              <th>Mars Gale (REMS)</th>
+              <th>Difference (Δ)</th>
+              <th>Analog Match</th>
+            </tr>
+          </thead>
+          <tbody id="comp-table-body">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+      <div class="comp-modal-footer">
+        <span class="comp-footer-note">NASA POWER MERRA-2 & CERES SYN1deg In-Situ Daily Archive (4,018 daily observations/site).</span>
+        <button id="btn-close-comp-bottom" class="btn btn-primary" style="padding: 6px 16px;">Done</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Automated Camera Tour (Preserved at the bottom as requested) -->
   <section class="glass-panel tour-panel">
@@ -160,8 +149,8 @@
   </section>
 
   <!-- Scripts -->
-  <script src="js/team-data.js?v=4.1.0"></script>
-  <script src="js/openspace-api.js?v=4.1.0"></script>
-  <script src="js/app.js?v=4.1.0"></script>
+  <script src="js/team-data.js?v=4.2.0"></script>
+  <script src="js/openspace-api.js?v=4.2.0"></script>
+  <script src="js/app.js?v=4.2.0"></script>
 </body>
 </html>
