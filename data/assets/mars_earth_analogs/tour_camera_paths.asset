@@ -162,6 +162,9 @@ local Actions = {
 
 asset.onInitialize(function()
   for _, action in ipairs(Actions) do
+    if openspace.action.hasAction(action.Identifier) then
+      openspace.action.removeAction(action.Identifier)
+    end
     openspace.action.registerAction(action)
   end
 
