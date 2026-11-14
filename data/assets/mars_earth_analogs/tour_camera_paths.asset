@@ -141,6 +141,30 @@ local Actions = {
     Documentation = "Return to wide-angle global planetary orbit",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
+  },
+  {
+    Identifier = "mars_earth.OrientSideways",
+    Name = "Orient Sideways (Ground Topography View)",
+    Command = [[
+      local nav = openspace.navigation.getNavigationState()
+      nav.Pitch = 1.35
+      openspace.navigation.setNavigationState(nav)
+    ]],
+    Documentation = "Tilts camera towards the horizon to view 3D topography and relief from ground level",
+    GuiPath = "/Planetary Analogs/Camera Orientation",
+    IsLocal = false
+  },
+  {
+    Identifier = "mars_earth.OrientTopDown",
+    Name = "Orient Top-Down (Map View)",
+    Command = [[
+      local nav = openspace.navigation.getNavigationState()
+      nav.Pitch = math.pi / 2.0
+      openspace.navigation.setNavigationState(nav)
+    ]],
+    Documentation = "Levels camera looking straight down at surface map",
+    GuiPath = "/Planetary Analogs/Camera Orientation",
+    IsLocal = false
   }
 }
 

@@ -7,6 +7,20 @@ local teamDataAsset = asset.require("./data/team_analog_data")
 asset.onInitialize(function()
   openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs with Team 10-Yr In-Situ Climate Data (4,018 daily records/site).")
 
+  -- "On opening: Set illumination for earth and mars." (Storyboard requirement)
+  if openspace.hasProperty("Scene.Earth.Renderable.PerformShading") then
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.PerformShading", false)
+  end
+  if openspace.hasProperty("Scene.Mars.Renderable.PerformShading") then
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.PerformShading", false)
+  end
+  if openspace.hasProperty("Scene.EarthAtmosphere.Renderable.SunFollowingCamera") then
+    openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.SunFollowingCamera", true)
+  end
+  if openspace.hasProperty("Scene.MarsAtmosphere.Renderable.SunFollowingCamera") then
+    openspace.setPropertyValueSingle("Scene.MarsAtmosphere.Renderable.SunFollowingCamera", true)
+  end
+
   -- Automatically enable best satellite imagery & 3D terrain on Earth
   if openspace.hasProperty("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled") then
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true)

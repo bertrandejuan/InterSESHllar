@@ -4,16 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OpenSpace: Mars Gale Crater & Earth Desert Analogs</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=4.0.0">
 </head>
 <body>
 
-  <!-- Top Glassmorphism Dashboard Header -->
+  <!-- Top Dashboard Header -->
   <header class="glass-panel header-row">
     <div class="title-area">
       <h1>
-        <span>Planetary Analog Dashboard</span>
-        <span class="badge badge-mars">Mars vs Earth</span>
+        <span>Planetary Analogs: Mars & Earth</span>
       </h1>
     </div>
     <div class="status-pills">
@@ -21,297 +20,148 @@
         <span id="dot-openspace" class="indicator-dot offline"></span>
         <span id="status-openspace">OpenSpace: Connecting...</span>
       </div>
-      <div class="status-pill">
-        <span id="dot-gemini" class="indicator-dot"></span>
-        <span id="status-gemini">Gemini: Offline Mode</span>
-      </div>
-      <button id="btn-open-settings" class="btn" title="Configure Gemini API Key">
-        ⚙ Settings
+      <button id="btn-orbit-return" class="btn btn-orbit" title="Return to high planetary orbit">
+        🌐 Orbit View
       </button>
     </div>
   </header>
 
-  <!-- Quick Target Navigation (Top Row) -->
-  <section class="glass-panel" style="padding: 10px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <h3 style="font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-        <span>Analog Locations</span>
-        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal;">(Click site to fly & inspect)</span>
-      </h3>
-      <button id="btn-orbit-return" class="btn" style="border-color: var(--accent-cyan); color: var(--accent-cyan); font-weight: 600; font-size: 0.75rem; padding: 4px 8px;" title="Restore all station pins and return to high orbit">
-        📍 Restore Pins & Orbit
+  <!-- Mars & Earth Location Selection (Storyboard Layout) -->
+  <section class="glass-panel location-selector-panel">
+    <div class="selector-group">
+      <div class="selector-heading">Mars:</div>
+      <button class="btn site-btn mars" data-site="mars_gale">
+        <span class="site-icon">🔴</span>
+        <span class="site-name">Gale Crater</span>
       </button>
     </div>
-    <div class="btn-group">
-      <button class="btn site-pill mars" data-site="mars_gale">Mars: Gale Crater</button>
-      <button class="btn site-pill aralkum" data-site="aralkum">Aralkum Desert</button>
-      <button class="btn site-pill mcmurdo" data-site="mcmurdo">McMurdo Valleys</button>
-      <button class="btn site-pill lut btn-active" data-site="lut">Lut Desert</button>
-      <button class="btn site-pill uyuni" data-site="uyuni">Salar de Uyuni</button>
+
+    <div class="selector-group" style="margin-top: 10px;">
+      <div class="selector-heading">Earth:</div>
+      <div class="earth-buttons-grid">
+        <button class="btn site-btn lut btn-active" data-site="lut">
+          <span class="site-icon">☀️</span>
+          <span class="site-name">Lut Desert</span>
+        </button>
+        <button class="btn site-btn mcmurdo" data-site="mcmurdo">
+          <span class="site-icon">❄️</span>
+          <span class="site-name">McMurdo Dry Valleys</span>
+        </button>
+        <button class="btn site-btn aralkum" data-site="aralkum">
+          <span class="site-icon">🏜️</span>
+          <span class="site-name">Aralkum Desert</span>
+        </button>
+        <button class="btn site-btn uyuni" data-site="uyuni">
+          <span class="site-icon">🧂</span>
+          <span class="site-name">Salar de Uyuni</span>
+        </button>
+      </div>
     </div>
   </section>
 
-  <!-- Interactive Detail Bubble / Comparison Modal (Immediately Visible) -->
-  <main class="glass-panel detail-bubble" id="detail-bubble">
+  <!-- Active Site Explorer Panel -->
+  <main class="glass-panel main-explorer-panel" id="main-explorer-panel">
 
-    <!-- Header & Overall Score -->
-    <div class="detail-header">
-      <div class="detail-title">
-        <h2 id="bubble-title">Lut Desert (Dasht-e Lut)</h2>
-        <div id="bubble-subtitle" class="detail-subtitle">Kerman / Sistan, Iran — [30.50°, 58.80°, Elev: 1416m]</div>
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button id="btn-show-pins" class="btn" style="border-color: var(--accent-cyan); font-size: 0.72rem; padding: 4px 8px;" title="Restore all pins and return to orbit">
-          📍 Restore Pins & Orbit
-        </button>
-        <div class="overall-score-badge">
-          <div id="bubble-score" class="score-number" style="color: var(--score-mid);">45.0%</div>
-          <div id="bubble-score-caption" class="score-caption">Overall Mars Similarity</div>
+    <!-- Active Location Title & Metadata -->
+    <div class="active-site-header">
+      <div class="active-site-info">
+        <h2 id="active-site-title">Lut Desert (Dasht-e Lut)</h2>
+        <div id="active-site-subtitle" class="active-site-subtitle">
+          Kerman / Sistan, Iran — 4,018 Daily Observations (2015–2025)
         </div>
       </div>
     </div>
 
-    <!-- Team Empirical Dataset Ingestion & Selector Bar -->
-    <div class="dataset-source-bar">
-      <div class="dataset-source-header">
-        <div class="dataset-source-title">
-          <span>📡 Climate Data Ingestion:</span>
-        </div>
-        <div class="dataset-badge-tag" id="dataset-active-tag">
-          Team 10-Yr In-Situ Dataset Active (2015–2025)
-        </div>
-      </div>
-      <div class="dataset-pill-toggle">
-        <button id="btn-toggle-team" class="dataset-toggle-btn active" title="Use research team's 10-year in-situ dataset (4,018 daily records)">
-          <span>📊 Team In-Situ Data</span>
-          <span class="badge badge-team-count">4,018 Days</span>
-        </button>
-        <button id="btn-toggle-reference" class="dataset-toggle-btn" title="Use standard planetary reference climatology model">
-          <span>🌐 Standard Climatology</span>
-        </button>
-      </div>
+    <!-- Overall Comparison to Mars (Right before Biology as requested) -->
+    <div class="mars-comparison-bar" id="mars-comparison-bar">
+      <button id="btn-toggle-mars-comparison" class="btn btn-comparison-mars" title="Toggle overall cross-category comparison with Mars Gale Crater">
+        <span class="comp-icon">🪐</span>
+        <span class="comp-title">Comparison to Mars (All Categories)</span>
+        <span class="comp-arrow" id="comp-arrow">▶</span>
+      </button>
     </div>
 
-    <!-- Parameter Similarity Scale Bars -->
-    <div class="scale-bars-section">
-      <h4>Parameter Similarity Scale Bars (0 – 100%)</h4>
-      
-      <div class="bar-row">
-        <div class="bar-labels">
-          <span class="bar-name">Mean Annual Temperature (T2M)</span>
-          <span id="val-temp" class="bar-val">16.9%</span>
-        </div>
-        <div class="progress-track">
-          <div id="bar-temp" class="progress-fill" style="width: 16.9%; background-color: var(--score-low);"></div>
-        </div>
-      </div>
-
-      <div class="bar-row">
-        <div class="bar-labels">
-          <span class="bar-name">Diurnal Thermal Swing (ΔT = Max - Min)</span>
-          <span id="val-deltat" class="bar-val">62.4%</span>
-        </div>
-        <div class="progress-track">
-          <div id="bar-deltat" class="progress-fill" style="width: 62.4%; background-color: var(--score-high);"></div>
-        </div>
-      </div>
-
-      <div class="bar-row">
-        <div class="bar-labels">
-          <span class="bar-name">Relative Humidity (RH2M)</span>
-          <span id="val-rh" class="bar-val">57.1%</span>
-        </div>
-        <div class="progress-track">
-          <div id="bar-rh" class="progress-fill" style="width: 57.1%; background-color: var(--score-mid);"></div>
-        </div>
-      </div>
-
-      <div class="bar-row">
-        <div class="bar-labels">
-          <span class="bar-name">Surface Wind Velocity (WS2M)</span>
-          <span id="val-ws" class="bar-val">82.5%</span>
-        </div>
-        <div class="progress-track">
-          <div id="bar-ws" class="progress-fill" style="width: 82.5%; background-color: var(--score-high);"></div>
-        </div>
-      </div>
-
-      <div class="bar-row">
-        <div class="bar-labels">
-          <span class="bar-name">Solar Insolation (ALLSKY_SFC_SW_DWN)</span>
-          <span id="val-sol" class="bar-val">51.8%</span>
-        </div>
-        <div class="progress-track">
-          <div id="bar-sol" class="progress-fill" style="width: 51.8%; background-color: var(--score-mid);"></div>
-        </div>
-      </div>
-
-      <div class="bar-row">
-        <div class="bar-labels">
-          <span class="bar-name">Atmospheric Surface Pressure Proxy</span>
-          <span id="val-pres" class="bar-val">3.1%</span>
-        </div>
-        <div class="progress-track">
-          <div id="bar-pres" class="progress-fill" style="width: 3.1%; background-color: var(--score-low);"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Summary Comparison Table -->
-    <div class="table-wrapper">
-      <table class="summary-table">
-        <thead>
-          <tr>
-            <th>Parameter</th>
-            <th>Earth Selected Site</th>
-            <th>Mars Gale Crater (REMS)</th>
-            <th>Variance (Δ)</th>
-            <th>Analog Match</th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          <!-- Dynamically populated by app.js -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Relevant Team In-Situ Empirical Analytics & Extremes Card -->
-    <div id="team-analytics-card" class="team-analytics-card">
-      <div class="team-card-header">
-        <h4>
-          <span>📈 Team Field Analytics & Relevant Extremes</span>
-          <span class="badge badge-source" id="badge-record-span">11-Year Record (4,018 Obs)</span>
-        </h4>
-        <span class="badge badge-team-count" id="badge-dataset-provenance">NASA POWER In-Situ Team Archive</span>
-      </div>
-      <div class="analytics-metrics-grid" id="analytics-metrics-grid">
-        <!-- Dynamically populated by app.js -->
-      </div>
-      <div class="monthly-breakdown-area" id="monthly-breakdown-area" style="margin-top: 6px;">
-        <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
-          Seasonal Thermal & Insolation Curve (10-Yr Monthly Means):
-        </div>
-        <div class="monthly-strip" id="monthly-strip">
-          <!-- 12-month series generated by app.js -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Coordinate Picker for Dynamic Regeneration -->
-    <div class="coord-picker">
-      <div class="coord-picker-header">
-        <span>Coordinate Explorer (Explore Sub-Regions)</span>
-        <span id="bounds-notice" style="color: var(--text-muted); font-size: 0.75rem;">Range: Lat [28.5° to 33.5°], Lon [57.0° to 60.5°]</span>
-      </div>
-      <div class="coord-inputs">
-        <div class="input-field">
-          <label>Latitude (°)</label>
-          <input type="number" id="input-lat" step="0.05" value="30.50">
-          <input type="range" id="slider-lat">
-        </div>
-        <div class="input-field">
-          <label>Longitude (°)</label>
-          <input type="number" id="input-lon" step="0.05" value="58.80">
-          <input type="range" id="slider-lon">
-        </div>
-        <div class="input-field" style="justify-content: flex-end;">
-          <button id="btn-regenerate" class="btn btn-primary" style="height: 38px; justify-content: center;">
-            <span id="regen-loader" style="display:none;">⏳</span>
-            <span>Regenerate with Gemini AI</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gemini AI Synthesis Box -->
-    <div class="ai-synthesis-box">
-      <h4>
-        <span>🪐 Astrobiological & Planetary Synthesis</span>
-        <span id="ai-source-tag" class="badge" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); font-size: 0.65rem;">Gemini AI</span>
-      </h4>
-      <p id="ai-synthesis-summary">Loading planetary comparative synthesis...</p>
-      <ul id="ai-bullets" class="ai-bullets"></ul>
-      <ul id="ai-divergences" class="ai-bullets" style="margin-top: 4px;"></ul>
-      <p id="ai-recommendation" style="margin-top: 8px; color: var(--accent-cyan); font-weight: 500;"></p>
+    <!-- Data Categories & Points Container -->
+    <div class="categories-container" id="categories-container">
+      <!-- Populated dynamically with Biology, Temperature, Wind & Atmosphere, Moisture & Precipitation, Solar Radiation -->
     </div>
 
   </main>
 
-  <!-- Controls Grid (Secondary / Below Overlay) -->
-  <section class="controls-grid" style="margin-top: 4px;">
-
-    <!-- Automated Camera Tour -->
-    <div class="control-card">
-      <h3>Automated Camera Tour</h3>
-      <div class="btn-group" style="align-items: center;">
-        <button id="btn-tour-play" class="btn btn-primary">▶ Start Tour</button>
-        <button id="btn-tour-pause" class="btn">⏸ Pause</button>
-        <button id="btn-tour-prev" class="btn">⏮ Prev</button>
-        <button id="btn-tour-next" class="btn">⏭ Next</button>
-        <select id="sel-tour-speed" class="btn" style="padding: 5px 8px;">
-          <option value="0.5">Speed: 0.5x</option>
-          <option value="1.0" selected>Speed: 1.0x</option>
-          <option value="1.5">Speed: 1.5x</option>
-          <option value="2.0">Speed: 2.0x</option>
-        </select>
+  <!-- Semi-Translucent Floating Overview Box (As drawn on storyboard) -->
+  <div id="semi-translucent-overview" class="semi-translucent-overview" style="display: none;">
+    <div class="overview-box-header">
+      <div class="overview-box-title">
+        <span id="overview-tag-icon">📊</span>
+        <span id="overview-box-heading">Data Point Overview</span>
       </div>
+      <button id="btn-close-overview" class="overview-close-btn" title="Close overview">&times;</button>
     </div>
-
-    <!-- Visual Overlays Toggles -->
-    <div class="control-card">
-      <h3>Visual Overlays</h3>
-      <div class="toggle-row">
-        <span>Location Tags & Markers</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-pins" checked>
-          <span class="slider-switch"></span>
-        </label>
-      </div>
-      <div class="toggle-row">
-        <span>3D Billboard Labels</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-labels" checked>
-          <span class="slider-switch"></span>
-        </label>
-      </div>
-      <div class="toggle-row">
-        <span>Team In-Situ Field Analytics</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-team-analytics" checked>
-          <span class="slider-switch"></span>
-        </label>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- Gemini API Key Settings Modal -->
-  <div id="modal-settings" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Gemini API Configuration</h3>
-        <button id="btn-close-settings" class="close-btn">&times;</button>
-      </div>
-      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-        Enter your Google AI Studio Gemini API key to enable live AI comparative planetology synthesis when you pick new coordinates. If omitted, the dashboard uses built-in NASA climatology models and pre-computed fallback datasets.
-      </p>
-      <div class="input-field" style="margin-bottom: 16px;">
-        <label>Gemini API Key</label>
-        <input type="password" id="input-gemini-key" placeholder="AIzaSy...">
-      </div>
-      <div style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button id="btn-save-key" class="btn btn-primary">Save Key</button>
-      </div>
+    <div class="overview-box-body" id="overview-box-body">
+      <!-- Populated dynamically -->
     </div>
   </div>
 
-  <!-- Scripts (Optimized Synchronous Loading with Cache-Buster) -->
-  <script src="js/fallback-data.js?v=3.1.0"></script>
-  <script src="js/team-data.js?v=3.1.0"></script>
-  <script src="js/config.js?v=3.1.0"></script>
-  <script src="js/openspace-api.js?v=3.1.0"></script>
-  <script src="js/climate-service.js?v=3.1.0"></script>
-  <script src="js/gemini-service.js?v=3.1.0"></script>
-  <script src="js/app.js?v=3.1.0"></script>
+  <!-- Semi-Translucent Comparison to Mars Slide Modal (As requested) -->
+  <div id="modal-mars-comparison" class="modal-mars-comparison" style="display: none;">
+    <div class="comp-modal-header">
+      <div class="comp-modal-title">
+        <span>🪐 Planetary Comparison: <span id="comp-site-name">Lut Desert</span> vs Mars Gale Crater</span>
+      </div>
+      <button id="btn-close-comp" class="overview-close-btn" title="Close comparison">&times;</button>
+    </div>
+    <div class="comp-modal-subtitle">
+      Direct parameter comparison across all categories from 10-year in-situ daily records (2015–2025) vs Curiosity REMS baseline.
+    </div>
+    <div class="comp-table-wrapper">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Category / Parameter</th>
+            <th id="th-site-label">Earth Selected Site</th>
+            <th>Mars Gale Crater (REMS)</th>
+            <th>Variance (Δ)</th>
+            <th>Similarity Match</th>
+          </tr>
+        </thead>
+        <tbody id="comp-table-body">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Visual Surface Overlay Banner (When Overlay is active) -->
+  <div id="surface-overlay-banner" class="surface-overlay-banner" style="display: none;">
+    <div class="surface-overlay-badge">
+      <span class="pulse-indicator"></span>
+      <span id="surface-overlay-text">Surface Data Overlay Active</span>
+    </div>
+  </div>
+
+  <!-- Automated Camera Tour (Preserved at the bottom as requested) -->
+  <section class="glass-panel tour-panel">
+    <div class="tour-header">
+      <h3>Automated Camera Tour</h3>
+      <span style="font-size: 0.72rem; color: var(--text-muted);">Cycles all planetary analogs</span>
+    </div>
+    <div class="btn-group" style="align-items: center; margin-top: 8px;">
+      <button id="btn-tour-play" class="btn btn-primary">▶ Start Tour</button>
+      <button id="btn-tour-pause" class="btn">⏸ Pause</button>
+      <button id="btn-tour-prev" class="btn">⏮ Prev</button>
+      <button id="btn-tour-next" class="btn">⏭ Next</button>
+      <select id="sel-tour-speed" class="btn" style="padding: 5px 8px;">
+        <option value="0.5">Speed: 0.5x</option>
+        <option value="1.0" selected>Speed: 1.0x</option>
+        <option value="1.5">Speed: 1.5x</option>
+        <option value="2.0">Speed: 2.0x</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <script src="js/team-data.js?v=4.0.0"></script>
+  <script src="js/openspace-api.js?v=4.0.0"></script>
+  <script src="js/app.js?v=4.0.0"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@ local TeamAnalogData = {
     id = "aralkum",
     name = "Aralkum Desert",
     region = "Karakalpakstan, Uzbekistan",
+    globe = "Earth",
     coordinates = {
       lat = 44.8,
       lon = 59.8,
@@ -185,6 +186,7 @@ local TeamAnalogData = {
     id = "mcmurdo",
     name = "McMurdo Dry Valleys",
     region = "Victoria Land, Antarctica",
+    globe = "Earth",
     coordinates = {
       lat = -77.5,
       lon = 162.0,
@@ -366,6 +368,7 @@ local TeamAnalogData = {
     id = "lut",
     name = "Lut Desert (Dasht-e Lut)",
     region = "Kerman / Sistan, Iran",
+    globe = "Earth",
     coordinates = {
       lat = 30.5,
       lon = 58.8,
@@ -547,6 +550,7 @@ local TeamAnalogData = {
     id = "uyuni",
     name = "Salar de Uyuni",
     region = "Potosí / Oruro, Bolivia",
+    globe = "Earth",
     coordinates = {
       lat = -20.15,
       lon = -67.6,
@@ -722,6 +726,58 @@ local TeamAnalogData = {
         ws = 2.92,
         sol_kwh = 7.26
       }
+    }
+  },
+  mars_gale = {
+    id = "mars_gale",
+    name = "Mars: Gale Crater",
+    region = "Aeolis Palus / Mount Sharp (REMS Station)",
+    globe = "Mars",
+    coordinates = {
+      lat = -4.5895,
+      lon = 137.4417,
+      elevation_m = -4400.0
+    },
+    record_period = "Curiosity Mission Sols 0–3500+ Continuous Telemetry",
+    total_observations = 3500,
+    data_source = "Curiosity Rover REMS (Rover Environmental Monitoring Station)",
+    climatology = {
+      T2M = -63.0,
+      T2M_MAX = 6.0,
+      T2M_MIN = -90.0,
+      DELTA_T = 96.0,
+      RH2M = 12.0,
+      WS2M = 3.5,
+      ALLSKY_SFC_SW_DWN = 4.1,
+      PRESSURE = 8.4
+    },
+    similarity_scores = {
+      temperature = 100.0,
+      diurnal_range = 100.0,
+      relative_humidity = 100.0,
+      wind_speed = 100.0,
+      solar_insolation = 100.0,
+      surface_pressure = 100.0,
+      overall_composite = 100.0
+    },
+    metrics = {
+      mean_temperature_c = -63.0,
+      avg_daily_max_c = -15.0,
+      avg_daily_min_c = -85.0,
+      absolute_record_max_c = 6.0,
+      absolute_record_min_c = -90.0,
+      total_recorded_range_c = 96.0,
+      mean_diurnal_thermal_swing_c = 96.0,
+      max_diurnal_thermal_swing_c = 105.0,
+      mean_relative_humidity_pct = 12.0,
+      min_relative_humidity_pct = 2.0,
+      mean_wind_speed_ms = 3.5,
+      peak_wind_gust_ms = 22.0,
+      mean_solar_insolation_kwh = 4.1,
+      mean_solar_insolation_mj = 14.76,
+      atmospheric_surface_pressure_hpa = 8.4,
+      mean_daily_precip_mm = 0.0,
+      mean_annual_precip_mm = 0.0
     }
   }
 }
