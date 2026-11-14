@@ -145,13 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
 
-    // Ensure station pin and encompassing geographic borders are enabled
+    // Ensure station pin and encompassing geographic borders and labels are enabled
     openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true);
     openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true);
     openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled", true);
     openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled", true);
+    openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", true);
+    ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
+      openSpace.setPropertyValue(`Scene.EarthLabel${name}.Renderable.Enabled`, true);
+    });
     if (togglePins) togglePins.checked = true;
     if (toggleBoundaries) toggleBoundaries.checked = true;
+    if (toggleLabels) toggleLabels.checked = true;
+
+    // Boost LOD and tile cache so graphics load crisp on immediate button navigation
+    openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.LodScaleFactor", 15.0);
 
     // Automatically enable best satellite imagery on Earth and Mars
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true);
@@ -303,11 +312,11 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const site = btn.dataset.site;
       if (site === "mars_gale") {
-        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 220000, 3);
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 350000, 3.5);
       } else {
         const target = CONFIG.sites[site];
         if (target) {
-          openSpace.flyToGeo(target.globe, target.lat, target.lon, target.alt, 3);
+          openSpace.flyToGeo(target.globe, target.lat, target.lon, target.alt, 3.5);
         }
       }
       displaySiteInstant(site);
