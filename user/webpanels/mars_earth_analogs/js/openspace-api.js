@@ -1,0 +1,118 @@
+/**
+ * OpenSpace JavaScript API 1.0.0 Client Wrapper
+ * Handles WebSocket communication with OpenSpace on ws://localhost:4682
+ */
+
+class OpenSpaceClient {
+  constructor(host = "localhost", port = 4682) {
+    this.host = host;
+    this.port = port;
+    this.ws = null;
+    this.connected = false;
+    this.nextTopicId = 0;
+    this.callbacks = {};
+    this.onConnectListeners = [];
+    this.onDisconnectListeners = [];
+  }
+
+  onConnect(fn) {
+    this.onConnectListeners.push(fn);
+  }
+
+  onDisconnect(fn) {
+    this.onDisconnectListeners.push(fn);
+  }
+
+  connect() {
+    return new Promise((resolve) => {
+      try {
+        const url = `ws://${this.host}:${this.port}`;
+        this.ws = new WebSocket(url);
+
+        this.ws.onopen = () => {
+          this.connected = true;
+          // Send JS API 1.0.0 Handshake
+          const handshake = {
+            type: "apiHandshake",
+            apiVersion: { major: 1, minor: 0, patch: 0 }
+          };
+          this.ws.send(JSON.stringify(handshake));
+          this.onConnectListeners.forEach(fn => fn());
+          resolve(true);
+        };
+
+        this.ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.topic !== undefined && this.callbacks[data.topic]) {
+              this.callbacks[data.topic](data.payload);
+              delete this.callbacks[data.topic];
+            }
+          } catch (e) {
+            console.warn("Message parsing error:", e);
+          }
+        };
+
+        this.ws.onclose = () => {
+          this.connected = false;
+          this.onDisconnectListeners.forEach(fn => fn());
+        };
+
+        this.ws.onerror = (err) => {
+          console.warn("OpenSpace WebSocket connection error (is OpenSpace running?):", err);
+        };
+      } catch (err) {
+        console.warn("WebSocket init failed:", err);
+        resolve(false);
+      }
+    });
+  }
+
+  executeLuaScript(script, returns = false) {
+    if (!this.connected || !this.ws) {
+      console.log("[Simulation] Lua script executed:", script);
+      return Promise.resolve(null);
+    }
+    const topic = this.nextTopicId++;
+    const payload = {
+      topic: topic,
+      type: "luascript",
+      payload: {
+        script: script,
+        return: returns,
+        shouldBeSynchronized: true
+      }
+    };
+    return new Promise((resolve) => {
+      if (returns) {
+        this.callbacks[topic] = resolve;
+      }
+      this.ws.send(JSON.stringify(payload));
+      if (!returns) resolve(true);
+    });
+  }
+
+  setPropertyValue(property, value) {
+    if (!this.connected || !this.ws) {
+      console.log(`[Simulation] Set property ${property} = ${value}`);
+      return;
+    }
+    const topic = this.nextTopicId++;
+    const payload = {
+      topic: topic,
+      type: "set",
+      payload: {
+        property: property,
+        value: value
+      }
+    };
+    this.ws.send(JSON.stringify(payload));
+  }
+
+  flyToGeo(globe, lat, lon, alt = 350000, duration = 4.0) {
+    const script = `openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, ${duration})`;
+    return this.executeLuaScript(script);
+  }
+}
+
+window.OpenSpaceClient = OpenSpaceClient;

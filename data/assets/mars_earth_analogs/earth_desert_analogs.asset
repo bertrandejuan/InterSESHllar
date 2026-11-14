@@ -1,0 +1,109 @@
+local assetHelper = asset.require("util/default_asset")
+
+local EarthBoundariesFile = asset.resource("../../../geojson/earth_desert_boundaries.geojson")
+local EarthPinsFile = asset.resource("../../../geojson/earth_desert_pins.geojson")
+
+local EarthBoundariesTable = {
+  Identifier = "EarthDesertBoundaries",
+  File = EarthBoundariesFile,
+  Enabled = true,
+  DefaultProperties = {
+    Color = { 0.95, 0.70, 0.20 },
+    FillColor = { 0.95, 0.70, 0.20, 0.22 },
+    Opacity = 0.85,
+    AltitudeMode = "RelativeToGround"
+  }
+}
+
+local EarthPinsTable = {
+  Identifier = "EarthDesertPins",
+  File = EarthPinsFile,
+  Enabled = true,
+  DefaultProperties = {
+    Color = { 1.0, 0.8, 0.2 },
+    PointSize = 22.0,
+    AltitudeMode = "RelativeToGround",
+    Altitude = 2000.0,
+    Extrude = true
+  }
+}
+
+local DesertLabels = {
+  {
+    Identifier = "EarthLabelAralkum",
+    Lat = 44.5,
+    Lon = 58.5,
+    Alt = 15000.0,
+    Text = "Aralkum Desert (Toxic Dust / Temp Swings)",
+    Color = { 1.0, 0.75, 0.20 }
+  },
+  {
+    Identifier = "EarthLabelMcMurdo",
+    Lat = -77.5,
+    Lon = 162.0,
+    Alt = 16000.0,
+    Text = "McMurdo Dry Valleys (Hyper-Arid Polar Cold)",
+    Color = { 0.35, 0.85, 1.00 }
+  },
+  {
+    Identifier = "EarthLabelLut",
+    Lat = 30.5,
+    Lon = 58.8,
+    Alt = 15000.0,
+    Text = "Lut Desert (Highest Surface Heat / Yardangs)",
+    Color = { 1.00, 0.35, 0.20 }
+  },
+  {
+    Identifier = "EarthLabelUyuni",
+    Lat = -20.15,
+    Lon = -67.6,
+    Alt = 18000.0,
+    Text = "Salar de Uyuni (Thin Air / UV Radiation)",
+    Color = { 0.80, 0.50, 1.00 }
+  }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson("Earth", EarthBoundariesTable)
+  openspace.globebrowsing.addGeoJson("Earth", EarthPinsTable)
+
+  for _, item in ipairs(DesertLabels) do
+    openspace.addSceneGraphNode({
+      Identifier = item.Identifier,
+      Parent = "Earth",
+      Transform = {
+        Translation = {
+          Type = "GlobeTranslation",
+          Globe = "Earth",
+          Latitude = item.Lat,
+          Longitude = item.Lon,
+          Altitude = item.Alt,
+          UseHeightmap = true
+        }
+      },
+      Renderable = {
+        Type = "RenderableLabel",
+        Enabled = true,
+        Text = item.Text,
+        FontSize = 16.0,
+        Color = item.Color,
+        MinMaxSize = { 10, 30 }
+      },
+      GUI = {
+        Name = item.Text,
+        Path = "/Planets/Earth/Mars Analog Sites"
+      }
+    })
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, item in ipairs(DesertLabels) do
+    openspace.removeSceneGraphNode(item.Identifier)
+  end
+  openspace.globebrowsing.deleteGeoJson("Earth", EarthPinsTable)
+  openspace.globebrowsing.deleteGeoJson("Earth", EarthBoundariesTable)
+end)
+
+asset.export("EarthBoundariesTable", EarthBoundariesTable)
+asset.export("EarthPinsTable", EarthPinsTable)

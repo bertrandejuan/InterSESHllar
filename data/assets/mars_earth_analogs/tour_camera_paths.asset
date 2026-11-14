@@ -1,0 +1,28 @@
+local assetHelper = asset.require("util/default_asset")
+
+local AnalogSites = {
+  { id = "mars_gale", name = "Mars: Gale Crater", globe = "Mars", lat = -4.5895, lon = 137.4417, alt = 350000, duration = 4.0 },
+  { id = "aralkum", name = "Earth: Aralkum Desert", globe = "Earth", lat = 44.5, lon = 58.5, alt = 450000, duration = 4.0 },
+  { id = "mcmurdo", name = "Earth: McMurdo Dry Valleys", globe = "Earth", lat = -77.5, lon = 162.0, alt = 400000, duration = 4.0 },
+  { id = "lut", name = "Earth: Lut Desert", globe = "Earth", lat = 30.5, lon = 58.8, alt = 380000, duration = 4.0 },
+  { id = "uyuni", name = "Earth: Salar de Uyuni", globe = "Earth", lat = -20.15, lon = -67.6, alt = 360000, duration = 4.0 }
+}
+
+asset.onInitialize(function()
+  -- Keybindings for quick navigation
+  openspace.bindKey("Ctrl+Alt+M", "openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 350000, 4)", "Fly to Mars Gale Crater")
+  openspace.bindKey("Ctrl+Alt+1", "openspace.navigation.flyToGeo('Earth', 44.5, 58.5, 450000, 4)", "Fly to Aralkum Desert")
+  openspace.bindKey("Ctrl+Alt+2", "openspace.navigation.flyToGeo('Earth', -77.5, 162.0, 400000, 4)", "Fly to McMurdo Dry Valleys")
+  openspace.bindKey("Ctrl+Alt+3", "openspace.navigation.flyToGeo('Earth', 30.5, 58.8, 380000, 4)", "Fly to Lut Desert")
+  openspace.bindKey("Ctrl+Alt+4", "openspace.navigation.flyToGeo('Earth', -20.15, -67.6, 360000, 4)", "Fly to Salar de Uyuni")
+end)
+
+asset.onDeinitialize(function()
+  openspace.unbindKey("Ctrl+Alt+M")
+  openspace.unbindKey("Ctrl+Alt+1")
+  openspace.unbindKey("Ctrl+Alt+2")
+  openspace.unbindKey("Ctrl+Alt+3")
+  openspace.unbindKey("Ctrl+Alt+4")
+end)
+
+asset.export("Sites", AnalogSites)

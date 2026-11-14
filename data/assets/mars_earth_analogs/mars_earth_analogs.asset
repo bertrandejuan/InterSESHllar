@@ -1,0 +1,16 @@
+local assetHelper = asset.require("util/default_asset")
+
+-- Require component assets
+local marsGale = asset.require("./mars_gale_crater")
+local earthAnalogs = asset.require("./earth_desert_analogs")
+local cameraPaths = asset.require("./tour_camera_paths")
+
+asset.onInitialize(function()
+  openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs Visualization Asset.")
+  -- Initial focus on Mars Gale Crater
+  openspace.navigation.flyToGeo("Mars", -4.5895, 137.4417, 1200000, 3)
+end)
+
+asset.onDeinitialize(function()
+  openspace.printInfo("Unloaded Mars Gale Crater & Earth Desert Analogs Visualization Asset.")
+end)

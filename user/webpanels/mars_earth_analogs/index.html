@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenSpace: Mars Gale Crater & Earth Desert Analogs</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Glassmorphism Dashboard Header -->
+  <header class="glass-panel header-row">
+    <div class="title-area">
+      <h1>
+        <span>Planetary Analog Dashboard</span>
+        <span class="badge badge-mars">Mars vs Earth</span>
+      </h1>
+    </div>
+    <div class="status-pills">
+      <div class="status-pill">
+        <span id="dot-openspace" class="indicator-dot offline"></span>
+        <span id="status-openspace">OpenSpace: Connecting...</span>
+      </div>
+      <div class="status-pill">
+        <span id="dot-gemini" class="indicator-dot"></span>
+        <span id="status-gemini">Gemini: Offline Mode</span>
+      </div>
+      <button id="btn-open-settings" class="btn" title="Configure Gemini API Key">
+        ⚙ Settings
+      </button>
+    </div>
+  </header>
+
+  <!-- Controls Grid -->
+  <section class="controls-grid">
+
+    <!-- Quick Target Navigation -->
+    <div class="control-card">
+      <h3>
+        <span>Analog Locations</span>
+        <span style="font-size: 0.7rem; color: var(--text-muted);">Click to Fly</span>
+      </h3>
+      <div class="btn-group">
+        <button class="btn site-pill mars" data-site="mars_gale">Mars: Gale Crater</button>
+        <button class="btn site-pill aralkum" data-site="aralkum">Aralkum Desert</button>
+        <button class="btn site-pill mcmurdo" data-site="mcmurdo">McMurdo Valleys</button>
+        <button class="btn site-pill lut btn-active" data-site="lut">Lut Desert</button>
+        <button class="btn site-pill uyuni" data-site="uyuni">Salar de Uyuni</button>
+      </div>
+    </div>
+
+    <!-- Automated Camera Tour -->
+    <div class="control-card">
+      <h3>Automated Camera Tour</h3>
+      <div class="btn-group" style="align-items: center;">
+        <button id="btn-tour-play" class="btn btn-primary">▶ Start Tour</button>
+        <button id="btn-tour-pause" class="btn">⏸ Pause</button>
+        <button id="btn-tour-prev" class="btn">⏮ Prev</button>
+        <button id="btn-tour-next" class="btn">⏭ Next</button>
+        <select id="sel-tour-speed" class="btn" style="padding: 5px 8px;">
+          <option value="0.5">Speed: 0.5x</option>
+          <option value="1.0" selected>Speed: 1.0x</option>
+          <option value="1.5">Speed: 1.5x</option>
+          <option value="2.0">Speed: 2.0x</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Visual Overlays Toggles -->
+    <div class="control-card">
+      <h3>Visual Overlays</h3>
+      <div class="toggle-row">
+        <span>GeoJSON Desert Boundaries</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-boundaries" checked>
+          <span class="slider-switch"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>Coordinate Station Pins</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-pins" checked>
+          <span class="slider-switch"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>3D Billboard Labels</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-labels" checked>
+          <span class="slider-switch"></span>
+        </label>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Interactive Detail Bubble / Comparison Modal -->
+  <main class="glass-panel detail-bubble">
+
+    <!-- Header & Overall Score -->
+    <div class="detail-header">
+      <div class="detail-title">
+        <h2 id="bubble-title">Lut Desert (Dasht-e Lut)</h2>
+        <div id="bubble-subtitle" class="detail-subtitle">Kerman / Sistan, Iran — [30.50°, 58.80°, Elev: 1416m]</div>
+      </div>
+      <div class="overall-score-badge">
+        <div id="bubble-score" class="score-number" style="color: var(--score-mid);">45.0%</div>
+        <div id="bubble-score-caption" class="score-caption">Overall Mars Similarity</div>
+      </div>
+    </div>
+
+    <!-- Parameter Similarity Scale Bars -->
+    <div class="scale-bars-section">
+      <h4>Parameter Similarity Scale Bars (0 – 100%)</h4>
+      
+      <div class="bar-row">
+        <div class="bar-labels">
+          <span class="bar-name">Mean Annual Temperature (T2M)</span>
+          <span id="val-temp" class="bar-val">16.9%</span>
+        </div>
+        <div class="progress-track">
+          <div id="bar-temp" class="progress-fill" style="width: 16.9%; background-color: var(--score-low);"></div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-labels">
+          <span class="bar-name">Diurnal Thermal Swing (ΔT = Max - Min)</span>
+          <span id="val-deltat" class="bar-val">62.4%</span>
+        </div>
+        <div class="progress-track">
+          <div id="bar-deltat" class="progress-fill" style="width: 62.4%; background-color: var(--score-high);"></div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-labels">
+          <span class="bar-name">Relative Humidity (RH2M)</span>
+          <span id="val-rh" class="bar-val">57.1%</span>
+        </div>
+        <div class="progress-track">
+          <div id="bar-rh" class="progress-fill" style="width: 57.1%; background-color: var(--score-mid);"></div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-labels">
+          <span class="bar-name">Surface Wind Velocity (WS2M)</span>
+          <span id="val-ws" class="bar-val">82.5%</span>
+        </div>
+        <div class="progress-track">
+          <div id="bar-ws" class="progress-fill" style="width: 82.5%; background-color: var(--score-high);"></div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-labels">
+          <span class="bar-name">Solar Insolation (ALLSKY_SFC_SW_DWN)</span>
+          <span id="val-sol" class="bar-val">51.8%</span>
+        </div>
+        <div class="progress-track">
+          <div id="bar-sol" class="progress-fill" style="width: 51.8%; background-color: var(--score-mid);"></div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-labels">
+          <span class="bar-name">Atmospheric Surface Pressure Proxy</span>
+          <span id="val-pres" class="bar-val">3.1%</span>
+        </div>
+        <div class="progress-track">
+          <div id="bar-pres" class="progress-fill" style="width: 3.1%; background-color: var(--score-low);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Comparison Table -->
+    <div class="table-wrapper">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Earth Selected Site</th>
+            <th>Mars Gale Crater (REMS)</th>
+            <th>Variance (Δ)</th>
+            <th>Analog Match</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Dynamically populated by app.js -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Coordinate Picker for Dynamic Regeneration -->
+    <div class="coord-picker">
+      <div class="coord-picker-header">
+        <span>Coordinate Explorer (Explore Sub-Regions)</span>
+        <span id="bounds-notice" style="color: var(--text-muted); font-size: 0.75rem;">Range: Lat [28.5° to 33.5°], Lon [57.0° to 60.5°]</span>
+      </div>
+      <div class="coord-inputs">
+        <div class="input-field">
+          <label>Latitude (°)</label>
+          <input type="number" id="input-lat" step="0.05" value="30.50">
+          <input type="range" id="slider-lat">
+        </div>
+        <div class="input-field">
+          <label>Longitude (°)</label>
+          <input type="number" id="input-lon" step="0.05" value="58.80">
+          <input type="range" id="slider-lon">
+        </div>
+        <div class="input-field" style="justify-content: flex-end;">
+          <button id="btn-regenerate" class="btn btn-primary" style="height: 38px; justify-content: center;">
+            <span id="regen-loader" style="display:none;">⏳</span>
+            <span>Regenerate with Gemini AI</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gemini AI Synthesis Box -->
+    <div class="ai-synthesis-box">
+      <h4>
+        <span>🪐 Astrobiological & Planetary Synthesis</span>
+        <span id="ai-source-tag" class="badge" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); font-size: 0.65rem;">Gemini AI</span>
+      </h4>
+      <p id="ai-synthesis-summary">Loading planetary comparative synthesis...</p>
+      <ul id="ai-bullets" class="ai-bullets"></ul>
+      <ul id="ai-divergences" class="ai-bullets" style="margin-top: 4px;"></ul>
+      <p id="ai-recommendation" style="margin-top: 8px; color: var(--accent-cyan); font-weight: 500;"></p>
+    </div>
+
+  </main>
+
+  <!-- Gemini API Key Settings Modal -->
+  <div id="modal-settings" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Gemini API Configuration</h3>
+        <button id="btn-close-settings" class="close-btn">&times;</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+        Enter your Google AI Studio Gemini API key to enable live AI comparative planetology synthesis when you pick new coordinates. If omitted, the dashboard uses built-in NASA climatology models and pre-computed fallback datasets.
+      </p>
+      <div class="input-field" style="margin-bottom: 16px;">
+        <label>Gemini API Key</label>
+        <input type="password" id="input-gemini-key" placeholder="AIzaSy...">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button id="btn-save-key" class="btn btn-primary">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/openspace-api.js"></script>
+  <script src="js/climate-service.js"></script>
+  <script src="js/gemini-service.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

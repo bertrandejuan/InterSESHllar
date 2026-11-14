@@ -1,0 +1,436 @@
+/**
+ * OpenSpace Mars-Earth Analogs: Master UI Coordinator & Application Logic
+ */
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize Services
+  const openSpace = new OpenSpaceClient(CONFIG.openspace.host, CONFIG.openspace.port);
+  const climateService = new ClimateService(CONFIG);
+  const geminiService = new GeminiService(CONFIG);
+
+  // Application State
+  const state = {
+    currentSiteKey: "lut",
+    currentCoords: { lat: 30.5, lon: 58.8, elevation_m: 1416 },
+    tourActive: false,
+    tourIndex: 0,
+    tourTimer: null,
+    tourSpeed: 1.0,
+    toggles: {
+      boundaries: true,
+      pins: true,
+      labels: true
+    }
+  };
+
+  // DOM Elements
+  const statusOpenSpace = document.getElementById("status-openspace");
+  const dotOpenSpace = document.getElementById("dot-openspace");
+  const statusGemini = document.getElementById("status-gemini");
+  const dotGemini = document.getElementById("dot-gemini");
+
+  // Tour Controls
+  const btnTourPlay = document.getElementById("btn-tour-play");
+  const btnTourPause = document.getElementById("btn-tour-pause");
+  const btnTourPrev = document.getElementById("btn-tour-prev");
+  const btnTourNext = document.getElementById("btn-tour-next");
+  const selTourSpeed = document.getElementById("sel-tour-speed");
+
+  // Site Selector Buttons
+  const siteBtns = document.querySelectorAll(".site-pill");
+
+  // Layer Toggles
+  const toggleBoundaries = document.getElementById("toggle-boundaries");
+  const togglePins = document.getElementById("toggle-pins");
+  const toggleLabels = document.getElementById("toggle-labels");
+
+  // Detail Modal / Bubble
+  const bubbleTitle = document.getElementById("bubble-title");
+  const bubbleSubtitle = document.getElementById("bubble-subtitle");
+  const bubbleScore = document.getElementById("bubble-score");
+  const bubbleScoreCaption = document.getElementById("bubble-score-caption");
+
+  // Scale Bars
+  const barTemp = document.getElementById("bar-temp");
+  const valTemp = document.getElementById("val-temp");
+  const barDeltaT = document.getElementById("bar-deltat");
+  const valDeltaT = document.getElementById("val-deltat");
+  const barRh = document.getElementById("bar-rh");
+  const valRh = document.getElementById("val-rh");
+  const barWs = document.getElementById("bar-ws");
+  const valWs = document.getElementById("val-ws");
+  const barSol = document.getElementById("bar-sol");
+  const valSol = document.getElementById("val-sol");
+  const barPres = document.getElementById("bar-pres");
+  const valPres = document.getElementById("val-pres");
+
+  // Comparison Table Body
+  const tableBody = document.getElementById("table-body");
+
+  // Coordinate Picker
+  const inputLat = document.getElementById("input-lat");
+  const inputLon = document.getElementById("input-lon");
+  const coordSliderLat = document.getElementById("slider-lat");
+  const coordSliderLon = document.getElementById("slider-lon");
+  const boundsNotice = document.getElementById("bounds-notice");
+  const btnRegenerate = document.getElementById("btn-regenerate");
+  const regenLoader = document.getElementById("regen-loader");
+
+  // AI Synthesis Area
+  const aiSynthesisSummary = document.getElementById("ai-synthesis-summary");
+  const aiBullets = document.getElementById("ai-bullets");
+  const aiDivergences = document.getElementById("ai-divergences");
+  const aiRecommendation = document.getElementById("ai-recommendation");
+  const aiSourceTag = document.getElementById("ai-source-tag");
+
+  // Settings Modal
+  const btnOpenSettings = document.getElementById("btn-open-settings");
+  const modalSettings = document.getElementById("modal-settings");
+  const btnCloseSettings = document.getElementById("btn-close-settings");
+  const inputGeminiKey = document.getElementById("input-gemini-key");
+  const btnSaveKey = document.getElementById("btn-save-key");
+
+  // Connect to OpenSpace
+  openSpace.onConnect(() => {
+    statusOpenSpace.innerText = "OpenSpace: Connected";
+    dotOpenSpace.className = "indicator-dot online";
+  });
+
+  openSpace.onDisconnect(() => {
+    statusOpenSpace.innerText = "OpenSpace: Disconnected (Port 4682)";
+    dotOpenSpace.className = "indicator-dot offline";
+  });
+
+  openSpace.connect();
+
+  // Update Gemini status indicator
+  function updateGeminiStatusBadge() {
+    if (geminiService.hasApiKey()) {
+      statusGemini.innerText = "Gemini: Live AI Key Configured";
+      dotGemini.className = "indicator-dot online";
+    } else {
+      statusGemini.innerText = "Gemini: Offline Mode (Rule-based)";
+      dotGemini.className = "indicator-dot";
+    }
+  }
+  updateGeminiStatusBadge();
+
+  // Color helper for similarity percentage
+  function getScoreColor(val) {
+    if (val >= 60) return "var(--score-high)";
+    if (val >= 35) return "var(--score-mid)";
+    return "var(--score-low)";
+  }
+
+  function updateProgressBar(element, valElement, score) {
+    element.style.width = `${Math.min(100, Math.max(0, score))}%`;
+    element.style.backgroundColor = getScoreColor(score);
+    valElement.innerText = `${score.toFixed(1)}%`;
+    valElement.style.color = getScoreColor(score);
+  }
+
+  // Populate UI with site data
+  async function displaySiteData(siteKey, customCoords = null) {
+    state.currentSiteKey = siteKey;
+    const siteConfig = CONFIG.sites[siteKey];
+
+    // Highlight button
+    siteBtns.forEach(btn => {
+      btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
+    });
+
+    if (siteKey === "mars_gale") {
+      renderMarsGaleOverview();
+      return;
+    }
+
+    if (!siteConfig) return;
+
+    // Use custom coords or default
+    const coords = customCoords || {
+      lat: siteConfig.lat,
+      lon: siteConfig.lon,
+      elevation_m: 500
+    };
+    state.currentCoords = coords;
+
+    // Update Slider & Input values
+    inputLat.value = coords.lat.toFixed(2);
+    inputLon.value = coords.lon.toFixed(2);
+    coordSliderLat.min = siteConfig.bounds.minLat;
+    coordSliderLat.max = siteConfig.bounds.maxLat;
+    coordSliderLat.step = 0.05;
+    coordSliderLat.value = coords.lat;
+
+    coordSliderLon.min = siteConfig.bounds.minLon;
+    coordSliderLon.max = siteConfig.bounds.maxLon;
+    coordSliderLon.step = 0.05;
+    coordSliderLon.value = coords.lon;
+
+    boundsNotice.innerText = `Range: Lat [${siteConfig.bounds.minLat}° to ${siteConfig.bounds.maxLat}°], Lon [${siteConfig.bounds.minLon}° to ${siteConfig.bounds.maxLon}°]`;
+
+    // Fetch climatology & compute scores
+    const climResult = await climateService.fetchClimatology(coords.lat, coords.lon);
+    coords.elevation_m = climResult.elevation_m;
+    const scores = climateService.computeSimilarityScores(climResult.climatology);
+
+    // Update Header
+    bubbleTitle.innerText = siteConfig.name;
+    bubbleSubtitle.innerText = `${siteConfig.region} — [${coords.lat.toFixed(2)}°, ${coords.lon.toFixed(2)}°, Elev: ${coords.elevation_m}m]`;
+    bubbleScore.innerText = `${scores.overall_composite}%`;
+    bubbleScore.style.color = getScoreColor(scores.overall_composite);
+    bubbleScoreCaption.innerText = "Overall Mars Similarity";
+
+    // Update Scale Bars
+    updateProgressBar(barTemp, valTemp, scores.temperature);
+    updateProgressBar(barDeltaT, valDeltaT, scores.diurnal_range);
+    updateProgressBar(barRh, valRh, scores.relative_humidity);
+    updateProgressBar(barWs, valWs, scores.wind_speed);
+    updateProgressBar(barSol, valSol, scores.solar_insolation);
+    updateProgressBar(barPres, valPres, scores.surface_pressure);
+
+    // Render Table
+    renderComparisonTable(climResult.climatology, scores);
+
+    // Generate AI Planetary Synthesis
+    const analysis = await geminiService.generateAnalogAnalysis(
+      siteConfig.name,
+      siteConfig.region,
+      coords,
+      climResult.climatology,
+      scores
+    );
+    renderAISynthesis(analysis);
+  }
+
+  function renderComparisonTable(climatology, scores) {
+    const mars = CONFIG.marsBaseline;
+    const rows = [
+      { param: "Mean Temperature", unit: "°C", earth: climatology.T2M, mars: mars.T2M, score: scores.temperature },
+      { param: "Diurnal Thermal Swing (ΔT)", unit: "°C", earth: climatology.DELTA_T, mars: mars.DELTA_T, score: scores.diurnal_range },
+      { param: "Relative Humidity (RH)", unit: "%", earth: climatology.RH2M, mars: mars.RH2M, score: scores.relative_humidity },
+      { param: "Surface Wind Speed", unit: "m/s", earth: climatology.WS2M, mars: mars.WS2M, score: scores.wind_speed },
+      { param: "Solar Insolation", unit: "kWh/m²/day", earth: climatology.ALLSKY_SFC_SW_DWN, mars: mars.ALLSKY_SFC_SW_DWN, score: scores.solar_insolation },
+      { param: "Atmospheric Surface Pressure", unit: "hPa", earth: climatology.PRESSURE, mars: mars.PRESSURE, score: scores.surface_pressure }
+    ];
+
+    tableBody.innerHTML = rows.map(r => {
+      const delta = (r.earth - r.mars).toFixed(1);
+      const deltaSign = r.earth >= r.mars ? `+${delta}` : `${delta}`;
+      const scoreColor = getScoreColor(r.score);
+      return `
+        <tr>
+          <td><strong>${r.param}</strong></td>
+          <td>${r.earth} ${r.unit}</td>
+          <td>${r.mars} ${r.unit}</td>
+          <td style="color: ${scoreColor}">${deltaSign} ${r.unit}</td>
+          <td><strong style="color: ${scoreColor}">${r.score}%</strong></td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderAISynthesis(analysis) {
+    aiSourceTag.innerText = analysis.source || "Gemini Astrobiology Synthesis";
+    aiSynthesisSummary.innerText = analysis.summary || "";
+
+    aiBullets.innerHTML = (analysis.key_analog_features || [])
+      .map(item => `<li><strong>Analog Match:</strong> ${item}</li>`)
+      .join("");
+
+    aiDivergences.innerHTML = (analysis.divergences || [])
+      .map(item => `<li><strong>Planetary Divergence:</strong> ${item}</li>`)
+      .join("");
+
+    aiRecommendation.innerHTML = analysis.research_recommendation 
+      ? `<em>Recommendation:</em> ${analysis.research_recommendation}` 
+      : "";
+  }
+
+  function renderMarsGaleOverview() {
+    const mars = CONFIG.marsBaseline;
+    bubbleTitle.innerText = "Mars: Gale Crater (Curiosity MSL)";
+    bubbleSubtitle.innerText = `Bradbury Landing / Aeolis Mons — [${mars.lat}°, ${mars.lon}°, Elev: ${mars.elevation_m}m]`;
+    bubbleScore.innerText = "100%";
+    bubbleScore.style.color = "var(--accent-mars)";
+    bubbleScoreCaption.innerText = "Planetary Reference Baseline";
+
+    [barTemp, barDeltaT, barRh, barWs, barSol, barPres].forEach(b => {
+      b.style.width = "100%";
+      b.style.backgroundColor = "var(--accent-mars)";
+    });
+    [valTemp, valDeltaT, valRh, valWs, valSol, valPres].forEach(v => {
+      v.innerText = "100% (Baseline)";
+      v.style.color = "var(--accent-mars)";
+    });
+
+    tableBody.innerHTML = `
+      <tr><td><strong>Mean Temperature</strong></td><td>-63.0 °C</td><td>-63.0 °C</td><td>0.0 °C</td><td>100%</td></tr>
+      <tr><td><strong>Diurnal Thermal Swing</strong></td><td>96.0 °C</td><td>96.0 °C</td><td>0.0 °C</td><td>100%</td></tr>
+      <tr><td><strong>Relative Humidity</strong></td><td>12.0 %</td><td>12.0 %</td><td>0.0 %</td><td>100%</td></tr>
+      <tr><td><strong>Surface Wind Speed</strong></td><td>3.5 m/s</td><td>3.5 m/s</td><td>0.0 m/s</td><td>100%</td></tr>
+      <tr><td><strong>Solar Insolation</strong></td><td>4.10 kWh/m²/day</td><td>4.10 kWh/m²/day</td><td>0.0</td><td>100%</td></tr>
+      <tr><td><strong>Surface Pressure</strong></td><td>8.4 hPa</td><td>8.4 hPa</td><td>0.0</td><td>100%</td></tr>
+    `;
+
+    renderAISynthesis({
+      source: "Mars Science Laboratory Curiosity Baseline",
+      summary: "Gale Crater serves as the primary scientific control site. Located in the Martian equatorial transition zone, its floor exposes layered sedimentary mudstones deposited in ancient lacustrine paleolakes.",
+      key_analog_features: [
+        "Curiosity REMS in-situ atmospheric measurement station",
+        "Layered clay and sulfate mineral strata recording planetary desiccation",
+        "Active modern aeolian dune fields and downslope wind circulation"
+      ],
+      divergences: [
+        "Hyper-thin CO2 atmosphere (~0.8% Earth pressure)",
+        "Zero ozone layer; direct solar cosmic and UV radiation flux"
+      ],
+      research_recommendation: "Baseline telemetry for all comparative Earth desert calculations."
+    });
+  }
+
+  // Site selection click handler
+  siteBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const site = btn.dataset.site;
+      if (site === "mars_gale") {
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 350000, 4);
+      } else {
+        const target = CONFIG.sites[site];
+        if (target) {
+          openSpace.flyToGeo(target.globe, target.lat, target.lon, target.alt, 4);
+        }
+      }
+      displaySiteData(site);
+    });
+  });
+
+  // Slider / Input sync
+  coordSliderLat.addEventListener("input", (e) => {
+    inputLat.value = parseFloat(e.target.value).toFixed(2);
+  });
+  coordSliderLon.addEventListener("input", (e) => {
+    inputLon.value = parseFloat(e.target.value).toFixed(2);
+  });
+  inputLat.addEventListener("change", (e) => {
+    coordSliderLat.value = e.target.value;
+  });
+  inputLon.addEventListener("change", (e) => {
+    coordSliderLon.value = e.target.value;
+  });
+
+  // Regenerate Button Handler
+  btnRegenerate.addEventListener("click", async () => {
+    const lat = parseFloat(inputLat.value);
+    const lon = parseFloat(inputLon.value);
+    if (isNaN(lat) || isNaN(lon)) return;
+
+    btnRegenerate.disabled = true;
+    regenLoader.style.display = "inline";
+
+    try {
+      // Fly OpenSpace camera to new coordinate
+      if (state.currentSiteKey !== "mars_gale") {
+        openSpace.flyToGeo("Earth", lat, lon, 250000, 3);
+      }
+
+      await displaySiteData(state.currentSiteKey, { lat, lon, elevation_m: 500 });
+    } finally {
+      btnRegenerate.disabled = false;
+      regenLoader.style.display = "none";
+    }
+  });
+
+  // Layer Toggles
+  toggleBoundaries.addEventListener("change", (e) => {
+    state.toggles.boundaries = e.target.checked;
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterBoundaries.Enabled", e.target.checked);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertBoundaries.Enabled", e.target.checked);
+  });
+
+  togglePins.addEventListener("change", (e) => {
+    state.toggles.pins = e.target.checked;
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", e.target.checked);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", e.target.checked);
+  });
+
+  toggleLabels.addEventListener("change", (e) => {
+    state.toggles.labels = e.target.checked;
+    openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", e.target.checked);
+    ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
+      openSpace.setPropertyValue(`Scene.EarthLabel${name}.Renderable.Enabled`, e.target.checked);
+    });
+  });
+
+  // Automated Tour Routine
+  function startTour() {
+    state.tourActive = true;
+    btnTourPlay.classList.add("btn-active");
+    btnTourPause.classList.remove("btn-active");
+    runTourStep();
+  }
+
+  function pauseTour() {
+    state.tourActive = false;
+    btnTourPlay.classList.remove("btn-active");
+    btnTourPause.classList.add("btn-active");
+    if (state.tourTimer) {
+      clearTimeout(state.tourTimer);
+      state.tourTimer = null;
+    }
+  }
+
+  function runTourStep() {
+    if (!state.tourActive) return;
+
+    const tourSeq = CONFIG.tourSequence;
+    const step = tourSeq[state.tourIndex];
+    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, step.duration / state.tourSpeed);
+    displaySiteData(step.target);
+
+    // Schedule next waypoint after dwell time
+    const dwellMs = (10000 / state.tourSpeed);
+    state.tourTimer = setTimeout(() => {
+      state.tourIndex = (state.tourIndex + 1) % tourSeq.length;
+      runTourStep();
+    }, dwellMs);
+  }
+
+  btnTourPlay.addEventListener("click", startTour);
+  btnTourPause.addEventListener("click", pauseTour);
+  btnTourNext.addEventListener("click", () => {
+    pauseTour();
+    state.tourIndex = (state.tourIndex + 1) % CONFIG.tourSequence.length;
+    const step = CONFIG.tourSequence[state.tourIndex];
+    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, step.duration);
+    displaySiteData(step.target);
+  });
+  btnTourPrev.addEventListener("click", () => {
+    pauseTour();
+    state.tourIndex = (state.tourIndex - 1 + CONFIG.tourSequence.length) % CONFIG.tourSequence.length;
+    const step = CONFIG.tourSequence[state.tourIndex];
+    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, step.duration);
+    displaySiteData(step.target);
+  });
+  selTourSpeed.addEventListener("change", (e) => {
+    state.tourSpeed = parseFloat(e.target.value) || 1.0;
+  });
+
+  // Settings Modal Handlers
+  btnOpenSettings.addEventListener("click", () => {
+    inputGeminiKey.value = geminiService.getApiKey();
+    modalSettings.style.display = "flex";
+  });
+  btnCloseSettings.addEventListener("click", () => {
+    modalSettings.style.display = "none";
+  });
+  btnSaveKey.addEventListener("click", () => {
+    geminiService.setApiKey(inputGeminiKey.value);
+    modalSettings.style.display = "none";
+    updateGeminiStatusBadge();
+    displaySiteData(state.currentSiteKey, state.currentCoords);
+  });
+
+  // Initial Load (Defaults to Lut Desert)
+  displaySiteData("lut");
+});
