@@ -97,6 +97,7 @@ class OpenSpaceClient {
       console.log(`[Simulation] Set property ${property} = ${value}`);
       return;
     }
+    // 1. Send WebSocket 'set' topic packet
     const topic = this.nextTopicId++;
     const payload = {
       topic: topic,
@@ -107,6 +108,11 @@ class OpenSpaceClient {
       }
     };
     this.ws.send(JSON.stringify(payload));
+
+    // 2. Also execute via Lua script for guaranteed in-engine execution
+    const luaVal = typeof value === "boolean" ? (value ? "true" : "false") : JSON.stringify(value);
+    const luaScript = `if openspace.hasProperty('${property}') then openspace.setPropertyValueSingle('${property}', ${luaVal}) end`;
+    this.executeLuaScript(luaScript, false);
   }
 
   flyToGeo(globe, lat, lon, alt = 350000, duration = 4.0) {

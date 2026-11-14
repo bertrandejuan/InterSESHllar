@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bubbleSubtitle = document.getElementById("bubble-subtitle");
   const bubbleScore = document.getElementById("bubble-score");
   const bubbleScoreCaption = document.getElementById("bubble-score-caption");
+  const btnShowPins = document.getElementById("btn-show-pins");
 
   // Scale Bars
   const barTemp = document.getElementById("bar-temp");
@@ -94,6 +95,14 @@ document.addEventListener("DOMContentLoaded", () => {
   openSpace.onConnect(() => {
     statusOpenSpace.innerText = "OpenSpace: Connected";
     dotOpenSpace.className = "indicator-dot online";
+
+    // Automatically enable best satellite imagery on Earth and Mars
+    openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Curiosity_Roving_Site_Mosaic.Enabled", true);
   });
 
   openSpace.onDisconnect(() => {
@@ -138,6 +147,18 @@ document.addEventListener("DOMContentLoaded", () => {
     siteBtns.forEach(btn => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
+
+    // Pin goes away when focused on the site
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", false);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", false);
+    if (togglePins) togglePins.checked = false;
+
+    // Automatically enable best satellite imagery on Earth and Mars
+    openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled", true);
 
     if (siteKey === "mars_gale") {
       renderMarsGaleOverview();
@@ -291,6 +312,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btn.addEventListener("click", handleSelect);
   });
+
+  // Restore Pins & Return to Orbit
+  if (btnShowPins) {
+    btnShowPins.addEventListener("click", (e) => {
+      e.preventDefault();
+      openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", true);
+      openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", true);
+      if (togglePins) togglePins.checked = true;
+      if (state.currentSiteKey === "mars_gale") {
+        openSpace.flyToGeo("Mars", 0, 137.4, 4500000, 3);
+      } else {
+        openSpace.flyToGeo("Earth", 20, 60, 8000000, 3);
+      }
+    });
+  }
 
   // Slider & Input Synchronizers
   coordSliderLat.addEventListener("input", (e) => {
