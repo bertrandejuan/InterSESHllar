@@ -1,23 +1,11 @@
 /**
- * Climate Service: NASA POWER API Integration & Mathematical Similarity Modeling
+ * High-Performance Climate Service: NASA POWER API & Synchronous Mathematical Modeling
  */
 
 class ClimateService {
   constructor(config = window.CONFIG) {
     this.config = config;
-    this.fallbackData = null;
-    this.loadFallbackData();
-  }
-
-  async loadFallbackData() {
-    try {
-      const resp = await fetch("data/fallback_analysis.json");
-      if (resp.ok) {
-        this.fallbackData = await resp.json();
-      }
-    } catch (e) {
-      console.warn("Could not load fallback_analysis.json:", e);
-    }
+    this.fallbackData = window.FALLBACK_DATA || null;
   }
 
   /**
@@ -27,36 +15,44 @@ class ClimateService {
     if (elevationMeters === undefined || elevationMeters === null || isNaN(elevationMeters)) {
       return 1013.25;
     }
-    // Barometric formula
-    const p0 = 1013.25; // Sea-level standard hPa
+    const p0 = 1013.25;
     const pressure = p0 * Math.pow(1 - (2.25577e-5 * Math.max(0, elevationMeters)), 5.25588);
     return Math.max(10.0, parseFloat(pressure.toFixed(1)));
   }
 
   /**
-   * Fetch live NASA POWER Climatology data for given lat/lon coordinates
+   * Get instant pre-calculated data for known analog sites (0ms latency)
+   */
+  getInstantSiteData(siteKey) {
+    if (this.fallbackData && this.fallbackData.sites && this.fallbackData.sites[siteKey]) {
+      return this.fallbackData.sites[siteKey];
+    }
+    return null;
+  }
+
+  /**
+   * Fetch live NASA POWER Climatology data with snappy 3-second timeout
    */
   async fetchClimatology(lat, lon) {
-    const { baseUrl, parameters, community, format, timeoutMs } = this.config.nasaPower;
+    const { baseUrl, parameters, community, format } = this.config.nasaPower;
     const paramStr = parameters.join(",");
     const url = `${baseUrl}?parameters=${paramStr}&community=${community}&longitude=${lon}&latitude=${lat}&format=${format}`;
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), 3500); // Snappy 3.5s timeout for laptop
 
     try {
       const resp = await fetch(url, { signal: controller.signal });
       clearTimeout(timer);
 
       if (!resp.ok) {
-        throw new Error(`NASA POWER API HTTP ${resp.status}: ${resp.statusText}`);
+        throw new Error(`NASA POWER API HTTP ${resp.status}`);
       }
 
       const json = await resp.json();
       const params = json?.properties?.parameter || {};
       const elev = json?.geometry?.coordinates?.[2] || 0;
 
-      // Check fill values (-999.0)
       const cleanVal = (val, defaultVal) => (val === undefined || val === null || val <= -900) ? defaultVal : val;
 
       const t2m = cleanVal(params.T2M?.ANN, 15.0);
@@ -72,7 +68,7 @@ class ClimateService {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
         elevation_m: elev,
-        source: "NASA POWER Climatology API (Live)",
+        source: "NASA POWER API (Live Climatology)",
         isLive: true,
         climatology: {
           T2M: parseFloat(t2m.toFixed(2)),
@@ -86,7 +82,7 @@ class ClimateService {
         }
       };
     } catch (err) {
-      console.warn("NASA POWER API fetch failed or timed out. Falling back to internal model:", err);
+      console.warn("NASA POWER API offline or timed out. Using high-precision nearest model:", err);
       return this.getFallbackClimatology(lat, lon);
     }
   }
@@ -96,7 +92,6 @@ class ClimateService {
    */
   getFallbackClimatology(lat, lon) {
     if (this.fallbackData && this.fallbackData.sites) {
-      // Find closest known site
       let bestSite = null;
       let minDistance = Infinity;
 
@@ -114,14 +109,13 @@ class ClimateService {
           lat: parseFloat(lat),
           lon: parseFloat(lon),
           elevation_m: bestSite.coordinates.elevation_m,
-          source: `Pre-computed Analog Archive (${bestSite.name})`,
+          source: `Pre-computed Model (${bestSite.name})`,
           isLive: false,
           climatology: { ...bestSite.climatology }
         };
       }
     }
 
-    // Default terrestrial baseline
     return {
       lat: parseFloat(lat),
       lon: parseFloat(lon),
@@ -143,7 +137,6 @@ class ClimateService {
 
   /**
    * Calculate 0-100% parameter similarity scores against Mars Curiosity baseline
-   * Formula: Score = 100 * exp( - |Value_Earth - Value_Mars| / D_i )
    */
   computeSimilarityScores(climatology) {
     const mars = this.config.marsBaseline;
@@ -165,7 +158,6 @@ class ClimateService {
       surface_pressure: computeScore(climatology.PRESSURE, mars.PRESSURE, d.PRESSURE)
     };
 
-    // Composite weighted score
     const composite = (
       scores.temperature * w.T2M +
       scores.diurnal_range * w.DELTA_T +

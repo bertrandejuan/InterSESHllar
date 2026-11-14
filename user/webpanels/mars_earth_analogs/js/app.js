@@ -1,8 +1,8 @@
 /**
- * OpenSpace Mars-Earth Analogs: Master UI Coordinator & Application Logic
+ * High-Performance OpenSpace UI Coordinator: 0ms Synchronous Rendering & Laptop Optimized
  */
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   // Initialize Services
   const openSpace = new OpenSpaceClient(CONFIG.openspace.host, CONFIG.openspace.port);
   const climateService = new ClimateService(CONFIG);
@@ -97,25 +97,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   openSpace.onDisconnect(() => {
-    statusOpenSpace.innerText = "OpenSpace: Disconnected (Port 4682)";
+    statusOpenSpace.innerText = "OpenSpace: Offline (Port 4682)";
     dotOpenSpace.className = "indicator-dot offline";
   });
 
   openSpace.connect();
 
-  // Update Gemini status indicator
   function updateGeminiStatusBadge() {
     if (geminiService.hasApiKey()) {
       statusGemini.innerText = "Gemini: Live AI Key Configured";
       dotGemini.className = "indicator-dot online";
     } else {
-      statusGemini.innerText = "Gemini: Offline Mode (Rule-based)";
+      statusGemini.innerText = "Gemini: Offline Fast Engine";
       dotGemini.className = "indicator-dot";
     }
   }
   updateGeminiStatusBadge();
 
-  // Color helper for similarity percentage
   function getScoreColor(val) {
     if (val >= 60) return "var(--score-high)";
     if (val >= 35) return "var(--score-mid)";
@@ -123,18 +121,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function updateProgressBar(element, valElement, score) {
-    element.style.width = `${Math.min(100, Math.max(0, score))}%`;
-    element.style.backgroundColor = getScoreColor(score);
-    valElement.innerText = `${score.toFixed(1)}%`;
-    valElement.style.color = getScoreColor(score);
+    const s = Math.min(100, Math.max(0, score));
+    element.style.width = `${s}%`;
+    element.style.backgroundColor = getScoreColor(s);
+    valElement.innerText = `${s.toFixed(1)}%`;
+    valElement.style.color = getScoreColor(s);
   }
 
-  // Populate UI with site data
-  async function displaySiteData(siteKey, customCoords = null) {
+  /**
+   * Fast synchronous site display with 0ms lag
+   */
+  function displaySiteInstant(siteKey) {
     state.currentSiteKey = siteKey;
     const siteConfig = CONFIG.sites[siteKey];
 
-    // Highlight button
     siteBtns.forEach(btn => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
@@ -146,42 +146,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!siteConfig) return;
 
-    // Use custom coords or default
-    const coords = customCoords || {
-      lat: siteConfig.lat,
-      lon: siteConfig.lon,
-      elevation_m: 500
-    };
-    state.currentCoords = coords;
+    const instant = climateService.getInstantSiteData(siteKey);
+    if (!instant) return;
 
-    // Update Slider & Input values
-    inputLat.value = coords.lat.toFixed(2);
-    inputLon.value = coords.lon.toFixed(2);
+    state.currentCoords = { ...instant.coordinates };
+
+    // Update Sliders & Inputs
+    inputLat.value = instant.coordinates.lat.toFixed(2);
+    inputLon.value = instant.coordinates.lon.toFixed(2);
     coordSliderLat.min = siteConfig.bounds.minLat;
     coordSliderLat.max = siteConfig.bounds.maxLat;
     coordSliderLat.step = 0.05;
-    coordSliderLat.value = coords.lat;
+    coordSliderLat.value = instant.coordinates.lat;
 
     coordSliderLon.min = siteConfig.bounds.minLon;
     coordSliderLon.max = siteConfig.bounds.maxLon;
     coordSliderLon.step = 0.05;
-    coordSliderLon.value = coords.lon;
+    coordSliderLon.value = instant.coordinates.lon;
 
-    boundsNotice.innerText = `Range: Lat [${siteConfig.bounds.minLat}° to ${siteConfig.bounds.maxLat}°], Lon [${siteConfig.bounds.minLon}° to ${siteConfig.bounds.maxLon}°]`;
+    boundsNotice.innerText = `Bounds: Lat [${siteConfig.bounds.minLat}° - ${siteConfig.bounds.maxLat}°], Lon [${siteConfig.bounds.minLon}° - ${siteConfig.bounds.maxLon}°]`;
 
-    // Fetch climatology & compute scores
-    const climResult = await climateService.fetchClimatology(coords.lat, coords.lon);
-    coords.elevation_m = climResult.elevation_m;
-    const scores = climateService.computeSimilarityScores(climResult.climatology);
-
-    // Update Header
+    // Header & Score
+    const scores = instant.similarity_scores;
     bubbleTitle.innerText = siteConfig.name;
-    bubbleSubtitle.innerText = `${siteConfig.region} — [${coords.lat.toFixed(2)}°, ${coords.lon.toFixed(2)}°, Elev: ${coords.elevation_m}m]`;
+    bubbleSubtitle.innerText = `${siteConfig.region} — [${instant.coordinates.lat.toFixed(2)}°, ${instant.coordinates.lon.toFixed(2)}°, Elev: ${instant.coordinates.elevation_m}m]`;
     bubbleScore.innerText = `${scores.overall_composite}%`;
     bubbleScore.style.color = getScoreColor(scores.overall_composite);
     bubbleScoreCaption.innerText = "Overall Mars Similarity";
 
-    // Update Scale Bars
+    // Fast Scale Bars
     updateProgressBar(barTemp, valTemp, scores.temperature);
     updateProgressBar(barDeltaT, valDeltaT, scores.diurnal_range);
     updateProgressBar(barRh, valRh, scores.relative_humidity);
@@ -189,18 +182,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateProgressBar(barSol, valSol, scores.solar_insolation);
     updateProgressBar(barPres, valPres, scores.surface_pressure);
 
-    // Render Table
-    renderComparisonTable(climResult.climatology, scores);
-
-    // Generate AI Planetary Synthesis
-    const analysis = await geminiService.generateAnalogAnalysis(
-      siteConfig.name,
-      siteConfig.region,
-      coords,
-      climResult.climatology,
-      scores
-    );
-    renderAISynthesis(analysis);
+    // Table & Analysis
+    renderComparisonTable(instant.climatology, scores);
+    renderAISynthesis(instant.gemini_analysis);
   }
 
   function renderComparisonTable(climatology, scores) {
@@ -231,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderAISynthesis(analysis) {
-    aiSourceTag.innerText = analysis.source || "Gemini Astrobiology Synthesis";
+    aiSourceTag.innerText = analysis.source || "Astrobiology Comparative Model";
     aiSynthesisSummary.innerText = analysis.summary || "";
 
     aiBullets.innerHTML = (analysis.key_analog_features || [])
@@ -289,23 +273,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Site selection click handler
+  // Instant Site Button Click Handlers
   siteBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
+    const handleSelect = (e) => {
+      e.preventDefault();
       const site = btn.dataset.site;
       if (site === "mars_gale") {
-        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 350000, 4);
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 350000, 3);
       } else {
         const target = CONFIG.sites[site];
         if (target) {
-          openSpace.flyToGeo(target.globe, target.lat, target.lon, target.alt, 4);
+          openSpace.flyToGeo(target.globe, target.lat, target.lon, target.alt, 3);
         }
       }
-      displaySiteData(site);
-    });
+      displaySiteInstant(site);
+    };
+
+    btn.addEventListener("click", handleSelect);
   });
 
-  // Slider / Input sync
+  // Slider & Input Synchronizers
   coordSliderLat.addEventListener("input", (e) => {
     inputLat.value = parseFloat(e.target.value).toFixed(2);
   });
@@ -319,7 +306,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     coordSliderLon.value = e.target.value;
   });
 
-  // Regenerate Button Handler
+  // Regenerate Button Handler (Snappy Background Fetch)
   btnRegenerate.addEventListener("click", async () => {
     const lat = parseFloat(inputLat.value);
     const lon = parseFloat(inputLon.value);
@@ -329,12 +316,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     regenLoader.style.display = "inline";
 
     try {
-      // Fly OpenSpace camera to new coordinate
       if (state.currentSiteKey !== "mars_gale") {
-        openSpace.flyToGeo("Earth", lat, lon, 250000, 3);
+        openSpace.flyToGeo("Earth", lat, lon, 250000, 2);
       }
 
-      await displaySiteData(state.currentSiteKey, { lat, lon, elevation_m: 500 });
+      const climResult = await climateService.fetchClimatology(lat, lon);
+      const scores = climateService.computeSimilarityScores(climResult.climatology);
+
+      const siteConfig = CONFIG.sites[state.currentSiteKey] || { name: "Custom Region", region: "Earth" };
+      bubbleSubtitle.innerText = `${siteConfig.name} — [${lat.toFixed(2)}°, ${lon.toFixed(2)}°, Elev: ${climResult.elevation_m}m]`;
+      bubbleScore.innerText = `${scores.overall_composite}%`;
+      bubbleScore.style.color = getScoreColor(scores.overall_composite);
+
+      updateProgressBar(barTemp, valTemp, scores.temperature);
+      updateProgressBar(barDeltaT, valDeltaT, scores.diurnal_range);
+      updateProgressBar(barRh, valRh, scores.relative_humidity);
+      updateProgressBar(barWs, valWs, scores.wind_speed);
+      updateProgressBar(barSol, valSol, scores.solar_insolation);
+      updateProgressBar(barPres, valPres, scores.surface_pressure);
+
+      renderComparisonTable(climResult.climatology, scores);
+
+      const analysis = await geminiService.generateAnalogAnalysis(
+        siteConfig.name,
+        siteConfig.region,
+        { lat, lon, elevation_m: climResult.elevation_m },
+        climResult.climatology,
+        scores
+      );
+      renderAISynthesis(analysis);
     } finally {
       btnRegenerate.disabled = false;
       regenLoader.style.display = "none";
@@ -386,10 +396,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tourSeq = CONFIG.tourSequence;
     const step = tourSeq[state.tourIndex];
     openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, step.duration / state.tourSpeed);
-    displaySiteData(step.target);
+    displaySiteInstant(step.target);
 
-    // Schedule next waypoint after dwell time
-    const dwellMs = (10000 / state.tourSpeed);
+    const dwellMs = (8000 / state.tourSpeed);
     state.tourTimer = setTimeout(() => {
       state.tourIndex = (state.tourIndex + 1) % tourSeq.length;
       runTourStep();
@@ -403,14 +412,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     state.tourIndex = (state.tourIndex + 1) % CONFIG.tourSequence.length;
     const step = CONFIG.tourSequence[state.tourIndex];
     openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, step.duration);
-    displaySiteData(step.target);
+    displaySiteInstant(step.target);
   });
   btnTourPrev.addEventListener("click", () => {
     pauseTour();
     state.tourIndex = (state.tourIndex - 1 + CONFIG.tourSequence.length) % CONFIG.tourSequence.length;
     const step = CONFIG.tourSequence[state.tourIndex];
     openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, step.duration);
-    displaySiteData(step.target);
+    displaySiteInstant(step.target);
   });
   selTourSpeed.addEventListener("change", (e) => {
     state.tourSpeed = parseFloat(e.target.value) || 1.0;
@@ -428,9 +437,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     geminiService.setApiKey(inputGeminiKey.value);
     modalSettings.style.display = "none";
     updateGeminiStatusBadge();
-    displaySiteData(state.currentSiteKey, state.currentCoords);
+    displaySiteInstant(state.currentSiteKey);
   });
 
-  // Initial Load (Defaults to Lut Desert)
-  displaySiteData("lut");
+  // Initial Instant Render (Defaults to Lut Desert)
+  displaySiteInstant("lut");
 });
