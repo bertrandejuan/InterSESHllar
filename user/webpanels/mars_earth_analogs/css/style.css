@@ -489,3 +489,192 @@ input:checked + .slider-switch:before {
   font-size: 1.3rem;
   cursor: pointer;
 }
+
+/* Dataset Selector Bar */
+.dataset-source-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: #0f172a;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.dataset-source-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dataset-source-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dataset-badge-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.dataset-pill-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.dataset-toggle-btn {
+  background: #1e293b;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.dataset-toggle-btn:hover {
+  background: #283548;
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+.dataset-toggle-btn.active {
+  background: #047857 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+
+.badge-team-count {
+  background: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+/* Team Empirical Analytics Panel */
+.team-analytics-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-left: 3px solid #10b981;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.team-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.team-card-header h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-source {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-size: 0.68rem;
+}
+
+.analytics-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.metric-stat-box {
+  background: #141c2e;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-stat-label {
+  font-size: 0.67rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.metric-stat-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.metric-stat-sub {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+/* Monthly seasonal mini-strip */
+.monthly-strip {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+.monthly-cell {
+  background: #141c2e;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 6px;
+  min-width: 44px;
+  text-align: center;
+  flex: 1;
+}
+
+.monthly-name {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.monthly-temp {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #38bdf8;
+}

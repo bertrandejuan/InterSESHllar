@@ -83,6 +83,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiRecommendation = document.getElementById("ai-recommendation");
   const aiSourceTag = document.getElementById("ai-source-tag");
 
+  // Data Source & Team Analytics Elements
+  const btnToggleTeam = document.getElementById("btn-toggle-team");
+  const btnToggleReference = document.getElementById("btn-toggle-reference");
+  const datasetActiveTag = document.getElementById("dataset-active-tag");
+  const teamAnalyticsCard = document.getElementById("team-analytics-card");
+  const badgeRecordSpan = document.getElementById("badge-record-span");
+  const badgeDatasetProvenance = document.getElementById("badge-dataset-provenance");
+  const analyticsMetricsGrid = document.getElementById("analytics-metrics-grid");
+  const monthlyStrip = document.getElementById("monthly-strip");
+  const toggleTeamAnalytics = document.getElementById("toggle-team-analytics");
+
   // Settings Modal
   const btnOpenSettings = document.getElementById("btn-open-settings");
   const modalSettings = document.getElementById("modal-settings");
@@ -209,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Table & Analysis
     renderComparisonTable(instant.climatology, scores);
     renderAISynthesis(instant.gemini_analysis);
+    renderTeamAnalytics(siteKey);
 
     const detailBubble = document.getElementById("detail-bubble");
     if (detailBubble) {
@@ -300,6 +312,105 @@ document.addEventListener("DOMContentLoaded", () => {
       ],
       research_recommendation: "Baseline telemetry for all comparative Earth desert calculations."
     });
+
+    renderTeamAnalytics("mars_gale");
+  }
+
+  function renderTeamAnalytics(siteKey) {
+    if (!teamAnalyticsCard) return;
+
+    const isTeam = climateService.isTeamMode();
+    const isVisible = !toggleTeamAnalytics || toggleTeamAnalytics.checked;
+
+    if (!isTeam || siteKey === "mars_gale" || !isVisible) {
+      teamAnalyticsCard.style.display = "none";
+      return;
+    }
+
+    const teamSite = window.TEAM_DATA ? window.TEAM_DATA[siteKey] : null;
+    if (!teamSite || !teamSite.metrics) {
+      teamAnalyticsCard.style.display = "none";
+      return;
+    }
+
+    teamAnalyticsCard.style.display = "flex";
+    const m = teamSite.metrics;
+
+    if (badgeRecordSpan) {
+      badgeRecordSpan.innerText = `${teamSite.record_period || "11-Year Record"} (${teamSite.total_observations.toLocaleString()} Obs)`;
+    }
+
+    if (badgeDatasetProvenance) {
+      badgeDatasetProvenance.innerText = "NASA POWER / MERRA-2 Team In-Situ Archive";
+    }
+
+    if (analyticsMetricsGrid) {
+      analyticsMetricsGrid.innerHTML = `
+        <div class="metric-stat-box">
+          <span class="metric-stat-label">10-Yr Temp Span</span>
+          <span class="metric-stat-val" style="color: var(--accent-cyan);">${m.total_recorded_range_c}°C</span>
+          <span class="metric-stat-sub">Min: ${m.absolute_record_min_c}°C | Max: ${m.absolute_record_max_c}°C</span>
+        </div>
+        <div class="metric-stat-box">
+          <span class="metric-stat-label">Mean Diurnal Swing (ΔT)</span>
+          <span class="metric-stat-val" style="color: var(--score-high);">${m.mean_diurnal_thermal_swing_c}°C</span>
+          <span class="metric-stat-sub">Single-Day Peak: ${m.max_diurnal_thermal_swing_c}°C</span>
+        </div>
+        <div class="metric-stat-box">
+          <span class="metric-stat-label">Relative Humidity</span>
+          <span class="metric-stat-val" style="color: ${m.mean_relative_humidity_pct < 30 ? 'var(--score-high)' : 'var(--score-mid)'};">${m.mean_relative_humidity_pct}%</span>
+          <span class="metric-stat-sub">Extreme Low: ${m.min_relative_humidity_pct}%</span>
+        </div>
+        <div class="metric-stat-box">
+          <span class="metric-stat-label">Surface Wind (10m)</span>
+          <span class="metric-stat-val">${m.mean_wind_speed_ms} m/s</span>
+          <span class="metric-stat-sub">Max Gust/Peak: ${m.peak_wind_gust_ms} m/s</span>
+        </div>
+        <div class="metric-stat-box">
+          <span class="metric-stat-label">Solar Insolation</span>
+          <span class="metric-stat-val" style="color: var(--accent-mars);">${m.mean_solar_insolation_kwh} kWh/m²/d</span>
+          <span class="metric-stat-sub">${m.mean_solar_insolation_mj} MJ/m²/day</span>
+        </div>
+        <div class="metric-stat-box">
+          <span class="metric-stat-label">Annual Precipitation</span>
+          <span class="metric-stat-val">${m.mean_annual_precip_mm} mm/yr</span>
+          <span class="metric-stat-sub">Daily Mean: ${m.mean_daily_precip_mm} mm/day</span>
+        </div>
+      `;
+    }
+
+    if (monthlyStrip && teamSite.monthly_climatology) {
+      monthlyStrip.innerHTML = teamSite.monthly_climatology.map(mon => `
+        <div class="monthly-cell">
+          <div class="monthly-name">${mon.month}</div>
+          <div class="monthly-temp" style="color: ${mon.t2m < 0 ? '#38bdf8' : '#f59e0b'};">${mon.t2m}°</div>
+        </div>
+      `).join("");
+    }
+  }
+
+  function setDataSource(mode) {
+    climateService.setDataSourceMode(mode);
+    if (mode === "team") {
+      btnToggleTeam?.classList.add("active");
+      btnToggleReference?.classList.remove("active");
+      if (datasetActiveTag) {
+        datasetActiveTag.innerText = "Team 10-Yr In-Situ Dataset Active (2015–2025)";
+        datasetActiveTag.style.borderColor = "rgba(16, 185, 129, 0.4)";
+        datasetActiveTag.style.color = "#34d399";
+        datasetActiveTag.style.background = "rgba(16, 185, 129, 0.12)";
+      }
+    } else {
+      btnToggleTeam?.classList.remove("active");
+      btnToggleReference?.classList.add("active");
+      if (datasetActiveTag) {
+        datasetActiveTag.innerText = "Standard Planetary Reference Model Active";
+        datasetActiveTag.style.borderColor = "rgba(56, 189, 248, 0.3)";
+        datasetActiveTag.style.color = "#38bdf8";
+        datasetActiveTag.style.background = "rgba(56, 189, 248, 0.12)";
+      }
+    }
+    displaySiteInstant(state.currentSiteKey);
   }
 
   // Instant Site Button Click Handlers
@@ -419,6 +530,19 @@ document.addEventListener("DOMContentLoaded", () => {
       ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
         openSpace.setPropertyValue(`Scene.EarthLabel${name}.Renderable.Enabled`, e.target.checked);
       });
+    });
+  }
+
+  // Dataset Source Toggles & Field Analytics Visibility
+  if (btnToggleTeam) {
+    btnToggleTeam.addEventListener("click", () => setDataSource("team"));
+  }
+  if (btnToggleReference) {
+    btnToggleReference.addEventListener("click", () => setDataSource("reference"));
+  }
+  if (toggleTeamAnalytics) {
+    toggleTeamAnalytics.addEventListener("change", () => {
+      renderTeamAnalytics(state.currentSiteKey);
     });
   }
 

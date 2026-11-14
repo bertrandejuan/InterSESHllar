@@ -6,6 +6,25 @@ class ClimateService {
   constructor(config = window.CONFIG) {
     this.config = config;
     this.fallbackData = window.FALLBACK_DATA || null;
+    this.teamData = window.TEAM_DATA || null;
+    this.activeMode = 'team'; // 'team' (10-Yr In-Situ Daily Archive) or 'reference' (Standard Climatology)
+  }
+
+  /**
+   * Set active data source: 'team' or 'reference'
+   */
+  setDataSourceMode(mode) {
+    if (mode === 'team' || mode === 'reference') {
+      this.activeMode = mode;
+    }
+  }
+
+  getDataSourceMode() {
+    return this.activeMode;
+  }
+
+  isTeamMode() {
+    return this.activeMode === 'team';
   }
 
   /**
@@ -24,6 +43,14 @@ class ClimateService {
    * Get instant pre-calculated data for known analog sites (0ms latency)
    */
   getInstantSiteData(siteKey) {
+    if (siteKey === "mars_gale") {
+      return this.fallbackData ? this.fallbackData.mars_baseline : null;
+    }
+
+    if (this.activeMode === 'team' && this.teamData && this.teamData[siteKey]) {
+      return this.teamData[siteKey];
+    }
+
     if (this.fallbackData && this.fallbackData.sites && this.fallbackData.sites[siteKey]) {
       return this.fallbackData.sites[siteKey];
     }
