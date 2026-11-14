@@ -1,18 +1,22 @@
 local GaleCraterBoundaryFile = asset.resource("./geojson/mars_gale_crater_boundary.geojson")
 local GaleCraterPinFile = asset.resource("./geojson/mars_gale_crater_pin.geojson")
+local StationPinTexture = asset.resource("./textures/station_pin.png")
 
 local GaleCraterBoundaryTable = {
   Identifier = "MarsGaleCraterBoundaries",
   File = GaleCraterBoundaryFile,
   Enabled = true,
-  HeightOffset = 1800.0,
-  LineWidthScale = 2.5,
+  HeightOffset = 800.0,
+  LineWidthScale = 4.0,
   DefaultProperties = {
+    AltitudeMode = "RelativeToGround",
     Color = { 1.0, 0.35, 0.08 },
     FillColor = { 1.0, 0.35, 0.08 },
-    FillOpacity = 0.85,
-    LineWidth = 4.0,
-    Opacity = 1.0
+    FillOpacity = 0.28,
+    LineWidth = 6.0,
+    Opacity = 1.0,
+    Extrude = true,
+    PerformShading = false
   }
 }
 
@@ -20,12 +24,15 @@ local GaleCraterPinTable = {
   Identifier = "MarsGaleCraterPin",
   File = GaleCraterPinFile,
   Enabled = true,
-  HeightOffset = 2000.0,
+  HeightOffset = 1000.0,
   PointRenderMode = "Camera Position",
   DefaultProperties = {
-    Color = { 1.0, 0.35, 0.08 },
-    PointSize = 32.0,
-    Extrude = true
+    AltitudeMode = "RelativeToGround",
+    Color = { 1.0, 0.45, 0.15 },
+    PointSize = 18000.0,
+    PointTexture = StationPinTexture,
+    PointTextureAnchor = "Center",
+    Opacity = 1.0
   }
 }
 
@@ -46,9 +53,10 @@ local GaleCraterLabelNode = {
     Type = "RenderableLabel",
     Enabled = true,
     Text = "Gale Crater Center (MSL Curiosity / Bradbury Landing)",
-    FontSize = 36.0,
+    FontSize = 32.0,
     Color = { 1.0, 0.85, 0.65 },
-    MinMaxSize = { 14, 52 }
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive"
   },
   GUI = {
     Name = "Mars Gale Crater Label",

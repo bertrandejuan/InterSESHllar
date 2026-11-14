@@ -8,15 +8,22 @@
         "id": "aralkum",
         "Name": "Aralkum Research Station",
         "Region": "Karakalpakstan, Uzbekistan",
-        "altitudeMode": "relativeToGround",
-        "Color": [1.0, 0.82, 0.10],
-        "PointSize": 24,
-        "Altitude": 80,
-        "Extrude": true
+        "stroke": "#2ee173",
+        "Color": [
+          0.18,
+          0.88,
+          0.45
+        ],
+        "point-size": 22000,
+        "PointSize": 22000,
+        "altitudeMode": "relativeToGround"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [59.80, 44.80]
+        "coordinates": [
+          59.8,
+          44.8
+        ]
       }
     },
     {
@@ -25,15 +32,22 @@
         "id": "mcmurdo",
         "Name": "McMurdo Dry Valleys Station",
         "Region": "Victoria Land, Antarctica",
-        "altitudeMode": "relativeToGround",
-        "Color": [0.15, 0.92, 1.00],
-        "PointSize": 24,
-        "Altitude": 80,
-        "Extrude": true
+        "stroke": "#26c6ff",
+        "Color": [
+          0.15,
+          0.78,
+          1.0
+        ],
+        "point-size": 22000,
+        "PointSize": 22000,
+        "altitudeMode": "relativeToGround"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [162.00, -77.50]
+        "coordinates": [
+          162.0,
+          -77.5
+        ]
       }
     },
     {
@@ -42,15 +56,22 @@
         "id": "lut",
         "Name": "Lut Desert Thermal Core",
         "Region": "Kerman / Sistan, Iran",
-        "altitudeMode": "relativeToGround",
-        "Color": [1.00, 0.38, 0.10],
-        "PointSize": 24,
-        "Altitude": 80,
-        "Extrude": true
+        "stroke": "#ffa21a",
+        "Color": [
+          1.0,
+          0.64,
+          0.1
+        ],
+        "point-size": 22000,
+        "PointSize": 22000,
+        "altitudeMode": "relativeToGround"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [58.80, 30.50]
+        "coordinates": [
+          58.8,
+          30.5
+        ]
       }
     },
     {
@@ -59,15 +80,22 @@
         "id": "uyuni",
         "Name": "Salar de Uyuni Center",
         "Region": "Potosi / Oruro, Bolivia",
-        "altitudeMode": "relativeToGround",
-        "Color": [0.92, 0.40, 1.00],
-        "PointSize": 24,
-        "Altitude": 80,
-        "Extrude": true
+        "stroke": "#b866fa",
+        "Color": [
+          0.72,
+          0.4,
+          0.98
+        ],
+        "point-size": 22000,
+        "PointSize": 22000,
+        "altitudeMode": "relativeToGround"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-67.60, -20.15]
+        "coordinates": [
+          -67.6,
+          -20.15
+        ]
       }
     }
   ]

@@ -158,6 +158,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (toggleBoundaries) toggleBoundaries.checked = true;
     if (toggleLabels) toggleLabels.checked = true;
 
+    // Trigger height re-calculation so geometry sits on top of 3D terrain
+    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.ForceUpdateHeightData') end");
+    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.ForceUpdateHeightData') end");
+    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.ForceUpdateHeightData') end");
+    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.ForceUpdateHeightData') end");
+
     // Boost LOD and tile cache so graphics load crisp on immediate button navigation
     openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
     openSpace.setPropertyValue("Scene.Mars.Renderable.LodScaleFactor", 15.0);
@@ -312,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const site = btn.dataset.site;
       if (site === "mars_gale") {
-        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 350000, 3.5);
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 550000, 3.5);
       } else {
         const target = CONFIG.sites[site];
         if (target) {

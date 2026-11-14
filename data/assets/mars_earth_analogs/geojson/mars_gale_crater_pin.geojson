@@ -5,17 +5,24 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "bradbury_landing",
-        "Name": "Bradbury Landing (MSL Curiosity)",
-        "altitudeMode": "relativeToGround",
-        "Color": [1.00, 0.35, 0.08],
-        "PointSize": 24,
-        "Altitude": 80,
-        "Extrude": true
+        "id": "mars_gale",
+        "Name": "Curiosity Rover (MSL) REMS Weather Station",
+        "stroke": "#ff5a14",
+        "Color": [
+          1.0,
+          0.35,
+          0.08
+        ],
+        "point-size": 18000,
+        "PointSize": 18000,
+        "altitudeMode": "relativeToGround"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [137.4417, -4.5895]
+        "coordinates": [
+          137.4417,
+          -4.5895
+        ]
       }
     }
   ]

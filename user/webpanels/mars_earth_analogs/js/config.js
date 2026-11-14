@@ -66,7 +66,7 @@ const CONFIG = {
       globe: "Earth",
       lat: 44.80,
       lon: 59.80,
-      alt: 380000,
+      alt: 850000,
       bounds: { minLat: 43.40, maxLat: 46.80, minLon: 57.90, maxLon: 61.80 },
       color: "#f5b041",
       tagline: "Toxic salt-dust storms & extreme continentality"
@@ -78,7 +78,7 @@ const CONFIG = {
       globe: "Earth",
       lat: -77.50,
       lon: 162.00,
-      alt: 340000,
+      alt: 650000,
       bounds: { minLat: -77.90, maxLat: -77.10, minLon: 160.00, maxLon: 164.20 },
       color: "#5dade2",
       tagline: "Hyper-arid polar cold & cryogenic endolithic habitats"
@@ -90,7 +90,7 @@ const CONFIG = {
       globe: "Earth",
       lat: 30.50,
       lon: 58.80,
-      alt: 350000,
+      alt: 850000,
       bounds: { minLat: 28.80, maxLat: 33.20, minLon: 56.90, maxLon: 60.30 },
       color: "#ec7063",
       tagline: "Record land surface heat & Martian yardangs"
@@ -102,7 +102,7 @@ const CONFIG = {
       globe: "Earth",
       lat: -20.15,
       lon: -67.60,
-      alt: 320000,
+      alt: 650000,
       bounds: { minLat: -20.80, maxLat: -19.60, minLon: -68.45, maxLon: -66.85 },
       color: "#af7ac5",
       tagline: "High-altitude thin air & intense solar ultraviolet flux"
@@ -111,11 +111,11 @@ const CONFIG = {
 
   // Camera Tour Sequence (Accurate Framing Altitudes for Crisp Tile Streaming)
   tourSequence: [
-    { target: "mars_gale", name: "Mars: Gale Crater", globe: "Mars", lat: -4.5895, lon: 137.4417, alt: 350000, duration: 4.0 },
-    { target: "aralkum", name: "Earth: Aralkum Desert", globe: "Earth", lat: 44.80, lon: 59.80, alt: 380000, duration: 4.0 },
-    { target: "mcmurdo", name: "Earth: McMurdo Dry Valleys", globe: "Earth", lat: -77.50, lon: 162.00, alt: 340000, duration: 4.0 },
-    { target: "lut", name: "Earth: Lut Desert", globe: "Earth", lat: 30.50, lon: 58.80, alt: 350000, duration: 4.0 },
-    { target: "uyuni", name: "Earth: Salar de Uyuni", globe: "Earth", lat: -20.15, lon: -67.60, alt: 320000, duration: 4.0 }
+    { target: "mars_gale", name: "Mars: Gale Crater", globe: "Mars", lat: -4.5895, lon: 137.4417, alt: 550000, duration: 4.0 },
+    { target: "aralkum", name: "Earth: Aralkum Desert", globe: "Earth", lat: 44.80, lon: 59.80, alt: 850000, duration: 4.0 },
+    { target: "mcmurdo", name: "Earth: McMurdo Dry Valleys", globe: "Earth", lat: -77.50, lon: 162.00, alt: 650000, duration: 4.0 },
+    { target: "lut", name: "Earth: Lut Desert", globe: "Earth", lat: 30.50, lon: 58.80, alt: 850000, duration: 4.0 },
+    { target: "uyuni", name: "Earth: Salar de Uyuni", globe: "Earth", lat: -20.15, lon: -67.60, alt: 650000, duration: 4.0 }
   ],
 
   // Gemini API Configuration
