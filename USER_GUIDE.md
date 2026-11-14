@@ -6,62 +6,72 @@ Welcome to the **Mars–Earth Planetary Analogs Visualization Package** for Open
 
 ## 🚀 1. How to Launch OpenSpace
 
-All background tasks have been completely terminated so you have **100% full, clean control** to launch OpenSpace yourself without any port or process lockups.
-
-### Launch Instructions:
-1. Double-click **`OpenSpace.exe`** directly from:
+Launch OpenSpace yourself whenever you are ready:
+1. Double-click **`OpenSpace.exe`** from:
    [`C:\OpenSpace\OpenSpace-0.22.1\bin\OpenSpace.exe`](file:///C:/OpenSpace/OpenSpace-0.22.1/bin/OpenSpace.exe)
-2. OpenSpace opens directly into the visualization with `BypassLauncher = true` and `customization.lua` pre-configured.
-3. On startup, the engine will automatically:
-   - Initialize Mars and Earth with high-resolution satellite imagery (**ESRI World Imagery** on Earth, **Caltech Murray Lab CTX 5m mosaic** on Mars).
-   - Load all desert analog boundaries, station coordinate pins, and 3D billboard labels.
-   - Dock the **Planetary Analog Dashboard** web panel directly inside OpenSpace's side panel.
-   - Make the dashboard accessible in any external browser (e.g., Chrome, Edge) at:  
-     **[http://localhost:4680/webpanels/mars_earth_analogs/index.html](http://localhost:4680/webpanels/mars_earth_analogs/index.html)**
+2. OpenSpace launches directly into the scene with automated asset loading and zero launcher stalls.
+3. The **Planetary Analog Dashboard** web panel automatically docks on the right side and is bookmarked under **User Panels**.
+4. The dashboard is also live in external web browsers at:  
+   **[http://localhost:4680/webpanels/mars_earth_analogs/index.html](http://localhost:4680/webpanels/mars_earth_analogs/index.html)**
 
 ---
 
-## 🎮 2. Interactive Controls & Features
+## 🗺️ 2. Geographic Borders & Adaptive Zoom Pins
 
-### A. Location Selection & Automatic Pin Auto-Hide
-Clicking any location button in the web panel or using native shortcuts executes:
-1. **Camera Flight**: Smoothly flies the camera down to 120–150 km altitude over the site.
-2. **Pin Disappearance**: The 3D coordinate pin automatically hides (`Enabled = false`) so the ground is completely clear for inspecting satellite imagery and terrain.
-3. **Transparent Boundaries**: Boundaries are ground-clamped (`HeightOffset = 10.0m`) with 100% transparent interiors (`FillOpacity = 0.0`), outlining the desert perimeter with a crisp 2px line without obscuring satellite ground details.
-4. **Comparison Overlay**: The 0–100% similarity scale bars, climatology comparison table, and planetary synthesis display immediately beneath the location buttons.
+### A. True Encompassing Geographic Borders
+Instead of small arbitrary boxes or buried lines, each analog site now features a **high-visibility, luminous 4.5px perimeter border** that encompasses the real geographic boundaries:
+* **Salar de Uyuni (Bolivia)**: High-precision 18-point border enveloping the full 10,500 km² white salt crust.
+  - Border Color: Radiant Neon Magenta (`#df59ff`).
+* **Aralkum Desert (Uzbekistan / Kazakhstan)**: 12-point geographic basin polygon tracing the entire dried seabed of the South Aral Sea.
+  - Border Color: Luminous Amber Gold (`#ffc71a`).
+* **Lut Desert / Dasht-e Lut (Iran)**: Full UNESCO boundary covering the hyper-arid Kalut yardangs, salt plains, and Rig-e Yalan mega-dunes.
+  - Border Color: Intense Thermal Flame Coral (`#ff4d1a`).
+* **McMurdo Dry Valleys (Antarctica)**: Encompasses the ice-free Taylor, Wright, and Victoria valley systems between the Transantarctic Mountains and Ross Sea.
+  - Border Color: Electric Cryo-Cyan (`#1ae6ff`).
+* **Mars: Gale Crater (Mars)**: 24-point smooth circular rim tracing the full 154 km impact crater wall around Mount Sharp (Aeolis Mons).
+  - Border Color: Vibrant Aerospace Mars Orange (`#ff6e0d`).
 
-### B. "📍 Restore Pins & Orbit"
-Clicking **"📍 Restore Pins & Orbit"** (at the top of the panel, in the comparison header, or via `Ctrl+Alt+0`):
-- Restores all 3D station pins (`Enabled = true`).
-- Pulls the camera back to high orbital overview (8,000 km altitude).
+### B. Terrain Clamping (`AltitudeMode = "RelativeToGround"`)
+* GeoJSON boundaries use `AltitudeMode = "RelativeToGround"` with `HeightOffset = 40.0m`.
+* **Zero Clipping**: The borders drape directly on top of the active 3D elevation terrain (Terrain_Tileset on Earth and MOLA/HRSC on Mars), ensuring they never sink inside mountains, dunes, or high-altitude plateaus (like the 3,656m Altiplano of Bolivia).
+
+### C. Adaptive Center Pins (Zoom-Scaled)
+Each site features a center pin marker configured with adaptive screen-space scaling (`MinMaxSize = { 10, 50 }`):
+* **Zoomed OUT (Planetary Orbit)**: The pin renders at **50px** on screen—large, bold, and easy to locate from space.
+* **Zooming IN (Approaching the Surface)**: The pin smoothly scales down to **10px**, minimizing screen clutter so you can inspect the high-resolution ESRI / CTX satellite imagery and ground topography unobstructed.
 
 ---
 
-## ⌨️ 3. Keyboard Shortcuts
+## 🎮 3. Dual Navigation: Side Panel & Mouse / Keyboard
+
+You have full dual control to navigate OpenSpace:
+1. **Side Panel (1-Click Fly-To)**:
+   - Click any site pill (**Mars: Gale Crater**, **Aralkum Desert**, **McMurdo Valleys**, **Lut Desert**, **Salar de Uyuni**).
+   - The camera automatically glides to the ideal framing altitude (180–320 km) to show the **entire geographic border and high-res satellite imagery**.
+   - The interactive comparison overlay (0–100% parameter bars, climatology table, AI synthesis) appears immediately beneath the buttons.
+   - Click **"📍 Restore Pins & Orbit"** (or press `Ctrl+Alt+0`) to return to high orbital view.
+2. **Mouse & Keyboard Controls**:
+   - **Left-Click + Drag**: Freely rotate the camera around the planet.
+   - **Right-Click + Drag / Mouse Wheel**: Smoothly zoom in and out.
+   - **Middle-Click / Shift + Left-Click**: Pan and tilt the camera horizon.
+   - **Arrow Keys**: Move camera orientation.
+
+---
+
+## ⌨️ 4. Keyboard Shortcuts
 
 | Shortcut | Destination / Action | Description |
 | :--- | :--- | :--- |
-| `Ctrl + Alt + M` | **Mars: Gale Crater** | Flies to Gale Crater (-4.59°, 137.44°), hides pin, reveals CTX mosaic. |
-| `Ctrl + Alt + 1` | **Earth: Aralkum Desert** | Flies to Aralkum (44.50°, 58.50°), hides pin, reveals ESRI imagery. |
-| `Ctrl + Alt + 2` | **Earth: McMurdo Dry Valleys** | Flies to McMurdo (-77.50°, 162.00°), hides pin, reveals polar satellite terrain. |
-| `Ctrl + Alt + 3` | **Earth: Lut Desert** | Flies to Lut Desert (30.50°, 58.80°), hides pin, reveals yardang imagery. |
-| `Ctrl + Alt + 4` | **Earth: Salar de Uyuni** | Flies to Salar de Uyuni (-20.15°, -67.60°), hides pin, reveals lithium salt crust. |
-| `Ctrl + Alt + 0` | **Restore Pins & Orbit** | Re-enables all station pins and returns camera to high orbital overview. |
+| `Ctrl + Alt + M` | **Mars: Gale Crater** | Flies to Gale Crater (-4.59°, 137.44°, 220 km), reveals 154km rim border and CTX mosaic. |
+| `Ctrl + Alt + 1` | **Earth: Aralkum Desert** | Flies to Aralkum (44.80°, 59.80°, 320 km), reveals dried Aral basin border and ESRI tiles. |
+| `Ctrl + Alt + 2` | **Earth: McMurdo Dry Valleys** | Flies to McMurdo (-77.50°, 162.00°, 180 km), reveals polar valley border and terrain. |
+| `Ctrl + Alt + 3` | **Earth: Lut Desert** | Flies to Lut (30.50°, 58.80°, 280 km), reveals yardang border and land surface heat core. |
+| `Ctrl + Alt + 4` | **Earth: Salar de Uyuni** | Flies to Salar de Uyuni (-20.15°, -67.60°, 240 km), reveals full white salt crust border. |
+| `Ctrl + Alt + 0` | **Restore Pins & Orbit** | Pulls camera back to 8,000 km orbital overview. |
 
 ---
 
-## 🛰️ 4. High-Resolution Satellite Layers Integrated
-
-- **Earth 1m Color Satellite Tiles**: `Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery`
-- **Earth 3D Elevation Terrain**: `Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset`
-- **Mars Global CTX 5m Mosaic**: `Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended` (Caltech Murray Lab)
-- **Mars 3D Elevation Topography**: `Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M`
-
----
-
-## 📊 5. Climatology Parameters & Similarity Math
-
-$$\text{Similarity Score } (S_i) = \max\left(0, 100 \times \left(1 - \frac{|V_{\text{Earth}} - V_{\text{Mars}}|}{\text{Tolerance}_i}\right)\right)$$
+## 🛰️ 5. Satellite Layers & Mathematical Comparison
 
 | Parameter | Mars Gale Baseline | Aralkum | McMurdo | Lut Desert | Salar de Uyuni |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -75,7 +85,7 @@ $$\text{Similarity Score } (S_i) = \max\left(0, 100 \times \left(1 - \frac{|V_{\
 
 ---
 
-## 🐙 6. GitHub Repository Tracking
+## 🐙 6. GitHub Repository
 
-All commits, asset updates, GeoJSON corrections, and web panel improvements are tracked and pushed directly to:  
+Tracked and synchronized at:  
 **`https://github.com/bertrandejuan/InterSESHllar.git` (`main` branch)**
