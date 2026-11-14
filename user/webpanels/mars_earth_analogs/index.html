@@ -31,71 +31,28 @@
     </div>
   </header>
 
-  <!-- Controls Grid -->
-  <section class="controls-grid">
-
-    <!-- Quick Target Navigation -->
-    <div class="control-card">
-      <h3>
+  <!-- Quick Target Navigation (Top Row) -->
+  <section class="glass-panel" style="padding: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h3 style="font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
         <span>Analog Locations</span>
-        <span style="font-size: 0.7rem; color: var(--text-muted);">Click to Fly</span>
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal;">(Click site to fly & inspect)</span>
       </h3>
-      <div class="btn-group">
-        <button class="btn site-pill mars" data-site="mars_gale">Mars: Gale Crater</button>
-        <button class="btn site-pill aralkum" data-site="aralkum">Aralkum Desert</button>
-        <button class="btn site-pill mcmurdo" data-site="mcmurdo">McMurdo Valleys</button>
-        <button class="btn site-pill lut btn-active" data-site="lut">Lut Desert</button>
-        <button class="btn site-pill uyuni" data-site="uyuni">Salar de Uyuni</button>
-      </div>
+      <button id="btn-orbit-return" class="btn" style="border-color: var(--accent-cyan); color: var(--accent-cyan); font-weight: 600; font-size: 0.75rem; padding: 4px 8px;" title="Restore all station pins and return to high orbit">
+        📍 Restore Pins & Orbit
+      </button>
     </div>
-
-    <!-- Automated Camera Tour -->
-    <div class="control-card">
-      <h3>Automated Camera Tour</h3>
-      <div class="btn-group" style="align-items: center;">
-        <button id="btn-tour-play" class="btn btn-primary">▶ Start Tour</button>
-        <button id="btn-tour-pause" class="btn">⏸ Pause</button>
-        <button id="btn-tour-prev" class="btn">⏮ Prev</button>
-        <button id="btn-tour-next" class="btn">⏭ Next</button>
-        <select id="sel-tour-speed" class="btn" style="padding: 5px 8px;">
-          <option value="0.5">Speed: 0.5x</option>
-          <option value="1.0" selected>Speed: 1.0x</option>
-          <option value="1.5">Speed: 1.5x</option>
-          <option value="2.0">Speed: 2.0x</option>
-        </select>
-      </div>
+    <div class="btn-group">
+      <button class="btn site-pill mars" data-site="mars_gale">Mars: Gale Crater</button>
+      <button class="btn site-pill aralkum" data-site="aralkum">Aralkum Desert</button>
+      <button class="btn site-pill mcmurdo" data-site="mcmurdo">McMurdo Valleys</button>
+      <button class="btn site-pill lut btn-active" data-site="lut">Lut Desert</button>
+      <button class="btn site-pill uyuni" data-site="uyuni">Salar de Uyuni</button>
     </div>
-
-    <!-- Visual Overlays Toggles -->
-    <div class="control-card">
-      <h3>Visual Overlays</h3>
-      <div class="toggle-row">
-        <span>GeoJSON Desert Boundaries</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-boundaries" checked>
-          <span class="slider-switch"></span>
-        </label>
-      </div>
-      <div class="toggle-row">
-        <span>Coordinate Station Pins</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-pins" checked>
-          <span class="slider-switch"></span>
-        </label>
-      </div>
-      <div class="toggle-row">
-        <span>3D Billboard Labels</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-labels" checked>
-          <span class="slider-switch"></span>
-        </label>
-      </div>
-    </div>
-
   </section>
 
-  <!-- Interactive Detail Bubble / Comparison Modal -->
-  <main class="glass-panel detail-bubble">
+  <!-- Interactive Detail Bubble / Comparison Modal (Immediately Visible) -->
+  <main class="glass-panel detail-bubble" id="detail-bubble">
 
     <!-- Header & Overall Score -->
     <div class="detail-header">
@@ -237,6 +194,54 @@
 
   </main>
 
+  <!-- Controls Grid (Secondary / Below Overlay) -->
+  <section class="controls-grid" style="margin-top: 4px;">
+
+    <!-- Automated Camera Tour -->
+    <div class="control-card">
+      <h3>Automated Camera Tour</h3>
+      <div class="btn-group" style="align-items: center;">
+        <button id="btn-tour-play" class="btn btn-primary">▶ Start Tour</button>
+        <button id="btn-tour-pause" class="btn">⏸ Pause</button>
+        <button id="btn-tour-prev" class="btn">⏮ Prev</button>
+        <button id="btn-tour-next" class="btn">⏭ Next</button>
+        <select id="sel-tour-speed" class="btn" style="padding: 5px 8px;">
+          <option value="0.5">Speed: 0.5x</option>
+          <option value="1.0" selected>Speed: 1.0x</option>
+          <option value="1.5">Speed: 1.5x</option>
+          <option value="2.0">Speed: 2.0x</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Visual Overlays Toggles -->
+    <div class="control-card">
+      <h3>Visual Overlays</h3>
+      <div class="toggle-row">
+        <span>GeoJSON Desert Boundaries</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-boundaries" checked>
+          <span class="slider-switch"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>Coordinate Station Pins</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-pins" checked>
+          <span class="slider-switch"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>3D Billboard Labels</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-labels" checked>
+          <span class="slider-switch"></span>
+        </label>
+      </div>
+    </div>
+
+  </section>
+
   <!-- Gemini API Key Settings Modal -->
   <div id="modal-settings" class="modal-overlay">
     <div class="modal-content">
@@ -257,12 +262,12 @@
     </div>
   </div>
 
-  <!-- Scripts (Optimized Synchronous Loading) -->
-  <script src="js/fallback-data.js?v=2.1.0"></script>
-  <script src="js/config.js?v=2.1.0"></script>
-  <script src="js/openspace-api.js?v=2.1.0"></script>
-  <script src="js/climate-service.js?v=2.1.0"></script>
-  <script src="js/gemini-service.js?v=2.1.0"></script>
-  <script src="js/app.js?v=2.1.0"></script>
+  <!-- Scripts (Optimized Synchronous Loading with Cache-Buster) -->
+  <script src="js/fallback-data.js?v=2.2.0"></script>
+  <script src="js/config.js?v=2.2.0"></script>
+  <script src="js/openspace-api.js?v=2.2.0"></script>
+  <script src="js/climate-service.js?v=2.2.0"></script>
+  <script src="js/gemini-service.js?v=2.2.0"></script>
+  <script src="js/app.js?v=2.2.0"></script>
 </body>
 </html>

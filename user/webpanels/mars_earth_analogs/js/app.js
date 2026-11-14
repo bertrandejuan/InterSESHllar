@@ -201,6 +201,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Table & Analysis
     renderComparisonTable(instant.climatology, scores);
     renderAISynthesis(instant.gemini_analysis);
+
+    const detailBubble = document.getElementById("detail-bubble");
+    if (detailBubble) {
+      detailBubble.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }
 
   function renderComparisonTable(climatology, scores) {
@@ -309,19 +314,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Restore Pins & Return to Orbit
-  if (btnShowPins) {
-    btnShowPins.addEventListener("click", (e) => {
-      e.preventDefault();
-      openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true);
-      openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true);
-      if (togglePins) togglePins.checked = true;
-      if (state.currentSiteKey === "mars_gale") {
-        openSpace.flyToGeo("Mars", 0, 137.4, 4500000, 3);
-      } else {
-        openSpace.flyToGeo("Earth", 20, 60, 8000000, 3);
-      }
-    });
-  }
+  const btnOrbitReturn = document.getElementById("btn-orbit-return");
+  const handleRestoreOrbit = (e) => {
+    if (e) e.preventDefault();
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true);
+    if (togglePins) togglePins.checked = true;
+    if (state.currentSiteKey === "mars_gale") {
+      openSpace.flyToGeo("Mars", 0, 137.4, 4500000, 3);
+    } else {
+      openSpace.flyToGeo("Earth", 20, 60, 8000000, 3);
+    }
+  };
+  if (btnShowPins) btnShowPins.addEventListener("click", handleRestoreOrbit);
+  if (btnOrbitReturn) btnOrbitReturn.addEventListener("click", handleRestoreOrbit);
 
   // Slider & Input Synchronizers
   coordSliderLat.addEventListener("input", (e) => {

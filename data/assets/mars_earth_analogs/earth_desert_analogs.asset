@@ -5,11 +5,12 @@ local EarthBoundariesTable = {
   Identifier = "EarthDesertBoundaries",
   File = EarthBoundariesFile,
   Enabled = true,
-  HeightOffset = 5000.0,
+  HeightOffset = 10.0,
   DefaultProperties = {
     Color = { 0.95, 0.70, 0.20 },
     FillColor = { 0.95, 0.70, 0.20 },
-    FillOpacity = 0.22,
+    FillOpacity = 0.0,
+    LineWidth = 2.0,
     Opacity = 0.85
   }
 }
@@ -18,11 +19,11 @@ local EarthPinsTable = {
   Identifier = "EarthDesertPins",
   File = EarthPinsFile,
   Enabled = true,
-  HeightOffset = 5000.0,
+  HeightOffset = 100.0,
   PointRenderMode = "Globe Normal",
   DefaultProperties = {
     Color = { 1.0, 0.8, 0.2 },
-    PointSize = 22.0,
+    PointSize = 18.0,
     Extrude = true
   }
 }
