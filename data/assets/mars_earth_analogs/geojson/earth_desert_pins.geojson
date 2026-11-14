@@ -10,7 +10,6 @@
         "Region": "Karakalpakstan, Uzbekistan",
         "Color": [1.0, 0.75, 0.20],
         "PointSize": 22.0,
-        "AltitudeMode": "RelativeToGround",
         "Altitude": 1500.0,
         "Extrude": true
       },
@@ -27,7 +26,6 @@
         "Region": "Victoria Land, Antarctica",
         "Color": [0.35, 0.85, 1.00],
         "PointSize": 22.0,
-        "AltitudeMode": "RelativeToGround",
         "Altitude": 2000.0,
         "Extrude": true
       },
@@ -44,7 +42,6 @@
         "Region": "Kerman / Sistan, Iran",
         "Color": [1.00, 0.35, 0.20],
         "PointSize": 22.0,
-        "AltitudeMode": "RelativeToGround",
         "Altitude": 1800.0,
         "Extrude": true
       },
@@ -61,7 +58,6 @@
         "Region": "Potosi / Oruro, Bolivia",
         "Color": [0.80, 0.50, 1.00],
         "PointSize": 22.0,
-        "AltitudeMode": "RelativeToGround",
         "Altitude": 3800.0,
         "Extrude": true
       },

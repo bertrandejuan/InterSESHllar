@@ -9,8 +9,7 @@
         "Description": "154 km diameter impact crater hosting Mount Sharp (Aeolis Mons) and NASA Curiosity Rover landing site.",
         "Color": [1.0, 0.45, 0.15],
         "FillColor": [0.85, 0.35, 0.1, 0.25],
-        "Opacity": 0.9,
-        "AltitudeMode": "RelativeToGround"
+        "Opacity": 0.9
       },
       "geometry": {
         "type": "Polygon",

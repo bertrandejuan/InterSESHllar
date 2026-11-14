@@ -11,8 +11,7 @@
         "AnalogAspect": "Extreme Continentality & Toxic Salt-Dust Storms",
         "Color": [0.95, 0.70, 0.20],
         "FillColor": [0.95, 0.70, 0.20, 0.22],
-        "Opacity": 0.85,
-        "AltitudeMode": "RelativeToGround"
+        "Opacity": 0.85
       },
       "geometry": {
         "type": "Polygon",
@@ -40,8 +39,7 @@
         "AnalogAspect": "Hyper-Arid Polar Cold, Katabatic Winds & Permafrost",
         "Color": [0.30, 0.75, 1.00],
         "FillColor": [0.20, 0.65, 0.95, 0.25],
-        "Opacity": 0.85,
-        "AltitudeMode": "RelativeToGround"
+        "Opacity": 0.85
       },
       "geometry": {
         "type": "Polygon",
@@ -68,8 +66,7 @@
         "AnalogAspect": "Record Thermal Extremes & Martian Yardang Terrains",
         "Color": [0.98, 0.35, 0.20],
         "FillColor": [0.95, 0.30, 0.15, 0.24],
-        "Opacity": 0.85,
-        "AltitudeMode": "RelativeToGround"
+        "Opacity": 0.85
       },
       "geometry": {
         "type": "Polygon",
@@ -96,8 +93,7 @@
         "AnalogAspect": "High-Altitude Rarefied Atmosphere & Extreme Solar/UV",
         "Color": [0.75, 0.45, 0.95],
         "FillColor": [0.70, 0.40, 0.90, 0.22],
-        "Opacity": 0.85,
-        "AltitudeMode": "RelativeToGround"
+        "Opacity": 0.85
       },
       "geometry": {
         "type": "Polygon",

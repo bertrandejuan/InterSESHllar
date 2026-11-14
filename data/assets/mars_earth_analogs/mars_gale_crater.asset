@@ -9,7 +9,7 @@ local GaleCraterBoundaryTable = {
     Color = { 1.0, 0.45, 0.15 },
     FillColor = { 0.85, 0.35, 0.1, 0.25 },
     Opacity = 0.9,
-    AltitudeMode = "RelativeToGround"
+    HeightOffset = 5000.0
   }
 }
 
@@ -20,7 +20,7 @@ local GaleCraterPinTable = {
   DefaultProperties = {
     Color = { 1.0, 0.2, 0.2 },
     PointSize = 24.0,
-    AltitudeMode = "RelativeToGround",
+    HeightOffset = 5000.0,
     Altitude = 2500.0,
     Extrude = true
   }
