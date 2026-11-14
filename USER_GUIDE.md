@@ -21,10 +21,35 @@ The required files have already been placed directly into your local installatio
    > [!TIP]
    > To load it automatically every time OpenSpace starts, add `asset.require("mars_earth_analogs/mars_earth_analogs")` into your favorite `.profile` (e.g. `default.profile`).
 
-### Step B: Open the Interactive Web Panel
-* **Inside OpenSpace (CEF Pane)**: Open the Web Panels drawer from the OpenSpace GUI and select `mars_earth_analogs`, or navigate to:
-  `http://localhost:4680/webpanels/mars_earth_analogs/index.html`
-* **On a Second Monitor or Tablet**: Double-click [`index.html`](file:///C:/OpenSpace/OpenSpace-0.22.1/user/webpanels/mars_earth_analogs/index.html) in any web browser (Chrome, Edge). It communicates directly with OpenSpace via WebSocket on `ws://localhost:4682`.
+### Step B: Open the Interactive Web Panel Inside OpenSpace
+You can open the dashboard directly inside OpenSpace using the **User Panels** menu (shown in the GUI side drawer):
+
+1. **Via "Add Local Panel" Tab**:
+   * In the **Select panel** dropdown, select `mars_earth_analogs`.
+   * Click **New Window** (to dock the panel inside OpenSpace) or **Browser** (to pop it open in Chrome/Edge).
+
+2. **Via "Add From URL" Tab**:
+   * **Title**: `Mars Earth Analogs`
+   * **URL**: `http://localhost:4680/webpanels/mars_earth_analogs/index.html`
+   * Click **New Window** to embed it directly as a floating or docked in-engine panel.
+
+---
+
+## ⚡ 2. Native In-Engine Actions & Toggles
+
+In addition to the web dashboard, **native GUI toggles and shortcuts** have been registered directly into OpenSpace's built-in **Actions Panel** (the lightning bolt icon ⚡):
+
+* **`/Planetary Analogs/Toggles`**:
+  * **Toggle Desert Boundaries**: Toggles 3D GeoJSON boundary polygons on/off.
+  * **Toggle Station Pins**: Toggles extruded research pins on/off.
+  * **Toggle 3D Billboard Labels**: Toggles floating billboard typography on/off.
+
+* **`/Planetary Analogs/Navigation`**:
+  * **Fly to Mars: Gale Crater**
+  * **Fly to Earth: Aralkum Desert**
+  * **Fly to Earth: McMurdo Dry Valleys**
+  * **Fly to Earth: Lut Desert**
+  * **Fly to Earth: Salar de Uyuni**
 
 ---
 
