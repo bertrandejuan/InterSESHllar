@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/default_asset")
-
 local GaleCraterBoundaryFile = asset.resource("./geojson/mars_gale_crater_boundary.geojson")
 local GaleCraterPinFile = asset.resource("./geojson/mars_gale_crater_pin.geojson")
 

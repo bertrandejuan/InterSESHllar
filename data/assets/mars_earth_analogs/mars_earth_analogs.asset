@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/default_asset")
-
 -- Require component assets
 local marsGale = asset.require("./mars_gale_crater")
 local earthAnalogs = asset.require("./earth_desert_analogs")

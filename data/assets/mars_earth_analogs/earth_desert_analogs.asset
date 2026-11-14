@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/default_asset")
-
 local EarthBoundariesFile = asset.resource("./geojson/earth_desert_boundaries.geojson")
 local EarthPinsFile = asset.resource("./geojson/earth_desert_pins.geojson")
 
