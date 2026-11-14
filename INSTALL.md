@@ -27,8 +27,9 @@ Copy or symlink the project files into your OpenSpace installation directory:
 2. Press the tilde key (`~`) or `F1` to open the OpenSpace console.
 3. Run the following command:
    ```lua
-   openspace.asset.add("data/assets/mars_earth_analogs/mars_earth_analogs.asset")
+   openspace.asset.add("mars_earth_analogs/mars_earth_analogs")
    ```
+   *(Note: Do not include `data/assets/` or `.asset`, as OpenSpace resolves paths relative to `data/assets` automatically).*
 
 ### Method B: Via Profile File (.profile)
 Add the asset line directly to your active OpenSpace profile (e.g., `default.profile`):

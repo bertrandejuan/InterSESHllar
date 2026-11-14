@@ -15,8 +15,9 @@ The required files have already been placed directly into your local installatio
 2. Press the tilde key (**`~`**) or **`F1`** to open the in-engine Lua console.
 3. Type the following command and press **Enter**:
    ```lua
-   openspace.asset.add("data/assets/mars_earth_analogs/mars_earth_analogs.asset")
+   openspace.asset.add("mars_earth_analogs/mars_earth_analogs")
    ```
+   *(Note: In OpenSpace, asset paths are always specified relative to `data/assets/` without the `.asset` extension).*
    > [!TIP]
    > To load it automatically every time OpenSpace starts, add `asset.require("mars_earth_analogs/mars_earth_analogs")` into your favorite `.profile` (e.g. `default.profile`).
 
