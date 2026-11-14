@@ -1,128 +1,79 @@
 # InterSESHllar: Mars Gale Crater & Earth Desert Analogs User Guide
 
-Welcome to the **Mars–Earth Planetary Analogs Visualization Package** for OpenSpace v0.22. This system brings the planetarium storyboard to life: comparing Mars's primary rover exploration site (**Gale Crater / Curiosity REMS**) with four terrestrial desert analogs (**Aralkum Desert, McMurdo Dry Valleys, Lut Desert, Salar de Uyuni**).
+Welcome to the **Mars–Earth Planetary Analogs Visualization Package** for OpenSpace v0.22+. This system brings the planetarium storyboard to life: comparing Mars's primary rover exploration site (**Gale Crater / Curiosity REMS baseline**) with four terrestrial desert analogs (**Aralkum Desert, McMurdo Dry Valleys, Lut Desert, Salar de Uyuni**).
 
 ---
 
-## 🚀 1. Integration Steps for OpenSpace
+## 🚀 1. Integration & Automated Startup
 
-The required files have already been placed directly into your local installation at `C:\OpenSpace\OpenSpace-0.22.1`:
+All core components are deployed directly into your local installation at `C:\OpenSpace\OpenSpace-0.22.1`:
 * **Assets & GeoJSON**: `C:\OpenSpace\OpenSpace-0.22.1\data\assets\mars_earth_analogs\`
+* **Customization Startup Script**: `C:\OpenSpace\OpenSpace-0.22.1\user\customization.lua`
 * **Web Panel**: `C:\OpenSpace\OpenSpace-0.22.1\user\webpanels\mars_earth_analogs\`
+* **Startup Profiles**: `default.profile` and `NASASpaceApps.profile`
 
-### Step A: Load the Asset in OpenSpace
-1. Launch OpenSpace (`OpenSpace.exe`).
-2. Press the tilde key (**`~`**) or **`F1`** to open the in-engine Lua console.
-3. Type the following command and press **Enter**:
-   ```lua
-   openspace.asset.add("mars_earth_analogs/mars_earth_analogs")
-   ```
-   *(Note: In OpenSpace, asset paths are always specified relative to `data/assets/` without the `.asset` extension).*
-   > [!TIP]
-   > To load it automatically every time OpenSpace starts, add `asset.require("mars_earth_analogs/mars_earth_analogs")` into your favorite `.profile` (e.g. `default.profile`).
-
-### Step B: Open the Interactive Web Panel Inside OpenSpace
-You can open the dashboard directly inside OpenSpace using the **User Panels** menu (shown in the GUI side drawer):
-
-1. **Via "Add Local Panel" Tab**:
-   * In the **Select panel** dropdown, select `mars_earth_analogs`.
-   * Click **New Window** (to dock the panel inside OpenSpace) or **Browser** (to pop it open in Chrome/Edge).
-
-2. **Via "Add From URL" Tab**:
-   * **Title**: `Mars Earth Analogs`
-   * **URL**: `http://localhost:4680/webpanels/mars_earth_analogs/index.html`
-   * Click **New Window** to embed it directly as a floating or docked in-engine panel.
+### Automated Launch
+OpenSpace is configured with `BypassLauncher = true` and `customization.lua` so that whenever OpenSpace starts:
+1. Mars, Earth, all 3D terrain elevation models, and high-resolution satellite imagery layers are loaded automatically.
+2. The `mars_earth_analogs` visualization asset initializes with all desert boundaries, pins, billboard labels, and camera paths.
+3. The interactive web panel automatically docks on the right inside OpenSpace and is bookmarked under **User Panels**.
+4. The dashboard is accessible in any web browser at:
+   **[http://localhost:4680/webpanels/mars_earth_analogs/index.html](http://localhost:4680/webpanels/mars_earth_analogs/index.html)**
 
 ---
 
-## ⚡ 2. Native In-Engine Actions & Toggles
+## 🛰️ 2. Official OpenSpace Assets & Layers Integrated
 
-In addition to the web dashboard, **native GUI toggles and shortcuts** have been registered directly into OpenSpace's built-in **Actions Panel** (the lightning bolt icon ⚡):
+Drawing from the official [OpenSpace/OpenSpace](https://github.com/OpenSpace/OpenSpace.git) asset ecosystem, the visualization integrates the following layers:
 
-* **`/Planetary Analogs/Toggles`**:
-  * **Toggle Desert Boundaries**: Toggles 3D GeoJSON boundary polygons on/off.
-  * **Toggle Station Pins**: Toggles extruded research pins on/off.
-  * **Toggle 3D Billboard Labels**: Toggles floating billboard typography on/off.
+### High-Resolution Imagery & 3D Topography
+* **Earth 1m Satellite Imagery**: `Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery` (1m/pixel global satellite tiles).
+* **Earth 3D Elevation Terrain**: `Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset` (real-time terrain elevation).
+* **Mars Global CTX 5m Mosaic**: `Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended` (5.0m/pixel global mosaic from the Caltech Murray Lab).
+* **Mars Global 3D Topography (MOLA/HRSC)**: `Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M` (global 200m blended DEM from MGS & Mars Express).
+* **Curiosity Rover CTX Mosaic**: `Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic` (NASA Trek MRO CTX mosaic at Gale Crater).
+* **Curiosity HiRISE 0.3m Ultra-Res Mosaic**: `Scene.Mars.Renderable.Layers.ColorLayers.curiosity_hirise_mosaic` (0.3m/pixel HiRISE imagery along the rover traverse).
+* **Gale Crater 1m 3D DEM**: `Scene.Mars.Renderable.Layers.HeightLayers.Gale_DEM_SMG_1m` (1-meter elevation model of Mount Sharp / Aeolis Mons and the crater floor).
+* **Real-Time Globe Location HUD**: `DashboardItemGlobeLocation` (displays camera latitude, longitude, and altitude on screen in real time).
 
-* **`/Planetary Analogs/Navigation`**:
-  * **Fly to Mars: Gale Crater**
-  * **Fly to Earth: Aralkum Desert**
-  * **Fly to Earth: McMurdo Dry Valleys**
-  * **Fly to Earth: Lut Desert**
-  * **Fly to Earth: Salar de Uyuni**
-
----
-
-## 🕹️ 2. Dashboard & Interactive Controls Walkthrough
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  PLANETARY ANALOG DASHBOARD [MARS VS EARTH]      OpenSpace: Connected  │
-├──────────────────────────┬───────────────────────┬─────────────────────┤
-│ ANALOG LOCATIONS         │ CAMERA TOUR           │ VISUAL OVERLAYS     │
-│ [Mars: Gale] [Aralkum]   │ [▶ Play] [⏸ Pause]   │ [x] Boundaries      │
-│ [McMurdo] [Lut] [Uyuni]  │ [⏮ Prev] [⏭ Next]   │ [x] Station Pins    │
-│                          │ Speed: [ 1.0x ▼ ]     │ [x] 3D Labels       │
-├──────────────────────────┴───────────────────────┴─────────────────────┤
-│  Lut Desert (Dasht-e Lut)                 OVERALL SIMILARITY: 45.0%    │
-│  Parameter Similarity Scale Bars (0 - 100%)                            │
-│  • Temperature:       [████░░░░░░░░░░░░░░░░]  16.9%                    │
-│  • Diurnal Range:     [████████████░░░░░░░░]  62.4%                    │
-│  • Relative Humidity: [███████████░░░░░░░░░]  57.1%                    │
-│  • Wind Speed:        [████████████████░░░░]  82.5%                    │
-│  • Solar Insolation:  [██████████░░░░░░░░░░]  51.8%                    │
-│  • Surface Pressure:  [█░░░░░░░░░░░░░░░░░░░]   3.1%                    │
-├────────────────────────────────────────────────────────────────────────┤
-│  Summary Comparison Table (Earth vs Mars Gale Crater REMS Baseline)    │
-│  Latitude & Longitude Slider Picker -> [ Regenerate with Gemini AI ]   │
-│  🪐 Astrobiological & Planetary AI Synthesis                           │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-### 1. Analog Locations Quick Selector
-Clicking any location pill (**Mars: Gale Crater**, **Aralkum Desert**, **McMurdo Valleys**, **Lut Desert**, or **Salar de Uyuni**) commands OpenSpace to smoothly fly the planetarium camera (`flyToGeo`) to that destination and instantly populates the telemetry bubble.
-
-### 2. Automated Camera Tour
-* **▶ Start Tour**: Initiates a continuous cinematic flight sequence across Gale Crater and all four deserts.
-* **⏸ Pause**: Halts the flight sequence at the current location for extended discussion.
-* **⏮ Prev / ⏭ Next**: Skips forward or backward in the tour sequence.
-* **Speed Governor**: Adjusts transit speed (`0.5x`, `1.0x`, `1.5x`, `2.0x`).
-
-### 3. Visual Overlay Toggles
-Instantly show or hide visual elements via `openspace.setPropertyValue()`:
-* **GeoJSON Desert Boundaries**: Color-coded 3D surface borders.
-* **Coordinate Station Pins**: Vertical extruded stalks marking specific research coordinates.
-* **3D Billboard Labels**: Floating typography visible from high orbital altitudes.
-
-### 4. Similarity Ranking Scale Bars & Comparison Table
-* **Scale Bars**: Continuous 0–100% progress bars based on the calibrated exponential decay distance function:
-  $$S_i = 100 \times \exp\left( - \frac{|V_{\text{Earth}} - V_{\text{Mars}}|}{D_i} \right)$$
-  Color-coded green ($\ge 60\%$), amber ($35 - 59\%$), and red ($< 35\%$).
-* **Comparison Table**: Shows the Earth value, Mars Curiosity REMS baseline, signed difference ($\Delta$), and match score.
-
-### 5. Coordinate Picker & Gemini AI Dynamic Regeneration
-* **Pick New Coordinates**: Move the **Latitude** and **Longitude** sliders to explore different sub-regions inside the desert boundary.
-* **Click "Regenerate with Gemini AI"**:
-  1. OpenSpace flies the camera to the new coordinates.
-  2. The browser queries the live **NASA POWER Climatology API** for those exact coordinates.
-  3. The similarity mathematical model recalculates all parameter matches and composite score.
-  4. The **Gemini REST API** (`gemini-2.5-flash`) generates structured astrobiological synthesis: key analog parallels, planetary divergences, and recommended instrument packages.
+### Physics-Based Rendering & Normal Vectors
+* **Globe Normal Alignment**: Station pins use `PointRenderMode = "Globe Normal"`, projecting outwards perpendicularly from the planet's spherical curvature.
+* **Sun Solar Shading**: Desert boundaries use `PerformShading = true` and `LightSources = { sunAsset.LightSource }`, dynamically reacting to real-time solar illumination and shadows.
 
 ---
 
-## ⌨️ 3. Planetarium Keyboard Shortcuts
+## 🎯 3. Interactive Location Inspection & Pin Disappearance
 
-| Shortcut | Destination / Action | Globe |
+* **Clicking Any Site Button or Location Pin**:
+  1. The camera descends smoothly to **120–150 km** altitude directly over the feature.
+  2. The station pin **disappears automatically** (`EarthDesertPins.Enabled = false`, `MarsGaleCraterPin.Enabled = false`) so high-resolution yardangs, dunes, and crater morphology are unobstructed.
+  3. The **Comparison Card Overlay** (0–100% parameter similarity scale bars, NASA climatology table, and AI synthesis) appears on top of the location.
+* **Restoring Pins & Returning to Orbit**:
+  - Click **"📍 Restore Pins & Orbit"** in the panel, or press **`Ctrl + Alt + 0`**.
+  - All station pins reappear and the camera pulls back to planetary orbital view.
+
+---
+
+## ⌨️ 4. Keyboard Shortcuts & Native Actions
+
+All actions are accessible under OpenSpace's **Actions Panel** (lightning bolt icon ⚡) under `/Planetary Analogs/`:
+
+| Shortcut | Native Action Name | Function |
 | :--- | :--- | :--- |
-| **`Ctrl + Alt + M`** | Fly to Mars Gale Crater (Curiosity MSL Site) | Mars |
-| **`Ctrl + Alt + 1`** | Fly to Aralkum Desert (Toxic Dust / Extreme Continentality) | Earth |
-| **`Ctrl + Alt + 2`** | Fly to McMurdo Dry Valleys (Hyper-Arid Polar Cold) | Earth |
-| **`Ctrl + Alt + 3`** | Fly to Lut Desert (Record Surface Heat / Yardangs) | Earth |
-| **`Ctrl + Alt + 4`** | Fly to Salar de Uyuni (High-Altitude Thin Air / Solar UV) | Earth |
+| **`Ctrl + Alt + M`** | Fly to Mars: Gale Crater | Fly to Gale Crater (150 km) & hide pin |
+| **`Ctrl + Alt + 1`** | Fly to Earth: Aralkum Desert | Fly to Aralkum Desert (150 km) & hide pin |
+| **`Ctrl + Alt + 2`** | Fly to Earth: McMurdo Dry Valleys | Fly to McMurdo Dry Valleys (140 km) & hide pin |
+| **`Ctrl + Alt + 3`** | Fly to Earth: Lut Desert | Fly to Lut Desert (120 km) & hide pin |
+| **`Ctrl + Alt + 4`** | Fly to Earth: Salar de Uyuni | Fly to Salar de Uyuni (120 km) & hide pin |
+| **`Ctrl + Alt + 0`** | Restore All Pins & Orbit Overview | Restore all pins and return to orbit |
 
 ---
 
-## ⚙️ 4. Offline Fallback & API Configuration
+## 🌐 5. GitHub Synchronization
 
-* **Optional Gemini API Key**: Click **⚙ Settings** in the dashboard header to input your Google AI Studio API key. The key is securely saved in browser `localStorage`.
-* **Planetarium Offline Resilience**: If internet is unavailable during a live dome presentation, the system automatically falls back to [`fallback_analysis.json`](file:///C:/OpenSpace/OpenSpace-0.22.1/user/webpanels/mars_earth_analogs/data/fallback_analysis.json) and rule-based synthesis without crashing or throwing errors.
+All project code, assets, web panels, GeoJSON files, and user documentation are tracked and pushed to your team's remote repository:
+* **Repository**: [https://github.com/bertrandejuan/InterSESHllar.git](https://github.com/bertrandejuan/InterSESHllar.git)
+* **Branch**: `main`
+* **Latest Commits**:
+  - `054e38d`: Auto-loading assets, pin hide-on-click with satellite imagery, user panel docking.
+  - `33c4464`: OpenSpace official 3D DEM elevation (`MDEM200M`, `Gale_DEM_SMG_1m`), MRO HiRISE mosaic, `Globe Normal` pins, and solar shading.
