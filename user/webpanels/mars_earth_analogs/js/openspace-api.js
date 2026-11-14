@@ -107,6 +107,11 @@ class OpenSpaceClient {
     const script = `openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, ${duration})`;
     return this.executeLuaScript(script);
   }
+
+  sendLua(script) {
+    return this.executeLuaScript(script, false);
+  }
 }
 
 window.OpenSpaceClient = OpenSpaceClient;
+window.OpenSpaceAPI = OpenSpaceClient;

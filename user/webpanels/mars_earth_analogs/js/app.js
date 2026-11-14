@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const activeSiteTitle = document.getElementById("active-site-title");
   const activeSiteSubtitle = document.getElementById("active-site-subtitle");
   const btnToggleMarsComp = document.getElementById("btn-toggle-mars-comparison");
+  const compTitleText = document.getElementById("comp-title-text");
   const compArrow = document.getElementById("comp-arrow");
   const categoriesContainer = document.getElementById("categories-container");
 
@@ -117,7 +118,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const selTourSpeed = document.getElementById("sel-tour-speed");
 
   // OpenSpace API Connection
-  const openSpace = new OpenSpaceAPI();
+  const OpenSpaceClass = window.OpenSpaceClient || window.OpenSpaceAPI;
+  const openSpace = OpenSpaceClass ? new OpenSpaceClass() : {
+    onConnect: () => {},
+    onDisconnect: () => {},
+    connect: () => {},
+    setPropertyValue: () => {},
+    flyToGeo: () => {},
+    sendLua: () => {},
+    executeLuaScript: () => {}
+  };
 
   openSpace.onConnect(() => {
     statusOpenSpace.innerText = "OpenSpace: Connected";
@@ -555,18 +565,10 @@ document.addEventListener("DOMContentLoaded", () => {
     compArrow.innerText = "▶";
 
     // Comparison to Mars button behavior
-    if (siteKey === "mars_gale") {
-      btnToggleMarsComp.innerHTML = `
-        <span class="comp-icon">🪐</span>
-        <span class="comp-title">Mars Curiosity REMS Telemetry Baseline</span>
-        <span class="comp-arrow" id="comp-arrow">▶</span>
-      `;
-    } else {
-      btnToggleMarsComp.innerHTML = `
-        <span class="comp-icon">🪐</span>
-        <span class="comp-title">Comparison to Mars (${siteConfig.name})</span>
-        <span class="comp-arrow" id="comp-arrow">▶</span>
-      `;
+    if (compTitleText) {
+      compTitleText.innerText = siteKey === "mars_gale"
+        ? "Mars Curiosity REMS Telemetry Baseline"
+        : `Comparison to Mars (${siteConfig.name})`;
     }
 
     // Populate Category Accordions
