@@ -57,17 +57,17 @@ const CONFIG = {
     PRESSURE: 0.10
   },
 
-  // Desert Analog Regions & Bounding Envelopes
+  // Desert Analog Regions & Encompassing Geographic Boundaries
   sites: {
     aralkum: {
       id: "aralkum",
       name: "Aralkum Desert",
-      region: "Karakalpakstan, Uzbekistan",
+      region: "Karakalpakstan, Uzbekistan / Kazakhstan",
       globe: "Earth",
-      lat: 44.5,
-      lon: 58.5,
-      alt: 150000,
-      bounds: { minLat: 43.0, maxLat: 46.5, minLon: 57.0, maxLon: 61.5 },
+      lat: 44.80,
+      lon: 59.80,
+      alt: 320000,
+      bounds: { minLat: 43.40, maxLat: 46.80, minLon: 57.90, maxLon: 61.80 },
       color: "#f5b041",
       tagline: "Toxic salt-dust storms & extreme continentality"
     },
@@ -76,10 +76,10 @@ const CONFIG = {
       name: "McMurdo Dry Valleys",
       region: "Victoria Land, Antarctica",
       globe: "Earth",
-      lat: -77.5,
-      lon: 162.0,
-      alt: 140000,
-      bounds: { minLat: -78.5, maxLat: -76.5, minLon: 159.0, maxLon: 165.0 },
+      lat: -77.50,
+      lon: 162.00,
+      alt: 180000,
+      bounds: { minLat: -77.90, maxLat: -77.10, minLon: 160.00, maxLon: 164.20 },
       color: "#5dade2",
       tagline: "Hyper-arid polar cold & cryogenic endolithic habitats"
     },
@@ -88,10 +88,10 @@ const CONFIG = {
       name: "Lut Desert (Dasht-e Lut)",
       region: "Kerman / Sistan, Iran",
       globe: "Earth",
-      lat: 30.5,
-      lon: 58.8,
-      alt: 120000,
-      bounds: { minLat: 28.5, maxLat: 33.5, minLon: 57.0, maxLon: 60.5 },
+      lat: 30.50,
+      lon: 58.80,
+      alt: 280000,
+      bounds: { minLat: 28.80, maxLat: 33.20, minLon: 56.90, maxLon: 60.30 },
       color: "#ec7063",
       tagline: "Record land surface heat & Martian yardangs"
     },
@@ -101,21 +101,21 @@ const CONFIG = {
       region: "Potosi / Oruro, Bolivia",
       globe: "Earth",
       lat: -20.15,
-      lon: -67.6,
-      alt: 120000,
-      bounds: { minLat: -20.8, maxLat: -19.5, minLon: -68.5, maxLon: -66.8 },
+      lon: -67.60,
+      alt: 240000,
+      bounds: { minLat: -20.80, maxLat: -19.60, minLon: -68.45, maxLon: -66.85 },
       color: "#af7ac5",
       tagline: "High-altitude thin air & intense solar ultraviolet flux"
     }
   },
 
-  // Camera Tour Sequence
+  // Camera Tour Sequence (Accurate Framing Altitudes)
   tourSequence: [
-    { target: "mars_gale", name: "Mars: Gale Crater", globe: "Mars", lat: -4.5895, lon: 137.4417, alt: 150000, duration: 3.5 },
-    { target: "aralkum", name: "Earth: Aralkum Desert", globe: "Earth", lat: 44.5, lon: 58.5, alt: 150000, duration: 3.5 },
-    { target: "mcmurdo", name: "Earth: McMurdo Dry Valleys", globe: "Earth", lat: -77.5, lon: 162.0, alt: 140000, duration: 3.5 },
-    { target: "lut", name: "Earth: Lut Desert", globe: "Earth", lat: 30.5, lon: 58.8, alt: 120000, duration: 3.5 },
-    { target: "uyuni", name: "Earth: Salar de Uyuni", globe: "Earth", lat: -20.15, lon: -67.6, alt: 120000, duration: 3.5 }
+    { target: "mars_gale", name: "Mars: Gale Crater", globe: "Mars", lat: -4.5895, lon: 137.4417, alt: 220000, duration: 3.5 },
+    { target: "aralkum", name: "Earth: Aralkum Desert", globe: "Earth", lat: 44.80, lon: 59.80, alt: 320000, duration: 3.5 },
+    { target: "mcmurdo", name: "Earth: McMurdo Dry Valleys", globe: "Earth", lat: -77.50, lon: 162.00, alt: 180000, duration: 3.5 },
+    { target: "lut", name: "Earth: Lut Desert", globe: "Earth", lat: 30.50, lon: 58.80, alt: 280000, duration: 3.5 },
+    { target: "uyuni", name: "Earth: Salar de Uyuni", globe: "Earth", lat: -20.15, lon: -67.60, alt: 240000, duration: 3.5 }
   ],
 
   // Gemini API Configuration

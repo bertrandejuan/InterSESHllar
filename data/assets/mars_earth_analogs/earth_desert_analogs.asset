@@ -5,13 +5,15 @@ local EarthBoundariesTable = {
   Identifier = "EarthDesertBoundaries",
   File = EarthBoundariesFile,
   Enabled = true,
-  HeightOffset = 10.0,
+  HeightOffset = 40.0,
+  LineWidthScale = 2.0,
   DefaultProperties = {
-    Color = { 0.95, 0.70, 0.20 },
-    FillColor = { 0.95, 0.70, 0.20 },
-    FillOpacity = 0.0,
-    LineWidth = 2.0,
-    Opacity = 0.85
+    AltitudeMode = "RelativeToGround",
+    Color = { 1.0, 0.78, 0.10 },
+    FillColor = { 1.0, 0.78, 0.10 },
+    FillOpacity = 0.03,
+    LineWidth = 4.5,
+    Opacity = 0.95
   }
 }
 
@@ -19,11 +21,12 @@ local EarthPinsTable = {
   Identifier = "EarthDesertPins",
   File = EarthPinsFile,
   Enabled = true,
-  HeightOffset = 100.0,
-  PointRenderMode = "Globe Normal",
+  HeightOffset = 40.0,
+  PointRenderMode = "Camera Position",
   DefaultProperties = {
-    Color = { 1.0, 0.8, 0.2 },
-    PointSize = 18.0,
+    AltitudeMode = "RelativeToGround",
+    Color = { 1.0, 0.85, 0.20 },
+    PointSize = 14.0,
     Extrude = true
   }
 }
@@ -31,35 +34,35 @@ local EarthPinsTable = {
 local DesertLabels = {
   {
     Identifier = "EarthLabelAralkum",
-    Lat = 44.5,
-    Lon = 58.5,
+    Lat = 44.80,
+    Lon = 59.80,
     Alt = 15000.0,
     Text = "Aralkum Desert (Toxic Dust / Temp Swings)",
-    Color = { 1.0, 0.75, 0.20 }
+    Color = { 1.0, 0.82, 0.15 }
   },
   {
     Identifier = "EarthLabelMcMurdo",
-    Lat = -77.5,
-    Lon = 162.0,
+    Lat = -77.50,
+    Lon = 162.00,
     Alt = 16000.0,
     Text = "McMurdo Dry Valleys (Hyper-Arid Polar Cold)",
-    Color = { 0.35, 0.85, 1.00 }
+    Color = { 0.20, 0.90, 1.00 }
   },
   {
     Identifier = "EarthLabelLut",
-    Lat = 30.5,
-    Lon = 58.8,
+    Lat = 30.50,
+    Lon = 58.80,
     Alt = 15000.0,
     Text = "Lut Desert (Highest Surface Heat / Yardangs)",
-    Color = { 1.00, 0.35, 0.20 }
+    Color = { 1.00, 0.35, 0.15 }
   },
   {
     Identifier = "EarthLabelUyuni",
     Lat = -20.15,
-    Lon = -67.6,
+    Lon = -67.60,
     Alt = 18000.0,
     Text = "Salar de Uyuni (Thin Air / UV Radiation)",
-    Color = { 0.80, 0.50, 1.00 }
+    Color = { 0.90, 0.45, 1.00 }
   }
 }
 
@@ -84,10 +87,10 @@ asset.onInitialize(function()
       Renderable = {
         Type = "RenderableLabel",
         Enabled = true,
-        Text = item.Text,
-        FontSize = 16.0,
+        Text = "📍 " .. item.Text,
+        FontSize = 28.0,
         Color = item.Color,
-        MinMaxSize = { 10, 30 }
+        MinMaxSize = { 10, 50 }
       },
       GUI = {
         Name = item.Text,

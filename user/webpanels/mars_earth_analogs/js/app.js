@@ -145,10 +145,13 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
 
-    // Pin goes away when focused on the site
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", false);
-    if (togglePins) togglePins.checked = false;
+    // Ensure station pin and encompassing geographic borders are enabled
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled", true);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled", true);
+    if (togglePins) togglePins.checked = true;
+    if (toggleBoundaries) toggleBoundaries.checked = true;
 
     // Automatically enable best satellite imagery on Earth and Mars
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true);
@@ -300,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const site = btn.dataset.site;
       if (site === "mars_gale") {
-        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 350000, 3);
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 220000, 3);
       } else {
         const target = CONFIG.sites[site];
         if (target) {

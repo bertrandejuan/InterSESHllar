@@ -1,9 +1,9 @@
 local AnalogSites = {
-  { id = "mars_gale", name = "Mars: Gale Crater", globe = "Mars", lat = -4.5895, lon = 137.4417, alt = 150000, duration = 3.5 },
-  { id = "aralkum", name = "Earth: Aralkum Desert", globe = "Earth", lat = 44.5, lon = 58.5, alt = 150000, duration = 3.5 },
-  { id = "mcmurdo", name = "Earth: McMurdo Dry Valleys", globe = "Earth", lat = -77.5, lon = 162.0, alt = 140000, duration = 3.5 },
-  { id = "lut", name = "Earth: Lut Desert", globe = "Earth", lat = 30.5, lon = 58.8, alt = 120000, duration = 3.5 },
-  { id = "uyuni", name = "Earth: Salar de Uyuni", globe = "Earth", lat = -20.15, lon = -67.6, alt = 120000, duration = 3.5 }
+  { id = "mars_gale", name = "Mars: Gale Crater", globe = "Mars", lat = -4.5895, lon = 137.4417, alt = 220000, duration = 3.5 },
+  { id = "aralkum", name = "Earth: Aralkum Desert", globe = "Earth", lat = 44.80, lon = 59.80, alt = 320000, duration = 3.5 },
+  { id = "mcmurdo", name = "Earth: McMurdo Dry Valleys", globe = "Earth", lat = -77.50, lon = 162.00, alt = 180000, duration = 3.5 },
+  { id = "lut", name = "Earth: Lut Desert", globe = "Earth", lat = 30.50, lon = 58.80, alt = 280000, duration = 3.5 },
+  { id = "uyuni", name = "Earth: Salar de Uyuni", globe = "Earth", lat = -20.15, lon = -67.60, alt = 240000, duration = 3.5 }
 }
 
 -- Native OpenSpace GUI Actions
@@ -95,66 +95,66 @@ local Actions = {
   },
   {
     Identifier = "mars_earth.FlyMarsGale",
-    Name = "Fly to Mars: Gale Crater (Inspect High-Res Imagery)",
+    Name = "Fly to Mars: Gale Crater (Encompassing Rim Border)",
     Command = [[
-      openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 150000, 3.5)
+      openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 220000, 3.5)
       if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
         openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", false)
       end
     ]],
-    Documentation = "Fly close to Gale Crater with pin hidden for unobstructed satellite viewing",
+    Documentation = "Fly close to Gale Crater with full 154km rim border and high-res CTX satellite imagery",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyAralkum",
-    Name = "Fly to Earth: Aralkum Desert (Inspect High-Res Imagery)",
+    Name = "Fly to Earth: Aralkum Desert (Encompassing Geographic Basin)",
     Command = [[
-      openspace.navigation.flyToGeo('Earth', 44.5, 58.5, 150000, 3.5)
+      openspace.navigation.flyToGeo('Earth', 44.80, 59.80, 320000, 3.5)
       if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
         openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
       end
     ]],
-    Documentation = "Fly close to Aralkum Desert with pin hidden for unobstructed satellite viewing",
+    Documentation = "Fly close to Aralkum Desert with full geographic basin border and high-res ESRI imagery",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyMcMurdo",
-    Name = "Fly to Earth: McMurdo Dry Valleys (Inspect High-Res Imagery)",
+    Name = "Fly to Earth: McMurdo Dry Valleys (Encompassing Valley System)",
     Command = [[
-      openspace.navigation.flyToGeo('Earth', -77.5, 162.0, 140000, 3.5)
+      openspace.navigation.flyToGeo('Earth', -77.50, 162.00, 180000, 3.5)
       if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
         openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
       end
     ]],
-    Documentation = "Fly close to McMurdo Dry Valleys with pin hidden for unobstructed satellite viewing",
+    Documentation = "Fly close to McMurdo Dry Valleys with full geographic border and high-res imagery",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyLut",
-    Name = "Fly to Earth: Lut Desert (Inspect High-Res Imagery)",
+    Name = "Fly to Earth: Lut Desert (Encompassing Yardangs & Dunes)",
     Command = [[
-      openspace.navigation.flyToGeo('Earth', 30.5, 58.8, 120000, 3.5)
+      openspace.navigation.flyToGeo('Earth', 30.50, 58.80, 280000, 3.5)
       if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
         openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
       end
     ]],
-    Documentation = "Fly close to Lut Desert with pin hidden for unobstructed satellite viewing",
+    Documentation = "Fly close to Lut Desert with full geographic border and high-res imagery",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyUyuni",
-    Name = "Fly to Earth: Salar de Uyuni (Inspect High-Res Imagery)",
+    Name = "Fly to Earth: Salar de Uyuni (Encompassing Salt Crust Basin)",
     Command = [[
-      openspace.navigation.flyToGeo('Earth', -20.15, -67.6, 120000, 3.5)
+      openspace.navigation.flyToGeo('Earth', -20.15, -67.60, 240000, 3.5)
       if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
         openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
       end
     ]],
-    Documentation = "Fly close to Salar de Uyuni with pin hidden for unobstructed satellite viewing",
+    Documentation = "Fly close to Salar de Uyuni with full salt crust border and high-res imagery",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   }
@@ -185,7 +185,9 @@ asset.onDeinitialize(function()
   openspace.unbindKey("Ctrl+Alt+0")
 
   for _, action in ipairs(Actions) do
-    openspace.action.removeAction(action.Identifier)
+    if openspace.action.hasAction(action.Identifier) then
+      openspace.action.removeAction(action.Identifier)
+    end
   end
 end)
 
