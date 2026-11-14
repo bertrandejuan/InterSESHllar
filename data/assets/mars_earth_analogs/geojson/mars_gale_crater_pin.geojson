@@ -7,22 +7,15 @@
       "properties": {
         "id": "bradbury_landing",
         "Name": "Bradbury Landing (MSL Curiosity)",
-        "AltitudeMode": "RelativeToGround",
-        "Color": [
-          1,
-          0.25,
-          0.05
-        ],
-        "PointSize": 14,
-        "Altitude": 100,
+        "altitudeMode": "relativeToGround",
+        "Color": [1.00, 0.35, 0.08],
+        "PointSize": 24,
+        "Altitude": 80,
         "Extrude": true
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          137.4417,
-          -4.5895
-        ]
+        "coordinates": [137.4417, -4.5895]
       }
     }
   ]

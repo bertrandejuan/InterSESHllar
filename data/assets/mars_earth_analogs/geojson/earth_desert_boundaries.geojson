@@ -9,73 +9,30 @@
         "Name": "Aralkum Desert Geographic Basin",
         "Region": "Karakalpakstan, Uzbekistan / Kazakhstan",
         "AnalogAspect": "Extreme Continentality & Toxic Salt-Dust Storms",
-        "AltitudeMode": "RelativeToGround",
-        "Color": [
-          1,
-          0.78,
-          0.1
-        ],
-        "FillColor": [
-          1,
-          0.78,
-          0.1
-        ],
-        "FillOpacity": 0.03,
-        "LineWidth": 4.5,
-        "Opacity": 0.95
+        "altitudeMode": "relativeToGround",
+        "Color": [1.0, 0.82, 0.10],
+        "FillColor": [1.0, 0.82, 0.10],
+        "FillOpacity": 0.04,
+        "LineWidth": 7.0,
+        "Opacity": 1.0
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [
-              58.2,
-              43.6
-            ],
-            [
-              59.1,
-              43.4
-            ],
-            [
-              60.3,
-              43.7
-            ],
-            [
-              61.2,
-              44.3
-            ],
-            [
-              61.8,
-              45.1
-            ],
-            [
-              61.6,
-              46.1
-            ],
-            [
-              60.8,
-              46.7
-            ],
-            [
-              59.8,
-              46.8
-            ],
-            [
-              58.9,
-              46.4
-            ],
-            [
-              58.2,
-              45.5
-            ],
-            [
-              57.9,
-              44.6
-            ],
-            [
-              58.2,
-              43.6
-            ]
+            [58.20, 43.60],
+            [59.10, 43.35],
+            [60.30, 43.70],
+            [61.20, 44.30],
+            [61.80, 45.10],
+            [61.70, 45.90],
+            [61.10, 46.50],
+            [60.20, 46.85],
+            [59.20, 46.60],
+            [58.40, 45.80],
+            [57.90, 44.80],
+            [58.00, 44.10],
+            [58.20, 43.60]
           ]
         ]
       }
@@ -87,65 +44,27 @@
         "Name": "McMurdo Dry Valleys Geographic Basin",
         "Region": "Victoria Land, Antarctica",
         "AnalogAspect": "Hyper-Arid Polar Cold, Katabatic Winds & Permafrost",
-        "AltitudeMode": "RelativeToGround",
-        "Color": [
-          0.1,
-          0.9,
-          1
-        ],
-        "FillColor": [
-          0.1,
-          0.9,
-          1
-        ],
-        "FillOpacity": 0.03,
-        "LineWidth": 4.5,
-        "Opacity": 0.95
+        "altitudeMode": "relativeToGround",
+        "Color": [0.15, 0.92, 1.00],
+        "FillColor": [0.15, 0.92, 1.00],
+        "FillOpacity": 0.04,
+        "LineWidth": 7.0,
+        "Opacity": 1.0
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [
-              160.2,
-              -77.3
-            ],
-            [
-              161.4,
-              -77.15
-            ],
-            [
-              162.8,
-              -77.2
-            ],
-            [
-              163.7,
-              -77.4
-            ],
-            [
-              164,
-              -77.65
-            ],
-            [
-              163.5,
-              -77.85
-            ],
-            [
-              162.2,
-              -77.88
-            ],
-            [
-              160.8,
-              -77.75
-            ],
-            [
-              160,
-              -77.55
-            ],
-            [
-              160.2,
-              -77.3
-            ]
+            [160.20, -77.30],
+            [161.40, -77.15],
+            [162.80, -77.20],
+            [163.70, -77.40],
+            [164.10, -77.65],
+            [163.60, -77.85],
+            [162.20, -77.90],
+            [160.80, -77.75],
+            [160.00, -77.55],
+            [160.20, -77.30]
           ]
         ]
       }
@@ -157,69 +76,28 @@
         "Name": "Lut Desert (Dasht-e Lut) Basin & Yardangs",
         "Region": "Kerman / Sistan, Iran",
         "AnalogAspect": "Record Thermal Extremes & Martian Yardang Terrains",
-        "AltitudeMode": "RelativeToGround",
-        "Color": [
-          1,
-          0.3,
-          0.1
-        ],
-        "FillColor": [
-          1,
-          0.3,
-          0.1
-        ],
-        "FillOpacity": 0.03,
-        "LineWidth": 4.5,
-        "Opacity": 0.95
+        "altitudeMode": "relativeToGround",
+        "Color": [1.00, 0.38, 0.10],
+        "FillColor": [1.00, 0.38, 0.10],
+        "FillOpacity": 0.04,
+        "LineWidth": 7.0,
+        "Opacity": 1.0
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [
-              57.4,
-              29.2
-            ],
-            [
-              58.5,
-              28.8
-            ],
-            [
-              59.8,
-              29.3
-            ],
-            [
-              60.3,
-              30.2
-            ],
-            [
-              60.25,
-              31.4
-            ],
-            [
-              59.8,
-              32.5
-            ],
-            [
-              58.9,
-              33.1
-            ],
-            [
-              57.8,
-              32.8
-            ],
-            [
-              57.1,
-              31.6
-            ],
-            [
-              56.9,
-              30.4
-            ],
-            [
-              57.4,
-              29.2
-            ]
+            [57.40, 29.20],
+            [58.50, 28.80],
+            [59.80, 29.30],
+            [60.40, 30.20],
+            [60.30, 31.40],
+            [59.80, 32.50],
+            [58.90, 33.10],
+            [57.80, 32.80],
+            [57.10, 31.60],
+            [56.90, 30.40],
+            [57.40, 29.20]
           ]
         ]
       }
@@ -231,85 +109,32 @@
         "Name": "Salar de Uyuni Salt Crust Basin",
         "Region": "Potosi / Oruro, Bolivia",
         "AnalogAspect": "High-Altitude Rarefied Atmosphere & Extreme Solar/UV",
-        "AltitudeMode": "RelativeToGround",
-        "Color": [
-          0.88,
-          0.35,
-          1
-        ],
-        "FillColor": [
-          0.88,
-          0.35,
-          1
-        ],
-        "FillOpacity": 0.03,
-        "LineWidth": 4.5,
-        "Opacity": 0.95
+        "altitudeMode": "relativeToGround",
+        "Color": [0.92, 0.40, 1.00],
+        "FillColor": [0.92, 0.40, 1.00],
+        "FillOpacity": 0.04,
+        "LineWidth": 7.0,
+        "Opacity": 1.0
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [
-              -68.25,
-              -19.75
-            ],
-            [
-              -67.95,
-              -19.65
-            ],
-            [
-              -67.6,
-              -19.65
-            ],
-            [
-              -67.25,
-              -19.8
-            ],
-            [
-              -67.05,
-              -20
-            ],
-            [
-              -66.9,
-              -20.25
-            ],
-            [
-              -67.05,
-              -20.55
-            ],
-            [
-              -67.25,
-              -20.72
-            ],
-            [
-              -67.6,
-              -20.75
-            ],
-            [
-              -67.95,
-              -20.7
-            ],
-            [
-              -68.2,
-              -20.55
-            ],
-            [
-              -68.38,
-              -20.35
-            ],
-            [
-              -68.42,
-              -20.1
-            ],
-            [
-              -68.35,
-              -19.9
-            ],
-            [
-              -68.25,
-              -19.75
-            ]
+            [ -68.25, -19.75 ],
+            [ -67.95, -19.65 ],
+            [ -67.60, -19.65 ],
+            [ -67.25, -19.80 ],
+            [ -67.05, -20.00 ],
+            [ -66.90, -20.25 ],
+            [ -67.05, -20.55 ],
+            [ -67.25, -20.72 ],
+            [ -67.60, -20.78 ],
+            [ -67.95, -20.70 ],
+            [ -68.20, -20.55 ],
+            [ -68.38, -20.35 ],
+            [ -68.42, -20.10 ],
+            [ -68.35, -19.90 ],
+            [ -68.25, -19.75 ]
           ]
         ]
       }
