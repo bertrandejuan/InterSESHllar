@@ -5,13 +5,13 @@ local EarthBoundariesTable = {
   Identifier = "EarthDesertBoundaries",
   File = EarthBoundariesFile,
   Enabled = true,
-  HeightOffset = 120.0,
+  HeightOffset = 4000.0,
   LineWidthScale = 2.5,
   DefaultProperties = {
     Color = { 1.0, 0.82, 0.10 },
     FillColor = { 1.0, 0.82, 0.10 },
-    FillOpacity = 0.04,
-    LineWidth = 7.0,
+    FillOpacity = 0.85,
+    LineWidth = 4.0,
     Opacity = 1.0
   }
 }
@@ -20,11 +20,11 @@ local EarthPinsTable = {
   Identifier = "EarthDesertPins",
   File = EarthPinsFile,
   Enabled = true,
-  HeightOffset = 60.0,
+  HeightOffset = 4200.0,
   PointRenderMode = "Camera Position",
   DefaultProperties = {
-    Color = { 1.0, 0.85, 0.20 },
-    PointSize = 24.0,
+    Color = { 1.0, 0.90, 0.20 },
+    PointSize = 32.0,
     Extrude = true
   }
 }
@@ -34,7 +34,7 @@ local DesertLabels = {
     Identifier = "EarthLabelAralkum",
     Lat = 44.80,
     Lon = 59.80,
-    Alt = 15000.0,
+    Alt = 8000.0,
     Text = "Aralkum Desert Station (Toxic Dust / Swings)",
     Color = { 1.0, 0.82, 0.15 }
   },
@@ -42,23 +42,23 @@ local DesertLabels = {
     Identifier = "EarthLabelMcMurdo",
     Lat = -77.50,
     Lon = 162.00,
-    Alt = 16000.0,
+    Alt = 8000.0,
     Text = "McMurdo Dry Valleys Station (Polar Cold)",
-    Color = { 0.20, 0.90, 1.00 }
+    Color = { 0.20, 0.95, 1.00 }
   },
   {
     Identifier = "EarthLabelLut",
     Lat = 30.50,
     Lon = 58.80,
-    Alt = 15000.0,
+    Alt = 8000.0,
     Text = "Lut Desert Thermal Station (Record Heat / Yardangs)",
-    Color = { 1.00, 0.38, 0.15 }
+    Color = { 1.00, 0.40, 0.15 }
   },
   {
     Identifier = "EarthLabelUyuni",
     Lat = -20.15,
     Lon = -67.60,
-    Alt = 18000.0,
+    Alt = 8000.0,
     Text = "Salar de Uyuni Station (Thin Air / UV Radiation)",
     Color = { 0.92, 0.45, 1.00 }
   }
@@ -86,13 +86,9 @@ asset.onInitialize(function()
         Type = "RenderableLabel",
         Enabled = true,
         Text = item.Text,
-        FontSize = 32.0,
+        FontSize = 36.0,
         Color = item.Color,
-        MinMaxSize = { 12, 48 },
-        EnableFading = true,
-        FadeDistances = { 80.0, 3000.0 },
-        FadeWidths = { 50.0, 800.0 },
-        FadeUnit = "Km"
+        MinMaxSize = { 14, 52 }
       },
       GUI = {
         Name = item.Text,

@@ -5,13 +5,13 @@ local GaleCraterBoundaryTable = {
   Identifier = "MarsGaleCraterBoundaries",
   File = GaleCraterBoundaryFile,
   Enabled = true,
-  HeightOffset = 120.0,
+  HeightOffset = 1800.0,
   LineWidthScale = 2.5,
   DefaultProperties = {
     Color = { 1.0, 0.35, 0.08 },
     FillColor = { 1.0, 0.35, 0.08 },
-    FillOpacity = 0.04,
-    LineWidth = 7.0,
+    FillOpacity = 0.85,
+    LineWidth = 4.0,
     Opacity = 1.0
   }
 }
@@ -20,11 +20,11 @@ local GaleCraterPinTable = {
   Identifier = "MarsGaleCraterPin",
   File = GaleCraterPinFile,
   Enabled = true,
-  HeightOffset = 60.0,
+  HeightOffset = 2000.0,
   PointRenderMode = "Camera Position",
   DefaultProperties = {
     Color = { 1.0, 0.35, 0.08 },
-    PointSize = 24.0,
+    PointSize = 32.0,
     Extrude = true
   }
 }
@@ -38,7 +38,7 @@ local GaleCraterLabelNode = {
       Globe = "Mars",
       Latitude = -4.5895,
       Longitude = 137.4417,
-      Altitude = 15000.0,
+      Altitude = 6000.0,
       UseHeightmap = true
     }
   },
@@ -46,13 +46,9 @@ local GaleCraterLabelNode = {
     Type = "RenderableLabel",
     Enabled = true,
     Text = "Gale Crater Center (MSL Curiosity / Bradbury Landing)",
-    FontSize = 32.0,
+    FontSize = 36.0,
     Color = { 1.0, 0.85, 0.65 },
-    MinMaxSize = { 12, 48 },
-    EnableFading = true,
-    FadeDistances = { 80.0, 3000.0 },
-    FadeWidths = { 50.0, 800.0 },
-    FadeUnit = "Km"
+    MinMaxSize = { 14, 52 }
   },
   GUI = {
     Name = "Mars Gale Crater Label",

@@ -412,18 +412,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Automated Tour Routine
+  // Automated Tour Routine with Pre-Buffering Graphics Loading
   function startTour() {
     state.tourActive = true;
     btnTourPlay.classList.add("btn-active");
     btnTourPause.classList.remove("btn-active");
-    runTourStep();
+    btnTourPlay.innerText = "⏳ Buffering Graphics...";
+
+    // Boost LOD scaling and tile providers so high-res imagery loads crisp
+    openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.LodScaleFactor", 15.0);
+
+    const tourSeq = CONFIG.tourSequence;
+    const step = tourSeq[state.tourIndex];
+    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, 4.0);
+    displaySiteInstant(step.target);
+
+    // Give 3.5 seconds for satellite tiles to stream into cache before commencing cycle
+    state.tourTimer = setTimeout(() => {
+      if (!state.tourActive) return;
+      btnTourPlay.innerText = "▶ Running Tour";
+      const dwellMs = (10000 / state.tourSpeed);
+      state.tourTimer = setTimeout(() => {
+        state.tourIndex = (state.tourIndex + 1) % tourSeq.length;
+        runTourStep();
+      }, dwellMs);
+    }, 3500);
   }
 
   function pauseTour() {
     state.tourActive = false;
     btnTourPlay.classList.remove("btn-active");
     btnTourPause.classList.add("btn-active");
+    btnTourPlay.innerText = "▶ Start Tour";
     if (state.tourTimer) {
       clearTimeout(state.tourTimer);
       state.tourTimer = null;
@@ -435,10 +456,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tourSeq = CONFIG.tourSequence;
     const step = tourSeq[state.tourIndex];
-    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, step.duration / state.tourSpeed);
+    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, 4.5 / state.tourSpeed);
     displaySiteInstant(step.target);
 
-    const dwellMs = (8000 / state.tourSpeed);
+    // 10s dwell gives time for Level 12-14 satellite tiles to resolve sharp
+    const dwellMs = (10000 / state.tourSpeed);
     state.tourTimer = setTimeout(() => {
       state.tourIndex = (state.tourIndex + 1) % tourSeq.length;
       runTourStep();

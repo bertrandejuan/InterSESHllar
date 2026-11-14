@@ -22,6 +22,14 @@ asset.onInitialize(function()
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled", true)
   end
 
+  -- Boost LOD scale factor so high-resolution surface tiles stream in early
+  if openspace.hasProperty("Scene.Earth.Renderable.LodScaleFactor") then
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.LodScaleFactor", 15.0)
+  end
+  if openspace.hasProperty("Scene.Mars.Renderable.LodScaleFactor") then
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.LodScaleFactor", 15.0)
+  end
+
   -- Initial focus on Mars Gale Crater
   openspace.navigation.flyToGeo("Mars", -4.5895, 137.4417, 1200000, 3)
 end)
