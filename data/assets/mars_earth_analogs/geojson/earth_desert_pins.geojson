@@ -1,0 +1,74 @@
+{
+  "type": "FeatureCollection",
+  "name": "EarthDesertPins",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "aralkum",
+        "Name": "Aralkum Desert Station",
+        "Region": "Karakalpakstan, Uzbekistan",
+        "Color": [1.0, 0.75, 0.20],
+        "PointSize": 22.0,
+        "AltitudeMode": "RelativeToGround",
+        "Altitude": 1500.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [58.5, 44.5]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mcmurdo",
+        "Name": "McMurdo Dry Valleys Station",
+        "Region": "Victoria Land, Antarctica",
+        "Color": [0.35, 0.85, 1.00],
+        "PointSize": 22.0,
+        "AltitudeMode": "RelativeToGround",
+        "Altitude": 2000.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [162.0, -77.5]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lut",
+        "Name": "Lut Desert Thermal Core",
+        "Region": "Kerman / Sistan, Iran",
+        "Color": [1.00, 0.35, 0.20],
+        "PointSize": 22.0,
+        "AltitudeMode": "RelativeToGround",
+        "Altitude": 1800.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [58.8, 30.5]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "uyuni",
+        "Name": "Salar de Uyuni Altiplano",
+        "Region": "Potosi / Oruro, Bolivia",
+        "Color": [0.80, 0.50, 1.00],
+        "PointSize": 22.0,
+        "AltitudeMode": "RelativeToGround",
+        "Altitude": 3800.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-67.6, -20.15]
+      }
+    }
+  ]
+}
