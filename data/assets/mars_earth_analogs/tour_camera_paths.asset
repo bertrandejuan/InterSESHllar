@@ -177,12 +177,14 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unbindKey("Ctrl+Alt+M")
-  openspace.unbindKey("Ctrl+Alt+1")
-  openspace.unbindKey("Ctrl+Alt+2")
-  openspace.unbindKey("Ctrl+Alt+3")
-  openspace.unbindKey("Ctrl+Alt+4")
-  openspace.unbindKey("Ctrl+Alt+0")
+  if openspace.clearKey then
+    openspace.clearKey("Ctrl+Alt+M")
+    openspace.clearKey("Ctrl+Alt+1")
+    openspace.clearKey("Ctrl+Alt+2")
+    openspace.clearKey("Ctrl+Alt+3")
+    openspace.clearKey("Ctrl+Alt+4")
+    openspace.clearKey("Ctrl+Alt+0")
+  end
 
   for _, action in ipairs(Actions) do
     if openspace.action.hasAction(action.Identifier) then
