@@ -3,10 +3,16 @@ local marsGale = asset.require("./mars_gale_crater")
 local earthAnalogs = asset.require("./earth_desert_analogs")
 local cameraPaths = asset.require("./tour_camera_paths")
 
+-- Require official OpenSpace NASA elevation, mosaic, and HUD assets
+local marsElevation = asset.require("scene/solarsystem/planets/mars/layers/heightlayers/mdem200m")
+local mroCtx = asset.require("scene/solarsystem/planets/mars/layers/nasa-treks/MRO_CTX")
+local mroHiRise = asset.require("scene/solarsystem/planets/mars/layers/nasa-treks/MRO_HiRISE")
+local globeLocation = asset.require("dashboard/globelocation")
+
 asset.onInitialize(function()
   openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs Visualization Asset.")
 
-  -- Automatically enable best satellite imagery on Earth
+  -- Automatically enable best satellite imagery & 3D terrain on Earth
   if openspace.hasProperty("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled") then
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true)
   end
@@ -14,18 +20,24 @@ asset.onInitialize(function()
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset.Enabled", true)
   end
 
-  -- Automatically enable best satellite imagery on Mars
+  -- Automatically enable best satellite imagery & 3D terrain on Mars
   if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled") then
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled", true)
   end
   if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled") then
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled", true)
   end
+  if openspace.hasProperty("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Enabled") then
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Enabled", true)
+  end
   if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled") then
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled", true)
   end
-  if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Curiosity_Roving_Site_Mosaic.Enabled") then
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Curiosity_Roving_Site_Mosaic.Enabled", true)
+  if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_hirise_mosaic.Enabled") then
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_hirise_mosaic.Enabled", true)
+  end
+  if openspace.hasProperty("Scene.Mars.Renderable.Layers.HeightLayers.Gale_DEM_SMG_1m.Enabled") then
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Gale_DEM_SMG_1m.Enabled", true)
   end
 
   -- Initial focus on Mars Gale Crater

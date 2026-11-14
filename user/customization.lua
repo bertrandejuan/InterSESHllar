@@ -22,6 +22,15 @@ end
 if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled") then
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Blended.Enabled", true)
 end
+if openspace.hasProperty("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Enabled") then
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Enabled", true)
+end
 if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled") then
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_ctx_mosaic.Enabled", true)
+end
+if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_hirise_mosaic.Enabled") then
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.curiosity_hirise_mosaic.Enabled", true)
+end
+if openspace.hasProperty("Scene.Mars.Renderable.Layers.HeightLayers.Gale_DEM_SMG_1m.Enabled") then
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Gale_DEM_SMG_1m.Enabled", true)
 end
