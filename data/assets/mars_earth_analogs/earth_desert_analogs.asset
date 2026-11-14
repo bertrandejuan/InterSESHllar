@@ -87,7 +87,7 @@ asset.onInitialize(function()
       Renderable = {
         Type = "RenderableLabel",
         Enabled = true,
-        Text = "📍 " .. item.Text,
+        Text = item.Text,
         FontSize = 28.0,
         Color = item.Color,
         MinMaxSize = { 10, 50 }
