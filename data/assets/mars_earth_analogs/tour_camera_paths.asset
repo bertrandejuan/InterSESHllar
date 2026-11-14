@@ -12,10 +12,13 @@ local Actions = {
     Identifier = "mars_earth.ToggleBoundaries",
     Name = "Toggle Desert Boundaries",
     Command = [[
-      local e = openspace.propertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertBoundaries.Enabled")
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertBoundaries.Enabled", not e)
-      if openspace.hasProperty("Scene.Mars.Renderable.GeoJson.MarsGaleCraterBoundaries.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.MarsGaleCraterBoundaries.Enabled", not e)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled") then
+        local e = openspace.propertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled")
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled", not e)
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled") then
+        local m = openspace.propertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled")
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled", not m)
       end
     ]],
     Documentation = "Toggles visibility for Mars Gale Crater & Earth Desert boundaries",
@@ -26,10 +29,13 @@ local Actions = {
     Identifier = "mars_earth.TogglePins",
     Name = "Toggle Station Pins",
     Command = [[
-      local e = openspace.propertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled")
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", not e)
-      if openspace.hasProperty("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", not e)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
+        local e = openspace.propertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled")
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", not e)
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
+        local m = openspace.propertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled")
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", not m)
       end
     ]],
     Documentation = "Toggles visibility for Mars Gale Crater & Earth Station pins",
@@ -40,9 +46,11 @@ local Actions = {
     Identifier = "mars_earth.RestorePinsAndOrbit",
     Name = "Restore All Pins & Return to Orbit Overview",
     Command = [[
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", true)
-      if openspace.hasProperty("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", true)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true)
       end
       openspace.navigation.flyToGeo('Earth', 20.0, 60.0, 8000000, 3.5)
     ]],
@@ -54,9 +62,11 @@ local Actions = {
     Identifier = "mars_earth.ShowAllPinsOrbit",
     Name = "Show All Pins (Orbit Overview)",
     Command = [[
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", true)
-      if openspace.hasProperty("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", true)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true)
       end
     ]],
     Documentation = "Shows all research station pins on Earth and Mars",
@@ -67,7 +77,10 @@ local Actions = {
     Identifier = "mars_earth.ToggleLabels",
     Name = "Toggle 3D Billboard Labels",
     Command = [[
-      local e = openspace.propertyValue("Scene.EarthLabelAralkum.Renderable.Enabled")
+      local e = false
+      if openspace.hasProperty("Scene.EarthLabelAralkum.Renderable.Enabled") then
+        e = openspace.propertyValue("Scene.EarthLabelAralkum.Renderable.Enabled")
+      end
       local newState = not e
       local labels = { "Scene.EarthLabelAralkum", "Scene.EarthLabelMcMurdo", "Scene.EarthLabelLut", "Scene.EarthLabelUyuni", "Scene.MarsGaleCraterLabel" }
       for _, l in ipairs(labels) do
@@ -85,8 +98,8 @@ local Actions = {
     Name = "Fly to Mars: Gale Crater (Inspect High-Res Imagery)",
     Command = [[
       openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 150000, 3.5)
-      if openspace.hasProperty("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", false)
+      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", false)
       end
     ]],
     Documentation = "Fly close to Gale Crater with pin hidden for unobstructed satellite viewing",
@@ -98,7 +111,9 @@ local Actions = {
     Name = "Fly to Earth: Aralkum Desert (Inspect High-Res Imagery)",
     Command = [[
       openspace.navigation.flyToGeo('Earth', 44.5, 58.5, 150000, 3.5)
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", false)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
+      end
     ]],
     Documentation = "Fly close to Aralkum Desert with pin hidden for unobstructed satellite viewing",
     GuiPath = "/Planetary Analogs/Navigation",
@@ -109,7 +124,9 @@ local Actions = {
     Name = "Fly to Earth: McMurdo Dry Valleys (Inspect High-Res Imagery)",
     Command = [[
       openspace.navigation.flyToGeo('Earth', -77.5, 162.0, 140000, 3.5)
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", false)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
+      end
     ]],
     Documentation = "Fly close to McMurdo Dry Valleys with pin hidden for unobstructed satellite viewing",
     GuiPath = "/Planetary Analogs/Navigation",
@@ -120,7 +137,9 @@ local Actions = {
     Name = "Fly to Earth: Lut Desert (Inspect High-Res Imagery)",
     Command = [[
       openspace.navigation.flyToGeo('Earth', 30.5, 58.8, 120000, 3.5)
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", false)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
+      end
     ]],
     Documentation = "Fly close to Lut Desert with pin hidden for unobstructed satellite viewing",
     GuiPath = "/Planetary Analogs/Navigation",
@@ -131,7 +150,9 @@ local Actions = {
     Name = "Fly to Earth: Salar de Uyuni (Inspect High-Res Imagery)",
     Command = [[
       openspace.navigation.flyToGeo('Earth', -20.15, -67.6, 120000, 3.5)
-      openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", false)
+      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false)
+      end
     ]],
     Documentation = "Fly close to Salar de Uyuni with pin hidden for unobstructed satellite viewing",
     GuiPath = "/Planetary Analogs/Navigation",

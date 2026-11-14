@@ -146,8 +146,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Pin goes away when focused on the site
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", false);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", false);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", false);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", false);
     if (togglePins) togglePins.checked = false;
 
     // Automatically enable best satellite imagery on Earth and Mars
@@ -312,8 +312,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnShowPins) {
     btnShowPins.addEventListener("click", (e) => {
       e.preventDefault();
-      openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", true);
-      openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", true);
+      openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true);
+      openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true);
       if (togglePins) togglePins.checked = true;
       if (state.currentSiteKey === "mars_gale") {
         openSpace.flyToGeo("Mars", 0, 137.4, 4500000, 3);
@@ -385,14 +385,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Layer Toggles
   toggleBoundaries.addEventListener("change", (e) => {
     state.toggles.boundaries = e.target.checked;
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterBoundaries.Enabled", e.target.checked);
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertBoundaries.Enabled", e.target.checked);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled", e.target.checked);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled", e.target.checked);
   });
 
   togglePins.addEventListener("change", (e) => {
     state.toggles.pins = e.target.checked;
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeoJson.MarsGaleCraterPin.Enabled", e.target.checked);
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeoJson.EarthDesertPins.Enabled", e.target.checked);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", e.target.checked);
+    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", e.target.checked);
   });
 
   toggleLabels.addEventListener("change", (e) => {
