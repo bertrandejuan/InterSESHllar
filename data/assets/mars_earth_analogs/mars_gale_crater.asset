@@ -5,11 +5,12 @@ local GaleCraterBoundaryTable = {
   Identifier = "MarsGaleCraterBoundaries",
   File = GaleCraterBoundaryFile,
   Enabled = true,
+  HeightOffset = 5000.0,
   DefaultProperties = {
     Color = { 1.0, 0.45, 0.15 },
-    FillColor = { 0.85, 0.35, 0.1, 0.25 },
-    Opacity = 0.9,
-    HeightOffset = 5000.0
+    FillColor = { 0.85, 0.35, 0.10 },
+    FillOpacity = 0.25,
+    Opacity = 0.90
   }
 }
 
@@ -17,11 +18,11 @@ local GaleCraterPinTable = {
   Identifier = "MarsGaleCraterPin",
   File = GaleCraterPinFile,
   Enabled = true,
+  HeightOffset = 5000.0,
+  PointRenderMode = "Globe Normal",
   DefaultProperties = {
     Color = { 1.0, 0.2, 0.2 },
     PointSize = 24.0,
-    HeightOffset = 5000.0,
-    Altitude = 2500.0,
     Extrude = true
   }
 }
