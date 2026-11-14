@@ -40,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const siteBtns = document.querySelectorAll(".site-pill");
 
   // Layer Toggles
-  const toggleBoundaries = document.getElementById("toggle-boundaries");
   const togglePins = document.getElementById("toggle-pins");
   const toggleLabels = document.getElementById("toggle-labels");
 
@@ -145,24 +144,15 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
 
-    // Ensure station pin and encompassing geographic borders and labels are enabled
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true);
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled", true);
+    // Ensure adaptive location tags and 3D labels are enabled
+    openSpace.setPropertyValue("Scene.MarsTagGaleCrater.Renderable.Enabled", true);
     openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", true);
     ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
+      openSpace.setPropertyValue(`Scene.EarthTag${name}.Renderable.Enabled`, true);
       openSpace.setPropertyValue(`Scene.EarthLabel${name}.Renderable.Enabled`, true);
     });
     if (togglePins) togglePins.checked = true;
-    if (toggleBoundaries) toggleBoundaries.checked = true;
     if (toggleLabels) toggleLabels.checked = true;
-
-    // Trigger height re-calculation so geometry sits on top of 3D terrain
-    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.ForceUpdateHeightData') end");
-    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.ForceUpdateHeightData') end");
-    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.ForceUpdateHeightData') end");
-    openSpace.executeLuaScript("if openspace.hasProperty('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.ForceUpdateHeightData') then openspace.triggerPropertyValue('Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.ForceUpdateHeightData') end");
 
     // Boost LOD and tile cache so graphics load crisp on immediate button navigation
     openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
@@ -335,11 +325,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnOrbitReturn = document.getElementById("btn-orbit-return");
   const handleRestoreOrbit = (e) => {
     if (e) e.preventDefault();
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true);
+    openSpace.setPropertyValue("Scene.MarsTagGaleCrater.Renderable.Enabled", true);
+    openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", true);
+    ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
+      openSpace.setPropertyValue(`Scene.EarthTag${name}.Renderable.Enabled`, true);
+      openSpace.setPropertyValue(`Scene.EarthLabel${name}.Renderable.Enabled`, true);
+    });
     if (togglePins) togglePins.checked = true;
+    if (toggleLabels) toggleLabels.checked = true;
     if (state.currentSiteKey === "mars_gale") {
-      openSpace.flyToGeo("Mars", 0, 137.4, 4500000, 3);
+      openSpace.flyToGeo("Mars", 0, 137.4, 5000000, 3);
     } else {
       openSpace.flyToGeo("Earth", 20, 60, 8000000, 3);
     }
@@ -407,25 +402,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Layer Toggles
-  toggleBoundaries.addEventListener("change", (e) => {
-    state.toggles.boundaries = e.target.checked;
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled", e.target.checked);
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled", e.target.checked);
-  });
-
-  togglePins.addEventListener("change", (e) => {
-    state.toggles.pins = e.target.checked;
-    openSpace.setPropertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", e.target.checked);
-    openSpace.setPropertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", e.target.checked);
-  });
-
-  toggleLabels.addEventListener("change", (e) => {
-    state.toggles.labels = e.target.checked;
-    openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", e.target.checked);
-    ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
-      openSpace.setPropertyValue(`Scene.EarthLabel${name}.Renderable.Enabled`, e.target.checked);
+  if (togglePins) {
+    togglePins.addEventListener("change", (e) => {
+      state.toggles.pins = e.target.checked;
+      openSpace.setPropertyValue("Scene.MarsTagGaleCrater.Renderable.Enabled", e.target.checked);
+      ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
+        openSpace.setPropertyValue(`Scene.EarthTag${name}.Renderable.Enabled`, e.target.checked);
+      });
     });
-  });
+  }
+
+  if (toggleLabels) {
+    toggleLabels.addEventListener("change", (e) => {
+      state.toggles.labels = e.target.checked;
+      openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", e.target.checked);
+      ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach(name => {
+        openSpace.setPropertyValue(`Scene.EarthLabel${name}.Renderable.Enabled`, e.target.checked);
+      });
+    });
+  }
 
   // Automated Tour Routine with Pre-Buffering Graphics Loading
   function startTour() {

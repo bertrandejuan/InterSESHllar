@@ -1,105 +1,119 @@
-local EarthBoundariesFile = asset.resource("./geojson/earth_desert_boundaries.geojson")
-local EarthPinsFile = asset.resource("./geojson/earth_desert_pins.geojson")
-local StationPinTexture = asset.resource("./textures/station_pin.png")
+local LocationTagTexture = asset.resource("./textures/location_tag.png")
 
-local EarthBoundariesTable = {
-  Identifier = "EarthDesertBoundaries",
-  File = EarthBoundariesFile,
-  Enabled = true,
-  HeightOffset = 1200.0,
-  LineWidthScale = 4.0,
-  DefaultProperties = {
-    AltitudeMode = "RelativeToGround",
-    Color = { 1.0, 0.85, 0.15 },
-    FillColor = { 1.0, 0.85, 0.15 },
-    FillOpacity = 0.28,
-    LineWidth = 6.0,
-    Opacity = 1.0,
-    Extrude = true,
-    PerformShading = false
-  }
-}
-
-local EarthPinsTable = {
-  Identifier = "EarthDesertPins",
-  File = EarthPinsFile,
-  Enabled = true,
-  HeightOffset = 1500.0,
-  PointRenderMode = "Camera Position",
-  DefaultProperties = {
-    AltitudeMode = "RelativeToGround",
-    Color = { 1.0, 0.95, 0.25 },
-    PointSize = 22000.0,
-    PointTexture = StationPinTexture,
-    PointTextureAnchor = "Center",
-    Opacity = 1.0
-  }
-}
-
-local DesertLabels = {
+local DesertSites = {
   {
-    Identifier = "EarthLabelAralkum",
+    TagId = "EarthTagAralkum",
+    LabelId = "EarthLabelAralkum",
+    Name = "Aralkum Desert",
+    LabelText = "Aralkum Desert Station",
+    Globe = "Earth",
     Lat = 44.80,
     Lon = 59.80,
-    Alt = 8000.0,
-    Text = "Aralkum Desert Station (Toxic Dust / Swings)",
-    Color = { 0.25, 1.00, 0.55 }
+    Alt = 1500.0,
+    LabelAlt = 4500.0,
+    Color = { 0.20, 0.90, 0.45 }
   },
   {
-    Identifier = "EarthLabelMcMurdo",
+    TagId = "EarthTagMcMurdo",
+    LabelId = "EarthLabelMcMurdo",
+    Name = "McMurdo Dry Valleys",
+    LabelText = "McMurdo Dry Valleys Station",
+    Globe = "Earth",
     Lat = -77.50,
     Lon = 162.00,
-    Alt = 8000.0,
-    Text = "McMurdo Dry Valleys Station (Polar Cold)",
-    Color = { 0.25, 0.85, 1.00 }
+    Alt = 1500.0,
+    LabelAlt = 4500.0,
+    Color = { 0.15, 0.80, 1.00 }
   },
   {
-    Identifier = "EarthLabelLut",
+    TagId = "EarthTagLut",
+    LabelId = "EarthLabelLut",
+    Name = "Lut Desert",
+    LabelText = "Lut Desert Thermal Station",
+    Globe = "Earth",
     Lat = 30.50,
     Lon = 58.80,
-    Alt = 8000.0,
-    Text = "Lut Desert Thermal Station (Record Heat / Yardangs)",
-    Color = { 1.00, 0.70, 0.15 }
+    Alt = 1500.0,
+    LabelAlt = 4500.0,
+    Color = { 1.00, 0.65, 0.10 }
   },
   {
-    Identifier = "EarthLabelUyuni",
+    TagId = "EarthTagUyuni",
+    LabelId = "EarthLabelUyuni",
+    Name = "Salar de Uyuni",
+    LabelText = "Salar de Uyuni Station",
+    Globe = "Earth",
     Lat = -20.15,
     Lon = -67.60,
-    Alt = 8000.0,
-    Text = "Salar de Uyuni Station (Thin Air / UV Radiation)",
-    Color = { 0.85, 0.55, 1.00 }
+    Alt = 1500.0,
+    LabelAlt = 4500.0,
+    Color = { 0.85, 0.45, 1.00 }
   }
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson("Earth", EarthBoundariesTable)
-  openspace.globebrowsing.addGeoJson("Earth", EarthPinsTable)
-
-  for _, item in ipairs(DesertLabels) do
+  for _, site in ipairs(DesertSites) do
+    -- 1. Adaptive Location Tag Marker (Large when zoomed out, smaller as you zoom in)
     openspace.addSceneGraphNode({
-      Identifier = item.Identifier,
-      Parent = "Earth",
+      Identifier = site.TagId,
+      Parent = site.Globe,
       Transform = {
         Translation = {
           Type = "GlobeTranslation",
-          Globe = "Earth",
-          Latitude = item.Lat,
-          Longitude = item.Lon,
-          Altitude = item.Alt,
+          Globe = site.Globe,
+          Latitude = site.Lat,
+          Longitude = site.Lon,
+          Altitude = site.Alt,
+          UseHeightmap = true
+        }
+      },
+      Renderable = {
+        Type = "RenderablePlaneImageLocal",
+        Enabled = true,
+        Texture = LocationTagTexture,
+        Billboard = true,
+        MultiplyColor = site.Color,
+        BlendMode = "Normal",
+        Size = 100000,
+        DistanceScalingSettings = {
+          ScaleByDistance = true,
+          ApparentSizeMultiplier = 0.035,
+          ScaleByDistanceMaxHeight = 350000.0,
+          ScaleByDistanceMinHeight = 2500.0
+        }
+      },
+      GUI = {
+        Name = site.Name .. " Location Tag",
+        Path = "/Planets/Earth/Mars Analog Sites"
+      }
+    })
+
+    -- 2. 3D Billboard Location Label on Screen
+    openspace.addSceneGraphNode({
+      Identifier = site.LabelId,
+      Parent = site.Globe,
+      Transform = {
+        Translation = {
+          Type = "GlobeTranslation",
+          Globe = site.Globe,
+          Latitude = site.Lat,
+          Longitude = site.Lon,
+          Altitude = site.LabelAlt,
           UseHeightmap = true
         }
       },
       Renderable = {
         Type = "RenderableLabel",
         Enabled = true,
-        Text = item.Text,
+        Text = site.LabelText,
         FontSize = 32.0,
-        Color = item.Color,
+        Color = site.Color,
+        MinMaxSize = { 12, 38 },
         OrientationOption = "Camera View Direction",
         BlendMode = "Additive"
       },
       GUI = {
-        Name = item.Text,
+        Name = site.Name .. " Label",
         Path = "/Planets/Earth/Mars Analog Sites"
       }
     })
@@ -107,12 +121,10 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  for _, item in ipairs(DesertLabels) do
-    openspace.removeSceneGraphNode(item.Identifier)
+  for _, site in ipairs(DesertSites) do
+    openspace.removeSceneGraphNode(site.LabelId)
+    openspace.removeSceneGraphNode(site.TagId)
   end
-  openspace.globebrowsing.deleteGeoJson("Earth", EarthPinsTable)
-  openspace.globebrowsing.deleteGeoJson("Earth", EarthBoundariesTable)
 end)
 
-asset.export("EarthBoundariesTable", EarthBoundariesTable)
-asset.export("EarthPinsTable", EarthPinsTable)
+asset.export("DesertSites", DesertSites)

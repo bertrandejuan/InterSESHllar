@@ -1,88 +1,42 @@
 local AnalogSites = {
-  { id = "mars_gale", name = "Mars: Gale Crater", globe = "Mars", lat = -4.5895, lon = 137.4417, alt = 350000, duration = 4.0 },
-  { id = "aralkum", name = "Earth: Aralkum Desert", globe = "Earth", lat = 44.80, lon = 59.80, alt = 380000, duration = 4.0 },
-  { id = "mcmurdo", name = "Earth: McMurdo Dry Valleys", globe = "Earth", lat = -77.50, lon = 162.00, alt = 340000, duration = 4.0 },
-  { id = "lut", name = "Earth: Lut Desert", globe = "Earth", lat = 30.50, lon = 58.80, alt = 350000, duration = 4.0 },
-  { id = "uyuni", name = "Earth: Salar de Uyuni", globe = "Earth", lat = -20.15, lon = -67.60, alt = 320000, duration = 4.0 }
+  MarsGale = { Globe = "Mars", Lat = -4.5895, Lon = 137.4417, Alt = 550000, Name = "Mars: Gale Crater" },
+  Aralkum = { Globe = "Earth", Lat = 44.80, Lon = 59.80, Alt = 850000, Name = "Earth: Aralkum Desert" },
+  McMurdo = { Globe = "Earth", Lat = -77.50, Lon = 162.00, Alt = 650000, Name = "Earth: McMurdo Dry Valleys" },
+  Lut = { Globe = "Earth", Lat = 30.50, Lon = 58.80, Alt = 850000, Name = "Earth: Lut Desert" },
+  Uyuni = { Globe = "Earth", Lat = -20.15, Lon = -67.60, Alt = 650000, Name = "Earth: Salar de Uyuni" }
 }
 
--- Native OpenSpace GUI Actions
 local Actions = {
   {
-    Identifier = "mars_earth.ToggleBoundaries",
-    Name = "Toggle Desert Boundaries",
+    Identifier = "mars_earth.ToggleTags",
+    Name = "Toggle Location Tags & Markers",
     Command = [[
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled") then
-        local e = openspace.propertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled")
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertBoundaries.Enabled", not e)
+      local tags = { "Scene.EarthTagAralkum", "Scene.EarthTagMcMurdo", "Scene.EarthTagLut", "Scene.EarthTagUyuni", "Scene.MarsTagGaleCrater" }
+      local e = false
+      if openspace.hasProperty("Scene.EarthTagAralkum.Renderable.Enabled") then
+        e = openspace.propertyValue("Scene.EarthTagAralkum.Renderable.Enabled")
       end
-      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled") then
-        local m = openspace.propertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled")
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterBoundaries.Enabled", not m)
+      local newState = not e
+      for _, tag in ipairs(tags) do
+        if openspace.hasProperty(tag .. ".Renderable.Enabled") then
+          openspace.setPropertyValueSingle(tag .. ".Renderable.Enabled", newState)
+        end
       end
     ]],
-    Documentation = "Toggles visibility for Mars Gale Crater & Earth Desert boundaries",
-    GuiPath = "/Planetary Analogs/Toggles",
-    IsLocal = false
-  },
-  {
-    Identifier = "mars_earth.TogglePins",
-    Name = "Toggle Station Pins",
-    Command = [[
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
-        local e = openspace.propertyValue("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled")
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", not e)
-      end
-      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
-        local m = openspace.propertyValue("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled")
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", not m)
-      end
-    ]],
-    Documentation = "Toggles visibility for Mars Gale Crater & Earth Station pins",
-    GuiPath = "/Planetary Analogs/Toggles",
-    IsLocal = false
-  },
-  {
-    Identifier = "mars_earth.RestorePinsAndOrbit",
-    Name = "Restore All Pins & Return to Orbit Overview",
-    Command = [[
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
-      end
-      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true)
-      end
-      openspace.navigation.flyToGeo('Earth', 20.0, 60.0, 8000000, 3.5)
-    ]],
-    Documentation = "Restores all station pins and returns camera to high orbital view",
-    GuiPath = "/Planetary Analogs/Navigation",
-    IsLocal = false
-  },
-  {
-    Identifier = "mars_earth.ShowAllPinsOrbit",
-    Name = "Show All Pins (Orbit Overview)",
-    Command = [[
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
-      end
-      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true)
-      end
-    ]],
-    Documentation = "Shows all research station pins on Earth and Mars",
+    Documentation = "Toggles visibility for all planetary location tags",
     GuiPath = "/Planetary Analogs/Toggles",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.ToggleLabels",
-    Name = "Toggle 3D Billboard Labels",
+    Name = "Toggle 3D Billboard Text Labels",
     Command = [[
+      local labels = { "Scene.EarthLabelAralkum", "Scene.EarthLabelMcMurdo", "Scene.EarthLabelLut", "Scene.EarthLabelUyuni", "Scene.MarsGaleCraterLabel" }
       local e = false
       if openspace.hasProperty("Scene.EarthLabelAralkum.Renderable.Enabled") then
         e = openspace.propertyValue("Scene.EarthLabelAralkum.Renderable.Enabled")
       end
       local newState = not e
-      local labels = { "Scene.EarthLabelAralkum", "Scene.EarthLabelMcMurdo", "Scene.EarthLabelLut", "Scene.EarthLabelUyuni", "Scene.MarsGaleCraterLabel" }
       for _, l in ipairs(labels) do
         if openspace.hasProperty(l .. ".Renderable.Enabled") then
           openspace.setPropertyValueSingle(l .. ".Renderable.Enabled", newState)
@@ -95,66 +49,96 @@ local Actions = {
   },
   {
     Identifier = "mars_earth.FlyMarsGale",
-    Name = "Fly to Mars: Gale Crater (Encompassing Rim Border)",
+    Name = "Fly to Mars: Gale Crater",
     Command = [[
       openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 550000, 4.0)
-      if openspace.hasProperty("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.MarsGaleCraterPin.Enabled", true)
+      if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", true)
       end
     ]],
-    Documentation = "Fly close to Gale Crater with full 154km rim border and high-res CTX satellite imagery",
+    Documentation = "Fly close to Gale Crater with high-res CTX satellite imagery and location tag",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyAralkum",
-    Name = "Fly to Earth: Aralkum Desert (Encompassing Geographic Basin)",
+    Name = "Fly to Earth: Aralkum Desert",
     Command = [[
       openspace.navigation.flyToGeo('Earth', 44.80, 59.80, 850000, 4.0)
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
+      if openspace.hasProperty("Scene.EarthTagAralkum.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthTagAralkum.Renderable.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.EarthLabelAralkum.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthLabelAralkum.Renderable.Enabled", true)
       end
     ]],
-    Documentation = "Fly close to Aralkum Desert with full geographic basin border and high-res ESRI imagery",
+    Documentation = "Fly close to Aralkum Desert with high-res ESRI imagery and location tag",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyMcMurdo",
-    Name = "Fly to Earth: McMurdo Dry Valleys (Encompassing Valley System)",
+    Name = "Fly to Earth: McMurdo Dry Valleys",
     Command = [[
       openspace.navigation.flyToGeo('Earth', -77.50, 162.00, 650000, 4.0)
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
+      if openspace.hasProperty("Scene.EarthTagMcMurdo.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthTagMcMurdo.Renderable.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.EarthLabelMcMurdo.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthLabelMcMurdo.Renderable.Enabled", true)
       end
     ]],
-    Documentation = "Fly close to McMurdo Dry Valleys with full geographic border and high-res imagery",
+    Documentation = "Fly close to McMurdo Dry Valleys with high-res imagery and location tag",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyLut",
-    Name = "Fly to Earth: Lut Desert (Encompassing Yardangs & Dunes)",
+    Name = "Fly to Earth: Lut Desert",
     Command = [[
       openspace.navigation.flyToGeo('Earth', 30.50, 58.80, 850000, 4.0)
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
+      if openspace.hasProperty("Scene.EarthTagLut.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthTagLut.Renderable.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.EarthLabelLut.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthLabelLut.Renderable.Enabled", true)
       end
     ]],
-    Documentation = "Fly close to Lut Desert with full geographic border and high-res imagery",
+    Documentation = "Fly close to Lut Desert with high-res imagery and location tag",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   },
   {
     Identifier = "mars_earth.FlyUyuni",
-    Name = "Fly to Earth: Salar de Uyuni (Encompassing Salt Crust Basin)",
+    Name = "Fly to Earth: Salar de Uyuni",
     Command = [[
       openspace.navigation.flyToGeo('Earth', -20.15, -67.60, 650000, 4.0)
-      if openspace.hasProperty("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled") then
-        openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeographicOverlays.EarthDesertPins.Enabled", true)
+      if openspace.hasProperty("Scene.EarthTagUyuni.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthTagUyuni.Renderable.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.EarthLabelUyuni.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.EarthLabelUyuni.Renderable.Enabled", true)
       end
     ]],
-    Documentation = "Fly close to Salar de Uyuni with full salt crust border and high-res imagery",
+    Documentation = "Fly close to Salar de Uyuni with high-res imagery and location tag",
+    GuiPath = "/Planetary Analogs/Navigation",
+    IsLocal = false
+  },
+  {
+    Identifier = "mars_earth.RestoreOrbit",
+    Name = "Return to High Planetary Orbit",
+    Command = [[
+      local focus = openspace.navigation.getNavigationState().Anchor
+      if focus == "Mars" then
+        openspace.navigation.flyToGeo('Mars', 0, 137.4, 5000000, 3.0)
+      else
+        openspace.navigation.flyToGeo('Earth', 20, 60, 8000000, 3.0)
+      end
+    ]],
+    Documentation = "Return to wide-angle global planetary orbit",
     GuiPath = "/Planetary Analogs/Navigation",
     IsLocal = false
   }
@@ -173,7 +157,7 @@ asset.onInitialize(function()
   openspace.bindKey("Ctrl+Alt+2", "mars_earth.FlyMcMurdo")
   openspace.bindKey("Ctrl+Alt+3", "mars_earth.FlyLut")
   openspace.bindKey("Ctrl+Alt+4", "mars_earth.FlyUyuni")
-  openspace.bindKey("Ctrl+Alt+0", "mars_earth.RestorePinsAndOrbit")
+  openspace.bindKey("Ctrl+Alt+0", "mars_earth.RestoreOrbit")
 end)
 
 asset.onDeinitialize(function()
