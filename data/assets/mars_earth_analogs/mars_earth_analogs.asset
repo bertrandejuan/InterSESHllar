@@ -5,9 +5,10 @@ local marsGale = asset.require("./mars_gale_crater")
 local earthAnalogs = asset.require("./earth_desert_analogs")
 local cameraPaths = asset.require("./tour_camera_paths")
 local teamDataAsset = asset.require("./data/team_analog_data")
+local globeOverlays = asset.require("./analog_globe_overlays")
 
 asset.onInitialize(function()
-  openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs Asset.")
+  openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs with Team 10-Yr Planetary Surface Data Overlays.")
 
   -- "On opening: Set illumination for earth and mars." (Storyboard requirement)
   if openspace.hasProperty("Scene.Earth.Renderable.PerformShading") then
@@ -47,8 +48,7 @@ asset.onInitialize(function()
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.LodScaleFactor", 15.0)
   end
 
-  -- "we dont need any of the other planets, galaxies, or close ups of stars.
-  -- we really only need earth and mars and the stars around us to make it pretty and nice."
+  -- Disable unnecessary celestial systems so view only contains Earth, Mars, and background stars
   local disabledBodies = {
     "Mercury", "Venus", "Moon", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
     "SunGlare", "Ceres", "Vesta", "Bennu", "Ryugu", "Io", "Europa", "Ganymede",

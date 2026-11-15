@@ -1,0 +1,124 @@
+-- OpenSpace Planetary Data Visualization Overlays Asset
+-- Registers custom global data maps across the surface of Earth and Mars
+-- Derived from NASA POWER 10-Year In-Situ Team Archive (2015-2025)
+
+local EarthOverlays = {
+  {
+    Identifier = "TeamData_Earth_Temperature",
+    Name = "Team Data: Surface Temperature Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.70,
+    FilePath = asset.resource("./textures/earth_overlay_temperature.png"),
+    Description = "Global surface temperature data visualization derived from 10-year in-situ team records."
+  },
+  {
+    Identifier = "TeamData_Earth_Wind",
+    Name = "Team Data: Aeolian Wind Speed Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.65,
+    FilePath = asset.resource("./textures/earth_overlay_wind.png"),
+    Description = "Global surface wind velocity data visualization."
+  },
+  {
+    Identifier = "TeamData_Earth_Moisture",
+    Name = "Team Data: Aridity & Relative Humidity Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.65,
+    FilePath = asset.resource("./textures/earth_overlay_moisture.png"),
+    Description = "Global relative humidity and precipitation deficit data visualization."
+  },
+  {
+    Identifier = "TeamData_Earth_Solar",
+    Name = "Team Data: Solar Insolation Flux Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.65,
+    FilePath = asset.resource("./textures/earth_overlay_solar.png"),
+    Description = "Global solar downward shortwave insolation flux."
+  },
+  {
+    Identifier = "TeamData_Earth_Biology",
+    Name = "Team Data: Extremophile Analog Habitability Index",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.70,
+    FilePath = asset.resource("./textures/earth_overlay_biology.png"),
+    Description = "Composite planetary extremophile analog habitability index."
+  }
+}
+
+local MarsOverlays = {
+  {
+    Identifier = "TeamData_Mars_Temperature",
+    Name = "Team Data: Mars REMS Climatology Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.70,
+    FilePath = asset.resource("./textures/mars_overlay_temperature.png"),
+    Description = "Martian thermal field centered on Gale Crater Curiosity REMS baseline."
+  },
+  {
+    Identifier = "TeamData_Mars_Wind",
+    Name = "Team Data: Mars Wind & Barometric Field",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.65,
+    FilePath = asset.resource("./textures/mars_overlay_wind.png"),
+    Description = "Martian slope winds and hypobaric barometric field."
+  },
+  {
+    Identifier = "TeamData_Mars_Moisture",
+    Name = "Team Data: Mars Perchlorate Deliquescence Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.65,
+    FilePath = asset.resource("./textures/mars_overlay_moisture.png"),
+    Description = "Martian atmospheric vapor bounds and nighttime frost potential."
+  },
+  {
+    Identifier = "TeamData_Mars_Solar",
+    Name = "Team Data: Mars Solar Insolation Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.65,
+    FilePath = asset.resource("./textures/mars_overlay_solar.png"),
+    Description = "Solar downwelling flux at 1.52 AU."
+  },
+  {
+    Identifier = "TeamData_Mars_Biology",
+    Name = "Team Data: Mars Lacustrine Biosignature Map",
+    Enabled = false,
+    ZIndex = 30,
+    Opacity = 0.75,
+    FilePath = asset.resource("./textures/mars_overlay_biology.png"),
+    Description = "Lacustrine mudstone biosignature preservation zones (Gale, Jezero, Meridiani)."
+  }
+}
+
+asset.onInitialize(function()
+  for _, layer in ipairs(EarthOverlays) do
+    if openspace.hasProperty("Scene.Earth.Renderable.Layers.ColorLayers." .. layer.Identifier) then
+      openspace.globebrowsing.deleteLayer("Earth", "ColorLayers", layer)
+    end
+    openspace.globebrowsing.addLayer("Earth", "ColorLayers", layer)
+  end
+
+  for _, layer in ipairs(MarsOverlays) do
+    if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers." .. layer.Identifier) then
+      openspace.globebrowsing.deleteLayer("Mars", "ColorLayers", layer)
+    end
+    openspace.globebrowsing.addLayer("Mars", "ColorLayers", layer)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, layer in ipairs(EarthOverlays) do
+    openspace.globebrowsing.deleteLayer("Earth", "ColorLayers", layer)
+  end
+  for _, layer in ipairs(MarsOverlays) do
+    openspace.globebrowsing.deleteLayer("Mars", "ColorLayers", layer)
+  end
+end)
