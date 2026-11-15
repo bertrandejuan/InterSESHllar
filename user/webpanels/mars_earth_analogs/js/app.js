@@ -71,13 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnLocationOverviewHUD = document.getElementById("btn-location-overview-hud");
   const btnMarsRefOverview = document.getElementById("btn-mars-ref-overview");
   const btnLocationHUDText = document.getElementById("btn-location-hud-text");
-
-  // DOM Elements - Results: Earth to Mars Comparison
-  const btnResultsComparison = document.getElementById("btn-results-comparison");
-  const drawerResultsComparison = document.getElementById("drawer-results-comparison");
-  const btnCloseResultsDrawer = document.getElementById("btn-close-results-drawer");
-  const btnResultsShowHud = document.getElementById("btn-results-show-hud");
-  const resultsComparisonContent = document.getElementById("results-comparison-content");
+  const btnComparisonMatrixHUD = document.getElementById("btn-comparison-matrix-hud");
+  const btnComparisonMatrixText = document.getElementById("btn-comparison-matrix-text");
 
   // DOM Elements - One Accordion Container
   const scienceAccordion = document.getElementById("science-accordion");
@@ -786,6 +781,16 @@ document.addEventListener("DOMContentLoaded", () => {
       btnModalComparisonHUD.setAttribute("aria-pressed", isOverviewActive ? "true" : "false");
     }
 
+    if (btnComparisonMatrixHUD) {
+      const isMatrixHUD = state.activeHUD === "hud_comparison_matrix.png";
+      const textSpan = document.getElementById("btn-comparison-matrix-text");
+      if (textSpan) {
+        textSpan.innerText = isMatrixHUD ? "Hide Matrix" : "Comparison Matrix";
+      }
+      btnComparisonMatrixHUD.classList.toggle("active", Boolean(isMatrixHUD));
+      btnComparisonMatrixHUD.setAttribute("aria-pressed", isMatrixHUD ? "true" : "false");
+    }
+
     if (modalHudNotice && modalTableContent) {
       if (isOverviewActive && modalAllData && modalAllData.style.display === "flex") {
         modalHudNotice.style.display = "flex";
@@ -1041,10 +1046,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTelemetryTable();
     loadBlurb();
 
-    if (drawerResultsComparison && drawerResultsComparison.style.display === "block") {
-      renderResultsComparison();
-    }
-
     if (flyCamera) {
       const globe = site.globe || "Earth";
       const target = SITE_CAMERA_TARGETS[siteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
@@ -1292,306 +1293,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // Results: Earth to Mars Comparison (Overall & Category Percentages)
+  // Comparison Matrix Viewport HUD Toggle
   // ----------------------------------------------------
-  function computeAllComparisonData() {
-    const sites = window.TEAM_DATA || {};
-    const marsSite = sites["mars_gale"] || {};
-    const marsMetrics = marsSite.metrics || {};
-
-    const analogKeys = ["mcmurdo", "lut", "aralkum", "uyuni"];
-    const allKeys = ["mars_gale", ...analogKeys];
-
-    const categoryMeta = [
-      { key: "thermal", label: "Thermal Conditions", icon: "🌡️", css: "thermal" },
-      { key: "astrobiology", label: "Astrobiology / Makeup", icon: "🧬", css: "astrobiology" },
-      { key: "atmospheric_dynamics", label: "Atmospheric Dynamics", icon: "💨", css: "dynamics" },
-      { key: "atmospheric_moisture", label: "Atmospheric Moisture", icon: "💧", css: "moisture" },
-      { key: "radiation", label: "Solar & UV Radiation", icon: "☀️", css: "radiation" }
-    ];
-
-    const siteData = {};
-
-    allKeys.forEach((key) => {
-      const site = sites[key];
-      if (!site) return;
-
-      const isMars = key === "mars_gale";
-      const metrics = site.metrics || {};
-
-      const catScores = {};
-      categoryMeta.forEach((cat) => {
-        if (isMars) {
-          catScores[cat.key] = 100.0;
-          return;
-        }
-
-        const catDef = SCIENCE_CATEGORIES.find((c) => c.key === cat.key);
-        if (!catDef) {
-          catScores[cat.key] = 50.0;
-          return;
-        }
-
-        let sum = 0;
-        let count = 0;
-        catDef.parameters.forEach((p) => {
-          if (p.scale && metrics[p.key] !== undefined && marsMetrics[p.key] !== undefined) {
-            const s = calcSimScore(metrics[p.key], marsMetrics[p.key], p.scale);
-            if (s !== null) {
-              sum += s;
-              count++;
-            }
-          }
-        });
-
-        if (cat.key === "astrobiology") {
-          // Astrobiology incorporates empirical soil pH and crystal / mineral preservation match
-          if (count > 0) {
-            catScores[cat.key] = sum / count;
-          } else {
-            catScores[cat.key] = key === "mcmurdo" ? 90.0 : 85.0;
-          }
-        } else {
-          catScores[cat.key] = count > 0 ? sum / count : 50.0;
-        }
-      });
-
-      // Overall Score: Arithmetic mean of the 4 quantitative categories
-      let overall = 100.0;
-      if (!isMars) {
-        const quantKeys = ["thermal", "atmospheric_dynamics", "atmospheric_moisture", "radiation"];
-        let qSum = 0;
-        quantKeys.forEach((qk) => {
-          qSum += catScores[qk];
-        });
-        overall = qSum / quantKeys.length;
+  if (btnComparisonMatrixHUD) {
+    btnComparisonMatrixHUD.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const matrixTexture = "hud_comparison_matrix.png";
+      if (state.activeHUD === matrixTexture) {
+        dismissHUD();
+      } else {
+        showHUDTexture(matrixTexture);
       }
-
-      const iconMap = {
-        mars_gale: "🔴",
-        mcmurdo: "❄️",
-        lut: "🔥",
-        aralkum: "🏜️",
-        uyuni: "🧂"
-      };
-
-      siteData[key] = {
-        key: key,
-        name: site.name,
-        shortName: site.short_name || site.name,
-        country: site.country || site.region || (isMars ? "Mars Baseline" : "Earth Analog"),
-        icon: iconMap[key] || "🌍",
-        isMars: isMars,
-        overall: overall,
-        categories: catScores
-      };
-    });
-
-    return { siteData, categoryMeta, analogKeys };
-  }
-
-  function renderResultsComparison() {
-    if (!resultsComparisonContent) return;
-
-    const { siteData, categoryMeta, analogKeys } = computeAllComparisonData();
-
-    // Sort analogs by overall match descending
-    const sortedAnalogs = [...analogKeys].sort((a, b) => siteData[b].overall - siteData[a].overall);
-    const rankBadges = ["🥇 1st", "🥈 2nd", "🥉 3rd", "4️⃣ 4th"];
-
-    // 1. Quick Ranking Bar
-    let rankingsHtml = `
-      <div class="results-rankings-bar">
-    `;
-    sortedAnalogs.forEach((key, idx) => {
-      const data = siteData[key];
-      const isActive = state.currentSiteKey === key;
-      rankingsHtml += `
-        <div class="ranking-pill-card ${isActive ? 'active-site-pill' : ''}" data-site="${key}" title="Click to view and fly to ${data.name}">
-          <div class="ranking-pill-top">
-            <span class="ranking-pill-rank">${rankBadges[idx]}</span>
-            <span class="ranking-pill-score">${data.overall.toFixed(1)}%</span>
-          </div>
-          <span class="ranking-pill-name">${data.shortName}</span>
-        </div>
-      `;
-    });
-    rankingsHtml += `</div>`;
-
-    // 2. Section Heading: Detailed Category Breakdown
-    let cardsHtml = `
-      <div class="results-section-heading">
-        <h5>Analog Match Breakdown & Domain Percentages</h5>
-        <span class="results-section-badge">All 5 Climatology & Astrobiology Domains</span>
-      </div>
-      <div class="results-location-cards-grid">
-    `;
-
-    sortedAnalogs.forEach((key, idx) => {
-      const data = siteData[key];
-      const isActive = state.currentSiteKey === key;
-      const rankPill = rankBadges[idx];
-
-      let catRowsHtml = "";
-      categoryMeta.forEach((cat) => {
-        const pct = data.categories[cat.key];
-        catRowsHtml += `
-          <div class="results-category-row">
-            <div class="results-cat-name-col" title="${cat.label}">
-              <span class="results-cat-icon">${cat.icon}</span>
-              <span>${cat.label}</span>
-            </div>
-            <div class="results-cat-bar-col">
-              <div class="results-cat-bar-track">
-                <div class="results-cat-bar-fill ${cat.css}" style="width: ${Math.min(100, Math.max(0, pct))}%;"></div>
-              </div>
-            </div>
-            <div class="results-cat-val-col">${pct.toFixed(1)}%</div>
-          </div>
-        `;
-      });
-
-      cardsHtml += `
-        <div class="results-site-card ${isActive ? 'site-active' : ''}" id="results-card-${key}">
-          <div class="results-site-card-header">
-            <div class="results-site-identity">
-              <span class="results-site-icon">${data.icon}</span>
-              <div>
-                <span class="results-site-title">${data.name}</span>
-                <span class="results-site-subtitle">${rankPill} • ${data.country}</span>
-              </div>
-            </div>
-            <div class="results-overall-badge-pill ${key}">
-              <span class="results-overall-val">${data.overall.toFixed(1)}%</span>
-              <span class="results-overall-lbl">Overall Match</span>
-            </div>
-          </div>
-          <div class="results-category-list">
-            ${catRowsHtml}
-          </div>
-        </div>
-      `;
-    });
-    cardsHtml += `</div>`;
-
-    // 3. Side-by-Side Comparison Matrix Table
-    let tableHtml = `
-      <div class="results-section-heading">
-        <h5>Full Earth to Mars Comparison Matrix</h5>
-        <span class="results-section-badge">Grounded Empirical Telemetry</span>
-      </div>
-      <div class="results-matrix-container">
-        <table class="results-matrix-table" aria-label="Earth to Mars Category Comparison Table">
-          <thead>
-            <tr>
-              <th>Scientific Domain</th>
-              <th style="color: #fb923c;">Mars Gale</th>
-              <th style="color: #38bdf8;">McMurdo</th>
-              <th style="color: #f59e0b;">Lut Desert</th>
-              <th style="color: #4ade80;">Aralkum</th>
-              <th style="color: #2dd4bf;">Uyuni</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    categoryMeta.forEach((cat) => {
-      // Find top analog in this category
-      let topKey = "";
-      let topVal = -1;
-      analogKeys.forEach((ak) => {
-        if (siteData[ak].categories[cat.key] > topVal) {
-          topVal = siteData[ak].categories[cat.key];
-          topKey = ak;
-        }
-      });
-
-      tableHtml += `
-        <tr>
-          <td class="cat-header-cell">
-            <span>${cat.icon}</span>
-            <span>${cat.label}</span>
-          </td>
-          <td class="mars-baseline-cell">100.0%</td>
-      `;
-
-      ["mcmurdo", "lut", "aralkum", "uyuni"].forEach((ak) => {
-        const val = siteData[ak].categories[cat.key];
-        const isLead = ak === topKey;
-        tableHtml += `
-          <td class="${isLead ? 'cell-highlight-lead' : ''}">
-            ${val.toFixed(1)}%${isLead ? ' ★' : ''}
-          </td>
-        `;
-      });
-
-      tableHtml += `</tr>`;
-    });
-
-    // Dedicated Overall Mars Match Row
-    tableHtml += `
-      <tr class="matrix-overall-row">
-        <td class="cat-header-cell" style="color: #38bdf8;">
-          <span>🎯</span>
-          <span>OVERALL MARS MATCH</span>
-        </td>
-        <td class="mars-baseline-cell">100.0%</td>
-        <td class="cell-highlight-lead">55.4% ★</td>
-        <td>54.1%</td>
-        <td>48.4%</td>
-        <td>46.8%</td>
-      </tr>
-    `;
-
-    tableHtml += `
-          </tbody>
-        </table>
-      </div>
-    `;
-
-    resultsComparisonContent.innerHTML = rankingsHtml + cardsHtml + tableHtml;
-
-    // Attach click handlers to ranking pills
-    resultsComparisonContent.querySelectorAll(".ranking-pill-card").forEach((pill) => {
-      pill.addEventListener("click", () => {
-        const targetSite = pill.dataset.site;
-        if (targetSite) {
-          selectSite(targetSite, true);
-        }
-      });
-    });
-  }
-
-  // Toggle & Close Listeners
-  if (btnResultsComparison) {
-    btnResultsComparison.addEventListener("click", () => {
-      const isOpen = drawerResultsComparison && drawerResultsComparison.style.display === "block";
-      if (drawerResultsComparison) {
-        drawerResultsComparison.style.display = isOpen ? "none" : "block";
-      }
-      btnResultsComparison.classList.toggle("active", !isOpen);
-      btnResultsComparison.setAttribute("aria-expanded", !isOpen ? "true" : "false");
-      if (!isOpen) {
-        renderResultsComparison();
-      }
-    });
-  }
-
-  if (btnCloseResultsDrawer) {
-    btnCloseResultsDrawer.addEventListener("click", () => {
-      if (drawerResultsComparison) {
-        drawerResultsComparison.style.display = "none";
-      }
-      if (btnResultsComparison) {
-        btnResultsComparison.classList.remove("active");
-        btnResultsComparison.setAttribute("aria-expanded", "false");
-      }
-    });
-  }
-
-  if (btnResultsShowHud) {
-    btnResultsShowHud.addEventListener("click", () => {
-      toggleComparisonHUD(state.currentSiteKey);
     });
   }
 

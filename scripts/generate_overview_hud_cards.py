@@ -609,4 +609,11 @@ for c_meta in CATEGORIES_META:
     for s_key in SITES:
         generate_category_overview_card(c_key, s_key)
 
-print("All 30 Overview HUD Cards generated successfully!")
+print("Generating Part 3: Comparison Matrix HUD Card (Image 2 table style with smaller details)...")
+try:
+    import generate_matrix_hud
+    generate_matrix_hud.generate_comparison_matrix_card()
+except Exception as e:
+    print(f"Comparison Matrix HUD generation note: {e}")
+
+print("All Overview HUD Cards generated successfully!")
