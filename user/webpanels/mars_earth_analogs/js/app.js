@@ -606,6 +606,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const statsContainer = document.createElement("div");
         statsContainer.className = "compact-stats-container";
 
+        const statsInner = document.createElement("div");
+        statsInner.className = `compact-stats-inner${isMars ? " mars-mode" : ""}`;
+
         const headerRow = document.createElement("div");
         headerRow.className = `compact-stats-header${isMars ? " mars-mode" : ""}`;
         if (isMars) {
@@ -621,7 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span style="text-align: right;">Match</span>
           `;
         }
-        statsContainer.appendChild(headerRow);
+        statsInner.appendChild(headerRow);
 
         cat.parameters.forEach((param) => {
           const rowGroup = document.createElement("div");
@@ -691,9 +694,10 @@ document.addEventListener("DOMContentLoaded", () => {
             btnToggle.classList.toggle("active", isHidden);
           });
 
-          statsContainer.appendChild(rowGroup);
+          statsInner.appendChild(rowGroup);
         });
 
+        statsContainer.appendChild(statsInner);
         body.appendChild(statsContainer);
       }
 
