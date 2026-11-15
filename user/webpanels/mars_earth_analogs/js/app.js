@@ -262,6 +262,18 @@ document.addEventListener("DOMContentLoaded", () => {
       availabilityNote: "Spatial vector overlay available for Climatology layers; Astrobiology uses point station telemetry.",
       parameters: [
         {
+          key: "soil_ph",
+          label: "Soil / Regolith pH",
+          code: "SOIL_PH",
+          unit: "pH",
+          desc: "Acidity / alkalinity of surface soil and regolith solution influencing mineral dissolution, clay stability, and habitability.",
+          source: "Earth Analogs: In-Situ Soil Chemical Analyses (soil_ph_summary.csv) | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids",
+          scale: 1.5,
+          isQualitative: false,
+          getVal: (m) => m.soil_ph !== null && m.soil_ph !== undefined ? `${formatNumber(m.soil_ph, 2)} pH (Range: ${m.soil_ph_min}–${m.soil_ph_max})` : "N/A (Cryogenic)",
+          getMarsVal: () => "7.80 pH (Range: 7.0–8.5)"
+        },
+        {
           key: "soil_mineral_type",
           label: "Mineral Composition & Rock Type",
           code: "MINERAL_TYPE",

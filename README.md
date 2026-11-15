@@ -16,11 +16,12 @@ Featuring automated and interactive camera navigation, custom GeoJSON boundary o
 ```
 TerraMatch: OpenSpace Mars-Earth Analogs Package
 │
-├── data/analogLocationCSV/                  <-- NASA POWER 10-Year In-Situ Daily Archive CSVs (4,018 records/site)
+├── data/analogLocationCSV/                  <-- NASA POWER 10-Year In-Situ Daily Archive CSVs & Soil Telemetry
 │   ├── Aralkum_Desert_Daily_Weather_Data.csv
 │   ├── Lut_Desert.csv
 │   ├── POWER_Point_Daily_20150101_20251231_077d50S_162d00E_LST.csv  (McMurdo)
-│   └── Salar de Uyuni Daily Weather Data.csv
+│   ├── Salar de Uyuni Daily Weather Data.csv
+│   └── soil_ph_summary.csv                  <-- Empirical Soil & Regolith pH Telemetry (Min, Max, Mean)
 │
 ├── earthaccess_pull/                        <-- NASA earthaccess Programmatic Pipeline
 │   ├── pull_earthaccess.ipynb               <-- NASA earthaccess EMIT & ICESat-2 extraction notebook
@@ -105,8 +106,8 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
    - **EMIT Mineral GeoTIFF Raster (`lut.tif`)**: High-resolution GeoTIFF (WGS 84, 1,327 × 2,511 resolution, Lon 57°–60°E, Lat 25°–31°N) containing discrete mineral classification codes (IDs 69–84) for pyroxene, hematite, goethite, and basalt evaporite coatings across the Lut Desert, Iran.
    - **EMIT Mineral GeoTIFF Raster (`araldesert.tif`)**: High-resolution GeoTIFF (WGS 84, 442 × 418 resolution) containing discrete mineral classification codes (IDs 45–57) for mirabilite, thenardite, gypsum, and toxic sulfate evaporites across the Aralkum Desert / Aral Sea bed.
 
-3. **NASA EMIT & MSL CheMin Surface Materials**:
-   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy (`araldesert.tif`, `lut.tif` & `out.csv`) and Curiosity MSL CheMin/SAM in-situ instruments.
+3. **NASA EMIT, Soil pH & MSL CheMin Surface Materials**:
+   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy (`araldesert.tif`, `lut.tif` & `out.csv`), in-situ soil pH measurements (`soil_ph_summary.csv`), and Curiosity MSL CheMin/SAM in-situ instruments.
 
 ---
 

@@ -45,6 +45,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Yellowknife Bay Mudstones", "Ancient lacustrine smectites and sulfate-bearing Mount Sharp strata"),
                 ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "Target for organic carbon preservation and ancient habitability biosignatures"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.80 pH (7.0 – 8.5)", "Yellowknife Bay lacustrine sediment neutral-to-alkaline pore water pH"),
                 ("Surface Mineral Spectroscopy", "Fe-Smectites, Jarosite & Sulfates", "Hydrated smectite clays, ferric sulfates, and calcium sulfates across Mount Sharp"),
                 ("Topographic Relief & Elevation", "-4,400 m to +1,100 m", "Crater depression with 5.5 km central sedimentary mound relief")
             ],
@@ -99,6 +100,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
                 ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.88 pH (6.9 – 8.4)", "Alkaline basaltic regolith pavement and playa margin soil solution pH"),
                 ("Surface Mineral Spectroscopy", "Pyroxene, Hematite & Goethite", "Surface spectral unmixing showing iron oxides, pyroxene, and basalt weathering coatings"),
                 ("Topographic Relief & Elevation", "401 m Elevation", "Elevated basalt plateau with deep wind-carved yardang corridors")
             ],
@@ -153,6 +155,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Beacon Sandstone & Dry Permafrost", "Porous Beacon sandstone sheltering cryptoendolithic microbial communities"),
                 ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces"),
+                ("Soil / Regolith pH [SOIL_PH]", "N/A (Cryogenic)", "Hyper-arid sub-zero permafrost regime with negligible liquid pore fluid"),
                 ("Surface Mineral Spectroscopy", "Quartz, Feldspar & Cryogenic Salts", "Cryogenic mineral weathering with nitrate and halite salt crusts"),
                 ("Topographic Relief & Elevation", "1,139 m Elevation", "Glacially carved dry valleys bounded by high-relief polar permafrost mountains")
             ],
@@ -207,6 +210,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
                 ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.84 pH (7.4 – 8.3)", "Alkaline toxic sulfate-chloride evaporite crust and desiccated seabed soil pH"),
                 ("Surface Mineral Spectroscopy", "Mirabilite, Thenardite & Gypsum", "Sodium and calcium sulfate evaporite minerals across desiccated seabed"),
                 ("Topographic Relief & Elevation", "44 – 78 m Relief (Mean: 59.9 m)", "Low-relief desiccated seabed floor with micro-topographic dune and crust features")
             ],
@@ -261,6 +265,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Lithium-Enriched Halite & Gypsum Crust", "10,000 km² expanse of pure lithium-halite evaporite playa modeling paleolakes"),
                 ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.50 pH (6.5 – 8.5)", "Circum-neutral to alkaline lithium-halite evaporite crust and brine pool pH"),
                 ("Surface Mineral Spectroscopy", "Halite, Gypsum & Lithium Borates", "Thick crystalline evaporite crust composed of halite and lithium-bearing borate minerals"),
                 ("Topographic Relief & Elevation", "3,656 m Elevation", "Ultra-flat high-altitude Andean plateau salt flat")
             ],

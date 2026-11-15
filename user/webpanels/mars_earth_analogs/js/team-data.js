@@ -72,7 +72,10 @@ window.TEAM_DATA = {
       mean_daily_temp_range_c: 58.68,
       surface_temp_c: -50.89,
 
-      // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
+      // 2) Astrobiology / Surface Materials
+      soil_ph: 7.80,
+      soil_ph_min: 7.0,
+      soil_ph_max: 8.5,
       soil_mineral_type: "Yellowknife Bay Mudstones & Sulfate-bearing strata",
       chemical_organic_focus: "Target for organic carbon preservation",
       emit_mineral_matrix: "Fe-Smectites, Jarosite & Calcium Sulfates",
@@ -160,7 +163,10 @@ window.TEAM_DATA = {
       mean_daily_temp_range_c: 15.6353,
       surface_temp_c: 70.70,
 
-      // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
+      // 2) Astrobiology / Surface Materials
+      soil_ph: 7.88,
+      soil_ph_min: 6.9,
+      soil_ph_max: 8.4,
       soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardangs",
       chemical_organic_focus: "Abiotic organic limit-of-detection baseline",
       emit_mineral_matrix: "Pyroxene, Hematite & Goethite Surface Matrix",
@@ -249,7 +255,10 @@ window.TEAM_DATA = {
       mean_daily_temp_range_c: 45.6800,
       surface_temp_c: -25.58,
 
-      // 2) Astrobiology / Surface Materials (NASA EMIT & Field Surveys)
+      // 2) Astrobiology / Surface Materials
+      soil_ph: null,
+      soil_ph_min: null,
+      soil_ph_max: null,
       soil_mineral_type: "Beacon Sandstone Matrix & Dry Permafrost",
       chemical_organic_focus: "Cryopreserved cryptoendolithic biomolecules",
       emit_mineral_matrix: "Quartz, Feldspar & Cryogenic Salts",
@@ -338,7 +347,10 @@ window.TEAM_DATA = {
       mean_daily_temp_range_c: 4.3622,
       surface_temp_c: 12.949,
 
-      // 2) Astrobiology / Surface Materials (NASA EMIT, earthaccess ICESat-2 Topography & Field Surveys)
+      // 2) Astrobiology / Surface Materials
+      soil_ph: 7.84,
+      soil_ph_min: 7.4,
+      soil_ph_max: 8.3,
       soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust",
       chemical_organic_focus: "Entrapment of desiccation organic biosignatures in sulfate crystals",
       emit_mineral_matrix: "Mirabilite, Thenardite, Gypsum & Halite Evaporite",
@@ -427,7 +439,10 @@ window.TEAM_DATA = {
       mean_daily_temp_range_c: 16.7560,
       surface_temp_c: 8.808,
 
-      // 2) Astrobiology / Surface Materials (NASA EMIT Mineralogy)
+      // 2) Astrobiology / Surface Materials
+      soil_ph: 7.50,
+      soil_ph_min: 6.5,
+      soil_ph_max: 8.5,
       soil_mineral_type: "Lithium-Enriched Halite & Gypsum Crust",
       chemical_organic_focus: "Preservation of polyextremophile cellular organics in fluid inclusions",
       emit_mineral_matrix: "Halite, Gypsum, Ulexite & Lithium Borates",
@@ -532,6 +547,18 @@ window.PARAMETER_DEFINITIONS = [
   },
 
   // 2) Astrobiology / Surface Materials
+  {
+    key: "soil_ph",
+    label: "Soil / Regolith pH",
+    code: "SOIL_PH",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Makeup",
+    unit: "pH",
+    marsBaseline: 7.80,
+    scale: 1.5,
+    desc: "Acidity / alkalinity of surface soil and regolith solution influencing mineral dissolution, clay stability, and habitability.",
+    source: "Earth Analogs: In-Situ Soil Chemical Analyses (soil_ph_summary.csv) | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids"
+  },
   {
     key: "soil_mineral_type",
     label: "Mineral Composition & Rock Type",
