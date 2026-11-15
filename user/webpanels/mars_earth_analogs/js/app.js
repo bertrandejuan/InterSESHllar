@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeCategoryFilter: "all",
     openAccordionKey: null, // All categories collapsed initially
     isGeminiLoading: false,
-    activeHUD: null,
+    activeHUD: "hud_overview_location_mars_gale.png",
     activeOverlay: null,
     isOrientSideways: false,
     tourActive: false,
@@ -69,6 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const overallScoreRank = document.getElementById("overall-score-rank");
   const overallScoreNum = document.getElementById("overall-score-num");
   const marsReferencePanel = document.getElementById("mars-reference-panel");
+  const btnLocationOverviewHUD = document.getElementById("btn-location-overview-hud");
+  const btnLocationHUDText = document.getElementById("btn-location-hud-text");
 
   // DOM Elements - One Accordion Container
   const scienceAccordion = document.getElementById("science-accordion");
@@ -769,6 +771,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.activeHUD = textureFilename;
 
+    if (btnLocationOverviewHUD) {
+      if (textureFilename.startsWith("hud_overview_location_")) {
+        btnLocationOverviewHUD.classList.add("active");
+        if (btnLocationHUDText) {
+          btnLocationHUDText.innerText = "General Location Overview Active";
+        }
+      } else {
+        btnLocationOverviewHUD.classList.remove("active");
+        if (btnLocationHUDText) {
+          btnLocationHUDText.innerText = "General Location Overview (3D HUD)";
+        }
+      }
+    }
+
     if (btnModalComparisonHUD) {
       if (textureFilename.startsWith("hud_overview_location_")) {
         btnModalComparisonHUD.classList.add("active");
@@ -790,6 +806,13 @@ document.addEventListener("DOMContentLoaded", () => {
     `);
 
     state.activeHUD = null;
+
+    if (btnLocationOverviewHUD) {
+      btnLocationOverviewHUD.classList.remove("active");
+      if (btnLocationHUDText) {
+        btnLocationHUDText.innerText = "General Location Overview (3D HUD)";
+      }
+    }
 
     if (btnModalComparisonHUD) {
       btnModalComparisonHUD.classList.remove("active");
@@ -1111,6 +1134,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnModalComparisonHUD) {
     btnModalComparisonHUD.addEventListener("click", () => {
+      toggleComparisonHUD(state.currentSiteKey);
+    });
+  }
+
+  if (btnLocationOverviewHUD) {
+    btnLocationOverviewHUD.addEventListener("click", () => {
+      toggleComparisonHUD(state.currentSiteKey);
+    });
+  }
+
+  if (overallScorePanel) {
+    overallScorePanel.addEventListener("click", () => {
+      toggleComparisonHUD(state.currentSiteKey);
+    });
+  }
+
+  if (marsReferencePanel) {
+    marsReferencePanel.addEventListener("click", () => {
       toggleComparisonHUD(state.currentSiteKey);
     });
   }

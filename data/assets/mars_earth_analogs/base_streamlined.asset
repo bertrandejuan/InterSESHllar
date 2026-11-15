@@ -1,0 +1,28 @@
+-- Streamlined Base Scene Asset for Mars vs Earth Project
+-- Removes heavy unused datasets: SDSS, Tully/Abell/Quasars, All Planets (Uranus, Neptune, Saturn, Jupiter, Venus, Mercury),
+-- Pluto/Charon, Milky Way volume, Exoplanets, SkyBrowser, and Asteroid/DESI addons.
+-- Keeps only the essential environment: Base blank, Sun, Earth, Mars, and GlobeBrowsing.
+
+asset.require("base_blank")
+
+-- Sun and Solar System Barycenter for lighting and orbits
+asset.require("scene/solarsystem/sun/sun")
+asset.require("scene/solarsystem/sun/layers/default_layers")
+
+-- GlobeBrowsing support and Solar System Actions
+asset.require("customization/globebrowsing")
+asset.require("actions/solarsystem_actions")
+
+asset.onInitialize(function()
+  openspace.globebrowsing.loadWMSServersFromFile(
+    openspace.absPath("${DATA}/globebrowsing_servers.lua")
+  )
+  openspace.setGuiOrder(
+    "/",
+    { "Solar System", "Examples" }
+  )
+  openspace.setGuiOrder(
+    "/Solar System",
+    { "Planets", "Sun", "Solar System Barycenter" }
+  )
+end)

@@ -1137,6 +1137,73 @@ body {
   color: #fff;
 }
 
+.btn-location-overview-hud {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 13px;
+  margin-top: 10px;
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.25), rgba(15, 23, 42, 0.9));
+  border: 1.5px solid rgba(249, 115, 22, 0.75);
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.btn-location-overview-hud:hover {
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.45), rgba(25, 40, 75, 0.95));
+  border-color: #fb923c;
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
+}
+
+.btn-location-overview-hud.active {
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.65), rgba(28, 45, 80, 0.98));
+  border-color: #ffedd5;
+  box-shadow: 0 0 14px rgba(249, 115, 22, 0.65);
+}
+
+.btn-location-overview-hud .btn-hud-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-location-overview-hud .btn-hud-icon {
+  font-size: 1.1rem;
+}
+
+.btn-location-overview-hud .hud-badge {
+  background: rgba(234, 88, 12, 0.4);
+  border: 1px solid rgba(249, 115, 22, 0.85);
+  color: #fed7aa;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-location-overview-hud.active .hud-badge {
+  background: #ea580c;
+  border-color: #ffedd5;
+  color: #fff;
+}
+
+.overall-score-panel, .mars-reference-panel {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.overall-score-panel:hover, .mars-reference-panel:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 .modal-close-btn {
   background: none;
   border: none;

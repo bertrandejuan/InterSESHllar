@@ -125,7 +125,7 @@
     </div>
 
     <!-- Overall Match Score Banner (Shown for Earth analogs; omitted on Gale Crater) -->
-    <div class="overall-score-panel" id="overall-score-panel" style="display: none;">
+    <div class="overall-score-panel" id="overall-score-panel" style="display: none;" title="Click to toggle 3D Viewport General Location Overview HUD">
       <div class="score-meta">
         <span class="score-label">Overall match to Gale Crater</span>
         <span class="score-site-rank" id="overall-score-rank">Lut Desert Planetary Analog</span>
@@ -137,13 +137,22 @@
     </div>
 
     <!-- Mars Reference Baseline Banner (Shown only on Gale Crater) -->
-    <div class="mars-reference-panel" id="mars-reference-panel">
+    <div class="mars-reference-panel" id="mars-reference-panel" title="Click to toggle 3D Viewport General Location Overview HUD">
       <span class="ref-icon">🔴</span>
       <div class="ref-text">
         <strong>Mars Reference Baseline</strong>
         <span>Curiosity REMS in-situ meteorology (4,018 daily records)</span>
       </div>
     </div>
+
+    <!-- General Location Overview 3D HUD Toggle Button (Image 2 Storyboard Requirement) -->
+    <button id="btn-location-overview-hud" class="btn-location-overview-hud active" title="Toggle 3D Viewport General Location Overview HUD">
+      <span class="btn-hud-content">
+        <span class="btn-hud-icon">🪐</span>
+        <span id="btn-location-hud-text">General Location Overview Active</span>
+      </span>
+      <span class="hud-badge">3D HUD</span>
+    </button>
   </section>
 
   <!-- One Accordion for the Science (All categories collapsed initially) -->
