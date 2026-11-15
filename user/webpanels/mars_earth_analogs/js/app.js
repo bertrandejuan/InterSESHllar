@@ -1095,6 +1095,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const targetSite = btn.getAttribute("data-site");
       if (targetSite) {
+        if (state.tourActive) pauseTour();
         selectSite(targetSite, true);
       }
     });
@@ -1108,6 +1109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const targetSite = el.getAttribute("data-site");
         if (targetSite) {
+          if (state.tourActive) pauseTour();
           selectSite(targetSite, true);
         }
       });
@@ -1348,6 +1350,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   // 10. Tour Drawer & Camera Flythrough Controls
   // ----------------------------------------------------
+  // 10. Automated Planetary Flythrough Tour Engine
+  // Orchestrates multi-planetary flythrough, category overviews,
+  // planetary continuous data overlays, and idle motion orbits
+  // ----------------------------------------------------
   if (btnToggleTour) {
     btnToggleTour.addEventListener("click", () => {
       const isOpen = drawerTour.style.display === "flex";
@@ -1357,50 +1363,330 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const tourSequence = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+  let tourCancellation = false;
 
-  function runTourStep() {
+  function setIdleMotion(enable) {
+    openSpace.executeLuaScript(`
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.IdleMotion.Apply") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleMotion.Apply", ${Boolean(enable)})
+      end
+    `);
+  }
+
+  function tourDelay(ms) {
+    return new Promise((resolve) => {
+      const speed = state.tourSpeed || 1.0;
+      const adjustedMs = Math.max(100, Math.round(ms / speed));
+      state.tourTimer = setTimeout(resolve, adjustedMs);
+    });
+  }
+
+  function updateTourStatus(text) {
+    const statusEl = document.getElementById("tour-status-text");
+    if (statusEl) {
+      statusEl.innerText = text;
+    }
+  }
+
+  function pauseTour() {
+    state.tourActive = false;
+    tourCancellation = true;
+    if (state.tourTimer) {
+      clearTimeout(state.tourTimer);
+      state.tourTimer = null;
+    }
+    setIdleMotion(false);
+    if (btnTourPlay) btnTourPlay.innerText = "▶ Start Tour";
+    updateTourStatus("Tour Paused");
+  }
+
+  async function runTourSequence(startSiteIndex = 0) {
     if (!state.tourActive) return;
+    tourCancellation = false;
 
-    const currentTarget = tourSequence[state.tourIndex];
-    selectSite(currentTarget, true);
+    const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
 
-    state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
+    try {
+      for (let i = startSiteIndex; i < siteKeys.length; i++) {
+        state.tourIndex = i;
+        const siteKey = siteKeys[i];
 
-    const baseDelayMs = 9000;
-    const actualDelay = baseDelayMs / state.tourSpeed;
-    state.tourTimer = setTimeout(runTourStep, actualDelay);
+        if (!state.tourActive || tourCancellation) break;
+
+        // --------------------------------------------------
+        // 1. MARS: GALE CRATER
+        // --------------------------------------------------
+        if (siteKey === "mars_gale") {
+          updateTourStatus("1/5 Mars: Gale Crater (Focusing)");
+          clearActiveOverlays();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("mars_gale", true);
+          // Flight animation (3.5s) + linger (3.0s) after animation finishes
+          await tourDelay(6500);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle thermal conditions overview (3 seconds) and turn off
+          updateTourStatus("1/5 Mars: Thermal Conditions Overview (3s)");
+          const thermalCat = SCIENCE_CATEGORIES.find((c) => c.key === "thermal");
+          if (thermalCat) {
+            state.openAccordionKey = "thermal";
+            renderScienceAccordion();
+            toggleCategoryHUD(thermalCat);
+            await tourDelay(3000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(400);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle thermal conditions overlay (linger for 1s after animation finishes)
+            updateTourStatus("1/5 Mars: Thermal Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(thermalCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on mars thermal conditions (1 second) and turn off overlay
+            updateTourStatus("1/5 Mars: Thermal Conditions Idle Orbit (1s)");
+            setIdleMotion(true);
+            await tourDelay(1000);
+            setIdleMotion(false);
+
+            updateTourStatus("1/5 Mars: Turning Off Overlay & Zooming In");
+            clearActiveOverlays();
+            // Zoom back into localized Gale Crater feature (2.5s) + 500ms
+            await tourDelay(3000);
+          }
+        }
+
+        // --------------------------------------------------
+        // 2. LUT DESERT (IRAN)
+        // --------------------------------------------------
+        else if (siteKey === "lut") {
+          updateTourStatus("2/5 Earth: Lut Desert (Flying from Mars)");
+          clearActiveOverlays();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("lut", true);
+          // Interplanetary flight (3.5s) + linger (3.0s) after animation finishes
+          await tourDelay(6500);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle astrobiology overview (3 seconds) and turn off
+          updateTourStatus("2/5 Lut Desert: Astrobiology Overview (3s)");
+          const astrobioCat = SCIENCE_CATEGORIES.find((c) => c.key === "astrobiology");
+          if (astrobioCat) {
+            state.openAccordionKey = "astrobiology";
+            renderScienceAccordion();
+            toggleCategoryHUD(astrobioCat);
+            await tourDelay(3000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(600);
+          }
+        }
+
+        // --------------------------------------------------
+        // 3. MCMURDO VALLEY (ANTARCTICA)
+        // --------------------------------------------------
+        else if (siteKey === "mcmurdo") {
+          updateTourStatus("3/5 Earth: McMurdo Dry Valleys (Focusing)");
+          clearActiveOverlays();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("mcmurdo", true);
+          // Flight animation (3.5s) + linger (3.0s) after animation finishes
+          await tourDelay(6500);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle atmospheric dynamics overview (3 seconds) and turn off
+          updateTourStatus("3/5 McMurdo: Atmospheric Dynamics Overview (3s)");
+          const dynamicsCat = SCIENCE_CATEGORIES.find((c) => c.key === "dynamics");
+          if (dynamicsCat) {
+            state.openAccordionKey = "dynamics";
+            renderScienceAccordion();
+            toggleCategoryHUD(dynamicsCat);
+            await tourDelay(3000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(400);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle atmospheric dynamics overlay (linger for 1s after animation finishes)
+            updateTourStatus("3/5 Earth: Dynamics Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(dynamicsCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth atmospheric dynamics (1 second) and turn off overlay
+            updateTourStatus("3/5 Earth: Atmospheric Dynamics Idle Orbit (1s)");
+            setIdleMotion(true);
+            await tourDelay(1000);
+            setIdleMotion(false);
+
+            updateTourStatus("3/5 McMurdo: Turning Off Overlay & Zooming In");
+            clearActiveOverlays();
+            // Zoom back into McMurdo feature (2.5s) + 500ms
+            await tourDelay(3000);
+          }
+        }
+
+        // --------------------------------------------------
+        // 4. ARALKUM DESERT (CENTRAL ASIA)
+        // --------------------------------------------------
+        else if (siteKey === "aralkum") {
+          updateTourStatus("4/5 Earth: Aralkum Desert (Focusing)");
+          clearActiveOverlays();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("aralkum", true);
+          // Flight animation (3.5s) + linger (3.0s) after animation finishes
+          await tourDelay(6500);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle atmospheric moisture overview (3 seconds) and turn off
+          updateTourStatus("4/5 Aralkum: Atmospheric Moisture Overview (3s)");
+          const moistureCat = SCIENCE_CATEGORIES.find((c) => c.key === "moisture");
+          if (moistureCat) {
+            state.openAccordionKey = "moisture";
+            renderScienceAccordion();
+            toggleCategoryHUD(moistureCat);
+            await tourDelay(3000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(400);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle atmospheric moisture overlay (linger for 1s after animation finishes)
+            updateTourStatus("4/5 Earth: Moisture Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(moistureCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth atmospheric moisture (1 second) and turn off overlay
+            updateTourStatus("4/5 Earth: Moisture Idle Orbit (1s)");
+            setIdleMotion(true);
+            await tourDelay(1000);
+            setIdleMotion(false);
+
+            updateTourStatus("4/5 Aralkum: Turning Off Overlay & Zooming In");
+            clearActiveOverlays();
+            // Zoom back into Aralkum feature (2.5s) + 500ms
+            await tourDelay(3000);
+          }
+        }
+
+        // --------------------------------------------------
+        // 5. SALAR DE UYUNI (BOLIVIA)
+        // --------------------------------------------------
+        else if (siteKey === "uyuni") {
+          updateTourStatus("5/5 Earth: Salar de Uyuni (Focusing)");
+          clearActiveOverlays();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("uyuni", true);
+          // Flight animation (3.5s) + linger (3.0s) after animation finishes
+          await tourDelay(6500);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle radiation overview (3 seconds) and turn off
+          updateTourStatus("5/5 Salar de Uyuni: Radiation Overview (3s)");
+          const radiationCat = SCIENCE_CATEGORIES.find((c) => c.key === "radiation");
+          if (radiationCat) {
+            state.openAccordionKey = "radiation";
+            renderScienceAccordion();
+            toggleCategoryHUD(radiationCat);
+            await tourDelay(3000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(400);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle radiation overlay (linger for 1s after animation finishes)
+            updateTourStatus("5/5 Earth: Radiation Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(radiationCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth radiation (1 second) and turn off overlay
+            updateTourStatus("5/5 Earth: Radiation Idle Orbit (1s)");
+            setIdleMotion(true);
+            await tourDelay(1000);
+            setIdleMotion(false);
+
+            updateTourStatus("5/5 Uyuni: Turning Off Overlay & Zooming In");
+            clearActiveOverlays();
+            // Zoom back into Uyuni feature (2.5s) + 500ms
+            await tourDelay(3000);
+          }
+
+          if (!state.tourActive || tourCancellation) break;
+
+          // Then idle without overlay on earth (1 second)
+          updateTourStatus("Earth: Final Idle Orbit Without Overlay (1s)");
+          setIdleMotion(true);
+          await tourDelay(1000);
+          setIdleMotion(false);
+        }
+      }
+
+      if (state.tourActive && !tourCancellation) {
+        updateTourStatus("Tour Completed Successfully");
+        state.tourActive = false;
+        if (btnTourPlay) btnTourPlay.innerText = "▶ Start Tour";
+        state.tourIndex = 0;
+      }
+    } catch (err) {
+      console.error("Tour sequence error:", err);
+      pauseTour();
+    }
   }
 
   if (btnTourPlay) {
     btnTourPlay.addEventListener("click", () => {
-      state.tourActive = true;
-      btnTourPlay.innerText = "▶ Running";
-      runTourStep();
+      if (state.tourActive) {
+        pauseTour();
+      } else {
+        state.tourActive = true;
+        btnTourPlay.innerText = "⏸ Running (Click to Pause)";
+        runTourSequence(state.tourIndex || 0);
+      }
     });
   }
 
   if (btnTourPause) {
     btnTourPause.addEventListener("click", () => {
-      state.tourActive = false;
-      btnTourPlay.innerText = "▶ Start Tour";
-      if (state.tourTimer) clearTimeout(state.tourTimer);
+      pauseTour();
     });
   }
 
   if (btnTourNext) {
     btnTourNext.addEventListener("click", () => {
-      if (state.tourTimer) clearTimeout(state.tourTimer);
-      state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
-      selectSite(tourSequence[state.tourIndex], true);
+      pauseTour();
+      const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+      state.tourIndex = (state.tourIndex + 1) % siteKeys.length;
+      state.tourActive = true;
+      if (btnTourPlay) btnTourPlay.innerText = "⏸ Running (Click to Pause)";
+      runTourSequence(state.tourIndex);
     });
   }
 
   if (btnTourPrev) {
     btnTourPrev.addEventListener("click", () => {
-      if (state.tourTimer) clearTimeout(state.tourTimer);
-      state.tourIndex = (state.tourIndex - 1 + tourSequence.length) % tourSequence.length;
-      selectSite(tourSequence[state.tourIndex], true);
+      pauseTour();
+      const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+      state.tourIndex = (state.tourIndex - 1 + siteKeys.length) % siteKeys.length;
+      state.tourActive = true;
+      if (btnTourPlay) btnTourPlay.innerText = "⏸ Running (Click to Pause)";
+      runTourSequence(state.tourIndex);
     });
   }
 
