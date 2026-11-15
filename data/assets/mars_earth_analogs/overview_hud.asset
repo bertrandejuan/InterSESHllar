@@ -1,7 +1,7 @@
 -- OpenSpace ScreenSpace Overview & Comparison HUD Asset
 -- Large, flat, screen-aligned overlay filling most of available viewport (Screenshot 3 reference)
 -- Scale = 0.82 and CartesianPosition = {-0.24, 0.03, -2.0} with Opacity = 1.0 (fully opaque against terrain)
--- FaceCamera = true, Rotation = {0,0,0} keeps edges horizontal and text upright during pans, tilts, and orbits
+-- FaceCamera = false, Rotation = {0,0,0} keeps edges strictly horizontal, flat, and screen-facing without 3D tilt
 
 local defaultTexture = asset.resource("./textures/hud_overview_location_mars_gale.png")
 
@@ -15,7 +15,7 @@ local OverviewHUD = {
   Placement = {
     CartesianPosition = { -0.24, 0.03, -2.0 },
     Scale = 0.82,
-    FaceCamera = true,
+    FaceCamera = false,
     Rotation = { 0.0, 0.0, 0.0 }
   }
 }

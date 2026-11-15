@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   const state = {
     currentSiteKey: "mars_gale",
-    currentStationId: "msl_01",
     activeCategoryFilter: "all",
     openAccordionKey: null, // All categories collapsed initially
     openStatsCatKey: null,  // Stats disclosure collapsed initially
@@ -60,12 +59,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const siteBtns = document.querySelectorAll(".site-btn");
   const btnSiteMarsGale = document.getElementById("btn-site-mars-gale");
 
-  // DOM Elements - Selected Site Header & Station Select
+  // DOM Elements - Selected Site Header
   const activeSiteTitle = document.getElementById("active-site-title");
   const activeSiteCoords = document.getElementById("active-site-coords");
   const activeSiteDesc = document.getElementById("active-site-desc");
-  const selectStation = document.getElementById("select-station");
-  const dataLevelBadge = document.getElementById("data-level-badge");
   const overallScorePanel = document.getElementById("overall-score-panel");
   const overallScoreRank = document.getElementById("overall-score-rank");
   const overallScoreNum = document.getElementById("overall-score-num");
@@ -808,7 +805,7 @@ document.addEventListener("DOMContentLoaded", () => {
           openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Rotation", { 0.0, 0.0, 0.0 })
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.FaceCamera") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.FaceCamera", true)
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.FaceCamera", false)
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Opacity") then
           openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Opacity", 1.0)
@@ -890,52 +887,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // 6. Station Selection Handler ("Change station")
+  // 6. Navigation Actions & Orbital Altitudes (Geographical Centers Only)
   // ----------------------------------------------------
-  function populateStationDropdown() {
-    if (!selectStation) return;
-    selectStation.innerHTML = "";
+  const SITE_ACTIONS = {
+    mars_gale: "mars_earth.FlyMarsGale",
+    lut: "mars_earth.FlyLut",
+    mcmurdo: "mars_earth.FlyMcMurdo",
+    aralkum: "mars_earth.FlyAralkum",
+    uyuni: "mars_earth.FlyUyuni"
+  };
 
-    const site = getActiveSiteData();
-    const stations = site.stations || [];
-
-    if (stations.length === 0) {
-      const opt = document.createElement("option");
-      opt.value = site.id;
-      opt.innerText = site.name;
-      selectStation.appendChild(opt);
-      return;
-    }
-
-    stations.forEach((st) => {
-      const opt = document.createElement("option");
-      opt.value = st.id;
-      opt.innerText = st.name;
-      opt.selected = st.id === state.currentStationId;
-      selectStation.appendChild(opt);
-    });
-
-    selectStation.onchange = () => {
-      const selectedId = selectStation.value;
-      const foundStation = stations.find((s) => s.id === selectedId);
-      if (foundStation) {
-        state.currentStationId = foundStation.id;
-
-        if (activeSiteCoords) {
-          activeSiteCoords.innerText = `Lat: ${foundStation.lat.toFixed(2)}° | Lon: ${foundStation.lon.toFixed(2)}° | Elev: ${foundStation.elevation_m}m | Globe: ${site.globe}`;
-        }
-        if (activeSiteDesc) {
-          activeSiteDesc.innerText = foundStation.desc;
-        }
-        if (dataLevelBadge) {
-          dataLevelBadge.innerText = foundStation.dataType || "Active Station In-Situ";
-        }
-
-        const globe = site.globe || "Earth";
-        openSpace.flyToGeo(globe, foundStation.lat, foundStation.lon, foundStation.alt || 2500.0, 2.0);
-      }
-    };
-  }
+  const SITE_ORBITAL_ALTITUDES = {
+    mars_gale: 550000.0,
+    lut: 850000.0,
+    mcmurdo: 650000.0,
+    aralkum: 850000.0,
+    uyuni: 650000.0
+  };
 
   // ----------------------------------------------------
   // 7. Site Navigation & Mathematical Overall Score Calculation
@@ -976,10 +944,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const isMars = site.globe === "Mars";
     const marsBaseline = getMarsBaselineData();
 
-    if (site.stations && site.stations.length > 0) {
-      state.currentStationId = site.stations[0].id;
-    }
-
     siteBtns.forEach((btn) => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
@@ -989,11 +953,6 @@ document.addEventListener("DOMContentLoaded", () => {
       activeSiteCoords.innerText = `Lat: ${site.coordinates.lat.toFixed(2)}° | Lon: ${site.coordinates.lon.toFixed(2)}° | Elev: ${site.coordinates.elevation_m}m | Globe: ${site.globe}`;
     }
     if (activeSiteDesc) activeSiteDesc.innerText = site.desc;
-
-    populateStationDropdown();
-    if (dataLevelBadge) {
-      dataLevelBadge.innerText = isMars ? "Curiosity REMS Station" : "Regional Aggregate";
-    }
 
     // Dynamic Mathematical Overall Match Score
     if (isMars) {
@@ -1020,8 +979,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const globe = site.globe || "Earth";
       const lat = site.coordinates.lat;
       const lon = site.coordinates.lon;
-      const alt = isMars ? 35000.0 : 25000.0;
-      openSpace.flyToGeo(globe, lat, lon, alt, 2.5);
+      const alt = SITE_ORBITAL_ALTITUDES[siteKey] || (isMars ? 550000.0 : 750000.0);
+      const actionName = SITE_ACTIONS[siteKey];
+
+      const flightLua = `
+        if openspace.action and openspace.action.hasAction("${actionName}") then
+          openspace.action.triggerAction("${actionName}")
+        else
+          if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
+            openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "${globe}")
+            openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+          end
+          openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, 3.5)
+        end
+      `;
+      openSpace.executeLuaScript(flightLua);
     }
 
     // Isolate planetary tags and labels so labels never bleed across interplanetary space
@@ -1057,9 +1029,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   siteBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      selectSite(btn.dataset.site, true);
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetSite = btn.getAttribute("data-site");
+      if (targetSite) {
+        selectSite(targetSite, true);
+      }
     });
+  });
+
+  // Explicit ID click bindings to guarantee top button responsiveness
+  ["btn-site-mars-gale", "btn-site-lut", "btn-site-mcmurdo", "btn-site-aralkum", "btn-site-uyuni"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetSite = el.getAttribute("data-site");
+        if (targetSite) {
+          selectSite(targetSite, true);
+        }
+      });
+    }
   });
 
   // ----------------------------------------------------

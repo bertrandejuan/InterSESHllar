@@ -107,8 +107,14 @@ class OpenSpaceClient {
     this.executeLuaScript(luaScript, false);
   }
 
-  flyToGeo(globe, lat, lon, alt = 350000, duration = 4.0) {
-    const script = `openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, ${duration})`;
+  flyToGeo(globe, lat, lon, alt = 650000, duration = 3.5) {
+    const script = `
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "${globe}")
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+      end
+      openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, ${duration})
+    `;
     return this.executeLuaScript(script);
   }
 

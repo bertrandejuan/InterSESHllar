@@ -51,6 +51,10 @@ local Actions = {
     Identifier = "mars_earth.FlyMarsGale",
     Name = "Fly to Mars: Gale Crater",
     Command = [[
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Mars")
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+      end
       openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 550000, 4.0)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", true)
@@ -75,6 +79,10 @@ local Actions = {
     Identifier = "mars_earth.FlyAralkum",
     Name = "Fly to Earth: Aralkum Desert",
     Command = [[
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+      end
       openspace.navigation.flyToGeo('Earth', 44.80, 59.80, 850000, 4.0)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
@@ -97,6 +105,10 @@ local Actions = {
     Identifier = "mars_earth.FlyMcMurdo",
     Name = "Fly to Earth: McMurdo Dry Valleys",
     Command = [[
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+      end
       openspace.navigation.flyToGeo('Earth', -77.50, 162.00, 650000, 4.0)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
@@ -119,6 +131,10 @@ local Actions = {
     Identifier = "mars_earth.FlyLut",
     Name = "Fly to Earth: Lut Desert",
     Command = [[
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+      end
       openspace.navigation.flyToGeo('Earth', 30.50, 58.80, 850000, 4.0)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
@@ -141,6 +157,10 @@ local Actions = {
     Identifier = "mars_earth.FlyUyuni",
     Name = "Fly to Earth: Salar de Uyuni",
     Command = [[
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+      end
       openspace.navigation.flyToGeo('Earth', -20.15, -67.60, 650000, 4.0)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
