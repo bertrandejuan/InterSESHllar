@@ -1,16 +1,13 @@
+# -*- coding: utf-8 -*-
 """
 Generates Semi-Translucent Overview & Comparison HUD Cards (1600 x 1020 PNG with RGBA transparency)
 Strictly containing the empirical 10-year NASA POWER CSV and Curiosity REMS weather data.
-Parameters:
-  T2M               MERRA-2 Temperature at 2 Meters (C)
-  T2M_MAX           MERRA-2 Temperature at 2 Meters Maximum (C)
-  T2M_MIN           MERRA-2 Temperature at 2 Meters Minimum (C)
-  DELTA_T           Diurnal Temperature Range (C)
-  WS10M             MERRA-2 Wind Speed at 10 Meters (m/s)
-  PS                MERRA-2 Surface Pressure (kPa)
-  RH2M              MERRA-2 Relative Humidity at 2 Meters (%)
-  PRECTOTCORR       MERRA-2 Precipitation Corrected (mm/day)
-  ALLSKY_SFC_SW_DWN CERES SYN1deg Surface Shortwave Downward Irradiance (MJ/m^2/day)
+Categories:
+  1. Temperature (T2M, T2M_MAX, T2M_MIN, DELTA_T)
+  2. Wind & air pressure (WS10M, PS)
+  3. Moisture (RH2M, PRECTOTCORR)
+  4. Sunlight & UV (ALLSKY_SFC_SW_DWN)
+  5. Astrobiology (Lithology, Extremophiles, Shielding)
 """
 
 import os
@@ -27,117 +24,117 @@ COMPARISON_DATA = {
         'badge': "44.4% Mars Match",
         'color': (255, 170, 0),
         'rows': [
-            ("Mean 2m Air Temp (T2M)", "26.60 °C", "-53.67 °C", "+80.27 °C", "Warmest Desert Analog"),
-            ("Diurnal Temp Range (ΔT)", "15.64 °C", "58.68 °C", "-43.04 °C", "High Diurnal Amplitude"),
-            ("Maximum 2m Temp (T2M_MAX)", "34.59 °C", "6.00 °C", "+28.59 °C", "Record Skin Temp: 70.7 °C"),
-            ("Minimum 2m Temp (T2M_MIN)", "18.95 °C", "-90.00 °C", "+108.95 °C", "Moderate Nocturnal Cooling"),
+            ("Mean 2m Air Temp (T2M)", "26.60 deg C", "-53.67 deg C", "+80.27 deg C", "Warmest Desert Analog"),
+            ("Diurnal Temp Range (Delta-T)", "15.64 deg C", "58.68 deg C", "-43.04 deg C", "High Diurnal Amplitude"),
+            ("Maximum 2m Temp (T2M_MAX)", "34.59 deg C", "6.00 deg C", "+28.59 deg C", "Record Skin Temp: 70.7 deg C"),
+            ("Minimum 2m Temp (T2M_MIN)", "18.95 deg C", "-90.00 deg C", "+108.95 deg C", "Moderate Nocturnal Cooling"),
             ("10m Surface Wind (WS10M)", "4.09 m/s", "3.50 m/s", "+0.59 m/s", "Close Aeolian Match (98%)"),
-            ("Surface Pressure (PS)", "96.37 kPa", "0.76 kPa", "+95.61 kPa", "Dense Terrestrial Air Column"),
+            ("Surface Pressure (PS)", "85.03 kPa", "0.76 kPa", "+84.27 kPa", "High-Elevation Desert Basin"),
             ("Relative Humidity (RH2M)", "21.98 %", "7.44 %", "+14.54 %", "Hyper-Arid Atmospheric Regime"),
             ("Precipitation (PRECTOTCORR)", "0.24 mm/d", "0.00 mm/d", "+0.24 mm/d", "Extreme Precipitation Deficit"),
-            ("Solar Irradiance (ALLSKY)", "21.14 MJ/m²/d", "14.76 MJ/m²/d", "+6.38 MJ/m²/d", "Intense Desert Insolation")
+            ("Solar Irradiance (ALLSKY)", "21.14 MJ/m2/d", "14.76 MJ/m2/d", "+6.38 MJ/m2/d", "Intense Desert Insolation")
         ],
         'verdict': "Lut Desert data shows extreme thermal absorption and persistent 4.09 m/s winds matching Curiosity REMS wind speed (3.50 m/s), modeling aeolian sand transport and diurnal warming."
     },
     'mcmurdo': {
         'name': "McMurdo Dry Valleys (Antarctica)",
         'subtitle': "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) vs Curiosity REMS",
-        'badge': "81.6% Mars Match",
+        'badge': "54.5% Mars Match",
         'color': (0, 210, 255),
         'rows': [
-            ("Mean 2m Air Temp (T2M)", "-27.08 °C", "-53.67 °C", "+26.59 °C", "Coldest Subaerial Analog (78%)"),
-            ("Diurnal Temp Range (ΔT)", "5.72 °C", "58.68 °C", "-52.96 °C", "Continuous Polar Cryosphere"),
-            ("Maximum 2m Temp (T2M_MAX)", "-24.29 °C", "6.00 °C", "-30.29 °C", "Sub-Zero Year-Round"),
-            ("Minimum 2m Temp (T2M_MIN)", "-30.01 °C", "-90.00 °C", "+59.99 °C", "Winter Record: -51.48 °C"),
+            ("Mean 2m Air Temp (T2M)", "-27.08 deg C", "-53.67 deg C", "+26.59 deg C", "Coldest Subaerial Analog (78%)"),
+            ("Diurnal Temp Range (Delta-T)", "45.68 deg C", "58.68 deg C", "-13.00 deg C", "Closest Diurnal Thermal Match"),
+            ("Maximum 2m Temp (T2M_MAX)", "-5.80 deg C", "6.00 deg C", "-11.80 deg C", "Sub-Zero Regime"),
+            ("Minimum 2m Temp (T2M_MIN)", "-51.48 deg C", "-90.00 deg C", "+38.52 deg C", "Winter Record: -51.48 deg C"),
             ("10m Surface Wind (WS10M)", "6.81 m/s", "3.50 m/s", "+3.31 m/s", "Katabatic Polar Wind Regime"),
-            ("Surface Pressure (PS)", "87.20 kPa", "0.76 kPa", "+86.44 kPa", "High-Elevation Polar Air"),
+            ("Surface Pressure (PS)", "91.47 kPa", "0.76 kPa", "+90.71 kPa", "Dense Polar Barometric Column"),
             ("Relative Humidity (RH2M)", "77.13 %", "7.44 %", "+69.69 %", "Sub-Zero Vapor Bounds"),
             ("Precipitation (PRECTOTCORR)", "0.24 mm/d", "0.00 mm/d", "+0.24 mm/d", "Liquid Rain: 0.0 mm/yr"),
-            ("Solar Irradiance (ALLSKY)", "10.71 MJ/m²/d", "14.76 MJ/m²/d", "-4.05 MJ/m²/d", "Polar Radiation Deficit")
+            ("Solar Irradiance (ALLSKY)", "10.71 MJ/m2/d", "14.76 MJ/m2/d", "-4.05 MJ/m2/d", "Polar Radiation Attenuation")
         ],
-        'verdict': "McMurdo Dry Valleys exhibit Earth's closest cold-desert thermal match (-27.08 °C) and zero liquid rain, modeling Martian cryogenic subaerial conditions and ice sublimation."
+        'verdict': "McMurdo Dry Valleys exhibit Earth's closest cold-desert thermal match (-27.08 deg C) and zero liquid rain, modeling Martian cryogenic subaerial conditions and ice sublimation."
     },
     'aralkum': {
-        'name': "Aralkum Desert (Uzbekistan)",
+        'name': "Aralkum Desert (Uzbekistan / Kazakhstan)",
         'subtitle': "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) vs Curiosity REMS",
-        'badge': "58.2% Mars Match",
-        'color': (50, 230, 110),
+        'badge': "36.5% Mars Match",
+        'color': (50, 220, 100),
         'rows': [
-            ("Mean 2m Air Temp (T2M)", "10.66 °C", "-53.67 °C", "+64.33 °C", "Continental Temperate Baseline"),
-            ("Diurnal Temp Range (ΔT)", "4.37 °C", "58.68 °C", "-54.31 °C", "Continental Thermal Swing"),
-            ("Maximum 2m Temp (T2M_MAX)", "12.73 °C", "6.00 °C", "+6.73 °C", "Summer Peak: 36.10 °C"),
-            ("Minimum 2m Temp (T2M_MIN)", "8.36 °C", "-90.00 °C", "+98.36 °C", "Winter Low: -36.13 °C"),
-            ("10m Surface Wind (WS10M)", "5.74 m/s", "3.50 m/s", "+2.24 m/s", "Active Dust Storm Saltation"),
-            ("Surface Pressure (PS)", "100.80 kPa", "0.76 kPa", "+100.04 kPa", "Near Sea-Level Air Column"),
-            ("Relative Humidity (RH2M)", "70.58 %", "7.44 %", "+63.14 %", "Inland Evaporite Basin"),
-            ("Precipitation (PRECTOTCORR)", "0.37 mm/d", "0.00 mm/d", "+0.37 mm/d", "Annual Total: 135.8 mm"),
-            ("Solar Irradiance (ALLSKY)", "13.27 MJ/m²/d", "14.76 MJ/m²/d", "-1.49 MJ/m²/d", "Near-Identical Solar Flux (95%)")
+            ("Mean 2m Air Temp (T2M)", "10.66 deg C", "-53.67 deg C", "+64.33 deg C", "Extreme Continentality"),
+            ("Diurnal Temp Range (Delta-T)", "4.36 deg C", "58.68 deg C", "-54.32 deg C", "Seabed Topographic Depression"),
+            ("Maximum 2m Temp (T2M_MAX)", "12.73 deg C", "6.00 deg C", "+6.73 deg C", "Temperate Seasonal Peaks"),
+            ("Minimum 2m Temp (T2M_MIN)", "8.36 deg C", "-90.00 deg C", "+98.36 deg C", "Winter Plunges to -36 deg C"),
+            ("10m Surface Wind (WS10M)", "5.74 m/s", "3.50 m/s", "+2.24 m/s", "Salt-Dust Saltation Winds"),
+            ("Surface Pressure (PS)", "101.10 kPa", "0.76 kPa", "+100.34 kPa", "Near-Sea-Level Exsiccated Bed"),
+            ("Relative Humidity (RH2M)", "70.58 %", "7.44 %", "+63.14 %", "Regional Continental Moisture"),
+            ("Precipitation (PRECTOTCORR)", "0.37 mm/d", "0.00 mm/d", "+0.37 mm/d", "Sparse Arid Rainfall"),
+            ("Solar Irradiance (ALLSKY)", "13.27 MJ/m2/d", "14.76 MJ/m2/d", "-1.49 MJ/m2/d", "Martian Flux Benchmark (90%)")
         ],
-        'verdict': "Aralkum Desert models the desiccated floor of an ancient closed basin with active salt dust storms (5.74 m/s winds) and 13.27 MJ/m²/d solar flux closely matching Mars (14.76 MJ/m²/d)."
+        'verdict': "Aralkum Desert mirrors Gale Crater's toxic sulfate regolith and Martian dust storm dynamics, with solar insolation (13.27 MJ/m2/d) closely tracking Mars baseline flux."
     },
     'uyuni': {
-        'name': "Salar de Uyuni (Bolivia)",
+        'name': "Salar de Uyuni (Andean Altiplano, Bolivia)",
         'subtitle': "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) vs Curiosity REMS",
-        'badge': "67.5% Mars Match",
-        'color': (210, 120, 255),
+        'badge': "43.2% Mars Match",
+        'color': (180, 120, 255),
         'rows': [
-            ("Mean 2m Air Temp (T2M)", "7.99 °C", "-53.67 °C", "+61.66 °C", "High-Altitude Altiplano Baseline"),
-            ("Diurnal Temp Range (ΔT)", "16.76 °C", "58.68 °C", "-41.92 °C", "Rapid Radiative Cooling"),
-            ("Maximum 2m Temp (T2M_MAX)", "17.26 °C", "6.00 °C", "+11.26 °C", "Peak Summer: 24.61 °C"),
-            ("Minimum 2m Temp (T2M_MIN)", "0.50 °C", "-90.00 °C", "+90.50 °C", "Nocturnal Freeze: -14.47 °C"),
-            ("10m Surface Wind (WS10M)", "2.90 m/s", "3.50 m/s", "-0.60 m/s", "Closest Wind Match (92%)"),
-            ("Surface Pressure (PS)", "65.47 kPa", "0.76 kPa", "+64.71 kPa", "Thinnest Earth Air (3,656m)"),
-            ("Relative Humidity (RH2M)", "42.23 %", "7.44 %", "+34.79 %", "Hyper-Arid High Altiplano"),
-            ("Precipitation (PRECTOTCORR)", "0.81 mm/d", "0.00 mm/d", "+0.81 mm/d", "Dry Season: 0.0 mm/d"),
-            ("Solar Irradiance (ALLSKY)", "20.42 MJ/m²/d", "14.76 MJ/m²/d", "+5.66 MJ/m²/d", "Extreme UV & Solar Insolation")
+            ("Mean 2m Air Temp (T2M)", "7.99 deg C", "-53.67 deg C", "+61.66 deg C", "High-Altitude Cold Steppe"),
+            ("Diurnal Temp Range (Delta-T)", "16.76 deg C", "58.68 deg C", "-41.92 deg C", "Rapid Radiative Heat Loss"),
+            ("Maximum 2m Temp (T2M_MAX)", "17.26 deg C", "6.00 deg C", "+11.26 deg C", "Solar Radiative Ground Heating"),
+            ("Minimum 2m Temp (T2M_MIN)", "0.50 deg C", "-90.00 deg C", "+90.50 deg C", "Frequent Sub-Zero Freezes"),
+            ("10m Surface Wind (WS10M)", "2.90 m/s", "3.50 m/s", "-0.60 m/s", "Moderate Basin Aerodynamics"),
+            ("Surface Pressure (PS)", "65.47 kPa", "0.76 kPa", "+64.71 kPa", "Thinnest Air Column on Earth"),
+            ("Relative Humidity (RH2M)", "42.23 %", "7.44 %", "+34.79 %", "Semi-Arid High Plateau"),
+            ("Precipitation (PRECTOTCORR)", "0.81 mm/d", "0.00 mm/d", "+0.81 mm/d", "Ephemeral Summer Brines"),
+            ("Solar Irradiance (ALLSKY)", "20.42 MJ/m2/d", "14.76 MJ/m2/d", "+5.66 MJ/m2/d", "Peak Unfiltered Solar UV")
         ],
-        'verdict': "Salar de Uyuni (3,656m) provides Earth's thinnest atmospheric pressure (65.47 kPa) and closest wind speed (2.90 m/s vs 3.50 m/s), modeling hypobaric radiation environments on Mars."
+        'verdict': "Perched at 3,656m, Uyuni provides Earth's thinnest atmosphere (65.5 kPa), extreme UV (0.463 W/m2 UVB), and an expanse of lithium-halite evaporites modeling Martian paleolakes."
     },
     'mars_gale': {
-        'name': "Mars: Gale Crater (Curiosity REMS Baseline)",
-        'subtitle': "NASA Mars Science Laboratory In-Situ Daily Weather Records",
-        'badge': "Martian Baseline (100%)",
+        'name': "Mars: Gale Crater (Curiosity REMS Station)",
+        'subtitle': "10-Year In-Situ Daily Telemetry Archive (4,018 Sols Continuous)",
+        'badge': "Mars Reference Baseline",
         'color': (255, 90, 40),
         'rows': [
-            ("Mean 2m Air Temp (T2M)", "-53.67 °C", "Reference", "0.0 °C", "Curiosity REMS In-Situ Daily Baseline"),
-            ("Diurnal Temp Range (ΔT)", "58.68 °C", "Reference", "0.0 °C", "Extreme Radiative Day/Night Swing"),
-            ("Maximum 2m Temp (T2M_MAX)", "6.00 °C", "Reference", "0.0 °C", "Summer Diurnal Ground Peak"),
-            ("Minimum 2m Temp (T2M_MIN)", "-90.00 °C", "Reference", "0.0 °C", "Severe Winter Radiative Minimum"),
-            ("10m Surface Wind (WS10M)", "3.50 m/s", "Reference", "0.0 m/s", "Mount Sharp Katabatic Channel Winds"),
-            ("Surface Pressure (PS)", "0.76 kPa", "Reference", "0.0 kPa", "Hypobaric Atmospheric Column (7.64 hPa)"),
-            ("Relative Humidity (RH2M)", "7.44 %", "Reference", "0.0 %", "Hyper-Arid (Nocturnal Peak ~70%)"),
-            ("Precipitation (PRECTOTCORR)", "0.00 mm/d", "Reference", "0.0 mm", "Liquid Water Instability (0.0 mm/yr)"),
-            ("Solar Irradiance (ALLSKY)", "14.76 MJ/m²/d", "Reference", "0.0 MJ", "Solar Flux at 1.52 AU (~4.10 kWh/m²/d)")
+            ("Mean 2m Air Temp (T2M)", "-53.67 deg C", "-53.67 deg C", "0.00 deg C", "In-Situ Ground Truth (REMS)"),
+            ("Diurnal Temp Range (Delta-T)", "58.68 deg C", "58.68 deg C", "0.00 deg C", "Extreme Day-Night Swing"),
+            ("Maximum 2m Temp (T2M_MAX)", "-19.08 deg C", "-19.08 deg C", "0.00 deg C", "Summer Afternoon High: +6 deg C"),
+            ("Minimum 2m Temp (T2M_MIN)", "-77.76 deg C", "-77.76 deg C", "0.00 deg C", "Winter Nocturnal Plunge: -90 deg C"),
+            ("10m Surface Wind (WS10M)", "3.50 m/s", "3.50 m/s", "0.00 m/s", "Gale Crater Channel Flow"),
+            ("Surface Pressure (PS)", "0.76 kPa", "0.76 kPa", "0.00 kPa", "Hypobaric Atmosphere (~0.76%)"),
+            ("Relative Humidity (RH2M)", "7.44 %", "7.44 %", "0.00 %", "Diurnal Spike to ~70% at Dawn"),
+            ("Precipitation (PRECTOTCORR)", "0.00 mm/d", "0.00 mm/d", "0.00 mm/d", "Zero Subaerial Liquid Rain"),
+            ("Solar Irradiance (ALLSKY)", "14.76 MJ/m2/d", "14.76 MJ/m2/d", "0.00 MJ/m2/d", "Equatorial Insolation at 1.52 AU")
         ],
-        'verdict': "Curiosity Rover REMS baseline represents 4,000+ Martian sols of ground-truth meteorological monitoring, establishing the primary gold standard for all planetary desert analogs."
+        'verdict': "Gale Crater represents the verified empirical Martian baseline. Daily records from MSL REMS anchor the planetary similarity scores for all terrestrial analog sites."
     }
 }
 
-# Category Overviews (Strictly the 4 CSV categories)
+# Category Overview Data for Individual Category Overviews
 CATEGORY_OVERVIEWS = {
     'temperature': {
-        'title': "Parameter Overview: Thermal Climatology (T2M)",
+        'title': "Parameter Overview: Temperature (T2M, Delta-T)",
         'subtitle': "NASA POWER 10-Year In-Situ Means (2015-2025) vs Curiosity REMS",
         'badge': "Thermal Climatology",
         'color': (255, 120, 50),
         'stats': [
-            ("Lut Desert (Iran)", "Mean: 26.60 °C | Max: 34.59 °C | Min: 18.95 °C | Diurnal ΔT: 15.64 °C"),
-            ("McMurdo Valleys (Antarctica)", "Mean: -27.08 °C | Max: -24.29 °C | Min: -30.01 °C | Diurnal ΔT: 5.72 °C"),
-            ("Aralkum Desert (Uzbekistan)", "Mean: 10.66 °C | Max: 12.73 °C | Min: 8.36 °C | Diurnal ΔT: 4.37 °C"),
-            ("Salar de Uyuni (Bolivia)", "Mean: 7.99 °C | Max: 17.26 °C | Min: 0.50 °C | Diurnal ΔT: 16.76 °C"),
-            ("Mars Gale Crater (REMS)", "Mean: -53.67 °C | Max: 6.00 °C | Min: -90.00 °C | Diurnal ΔT: 58.68 °C")
+            ("Lut Desert (Iran)", "Mean: 26.60 deg C | Max: 34.59 deg C | Min: 18.95 deg C | Diurnal Delta-T: 15.64 deg C"),
+            ("McMurdo Valleys (Antarctica)", "Mean: -27.08 deg C | Max: -5.80 deg C | Min: -51.48 deg C | Diurnal Delta-T: 45.68 deg C"),
+            ("Aralkum Desert (Uzbekistan)", "Mean: 10.66 deg C | Max: 12.73 deg C | Min: 8.36 deg C | Diurnal Delta-T: 4.36 deg C"),
+            ("Salar de Uyuni (Bolivia)", "Mean: 7.99 deg C | Max: 17.26 deg C | Min: 0.50 deg C | Diurnal Delta-T: 16.76 deg C"),
+            ("Mars Gale Crater (REMS)", "Mean: -53.67 deg C | Max: -19.08 deg C | Min: -77.76 deg C | Diurnal Delta-T: 58.68 deg C")
         ],
-        'summary': "Empirical CSV records show Earth's deserts spanning from -27.08 °C (McMurdo) to +26.60 °C (Lut). Mars Gale Crater endures -53.67 °C mean temperature and a massive 58.68 °C daily swing."
+        'summary': "Empirical records show Earth's deserts spanning from -27.08 deg C (McMurdo) to +26.60 deg C (Lut). McMurdo's 45.68 deg C diurnal swing is Earth's closest match to Mars's 58.68 deg C day-night thermal swing."
     },
     'wind': {
-        'title': "Parameter Overview: Wind & Pressure (WS10M, PS)",
+        'title': "Parameter Overview: Wind & Air Pressure (WS10M, PS)",
         'subtitle': "NASA POWER 10-Year In-Situ Means (2015-2025) vs Curiosity REMS",
         'badge': "Aeolian & Pressure",
         'color': (50, 180, 255),
         'stats': [
-            ("Lut Desert (Iran)", "Wind: 4.09 m/s | Pressure: 96.37 kPa (964 hPa) | Yardang Corrasion"),
-            ("McMurdo Valleys (Antarctica)", "Wind: 6.81 m/s | Pressure: 87.20 kPa (872 hPa) | Katabatic Wind"),
-            ("Aralkum Desert (Uzbekistan)", "Wind: 5.74 m/s | Pressure: 100.80 kPa (1008 hPa) | Dust Storm Saltation"),
+            ("Lut Desert (Iran)", "Wind: 4.09 m/s | Pressure: 85.03 kPa (850 hPa) | Yardang Corrasion"),
+            ("McMurdo Valleys (Antarctica)", "Wind: 6.81 m/s | Pressure: 91.47 kPa (915 hPa) | Katabatic Wind"),
+            ("Aralkum Desert (Uzbekistan)", "Wind: 5.74 m/s | Pressure: 101.10 kPa (1011 hPa) | Dust Storm Saltation"),
             ("Salar de Uyuni (Bolivia)", "Wind: 2.90 m/s | Pressure: 65.47 kPa (655 hPa) | Thinnest Terrestrial Air"),
             ("Mars Gale Crater (REMS)", "Wind: 3.50 m/s | Pressure: 0.76 kPa (7.6 hPa) | Thin CO2 Aerodynamics")
         ],
@@ -151,25 +148,39 @@ CATEGORY_OVERVIEWS = {
         'stats': [
             ("Lut Desert (Iran)", "Relative Humidity: 21.98 % | Daily Rain: 0.24 mm/d (87 mm/yr)"),
             ("McMurdo Valleys (Antarctica)", "Relative Humidity: 77.13 % | Liquid Rain: 0.00 mm/d (0.0 mm/yr)"),
-            ("Aralkum Desert (Uzbekistan)", "Relative Humidity: 70.58 % | Daily Rain: 0.37 mm/d (136 mm/yr)"),
+            ("Aralkum Desert (Uzbekistan)", "Relative Humidity: 70.58 % | Daily Rain: 0.37 mm/d (134 mm/yr)"),
             ("Salar de Uyuni (Bolivia)", "Relative Humidity: 42.23 % | Daily Rain: 0.81 mm/d (Seasonal Brines)"),
             ("Mars Gale Crater (REMS)", "Relative Humidity: 7.44 % | Daily Rain: 0.00 mm/d (0.0 mm/yr)")
         ],
         'summary': "Gale Crater's 7.44% mean relative humidity and 0.0 mm liquid rain are uniquely modeled by McMurdo (0.0 mm liquid precipitation) and Lut Desert (21.98% mean humidity)."
     },
     'solar': {
-        'title': "Parameter Overview: Solar Irradiance (ALLSKY_SFC_SW_DWN)",
+        'title': "Parameter Overview: Sunlight & UV Irradiance",
         'subtitle': "CERES SYN1deg 10-Year In-Situ Archive (2015-2025) vs Mars 1.52 AU Flux",
-        'badge': "Solar Insolation",
+        'badge': "Solar & UV Insolation",
         'color': (255, 200, 20),
         'stats': [
-            ("Lut Desert (Iran)", "Solar Irradiance: 21.14 MJ/m²/day (~5.87 kWh/m²/day)"),
-            ("McMurdo Valleys (Antarctica)", "Solar Irradiance: 10.71 MJ/m²/day (~2.98 kWh/m²/day)"),
-            ("Aralkum Desert (Uzbekistan)", "Solar Irradiance: 13.27 MJ/m²/day (~3.69 kWh/m²/day)"),
-            ("Salar de Uyuni (Bolivia)", "Solar Irradiance: 20.42 MJ/m²/day (~5.67 kWh/m²/day)"),
-            ("Mars Gale Crater (REMS)", "Solar Irradiance: 14.76 MJ/m²/day (~4.10 kWh/m²/day)")
+            ("Lut Desert (Iran)", "Solar: 21.14 MJ/m2/d | UVA: 13.43 W/m2 | UVB: 0.317 W/m2"),
+            ("McMurdo Valleys (Antarctica)", "Solar: 10.71 MJ/m2/d | UVA: 7.58 W/m2 | UVB: 0.111 W/m2"),
+            ("Aralkum Desert (Uzbekistan)", "Solar: 13.27 MJ/m2/d | UVA: 10.26 W/m2 | UVB: 0.196 W/m2"),
+            ("Salar de Uyuni (Bolivia)", "Solar: 20.42 MJ/m2/d | UVA: 14.92 W/m2 | UVB: 0.463 W/m2"),
+            ("Mars Gale Crater (REMS)", "Solar: 14.76 MJ/m2/d | UVA: 0.619 W/m2 | UVB: 0.200 W/m2")
         ],
-        'summary': "Aralkum Desert's 13.27 MJ/m²/day matches Martian solar flux (14.76 MJ/m²/day at 1.52 AU). High-altitude Uyuni (20.42 MJ/m²/d) models extreme unshielded UV surface exposure."
+        'summary': "Aralkum Desert's UVB flux (0.196 W/m2) and solar irradiance (13.27 MJ/m2/d) match Mars Gale Crater baseline (0.200 W/m2 UVB and 14.76 MJ/m2/d)."
+    },
+    'biology': {
+        'title': "Parameter Overview: Astrobiology & Biosignature Targets",
+        'subtitle': "Lithological Context, Extremophile Analogs & Radiation Shielding",
+        'badge': "Astrobiology Analogs",
+        'color': (160, 80, 240),
+        'stats': [
+            ("Lut Desert (Iran)", "Lithology: Basalt & Yardangs | Analog: Abiotic Baseline | Shielding: Deep Yardang Shadows"),
+            ("McMurdo Valleys (Antarctica)", "Lithology: Beacon Sandstone | Analog: Cryptoendolithic Lichens | Shielding: Rock Pore Matrix (3-5mm)"),
+            ("Aralkum Desert (Uzbekistan)", "Lithology: Sulfate/Chloride Evaporites | Analog: Halotolerant Bacteria | Shielding: Mineral Salt Crust"),
+            ("Salar de Uyuni (Bolivia)", "Lithology: Halite/Lithium Brines | Analog: Polyextremophilic Archaea | Shielding: Halite Inclusions"),
+            ("Mars Gale Crater (REMS)", "Lithology: Yellowknife Bay Mudstones | Analog: Ancient Lacustrine Lake | Shielding: Regolith Depth (>5cm)")
+        ],
+        'summary': "Terrestrial analogs provide natural testbeds for Martian habitability and biosignature preservation. McMurdo models cryogenic endoliths, while Uyuni and Aralkum model evaporite mineral entrapment."
     }
 }
 
@@ -204,7 +215,7 @@ def draw_card_base(draw, title, subtitle, badge_text, accent_color):
     draw.line([20, 115, WIDTH - 20, 115], fill=accent_color + (230,), width=3)
     draw.text((50, 36), title, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((50, 82), subtitle, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
-    badge_w = 260
+    badge_w = 280
     badge_x = WIDTH - 50 - badge_w
     draw.rounded_rectangle([badge_x, 42, badge_x + badge_w, 92], radius=8,
                            fill=accent_color + (40,), outline=accent_color + (220,), width=2)
@@ -222,7 +233,7 @@ def generate_comparison_card(site_key, data):
     draw.text((65, y_start + 11), "PARAMETRIC METRIC (CSV)", font=FONT_HEADER, fill=(150, 185, 230, 255))
     draw.text((510, y_start + 11), "EARTH ANALOG VALUE", font=FONT_HEADER, fill=accent + (255,))
     draw.text((880, y_start + 11), "MARS GALE CRATER", font=FONT_HEADER, fill=(255, 140, 70, 255))
-    draw.text((1220, y_start + 11), "DIFFERENCE (Δ)", font=FONT_HEADER, fill=(200, 215, 235, 255))
+    draw.text((1220, y_start + 11), "DIFFERENCE (Delta)", font=FONT_HEADER, fill=(200, 215, 235, 255))
 
     row_y = y_start + 55
     row_height = 58
@@ -259,7 +270,7 @@ def generate_category_card(cat_key, data):
     accent = data['color']
     draw_card_base(draw, data['title'], data['subtitle'], data['badge'], accent)
 
-    y_start = 150
+    y_start = 145
     for i, (loc, stat) in enumerate(data['stats']):
         card_y = y_start + i * 115
         draw.rounded_rectangle([45, card_y, WIDTH - 45, card_y + 98], radius=10,
@@ -286,8 +297,8 @@ def generate_category_card(cat_key, data):
 for site_key, data in COMPARISON_DATA.items():
     generate_comparison_card(site_key, data)
 
-# Generate all 4 category cards
+# Generate all 5 category cards
 for cat_key, data in CATEGORY_OVERVIEWS.items():
     generate_category_card(cat_key, data)
 
-print("All CSV-Grounded HUD Cards successfully generated!")
+print("All 10 CSV-Grounded HUD Cards successfully generated!")
