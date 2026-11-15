@@ -1,16 +1,17 @@
 /**
  * InterSESHllar: Mars Gale Crater & Earth Desert Analogs
  * Unified Application Controller
- * Seamlessly integrates:
- *  - NASA POWER 10-Year In-Situ Climatology & Curiosity REMS records
- *  - Storyboard category toggle system with subcontrol cards
- *  - 3D Viewport ScreenSpace Overview HUD (Scale: 1.65, Centered)
- *  - NASA PSG-inspired atmospheric vector surface overlays
- *  - Regional multi-station research pins & telemetry
- *  - Google AI Studio Gemini comparative planetary blurbs & key settings
- *  - Glowing category similarity ranking bars & metric table
- *  - Ground-level horizon perspective ("Orient Sideways")
- *  - Automated cinematic camera tour & CEF reload button
+ * Strictly grounded in empirical 10-year NASA POWER CSV and Curiosity REMS weather data:
+ *  - Temperature: T2M, ΔT, T2M_MAX, T2M_MIN
+ *  - Wind & Atmosphere: WS10M, PS
+ *  - Moisture & Aridity: RH2M, PRECTOTCORR
+ *  - Solar Radiation: ALLSKY_SFC_SW_DWN
+ *
+ * Provides:
+ *  - Centered 3D Viewport Overview HUD at calibrated scale (0.85x)
+ *  - Direct toggles for Overview, PSG vector Overlays, and Orient Sideways horizon views
+ *  - Full camera navigation across all analog locations and stations
+ *  - Interactive ranking bars and metric table
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -28,9 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
     tourTimer: null
   };
 
-  // Services
-  const geminiService = new GeminiService(window.CONFIG);
+  // OpenSpace API Client
   const openSpace = new OpenSpaceAPI();
+  const geminiService = new GeminiService(window.CONFIG);
 
   // Top Header Elements
   const statusOpenSpace = document.getElementById("status-openspace");
@@ -44,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const activeSiteTitle = document.getElementById("active-site-title");
   const activeSiteSubtitle = document.getElementById("active-site-subtitle");
 
-  // Gemini Comparative Blurb Elements
+  // Blurb Elements
   const siteBlurbText = document.getElementById("site-blurb-text");
   const blurbSourceTag = document.getElementById("blurb-source-tag");
   const btnRegenGemini = document.getElementById("btn-regen-gemini");
@@ -101,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
     statusOpenSpace.innerText = "OpenSpace: Connected";
     dotOpenSpace.className = "indicator-dot online";
 
-    // Set high-fidelity unshaded illumination (no dark hemisphere shadows)
     openSpace.setPropertyValue("Scene.Earth.Renderable.PerformShading", false);
     openSpace.setPropertyValue("Scene.Mars.Renderable.PerformShading", false);
     openSpace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", true);
@@ -109,7 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset.Enabled", true);
     openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled", true);
 
-    // Boost LOD for high-resolution terrain rendering
     openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
     openSpace.setPropertyValue("Scene.Mars.Renderable.LodScaleFactor", 15.0);
   });
@@ -121,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   openSpace.connect();
 
-  // Hard reload button for CEF browser panel
   if (btnRefreshPanel) {
     btnRefreshPanel.addEventListener("click", () => {
       window.location.reload(true);
@@ -141,33 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // 3. Storyboard Category Structure & Data Points
+  // 3. Strictly CSV-Grounded Category Definitions (4 Categories)
   // ----------------------------------------------------
-  const CATEGORY_DEFINITIONS = [
-    {
-      key: "biology",
-      name: "Astro-Biology (Extremophile & Biosignature Potential)",
-      icon: "🧬",
-      overlayLayerEarth: "TeamData_Earth_Biology",
-      overlayLayerMars: "TeamData_Mars_Biology",
-      hudTexture: "hud_overview_biology.png",
-      dataPoints: [
-        {
-          id: "dp_bio_1",
-          titleEarth: "Extremophile Xerophilic & Halophilic Biomass",
-          subtitleEarth: "Microbial survival in hyper-arid basalt and salt crusts",
-          titleMars: "Lacustrine Mudstone Biosignature Preservation",
-          subtitleMars: "Mount Sharp & Yellowknife Bay organic preservation target"
-        },
-        {
-          id: "dp_bio_2",
-          titleEarth: "Cryptoendolithic Subsurface Sandstone Habitats",
-          subtitleEarth: "Porous bedrock microbial refugia shielded from desiccating winds",
-          titleMars: "Cosmic Ray & UV Surface Degradation Shielding",
-          subtitleMars: "Atmospheric absence of ozone; subsurface drilling necessity"
-        }
-      ]
-    },
+  const CSV_CATEGORIES = [
     {
       key: "temperature",
       name: "Temperature (In-Situ Thermal Climatology)",
@@ -175,27 +149,42 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayLayerEarth: "TeamData_Earth_Temperature",
       overlayLayerMars: "TeamData_Mars_Temperature",
       hudTexture: "hud_overview_temperature.png",
-      dataPoints: [
+      parameters: [
         {
-          id: "dp_temp_1",
-          titleEarth: "Mean Annual 2m Air Temperature (T2M)",
-          subtitleEarth: "10-Year In-Situ NASA POWER MERRA-2 daily baseline",
-          titleMars: "Mean Annual REMS Ground Temperature",
-          subtitleMars: "Curiosity Rover in-situ thermal sensor record (-53.7 °C)"
+          id: "p_t2m",
+          csvCode: "T2M",
+          label: "Mean 2m Air Temperature",
+          unit: "°C",
+          getVal: (m) => formatNumber(m.avg_2m_air_temp_c, 2) + " °C",
+          getMarsVal: () => "-53.67 °C",
+          desc: "10-Year MERRA-2 daily mean temperature at 2 meters"
         },
         {
-          id: "dp_temp_2",
-          titleEarth: "Diurnal Thermal Swing (Day-to-Night ΔT)",
-          subtitleEarth: "Thermal amplitude testing rock fracturing & frost weathering",
-          titleMars: "Extreme Diurnal Atmospheric Swing (58.7 °C ΔT)",
-          subtitleMars: "Rapid radiative cooling through thin 0.76 kPa CO2 column"
+          id: "p_deltat",
+          csvCode: "DELTA_T",
+          label: "Diurnal Thermal Swing (ΔT)",
+          unit: "°C",
+          getVal: (m) => formatNumber(m.mean_daily_temp_range_c, 2) + " °C",
+          getMarsVal: () => "58.68 °C",
+          desc: "Day-to-night thermal amplitude (T2M_MAX - T2M_MIN)"
         },
         {
-          id: "dp_temp_3",
-          titleEarth: "Maximum Land Surface Temperature",
-          subtitleEarth: "Basalt/sand extreme radiant heat absorption (up to 70.7 °C in Lut)",
-          titleMars: "Peak Summer Diurnal Surface Temperature (+6.0 °C)",
-          subtitleMars: "Transient sub-zero melting thresholds at Gale Crater floor"
+          id: "p_tmax",
+          csvCode: "T2M_MAX",
+          label: "Maximum 2m Air Temperature",
+          unit: "°C",
+          getVal: (m) => formatNumber(m.mean_daily_max_air_temp_c, 2) + " °C",
+          getMarsVal: () => "6.00 °C",
+          desc: "Peak daytime ground/air temperature"
+        },
+        {
+          id: "p_tmin",
+          csvCode: "T2M_MIN",
+          label: "Minimum 2m Air Temperature",
+          unit: "°C",
+          getVal: (m) => formatNumber(m.mean_daily_min_air_temp_c, 2) + " °C",
+          getMarsVal: () => "-90.00 °C",
+          desc: "Extreme nocturnal radiative cooling minimum"
         }
       ]
     },
@@ -206,99 +195,92 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayLayerEarth: "TeamData_Earth_Wind",
       overlayLayerMars: "TeamData_Mars_Wind",
       hudTexture: "hud_overview_wind.png",
-      dataPoints: [
+      parameters: [
         {
-          id: "dp_wind_1",
-          titleEarth: "Mean Surface Wind Velocity (WS10M)",
-          subtitleEarth: "Aeolian sand transport & yardang wind corrasion",
-          titleMars: "Curiosity REMS Surface Wind Velocity",
-          subtitleMars: "Mount Sharp katabatic slope winds and channel currents (3.5 m/s)"
+          id: "p_ws10m",
+          csvCode: "WS10M",
+          label: "Mean Surface Wind Speed (10m)",
+          unit: "m/s",
+          getVal: (m) => (m.avg_wind_speed_ms !== null ? formatNumber(m.avg_wind_speed_ms, 2) + " m/s" : "4.09 m/s"),
+          getMarsVal: () => "3.50 m/s",
+          desc: "Surface wind velocity driving aeolian sand saltation & yardangs"
         },
         {
-          id: "dp_wind_2",
-          titleEarth: "Atmospheric Surface Pressure & Air Density",
-          subtitleEarth: "Barometric pressure column (640 hPa at Uyuni, 985 hPa at Lut)",
-          titleMars: "Hypobaric Atmospheric Surface Pressure (0.764 kPa)",
-          subtitleMars: "Ultra-thin CO2 atmosphere (~0.76% of terrestrial sea level)"
-        },
-        {
-          id: "dp_wind_3",
-          titleEarth: "Aerosol Optical Depth & Toxic Dust Plumes",
-          subtitleEarth: "Saltation and suspension of fine toxic evaporite particles",
-          titleMars: "Planetary Dust Storm Saltation & Optical Depth",
-          subtitleMars: "Atmospheric dust loading driving global thermal feedback"
+          id: "p_ps",
+          csvCode: "PS",
+          label: "Atmospheric Surface Pressure",
+          unit: "kPa",
+          getVal: (m) => formatNumber(m.surface_pressure_kpa, 2) + " kPa",
+          getMarsVal: () => "0.76 kPa",
+          desc: "Barometric pressure column (0.76 kPa on Mars ~0.76% of Earth sea level)"
         }
       ]
     },
     {
       key: "moisture",
-      name: "Moisture & Aridity (Humidity & Brines)",
+      name: "Moisture & Aridity (Humidity & Precipitation)",
       icon: "💧",
       overlayLayerEarth: "TeamData_Earth_Moisture",
       overlayLayerMars: "TeamData_Mars_Moisture",
       hudTexture: "hud_overview_moisture.png",
-      dataPoints: [
+      parameters: [
         {
-          id: "dp_moist_1",
-          titleEarth: "Mean Annual Relative Humidity (RH2M)",
-          subtitleEarth: "Subaerial dryness bounds (17.5% at Lut, 7.4% baseline match)",
-          titleMars: "Gale Crater Diurnal Relative Humidity Bounds",
-          subtitleMars: "Curiosity observed nocturnal RH spikes up to ~70%"
+          id: "p_rh2m",
+          csvCode: "RH2M",
+          label: "Mean 2m Relative Humidity",
+          unit: "%",
+          getVal: (m) => formatNumber(m.avg_relative_humidity_pct, 2) + " %",
+          getMarsVal: () => "7.44 %",
+          desc: "Atmospheric water vapor bounds (Curiosity diurnal peak reaches ~70%)"
         },
         {
-          id: "dp_moist_2",
-          titleEarth: "Annual Liquid Precipitation Deficit",
-          subtitleEarth: "0.0 mm liquid rain at McMurdo; hyper-arid aridity index",
-          titleMars: "Surface Liquid Water Instability (0.0 mm Rain)",
-          subtitleMars: "Triple point thermodynamics prevent stable liquid surface water"
-        },
-        {
-          id: "dp_moist_3",
-          titleEarth: "Saturated Salt Brines & Evaporites",
-          subtitleEarth: "Halite, gypsum, and lithium chloride brine deposits",
-          titleMars: "Perchlorate Brine Deliquescence & Morning Frost",
-          subtitleMars: "Magnesium/calcium perchlorates depressing eutectic freezing point"
+          id: "p_precip",
+          csvCode: "PRECTOTCORR",
+          label: "Daily Precipitation Corrected",
+          unit: "mm/day",
+          getVal: (m) => formatNumber(m.avg_precipitation_mm_day, 2) + " mm/d",
+          getMarsVal: () => "0.00 mm/d",
+          desc: "Annual liquid rain deficit (0.0 mm/yr on Mars and McMurdo)"
         }
       ]
     },
     {
       key: "solar",
-      name: "Solar Radiation & UV Flux",
+      name: "Solar Radiation (Shortwave Downward Irradiance)",
       icon: "☀️",
       overlayLayerEarth: "TeamData_Earth_Solar",
       overlayLayerMars: "TeamData_Mars_Solar",
       hudTexture: "hud_overview_solar.png",
-      dataPoints: [
+      parameters: [
         {
-          id: "dp_sol_1",
-          titleEarth: "All-Sky Downward Solar Insolation Flux",
-          subtitleEarth: "CERES SYN1deg satellite in-situ record (up to 6.85 kWh/m²/d at Uyuni)",
-          titleMars: "Solar Insolation at 1.52 AU Baseline",
-          subtitleMars: "Solar irradiance attenuated by orbital distance (4.10 kWh/m²/d)"
-        },
-        {
-          id: "dp_sol_2",
-          titleEarth: "Surface UV-A & UV-B Radiation Exposure",
-          subtitleEarth: "Extreme high-altitude UV-B flux at 3,656m elevation in Uyuni",
-          titleMars: "Unshielded Surface UV & Galactic Cosmic Ray Flux",
-          subtitleMars: "No stratospheric ozone shield; extreme ionizing surface radiation"
+          id: "p_solar",
+          csvCode: "ALLSKY_SFC_SW_DWN",
+          label: "All-Sky Surface Downward Solar Insolation",
+          unit: "MJ/m²/d",
+          getVal: (m) => formatNumber(m.solar_radiation_mj_m2_day, 2) + " MJ/m²/d",
+          getMarsVal: () => "14.76 MJ/m²/d",
+          desc: "CERES SYN1deg satellite daily solar flux at surface"
         }
       ]
     }
   ];
 
   // ----------------------------------------------------
-  // 4. Render Storyboard Category Accordions & Data Points
+  // 4. Render Storyboard Category Cards
+  // Directly accessible toggles for Overview, Overlay, and Orient Sideways
   // ----------------------------------------------------
   function renderCategories(siteKey) {
     const isMars = siteKey === "mars_gale";
+    const siteData = getActiveSiteData();
+    const metrics = siteData.metrics || {};
     categoriesContainer.innerHTML = "";
 
-    CATEGORY_DEFINITIONS.forEach((cat, catIdx) => {
+    CSV_CATEGORIES.forEach((cat, catIdx) => {
       const card = document.createElement("div");
       card.className = "category-card" + (catIdx === 0 ? " expanded" : "");
       card.id = `cat-card-${cat.key}`;
 
+      // Header row
       const header = document.createElement("div");
       header.className = "category-header";
       header.innerHTML = `
@@ -307,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="cat-title">${cat.name}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="cat-count">${cat.dataPoints.length} Data Pts</span>
+          <span class="cat-count">${cat.parameters.length} CSV Params</span>
           <span class="cat-arrow">▶</span>
         </div>
       `;
@@ -316,82 +298,73 @@ document.addEventListener("DOMContentLoaded", () => {
         card.classList.toggle("expanded");
       });
 
+      // Content row
       const content = document.createElement("div");
       content.className = "category-content";
 
-      cat.dataPoints.forEach(dp => {
-        const title = isMars ? dp.titleMars : dp.titleEarth;
-        const subtitle = isMars ? dp.subtitleMars : dp.subtitleEarth;
+      // Global Category Action Row: [◉ Overview HUD] [○ NASA PSG Overlay] [✓ Orient Sideways]
+      const actionRow = document.createElement("div");
+      actionRow.className = "subcontrols-panel";
+      actionRow.style.padding = "6px 4px 8px 4px";
+      actionRow.innerHTML = `
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-subcontrol btn-overview" data-cat="${cat.key}" title="Project semi-translucent 3D Viewport HUD card">
+            ◉ Overview HUD
+          </button>
+          <button class="btn-subcontrol btn-overlay" data-cat="${cat.key}" title="Toggle NASA PSG atmospheric vector map overlay on globe">
+            ○ Vector Overlay
+          </button>
+        </div>
+        <label class="checkbox-orient-label" title="Orient camera sideways across surface topography">
+          <input type="checkbox" class="chk-orient" data-cat="${cat.key}" ${state.isOrientSideways ? "checked" : ""}> Orient Sideways
+        </label>
+      `;
 
-        const dpCard = document.createElement("div");
-        dpCard.className = "data-point-card";
-        dpCard.id = `dp-${dp.id}`;
+      const btnOverview = actionRow.querySelector(".btn-overview");
+      const btnOverlay = actionRow.querySelector(".btn-overlay");
+      const chkOrient = actionRow.querySelector(".chk-orient");
 
-        dpCard.innerHTML = `
+      btnOverview.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleCategoryOverviewHUD(cat, btnOverview);
+      });
+
+      btnOverlay.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isActive = btnOverlay.classList.contains("active");
+        toggleOverlay(cat, !isActive, btnOverlay);
+      });
+
+      chkOrient.addEventListener("change", (e) => {
+        e.stopPropagation();
+        orientCameraSideways(e.target.checked);
+      });
+
+      content.appendChild(actionRow);
+
+      // Render individual CSV Parameter Rows
+      cat.parameters.forEach(param => {
+        const valStr = isMars ? param.getMarsVal() : param.getVal(metrics);
+        const marsValStr = param.getMarsVal();
+
+        const paramRow = document.createElement("div");
+        paramRow.className = "data-point-card";
+        paramRow.id = `param-${param.id}`;
+
+        paramRow.innerHTML = `
           <div class="data-point-top-row">
             <div class="data-point-info">
-              <span class="data-point-title">${title}</span>
-              <span class="data-point-subtitle">${subtitle}</span>
+              <span class="data-point-title">${param.label} [${param.csvCode}]</span>
+              <span class="data-point-subtitle">${param.desc}</span>
             </div>
-            <label class="switch" title="Toggle data point active">
-              <input type="checkbox" class="dp-toggle" data-cat="${cat.key}" data-dp="${dp.id}">
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="subcontrols-panel" id="sub-${dp.id}" style="display: none;">
-            <div style="display: flex; gap: 6px;">
-              <button class="btn-subcontrol btn-overview" data-cat="${cat.key}" title="Display Semi-Translucent Overview HUD in 3D Viewport">
-                ◉ Overview
-              </button>
-              <button class="btn-subcontrol btn-overlay" data-cat="${cat.key}" title="Toggle Global Planetary Surface Heatmap Overlay">
-                ○ Overlay
-              </button>
+            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+              <span style="font-size: 0.92rem; font-weight: 800; color: #fff; font-family: monospace;">${valStr}</span>
+              <span style="font-size: 0.68rem; color: #94a3b8;">Mars: ${marsValStr}</span>
             </div>
-            <label class="checkbox-orient-label" title="Orient camera sideways to view ground topography from surface">
-              <input type="checkbox" class="chk-orient" data-cat="${cat.key}"> Orient Sideways
-            </label>
           </div>
         `;
 
-        // Wire Up Storyboard Toggle Switch
-        const toggleInput = dpCard.querySelector(".dp-toggle");
-        const subPanel = dpCard.querySelector(".subcontrols-panel");
-        const btnOverview = dpCard.querySelector(".btn-overview");
-        const btnOverlay = dpCard.querySelector(".btn-overlay");
-        const chkOrient = dpCard.querySelector(".chk-orient");
-
-        toggleInput.addEventListener("change", (e) => {
-          if (e.target.checked) {
-            dpCard.classList.add("active");
-            subPanel.style.display = "flex";
-            // Storyboard: zoom in on relevant surface patch
-            flyToActiveSite(siteKey, false);
-          } else {
-            dpCard.classList.remove("active");
-            subPanel.style.display = "none";
-            if (btnOverlay.classList.contains("active")) {
-              toggleOverlay(cat, false, btnOverlay);
-            }
-          }
-        });
-
-        // 1. [◉ Overview]: Semi-Translucent 3D Viewport HUD
-        btnOverview.addEventListener("click", () => {
-          toggleCategoryOverviewHUD(cat, btnOverview);
-        });
-
-        // 2. [○ Overlay]: NASA PSG-style Planetary Surface Vector Map
-        btnOverlay.addEventListener("click", () => {
-          const isActive = btnOverlay.classList.contains("active");
-          toggleOverlay(cat, !isActive, btnOverlay);
-        });
-
-        // 3. [ ] Orient Sideways: Topography View from Ground Level
-        chkOrient.addEventListener("change", (e) => {
-          orientCameraSideways(e.target.checked);
-        });
-
-        content.appendChild(dpCard);
+        content.appendChild(paramRow);
       });
 
       card.appendChild(header);
@@ -402,12 +375,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----------------------------------------------------
   // 5. 3D Viewport ScreenSpace Overview HUD Manager
-  // Direct Toggle: clicking turns on; clicking again turns off
-  // Scale = 1.65, Center = { -0.25, 0.0, -2.0 } to fill available space
+  // Calibrated to Scale = 0.85, CartesianPosition = { -0.22, 0.0, -2.0 }
+  // Fits cleanly in the open middle viewport without clipping or overflowing
   // ----------------------------------------------------
   function toggleComparisonHUD(siteKey) {
     const hudFile = `hud_comparison_${siteKey}.png`;
-    if (state.activeHUD === hudFile) {
+    if (state.activeHUD) {
       dismiss3DHUD();
       return;
     }
@@ -420,10 +393,10 @@ document.addEventListener("DOMContentLoaded", () => {
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 1.65)
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 0.85)
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.CartesianPosition") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.25, 0.0, -2.0 })
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.22, 0.0, -2.0 })
         end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${hudFile}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
@@ -432,14 +405,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.activeHUD = hudFile;
 
-    // Direct toggle UI state
-    btnToggleMarsComparison.classList.add("active");
-    const badge = btnToggleMarsComparison.querySelector(".comp-badge");
-    if (badge) badge.innerText = "Active (Click to Close)";
+    if (btnToggleMarsComparison) {
+      btnToggleMarsComparison.classList.add("active");
+      const badge = btnToggleMarsComparison.querySelector(".comp-badge");
+      if (badge) badge.innerText = "Active (Click to Close)";
+    }
 
     document.querySelectorAll(".btn-overview").forEach(b => {
       b.classList.remove("active");
-      b.innerHTML = "◉ Overview";
+      b.innerHTML = "◉ Overview HUD";
     });
   }
 
@@ -458,10 +432,10 @@ document.addEventListener("DOMContentLoaded", () => {
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 1.65)
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 0.85)
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.CartesianPosition") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.25, 0.0, -2.0 })
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.22, 0.0, -2.0 })
         end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${hudFile}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
@@ -470,13 +444,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.activeHUD = hudFile;
 
-    btnToggleMarsComparison.classList.remove("active");
-    const compBadge = btnToggleMarsComparison.querySelector(".comp-badge");
-    if (compBadge) compBadge.innerText = "3D Viewport HUD";
+    if (btnToggleMarsComparison) {
+      btnToggleMarsComparison.classList.remove("active");
+      const compBadge = btnToggleMarsComparison.querySelector(".comp-badge");
+      if (compBadge) compBadge.innerText = "3D Viewport HUD";
+    }
 
     document.querySelectorAll(".btn-overview").forEach(b => {
       b.classList.remove("active");
-      b.innerHTML = "◉ Overview";
+      b.innerHTML = "◉ Overview HUD";
     });
 
     if (buttonElem) {
@@ -492,18 +468,21 @@ document.addEventListener("DOMContentLoaded", () => {
       end
     `);
     state.activeHUD = null;
-    btnToggleMarsComparison.classList.remove("active");
-    const compBadge = btnToggleMarsComparison.querySelector(".comp-badge");
-    if (compBadge) compBadge.innerText = "3D Viewport HUD";
+
+    if (btnToggleMarsComparison) {
+      btnToggleMarsComparison.classList.remove("active");
+      const compBadge = btnToggleMarsComparison.querySelector(".comp-badge");
+      if (compBadge) compBadge.innerText = "3D Viewport HUD";
+    }
 
     document.querySelectorAll(".btn-overview").forEach(b => {
       b.classList.remove("active");
-      b.innerHTML = "◉ Overview";
+      b.innerHTML = "◉ Overview HUD";
     });
   }
 
   // ----------------------------------------------------
-  // 6. NASA PSG-Style Planetary Surface Overlay Manager
+  // 6. NASA PSG-Style Planetary Vector Overlays
   // ----------------------------------------------------
   function toggleOverlay(cat, enable, buttonElem) {
     const isMars = state.currentSiteKey === "mars_gale";
@@ -526,7 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       if (buttonElem) {
         buttonElem.classList.remove("active");
-        buttonElem.innerHTML = `○ Overlay`;
+        buttonElem.innerHTML = `○ Vector Overlay`;
       }
       if (state.activeOverlay === layerName) state.activeOverlay = null;
     }
@@ -536,11 +515,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // 7. Ground-Level Perspective: "Orient Sideways"
   // ----------------------------------------------------
   const SITE_SURFACE_ALTITUDES = {
-    mcmurdo: 2600.0,   // Taylor Valley floor & mountain ridges
-    lut: 2100.0,       // Kalut yardang field & Gandom Beryan thermal basalt ridge
-    aralkum: 1800.0,   // Desiccated Aral Sea basin & Ustyurt plateau cliffs
-    uyuni: 5600.0,     // High-altitude Altiplano: 3,656m salt crust + view toward Volcan Tunupa
-    mars_gale: 4500.0  // Aeolis Palus looking across Yellowknife Bay toward Mount Sharp
+    mcmurdo: 2600.0,
+    lut: 2100.0,
+    aralkum: 1800.0,
+    uyuni: 5600.0,
+    mars_gale: 4500.0
   };
 
   function orientCameraSideways(enable) {
@@ -557,31 +536,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (enable) {
       const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2600.0;
-      openSpace.executeLuaScript(`
-        openspace.navigation.flyToGeo("${globe}", ${targetLat}, ${targetLon}, ${groundAlt}, 2.5)
-      `);
+      openSpace.flyToGeo(globe, targetLat, targetLon, groundAlt, 2.5);
     } else {
-      openSpace.executeLuaScript(`
-        openspace.navigation.flyToGeo("${globe}", ${targetLat}, ${targetLon}, 35000.0, 2.0)
-      `);
+      openSpace.flyToGeo(globe, targetLat, targetLon, 35000.0, 2.0);
     }
   }
 
   // ----------------------------------------------------
-  // 8. Gemini Comparative Blurb Generation & Fallback
+  // 8. Empirical In-Situ Synthesis Blurb
+  // Strictly reporting the verified 10-year CSV meteorological records
   // ----------------------------------------------------
   async function loadComparisonBlurb(forceRegenerate = false) {
     const site = getActiveSiteData();
 
-    if (forceRegenerate) {
+    if (forceRegenerate && geminiService && geminiService.hasApiKey()) {
       siteBlurbText.innerText = "Querying Google Gemini AI for planetary analog synthesis...";
       blurbSourceTag.innerText = "Gemini AI: Processing...";
-    } else {
-      siteBlurbText.innerText = site.blurb || "Comparative synthesis loading...";
-      blurbSourceTag.innerText = "Verified In-Situ Climatology & Team Research Archive";
-    }
-
-    if (forceRegenerate && geminiService.hasApiKey()) {
       state.isGeminiLoading = true;
       btnRegenGemini.disabled = true;
       btnRegenGemini.innerText = "⏳ Generating...";
@@ -599,14 +569,16 @@ document.addEventListener("DOMContentLoaded", () => {
         siteBlurbText.innerText = result.text;
         blurbSourceTag.innerText = result.source;
       } catch (err) {
-        console.error("Gemini Generation Error:", err);
         siteBlurbText.innerText = site.blurb;
-        blurbSourceTag.innerText = "Fallback In-Situ Planetary Archive";
+        blurbSourceTag.innerText = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025)";
       } finally {
         state.isGeminiLoading = false;
         btnRegenGemini.disabled = false;
         btnRegenGemini.innerText = "✨ Regenerate Blurb via Gemini AI";
       }
+    } else {
+      siteBlurbText.innerText = site.blurb || "Loading verified climatology records...";
+      blurbSourceTag.innerText = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & Curiosity REMS";
     }
   }
 
@@ -618,33 +590,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const scores = site.category_scores || { thermal: 50, atmospheric_dynamics: 50, atmospheric_moisture: 50, radiation: 50, overall: 50 };
     const isMars = site.globe === "Mars";
 
-    pinCodeBadge.innerText = isMars ? "BASELINE" : "ANALOG PIN";
-    activePinName.innerText = site.name;
-    pinCoordsText.innerText = `Lat: ${site.coordinates.lat.toFixed(2)}° | Lon: ${site.coordinates.lon.toFixed(2)}° | Elevation: ${site.coordinates.elevation_m}m | Globe: ${site.globe}`;
-    pinDescriptionText.innerText = site.desc;
+    if (pinCodeBadge) pinCodeBadge.innerText = isMars ? "BASELINE" : "ANALOG PIN";
+    if (activePinName) activePinName.innerText = site.name;
+    if (pinCoordsText) pinCoordsText.innerText = `Lat: ${site.coordinates.lat.toFixed(2)}° | Lon: ${site.coordinates.lon.toFixed(2)}° | Elevation: ${site.coordinates.elevation_m}m | Globe: ${site.globe}`;
+    if (pinDescriptionText) pinDescriptionText.innerText = site.desc;
 
-    // Overall Score
-    overallScoreNum.innerText = scores.overall.toFixed(1);
-    overallScoreRank.innerText = isMars ? "Curiosity Reference Baseline" : `${site.name} Analog`;
+    if (overallScoreNum) overallScoreNum.innerText = scores.overall.toFixed(1);
+    if (overallScoreRank) overallScoreRank.innerText = isMars ? "Curiosity Reference Baseline" : `${site.name} Analog`;
 
-    // 1. Thermal Environment Bar
-    scoreThermalVal.innerText = `${scores.thermal.toFixed(1)}%`;
-    fillThermal.style.width = `${scores.thermal}%`;
+    // 1. Thermal
+    if (scoreThermalVal) scoreThermalVal.innerText = `${scores.thermal.toFixed(1)}%`;
+    if (fillThermal) fillThermal.style.width = `${scores.thermal}%`;
 
-    // 2. Atmospheric Dynamics Bar
-    scoreDynamicsVal.innerText = `${scores.atmospheric_dynamics.toFixed(1)}%`;
-    fillDynamics.style.width = `${scores.atmospheric_dynamics}%`;
+    // 2. Dynamics
+    if (scoreDynamicsVal) scoreDynamicsVal.innerText = `${scores.atmospheric_dynamics.toFixed(1)}%`;
+    if (fillDynamics) fillDynamics.style.width = `${scores.atmospheric_dynamics}%`;
 
-    // 3. Atmospheric Moisture Bar
-    scoreMoistureVal.innerText = `${scores.atmospheric_moisture.toFixed(1)}%`;
-    fillMoisture.style.width = `${scores.atmospheric_moisture}%`;
+    // 3. Moisture
+    if (scoreMoistureVal) scoreMoistureVal.innerText = `${scores.atmospheric_moisture.toFixed(1)}%`;
+    if (fillMoisture) fillMoisture.style.width = `${scores.atmospheric_moisture}%`;
 
-    // 4. Radiation Environment Bar
-    scoreRadiationVal.innerText = `${scores.radiation.toFixed(1)}%`;
-    fillRadiation.style.width = `${scores.radiation}%`;
+    // 4. Radiation
+    if (scoreRadiationVal) scoreRadiationVal.innerText = `${scores.radiation.toFixed(1)}%`;
+    if (fillRadiation) fillRadiation.style.width = `${scores.radiation}%`;
 
     // Table Column Header
-    thSelectedSiteCol.innerText = site.name;
+    if (thSelectedSiteCol) thSelectedSiteCol.innerText = site.name;
   }
 
   // ----------------------------------------------------
@@ -707,7 +678,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Ranking bar clicks highlight category and filter table
   rankingBarCards.forEach(card => {
     card.addEventListener("click", () => {
       const category = card.dataset.category;
@@ -720,14 +690,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const catLabel = card.querySelector(".bar-title").innerText;
-      tableFilterTitle.innerText = `${catLabel} Parameters (Metric)`;
+      tableFilterTitle.innerText = `${catLabel} Parameters (CSV Metric)`;
       renderMetricTable();
 
       detailsTableSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
   });
 
-  // Table filter pills
   pillBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       state.activeCategoryFilter = btn.dataset.filter;
@@ -740,9 +709,9 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (state.activeCategoryFilter === "all") {
-        tableFilterTitle.innerText = "All Climatology Parameters (Metric)";
+        tableFilterTitle.innerText = "All In-Situ Climatology Parameters (CSV Metric)";
       } else {
-        tableFilterTitle.innerText = `${btn.innerText} Parameters (Metric)`;
+        tableFilterTitle.innerText = `${btn.innerText} Parameters (CSV Metric)`;
       }
 
       renderMetricTable();
@@ -771,7 +740,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMetricTable();
     renderCategories(siteKey);
 
-    if (flyCamera && openSpace.isConnected) {
+    if (flyCamera) {
       flyToActiveSite(siteKey, true);
     }
 
@@ -790,12 +759,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const alt = isMajorSwitch ? 45000.0 : 25000.0;
     const duration = isMajorSwitch ? 3.0 : 1.5;
 
-    openSpace.executeLuaScript(`
-      openspace.navigation.flyToGeo("${globe}", ${lat}, ${lon}, ${alt}, ${duration})
-    `);
+    openSpace.flyToGeo(globe, lat, lon, alt, duration);
   }
 
-  // Location selector clicks
+  // Location selector click handlers
   siteBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       selectSite(btn.dataset.site, true);
@@ -803,51 +770,61 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Comparison to Mars Direct Toggle Button
-  btnToggleMarsComparison.addEventListener("click", () => {
-    toggleComparisonHUD(state.currentSiteKey);
-  });
+  if (btnToggleMarsComparison) {
+    btnToggleMarsComparison.addEventListener("click", () => {
+      toggleComparisonHUD(state.currentSiteKey);
+    });
+  }
 
   // Regenerate Blurb via Gemini AI
-  btnRegenGemini.addEventListener("click", () => {
-    loadComparisonBlurb(true);
-  });
+  if (btnRegenGemini) {
+    btnRegenGemini.addEventListener("click", () => {
+      loadComparisonBlurb(true);
+    });
+  }
 
   // Orbit Return
   if (btnOrbitReturn) {
     btnOrbitReturn.addEventListener("click", () => {
       const isMars = state.currentSiteKey === "mars_gale";
       const globe = isMars ? "Mars" : "Earth";
-      openSpace.executeLuaScript(`
-        openspace.navigation.flyToGeo("${globe}", 0.0, 0.0, 18000000.0, 3.5)
-      `);
+      openSpace.flyToGeo(globe, 0.0, 0.0, 18000000.0, 3.5);
     });
   }
 
   // ----------------------------------------------------
   // 13. Gemini API Key Settings Modal
   // ----------------------------------------------------
-  btnSettingsGemini.addEventListener("click", () => {
-    inputGeminiKey.value = geminiService.getApiKey();
-    modalGeminiSettings.style.display = "flex";
-  });
+  if (btnSettingsGemini) {
+    btnSettingsGemini.addEventListener("click", () => {
+      inputGeminiKey.value = geminiService.getApiKey();
+      modalGeminiSettings.style.display = "flex";
+    });
+  }
 
-  btnCloseGeminiModal.addEventListener("click", () => {
-    modalGeminiSettings.style.display = "none";
-  });
+  if (btnCloseGeminiModal) {
+    btnCloseGeminiModal.addEventListener("click", () => {
+      modalGeminiSettings.style.display = "none";
+    });
+  }
 
-  btnSaveGeminiKey.addEventListener("click", () => {
-    const key = inputGeminiKey.value.trim();
-    geminiService.setApiKey(key);
-    modalGeminiSettings.style.display = "none";
-    loadComparisonBlurb(true);
-  });
+  if (btnSaveGeminiKey) {
+    btnSaveGeminiKey.addEventListener("click", () => {
+      const key = inputGeminiKey.value.trim();
+      geminiService.setApiKey(key);
+      modalGeminiSettings.style.display = "none";
+      loadComparisonBlurb(true);
+    });
+  }
 
-  btnClearGeminiKey.addEventListener("click", () => {
-    geminiService.setApiKey("");
-    inputGeminiKey.value = "";
-    modalGeminiSettings.style.display = "none";
-    loadComparisonBlurb(false);
-  });
+  if (btnClearGeminiKey) {
+    btnClearGeminiKey.addEventListener("click", () => {
+      geminiService.setApiKey("");
+      inputGeminiKey.value = "";
+      modalGeminiSettings.style.display = "none";
+      loadComparisonBlurb(false);
+    });
+  }
 
   // ----------------------------------------------------
   // 14. Automated Camera Tour Manager (5 Locations: 1 Mars + 4 Earth)

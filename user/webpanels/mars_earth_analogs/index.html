@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>InterSESHllar: Mars Gale Crater & Earth Desert Analogs</title>
-  <link rel="stylesheet" href="css/style.css?v=6.5.0">
+  <link rel="stylesheet" href="css/style.css?v=7.0.0">
 </head>
 <body>
 
@@ -218,20 +218,19 @@
     </button>
   </section>
 
-  <!-- Storyboard Categories & Data Points Section -->
+  <!-- In-Situ Climatology Categories (Empirical CSV Records) -->
   <section class="glass-panel storyboard-section">
     <div class="section-title-row">
-      <h3 class="section-title">Storyboard Data Categories & Surface Toggles</h3>
-      <span class="section-hint">Toggle parameters to zoom in on relevant surface patches</span>
+      <h3 class="section-title">In-Situ Climatology Categories (Empirical CSV Records)</h3>
+      <span class="section-hint">10-Year NASA POWER daily archives vs Curiosity REMS</span>
     </div>
 
-    <!-- Accordion Category Cards injected dynamically by app.js:
-         - Astro-Biology (Extremophile & Biosignature Potential)
-         - Temperature (In-Situ Thermal Climatology)
-         - Wind & Atmosphere (Aeolian & Barometric Dynamics)
-         - Moisture & Aridity (Humidity & Brines)
-         - Solar Radiation & UV Flux
-         Each with Switch, [◉ Overview], [○ Overlay], and [ ] Orient Sideways
+    <!-- Injected dynamically by app.js:
+         1. Temperature (T2M, ΔT, T2M_MAX, T2M_MIN)
+         2. Wind & Atmosphere (WS10M, PS)
+         3. Moisture & Aridity (RH2M, PRECTOTCORR)
+         4. Solar Radiation (ALLSKY_SFC_SW_DWN)
+         Each with [◉ Overview HUD], [○ Vector Overlay], and [✓ Orient Sideways]
     -->
     <div class="categories-container" id="categories-container"></div>
   </section>
@@ -319,12 +318,12 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/config.js?v=6.5.0"></script>
-  <script src="js/fallback-data.js?v=6.5.0"></script>
-  <script src="js/team-data.js?v=6.5.0"></script>
-  <script src="js/gemini-service.js?v=6.5.0"></script>
-  <script src="js/climate-service.js?v=6.5.0"></script>
-  <script src="js/openspace-api.js?v=6.5.0"></script>
-  <script src="js/app.js?v=6.5.0"></script>
+  <script src="js/config.js?v=7.0.0"></script>
+  <script src="js/fallback-data.js?v=7.0.0"></script>
+  <script src="js/team-data.js?v=7.0.0"></script>
+  <script src="js/gemini-service.js?v=7.0.0"></script>
+  <script src="js/climate-service.js?v=7.0.0"></script>
+  <script src="js/openspace-api.js?v=7.0.0"></script>
+  <script src="js/app.js?v=7.0.0"></script>
 </body>
 </html>
