@@ -1,2 +1,5 @@
 # Internal agent run logs
 .agents/
+
+earth_access/data/
+*.h5
