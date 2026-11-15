@@ -23,8 +23,11 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 │   └── Salar de Uyuni Daily Weather Data.csv
 │
 ├── earthaccess_pull/                        <-- NASA earthaccess Programmatic Pipeline
-│   ├── pull_earthaccess.ipynb               <-- NASA earthaccess ICESat-2 ATL06 data query & extraction notebook
-│   └── out.tif                              <-- ICESat-2 ATL06 4,424x4,184 GeoTIFF Surface Elevation Raster
+│   ├── pull_earthaccess.ipynb               <-- NASA earthaccess EMIT & ICESat-2 extraction notebook
+│   ├── tiff_convert.py                      <-- TIFF raster to matrix CSV conversion utility
+│   ├── out.tif                              <-- ICESat-2 ATL06 4,424x4,184 GeoTIFF Surface Elevation Raster
+│   ├── out.csv                              <-- NASA EMIT L2B Mineral Grid (4,424x4,184 matrix)
+│   └── lut.tif                              <-- NASA EMIT L2B Mineral GeoTIFF Raster (1,327x2,511; Lut Desert)
 │
 ├── data/assets/mars_earth_analogs/          <-- OpenSpace Lua Assets
 │   ├── mars_earth_analogs.asset             <-- Master entry asset
@@ -95,11 +98,13 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
    - Provides empirical daily ground truth for Air Temperature (`T2M`), Thermal Extremes (`T2M_MIN`, `T2M_MAX`), Wind Speed (`WS10M`), Precipitation (`PRECTOTCORR`), Relative Humidity (`RH2M`), Surface Pressure (`PS`), and Solar Shortwave Insolation (`ALLSKY_SFC_SW_DWN`).
 
 2. **NASA earthaccess & ICESat-2 Topographic Pipeline (`earthaccess_pull/`)**:
-   - **Notebook (`pull_earthaccess.ipynb`)**: Automated Python extraction pipeline querying the official NASA `earthaccess` library for ICESat-2 (Ice, Cloud, and land Elevation Satellite 2) Land Ice / Land Water Surface Height data (`doi: 10.5067/ATLAS/ATL06.007`).
-   - **GeoTIFF Raster (`out.tif`)**: 16-bit GeoTIFF (WGS 84, 4,424 × 4,184 resolution) capturing high-resolution micro-topographic relief (44 m to 78 m elevation, mean 59.94 m) across the Aralkum Desert / Aral Sea basin floor.
+   - **Notebook (`pull_earthaccess.ipynb`)**: Automated Python extraction pipeline querying the official NASA `earthaccess` library for ICESat-2 (Ice, Cloud, and land Elevation Satellite 2) Land Ice / Land Water Surface Height data (`doi: 10.5067/ATLAS/ATL06.007`) and NASA EMIT L2B imaging spectroscopy.
+   - **GeoTIFF Elevation Raster (`out.tif`)**: 16-bit GeoTIFF (WGS 84, 4,424 × 4,184 resolution) capturing high-resolution micro-topographic relief (44 m to 78 m elevation, mean 59.94 m) across the Aralkum Desert / Aral Sea basin floor.
+   - **EMIT Mineral CSV Grid (`out.csv`)**: 4,424 × 4,184 mineral classification matrix converted from EMIT imaging spectroscopy.
+   - **EMIT Mineral GeoTIFF Raster (`lut.tif`)**: High-resolution GeoTIFF (WGS 84, 1,327 × 2,511 resolution, Lon 57°–60°E, Lat 25°–31°N) containing discrete mineral classification codes (IDs 69–84) for pyroxene, hematite, goethite, and basalt evaporite coatings across the Lut Desert, Iran.
 
 3. **NASA EMIT & MSL CheMin Surface Materials**:
-   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy and Curiosity MSL CheMin/SAM in-situ instruments.
+   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy (`lut.tif` & `out.csv`) and Curiosity MSL CheMin/SAM in-situ instruments.
 
 ---
 

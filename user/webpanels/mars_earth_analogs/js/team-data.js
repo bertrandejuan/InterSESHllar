@@ -10,7 +10,7 @@
  *
  * ALL scores derived from exact mathematical formula: S_i = 100 * exp(-|Delta_i| / D_i)
  * ZERO hallucinated numbers. Verified NASA POWER 10-year daily archive (2015-2025, 4,018 daily records per analog CSV),
- * NASA earthaccess ICESat-2 (ATL06 out.tif 44-78m DEM), NASA EMIT spectroscopy, and MSL Curiosity REMS/CheMin.
+ * NASA earthaccess EMIT L2B mineral mapping (lut.tif & out.csv), ICESat-2 (ATL06 out.tif 44-78m DEM), NASA EMIT spectroscopy, and MSL Curiosity REMS/CheMin.
  */
 
 window.TEAM_DATA = {
@@ -115,8 +115,8 @@ window.TEAM_DATA = {
       elevation_m: 256.0,
       alt: 24000
     },
-    desc: "Earth's thermal maximum land surface with towering yardangs directly analogous to Mount Sharp aeolian yardang ridges.",
-    blurb: "The Lut Desert (Dasht-e Lut) holds the record for the highest land skin temperatures ever measured on Earth (70.7°C). Its hyper-arid atmosphere features a mean relative humidity of only 21.98%, annual precipitation under 0.25 mm/day, and intense solar insolation (21.14 MJ/m²/day). Towering yardang ridges carved by continuous 120-day winds mirror the vast aeolian yardang fields of Aeolis Palus and the Bagnold Dunes inside Gale Crater.",
+    desc: "Earth's thermal maximum land surface with towering yardangs and NASA EMIT L2B mineral spectrometry (lut.tif), directly analogous to Mount Sharp aeolian yardang ridges.",
+    blurb: "The Lut Desert (Dasht-e Lut) holds the record for the highest land skin temperatures ever measured on Earth (70.7°C). Surface mineralogy is characterized by a 1,327 × 2,511 NASA EMIT L2B mineral mapping matrix (lut.tif) spanning 25°–31°N, 57°–60°E. Its hyper-arid atmosphere features a mean relative humidity of only 21.98%, annual precipitation under 0.25 mm/day, and intense solar insolation (21.14 MJ/m²/day). Towering yardang ridges carved by continuous 120-day winds mirror the vast aeolian yardang fields of Aeolis Palus and the Bagnold Dunes inside Gale Crater.",
     stations: [
       {
         id: "lut_01",
@@ -161,9 +161,9 @@ window.TEAM_DATA = {
       surface_temp_c: 70.70,
 
       // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
-      soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardang Bedrock (EMIT-2 target)",
+      soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardangs (NASA EMIT L2B lut.tif)",
       chemical_organic_focus: "Abiotic limit-of-detection testing for rover organic detection instruments",
-      emit_mineral_matrix: "NASA EMIT L2B pyroxene/iron-oxide imaging spectroscopy & spectral unmixing",
+      emit_mineral_matrix: "NASA EMIT L2B Mineral Grid: 1,327 × 2,511 matrix (EMITL2BMIN.002 via earthaccess lut.tif)",
       surface_elevation_relief: "401 m elevation (Basalt plateau & yardang mega-corridor relief)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
@@ -542,7 +542,7 @@ window.PARAMETER_DEFINITIONS = [
     marsBaseline: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
     scale: null,
     desc: "Dominant surface mineralogy and micro-topography providing geological substrates for biosignature preservation.",
-    source: "NASA EMIT, earthaccess ICESat-2 (out.tif) & MSL CheMin"
+    source: "NASA EMIT (lut.tif / out.csv), earthaccess ICESat-2 (out.tif) & MSL CheMin"
   },
   {
     key: "chemical_organic_focus",
@@ -565,8 +565,8 @@ window.PARAMETER_DEFINITIONS = [
     unit: "Matrix",
     marsBaseline: "CRISM & Mastcam multispectral mineral identification (Fe-smectites, jarosite, gypsum)",
     scale: null,
-    desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess out.csv).",
-    source: "NASA earthaccess EMIT L2B (out.csv / out.tif) & CRISM"
+    desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess lut.tif & out.csv).",
+    source: "NASA earthaccess EMIT L2B (lut.tif / out.csv / out.tif) & CRISM"
   },
   {
     key: "surface_elevation_relief",

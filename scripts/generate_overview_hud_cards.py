@@ -83,7 +83,7 @@ SITES = {
         'highlight_border': (255, 185, 40, 255),
         'key_points': {
             'thermal': "26.60 °C",
-            'astrobiology': "Basalt Regolith Pavement",
+            'astrobiology': "Basalt Regolith / EMIT lut.tif",
             'dynamics': "4.09 m/s",
             'moisture': "21.98 %",
             'radiation': "21.14 MJ/m²/d"
@@ -99,7 +99,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
                 ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT Pyroxene/Iron-Oxide Map", "EMIT imaging spectroscopy pyroxene and ferric oxide spectral unmixing"),
+                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 1,327x2,511 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (lut.tif)"),
                 ("Topographic Relief & Altimetry", "401 m Elevation", "NASA POWER / MERRA-2 digital elevation model of central yardang plateau")
             ],
             'dynamics': [
@@ -120,7 +120,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Lut Desert holds Earth's recorded land skin thermal maximum (70.70 °C). Mean air temperature is 26.60 °C with daytime highs averaging 34.59 °C and a diurnal swing of 15.64 °C.",
-            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs provide natural analogs to Mount Sharp aeolian structures investigated for biosignature preservation.",
+            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs mapped via NASA EMIT L2B spectroscopy (lut.tif) provide natural analogs to Mount Sharp aeolian structures investigated for biosignature preservation.",
             'dynamics': "Surface wind speeds average 4.09 m/s, driving active sand transport and yardang corrasion that closely matches Curiosity's 3.50 m/s wind regime.",
             'moisture': "Hyper-arid atmospheric regime with a mean relative humidity of only 21.98% and daily precipitation of 0.24 mm/day (88 mm/year total liquid).",
             'radiation': "Intense desert solar insolation of 21.14 MJ/m²/day with UVB surface flux of 0.317 W/m², modeling high desert surface radiative exposure."
