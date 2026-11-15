@@ -117,41 +117,6 @@
 
   </main>
 
-  <!-- Semi-Translucent Viewport Modal for Comparison Table (Fallback / In-Browser view) -->
-  <div id="modal-mars-backdrop" class="modal-backdrop-overlay" style="display: none;">
-    <div class="modal-semi-translucent-card" id="modal-mars-card">
-      <div class="comp-modal-header">
-        <div class="comp-modal-title">
-          <span>🪐 Comparison to Mars: <span id="comp-site-name">Lut Desert</span> vs Gale Crater</span>
-        </div>
-        <button id="btn-close-comp" class="overview-close-btn" title="Close comparison">&times;</button>
-      </div>
-      <div class="comp-modal-subtitle">
-        Semi-translucent cross-category parameter overview derived from 10-year in-situ daily records (2015–2025) vs Curiosity REMS baseline.
-      </div>
-      <div class="comp-table-wrapper">
-        <table class="comp-table">
-          <thead>
-            <tr>
-              <th>Category / Parameter</th>
-              <th id="th-site-label">Analog Value</th>
-              <th>Mars Gale (REMS)</th>
-              <th>Difference (Δ)</th>
-              <th>Analog Match</th>
-            </tr>
-          </thead>
-          <tbody id="comp-table-body">
-            <!-- Populated dynamically -->
-          </tbody>
-        </table>
-      </div>
-      <div class="comp-modal-footer">
-        <span class="comp-footer-note">Projected into OpenSpace 3D Viewport HUD.</span>
-        <button id="btn-close-comp-bottom" class="btn btn-primary" style="padding: 6px 16px;">Done</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Automated Camera Tour (Preserved at the bottom as requested) -->
   <section class="glass-panel tour-panel">
     <div class="tour-header">

@@ -43,12 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDismissHud = document.getElementById("btn-dismiss-hud");
 
   const btnToggleMarsComparison = document.getElementById("btn-toggle-mars-comparison");
-  const modalMarsBackdrop = document.getElementById("modal-mars-backdrop");
-  const btnCloseComp = document.getElementById("btn-close-comp");
-  const btnCloseCompBottom = document.getElementById("btn-close-comp-bottom");
-  const compSiteName = document.getElementById("comp-site-name");
-  const compTableBody = document.getElementById("comp-table-body");
-  const thSiteLabel = document.getElementById("th-site-label");
 
   const categoriesContainer = document.getElementById("categories-container");
 
@@ -358,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 1. [◉ Overview]: Semi-Translucent 3D Viewport HUD
         btnOverview.addEventListener("click", () => {
-          showCategoryOverviewHUD(cat);
+          toggleCategoryOverviewHUD(cat, btnOverview);
         });
 
         // 2. [○ Overlay]: Global Planetary Surface Data Map
@@ -382,15 +376,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // 3D Viewport Overview HUD Manager
+  // 3D Viewport Overview HUD Manager (ScreenSpaceRenderable)
   // ----------------------------------------------------
+  function toggleComparisonHUD(siteKey) {
+    const hudFile = `hud_comparison_${siteKey}.png`;
+    if (state.activeHUD === hudFile) {
+      dismiss3DHUD();
+      return;
+    }
+    showComparisonHUD(siteKey);
+  }
+
   function showComparisonHUD(siteKey) {
     const siteData = window.TEAM_DATA[siteKey] || window.TEAM_DATA.lut;
     const hudFile = `hud_comparison_${siteKey}.png`;
 
-    // 1. Project into OpenSpace 3D Viewport via ScreenSpaceImageLocal
+    // Project large, screen-wide semi-translucent HUD into OpenSpace 3D Viewport
     openSpace.executeLuaScript(`
-      if openspace.hasProperty("ScreenSpace.OverviewHUD.TexturePath") then
+      if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.Scale") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.Scale", 2.05)
+        end
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.CartesianPosition") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.CartesianPosition", { -0.26, 0.02, -2.0 })
+        end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${hudFile}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
       end
@@ -398,28 +407,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.activeHUD = hudFile;
 
-    // 2. Show Active HUD Banner in panel
+    // Highlight button & show HUD status banner (NO side menu popup!)
+    btnToggleMarsComparison.classList.add("active");
+    document.querySelectorAll(".btn-overview").forEach(b => b.classList.remove("active"));
     hudStatusBanner.style.display = "flex";
     hudStatusText.innerText = `3D Viewport HUD: Mars vs ${siteData.name} Active`;
-
-    // 3. Populate and show web modal table
-    compSiteName.innerText = siteData.name;
-    thSiteLabel.innerText = `${siteData.name} Value`;
-    populateComparisonTable(siteData);
-    modalMarsBackdrop.style.display = "flex";
   }
 
-  function showCategoryOverviewHUD(cat) {
+  function toggleCategoryOverviewHUD(cat, buttonElem) {
+    const hudFile = cat.hudTexture;
+    if (state.activeHUD === hudFile) {
+      dismiss3DHUD();
+      return;
+    }
+    showCategoryOverviewHUD(cat, buttonElem);
+  }
+
+  function showCategoryOverviewHUD(cat, buttonElem) {
     const hudFile = cat.hudTexture;
 
     openSpace.executeLuaScript(`
-      if openspace.hasProperty("ScreenSpace.OverviewHUD.TexturePath") then
+      if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.Scale") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.Scale", 2.05)
+        end
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.CartesianPosition") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.CartesianPosition", { -0.26, 0.02, -2.0 })
+        end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${hudFile}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
       end
     `);
 
     state.activeHUD = hudFile;
+
+    // Highlight clicked button, clear comparison button active state
+    btnToggleMarsComparison.classList.remove("active");
+    document.querySelectorAll(".btn-overview").forEach(b => b.classList.remove("active"));
+    if (buttonElem) buttonElem.classList.add("active");
 
     hudStatusBanner.style.display = "flex";
     hudStatusText.innerText = `3D Viewport HUD: ${cat.name} Active`;
@@ -432,6 +457,8 @@ document.addEventListener("DOMContentLoaded", () => {
       end
     `);
     state.activeHUD = null;
+    btnToggleMarsComparison.classList.remove("active");
+    document.querySelectorAll(".btn-overview").forEach(b => b.classList.remove("active"));
     hudStatusBanner.style.display = "none";
   }
 
@@ -489,99 +516,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ----------------------------------------------------
-  // Populate Comparison Table Modal
-  // ----------------------------------------------------
-  function populateComparisonTable(site) {
-    compTableBody.innerHTML = "";
-    const m = site.metrics || {};
-    const marsM = window.TEAM_DATA.mars_gale.metrics;
-
-    const rows = [
-      {
-        param: "Mean Annual 2m Air Temp",
-        val: `${m.avg_2m_air_temp_c !== null ? m.avg_2m_air_temp_c + " °C" : "N/A"}`,
-        mars: `${marsM.avg_2m_air_temp_c} °C`,
-        diff: m.avg_2m_air_temp_c !== null ? `${(m.avg_2m_air_temp_c - marsM.avg_2m_air_temp_c).toFixed(1)} °C` : "N/A",
-        match: site.id === "mcmurdo" ? "High (Cryogenic Cold)" : "Thermal Divergence"
-      },
-      {
-        param: "Diurnal Thermal Swing (ΔT)",
-        val: `${m.mean_daily_temp_range_c !== null ? m.mean_daily_temp_range_c + " °C" : "N/A"}`,
-        mars: `${marsM.mean_daily_temp_range_c} °C`,
-        diff: m.mean_daily_temp_range_c !== null ? `${(m.mean_daily_temp_range_c - marsM.mean_daily_temp_range_c).toFixed(1)} °C` : "N/A",
-        match: site.id === "aralkum" ? "High (Continental ΔT)" : "Partial Analogy"
-      },
-      {
-        param: "Surface Wind Velocity",
-        val: `${m.avg_wind_speed_ms !== null ? m.avg_wind_speed_ms + " m/s" : "4.12 m/s (NASA)"}`,
-        mars: "3.50 m/s",
-        diff: m.avg_wind_speed_ms !== null ? `+${(m.avg_wind_speed_ms - 3.5).toFixed(2)} m/s` : "+0.62 m/s",
-        match: "Direct Aeolian Match (95-98%)"
-      },
-      {
-        param: "Atmospheric Surface Pressure",
-        val: `${m.surface_pressure_kpa !== null ? m.surface_pressure_kpa + " kPa" : "98.5 kPa"}`,
-        mars: `${marsM.surface_pressure_kpa} kPa (8.4 hPa)`,
-        diff: m.surface_pressure_kpa !== null ? `+${(m.surface_pressure_kpa - marsM.surface_pressure_kpa).toFixed(1)} kPa` : "+97.7 kPa",
-        match: site.id === "uyuni" ? "Altiplano Thin Air (64 kPa)" : "Terrestrial Dense Air"
-      },
-      {
-        param: "Mean Relative Humidity",
-        val: `${m.avg_relative_humidity_pct !== null ? m.avg_relative_humidity_pct + " %" : "N/A"}`,
-        mars: `${marsM.avg_relative_humidity_pct} %`,
-        diff: m.avg_relative_humidity_pct !== null ? `${(m.avg_relative_humidity_pct - marsM.avg_relative_humidity_pct).toFixed(1)} %` : "N/A",
-        match: site.id === "lut" ? "High (Hyper-Arid 17%)" : "Arid Match"
-      },
-      {
-        param: "Annual Liquid Precipitation",
-        val: `${m.avg_precipitation_mm_day !== null ? (m.avg_precipitation_mm_day * 365).toFixed(1) + " mm/yr" : "N/A"}`,
-        mars: "0.0 mm/yr",
-        diff: m.avg_precipitation_mm_day !== null ? `+${(m.avg_precipitation_mm_day * 365).toFixed(1)} mm` : "N/A",
-        match: site.id === "mcmurdo" ? "Exact Zero Match (100%)" : "Hyper-Arid Regime"
-      },
-      {
-        param: "Solar Insolation Flux",
-        val: `${m.solar_radiation_mj_m2_day !== null ? (m.solar_radiation_mj_m2_day / 3.6).toFixed(2) + " kWh/m²/d" : "N/A"}`,
-        mars: "4.10 kWh/m²/d",
-        diff: m.solar_radiation_mj_m2_day !== null ? `${((m.solar_radiation_mj_m2_day / 3.6) - 4.10).toFixed(2)} kWh` : "N/A",
-        match: site.id === "aralkum" ? "Near Identical (96%)" : "Solar Analogy"
-      }
-    ];
-
-    rows.forEach(r => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-weight: 600;">${r.param}</td>
-        <td style="color: #38bdf8; font-weight: 600;">${r.val}</td>
-        <td style="color: #fb923c; font-weight: 600;">${r.mars}</td>
-        <td style="color: #cbd5e1;">${r.diff}</td>
-        <td style="color: #4ade80; font-weight: 600;">${r.match}</td>
-      `;
-      compTableBody.appendChild(tr);
-    });
-  }
-
-  // Comparison Bar Click Handler
+  // Comparison Bar Click Handler (Toggles 3D HUD on/off)
   btnToggleMarsComparison.addEventListener("click", () => {
-    showComparisonHUD(state.currentSiteKey);
-  });
-
-  // Modal Close Handlers
-  if (btnCloseComp) {
-    btnCloseComp.addEventListener("click", () => {
-      modalMarsBackdrop.style.display = "none";
-    });
-  }
-  if (btnCloseCompBottom) {
-    btnCloseCompBottom.addEventListener("click", () => {
-      modalMarsBackdrop.style.display = "none";
-    });
-  }
-  modalMarsBackdrop.addEventListener("click", (e) => {
-    if (e.target === modalMarsBackdrop) {
-      modalMarsBackdrop.style.display = "none";
-    }
+    toggleComparisonHUD(state.currentSiteKey);
   });
 
   // ----------------------------------------------------

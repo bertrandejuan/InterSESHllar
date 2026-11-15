@@ -1,5 +1,5 @@
 """
-Generates Semi-Translucent Overview & Comparison HUD Cards (PNG with RGBA transparency)
+Generates Semi-Translucent Overview & Comparison HUD Cards (1600 x 1020 PNG with RGBA transparency)
 for projection into OpenSpace's 3D Viewport via ScreenSpaceImageLocal.
 These cards appear in the empty space of the screen when the user clicks
 'Comparison to Mars (All Categories)' or '◉ Overview'.
@@ -105,7 +105,6 @@ COMPARISON_DATA = {
     }
 }
 
-# Category Overview Cards
 CATEGORY_OVERVIEWS = {
     'temperature': {
         'title': "Parameter Overview: Thermal Environment",
@@ -180,136 +179,137 @@ CATEGORY_OVERVIEWS = {
 }
 
 def render_comparison_hud(key, info):
-    """Renders a semi-translucent 1200x780 comparison card for projection in OpenSpace 3D viewport."""
-    width, height = 1200, 780
+    """Renders a semi-translucent 1600x1020 comparison card for projection in OpenSpace 3D viewport."""
+    width, height = 1600, 1020
     im = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
 
     # Semi-translucent dark glass card background
-    # (10, 18, 32, 225) provides dark translucent glass look allowing planetary 3D view underneath
-    card_bg = (10, 18, 34, 230)
-    border_color = info['color'] + (220,)
+    card_bg = (8, 16, 32, 235)
+    border_color = info['color'] + (240,)
     
     # Outer glowing rounded rectangle
-    draw.rounded_rectangle([(10, 10), (width - 10, height - 10)], radius=24, fill=card_bg, outline=border_color, width=3)
+    draw.rounded_rectangle([(14, 14), (width - 14, height - 14)], radius=28, fill=card_bg, outline=border_color, width=4)
     # Inner subtle glow border
-    draw.rounded_rectangle([(14, 14), (width - 14, height - 14)], radius=20, outline=(info['color'][0], info['color'][1], info['color'][2], 80), width=1)
+    draw.rounded_rectangle([(18, 18), (width - 18, height - 18)], radius=24, outline=(info['color'][0], info['color'][1], info['color'][2], 90), width=2)
 
     try:
-        font_title = ImageFont.truetype("arialbd.ttf", 32)
-        font_sub = ImageFont.truetype("arial.ttf", 16)
-        font_badge = ImageFont.truetype("arialbd.ttf", 16)
-        font_th = ImageFont.truetype("arialbd.ttf", 16)
-        font_td = ImageFont.truetype("arial.ttf", 15)
-        font_verdict = ImageFont.truetype("arialbd.ttf", 15)
-        font_note = ImageFont.truetype("arial.ttf", 13)
+        font_title = ImageFont.truetype("arialbd.ttf", 40)
+        font_sub = ImageFont.truetype("arial.ttf", 22)
+        font_badge = ImageFont.truetype("arialbd.ttf", 22)
+        font_th = ImageFont.truetype("arialbd.ttf", 22)
+        font_td = ImageFont.truetype("arial.ttf", 20)
+        font_verdict_h = ImageFont.truetype("arialbd.ttf", 21)
+        font_verdict_b = ImageFont.truetype("arial.ttf", 20)
+        font_note = ImageFont.truetype("arial.ttf", 16)
     except:
-        font_title = font_sub = font_badge = font_th = font_td = font_verdict = font_note = ImageFont.load_default()
+        font_title = font_sub = font_badge = font_th = font_td = font_verdict_h = font_verdict_b = font_note = ImageFont.load_default()
 
     # Header Bar
-    draw.text((40, 32), f"🪐 {info['name']}", fill=(255, 255, 255, 255), font=font_title)
-    draw.text((40, 74), info['subtitle'], fill=(180, 205, 230, 220), font=font_sub)
+    draw.text((50, 40), f"🪐 {info['name']}", fill=(255, 255, 255, 255), font=font_title)
+    draw.text((50, 92), info['subtitle'], fill=(180, 210, 240, 230), font=font_sub)
 
     # Top Right Badge
-    badge_w = 260
-    draw.rounded_rectangle([(width - badge_w - 40, 32), (width - 40, 78)], radius=12,
-                           fill=(info['color'][0]//4, info['color'][1]//4, info['color'][2]//4, 200),
+    badge_w = 340
+    draw.rounded_rectangle([(width - badge_w - 50, 40), (width - 50, 98)], radius=16,
+                           fill=(info['color'][0]//4, info['color'][1]//4, info['color'][2]//4, 210),
                            outline=info['color'] + (255,), width=2)
-    draw.text((width - badge_w - 20, 44), info['badge'], fill=info['color'] + (255,), font=font_badge)
+    draw.text((width - badge_w - 25, 54), info['badge'], fill=info['color'] + (255,), font=font_badge)
 
     # Dividing Line
-    draw.line([(40, 105), (width - 40, 105)], fill=(60, 90, 130, 160), width=1)
+    draw.line([(50, 132), (width - 50, 132)], fill=(70, 105, 150, 180), width=2)
 
     # Table Header
-    y_th = 120
-    draw.rectangle([(40, y_th), (width - 40, y_th + 36)], fill=(20, 38, 65, 200))
-    draw.text((55, y_th + 8), "PARAMETER / METRIC", fill=(130, 190, 255, 255), font=font_th)
-    draw.text((370, y_th + 8), "ANALOG VALUE", fill=(255, 255, 255, 255), font=font_th)
-    draw.text((610, y_th + 8), "MARS GALE CRATER", fill=(255, 140, 60, 255), font=font_th)
-    draw.text((840, y_th + 8), "DIFFERENCE (Δ)", fill=(220, 220, 220, 255), font=font_th)
-    draw.text((1010, y_th + 8), "MATCH", fill=(100, 240, 160, 255), font=font_th)
+    y_th = 150
+    draw.rectangle([(50, y_th), (width - 50, y_th + 46)], fill=(20, 42, 75, 220))
+    draw.text((70, y_th + 10), "PARAMETER / METRIC", fill=(140, 200, 255, 255), font=font_th)
+    draw.text((490, y_th + 10), "ANALOG VALUE", fill=(255, 255, 255, 255), font=font_th)
+    draw.text((800, y_th + 10), "MARS GALE CRATER", fill=(255, 150, 70, 255), font=font_th)
+    draw.text((1110, y_th + 10), "DIFFERENCE (Δ)", fill=(225, 225, 225, 255), font=font_th)
+    draw.text((1340, y_th + 10), "MATCH", fill=(110, 245, 170, 255), font=font_th)
 
     # Table Rows
-    y_row = y_th + 42
+    y_row = y_th + 52
     for i, row in enumerate(info['rows']):
-        bg_row = (15, 28, 48, 140) if i % 2 == 0 else (10, 20, 36, 100)
-        draw.rectangle([(40, y_row), (width - 40, y_row + 34)], fill=bg_row)
+        bg_row = (16, 32, 58, 160) if i % 2 == 0 else (12, 24, 44, 120)
+        draw.rectangle([(50, y_row), (width - 50, y_row + 44)], fill=bg_row)
         
-        draw.text((55, y_row + 8), row[0], fill=(220, 235, 250, 240), font=font_td)
-        draw.text((370, y_row + 8), row[1], fill=(info['color'][0], info['color'][1], info['color'][2], 255), font=font_td)
-        draw.text((610, y_row + 8), row[2], fill=(255, 180, 120, 255), font=font_td)
-        draw.text((840, y_row + 8), row[3], fill=(200, 210, 225, 240), font=font_td)
-        draw.text((1010, y_row + 8), row[4], fill=(120, 240, 160, 255), font=font_td)
-        y_row += 37
+        draw.text((70, y_row + 10), row[0], fill=(225, 240, 255, 250), font=font_td)
+        draw.text((490, y_row + 10), row[1], fill=(info['color'][0], info['color'][1], info['color'][2], 255), font=font_td)
+        draw.text((800, y_row + 10), row[2], fill=(255, 190, 130, 255), font=font_td)
+        draw.text((1110, y_row + 10), row[3], fill=(210, 220, 235, 245), font=font_td)
+        draw.text((1340, y_row + 10), row[4], fill=(130, 245, 175, 255), font=font_td)
+        y_row += 48
 
     # Scientific Verdict Box at Bottom
-    y_verdict = height - 120
-    draw.rounded_rectangle([(40, y_verdict), (width - 40, height - 55)], radius=12,
-                           fill=(20, 36, 60, 210), outline=(60, 110, 170, 180), width=1)
-    draw.text((55, y_verdict + 12), "SCIENTIFIC ANALOG EVALUATION & MARS RELEVANCE:", fill=(100, 210, 255, 255), font=font_verdict)
-    draw.text((55, y_verdict + 36), info['verdict'], fill=(220, 235, 250, 240), font=font_sub)
+    y_verdict = height - 165
+    draw.rounded_rectangle([(50, y_verdict), (width - 50, height - 70)], radius=16,
+                           fill=(22, 40, 70, 230), outline=(70, 125, 190, 200), width=2)
+    draw.text((70, y_verdict + 14), "SCIENTIFIC ANALOG EVALUATION & MARS RELEVANCE:", fill=(110, 220, 255, 255), font=font_verdict_h)
+    draw.text((70, y_verdict + 44), info['verdict'], fill=(230, 242, 255, 250), font=font_verdict_b)
 
     # Footer Metadata
-    draw.text((45, height - 38), "NASA POWER MERRA-2 & CERES SYN1deg In-Situ Archive (2015-2025) vs Curiosity REMS Baseline.", fill=(130, 160, 190, 200), font=font_note)
-    draw.text((width - 320, height - 38), "Semi-Translucent OpenSpace 3D HUD", fill=(100, 180, 240, 200), font=font_note)
+    draw.text((60, height - 48), "NASA POWER MERRA-2 & CERES SYN1deg In-Situ Archive (2015-2025) vs Curiosity REMS Baseline.", fill=(140, 175, 210, 220), font=font_note)
+    draw.text((width - 420, height - 48), "Semi-Translucent OpenSpace 3D Viewport HUD", fill=(110, 195, 255, 220), font=font_note)
 
     out_path = os.path.join(OUTPUT_DIR, f"hud_comparison_{key}.png")
     im.save(out_path, "PNG")
-    print(f"Generated Overview HUD: {os.path.basename(out_path)}")
+    print(f"Generated High-Res HUD: {os.path.basename(out_path)} ({width}x{height})")
 
 def render_category_overview_hud(cat_key, cat_info):
-    """Renders a semi-translucent 1150x650 category overview card for OpenSpace 3D viewport."""
-    width, height = 1150, 650
+    """Renders a semi-translucent 1600x1020 category overview card for OpenSpace 3D viewport."""
+    width, height = 1600, 1020
     im = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
 
-    card_bg = (10, 18, 34, 230)
-    border_color = cat_info['color'] + (220,)
-    draw.rounded_rectangle([(10, 10), (width - 10, height - 10)], radius=24, fill=card_bg, outline=border_color, width=3)
-    draw.rounded_rectangle([(14, 14), (width - 14, height - 14)], radius=20, outline=(cat_info['color'][0], cat_info['color'][1], cat_info['color'][2], 80), width=1)
+    card_bg = (8, 16, 32, 235)
+    border_color = cat_info['color'] + (240,)
+    draw.rounded_rectangle([(14, 14), (width - 14, height - 14)], radius=28, fill=card_bg, outline=border_color, width=4)
+    draw.rounded_rectangle([(18, 18), (width - 18, height - 18)], radius=24, outline=(cat_info['color'][0], cat_info['color'][1], cat_info['color'][2], 90), width=2)
 
     try:
-        font_title = ImageFont.truetype("arialbd.ttf", 30)
-        font_sub = ImageFont.truetype("arial.ttf", 16)
-        font_badge = ImageFont.truetype("arialbd.ttf", 16)
-        font_loc = ImageFont.truetype("arialbd.ttf", 16)
-        font_val = ImageFont.truetype("arial.ttf", 15)
-        font_sum = ImageFont.truetype("arial.ttf", 15)
-        font_note = ImageFont.truetype("arial.ttf", 13)
+        font_title = ImageFont.truetype("arialbd.ttf", 38)
+        font_sub = ImageFont.truetype("arial.ttf", 22)
+        font_badge = ImageFont.truetype("arialbd.ttf", 22)
+        font_loc = ImageFont.truetype("arialbd.ttf", 22)
+        font_val = ImageFont.truetype("arial.ttf", 20)
+        font_sum_h = ImageFont.truetype("arialbd.ttf", 21)
+        font_sum_b = ImageFont.truetype("arial.ttf", 20)
+        font_note = ImageFont.truetype("arial.ttf", 16)
     except:
-        font_title = font_sub = font_badge = font_loc = font_val = font_sum = font_note = ImageFont.load_default()
+        font_title = font_sub = font_badge = font_loc = font_val = font_sum_h = font_sum_b = font_note = ImageFont.load_default()
 
-    draw.text((40, 32), f"📊 {cat_info['title']}", fill=(255, 255, 255, 255), font=font_title)
-    draw.text((40, 72), cat_info['subtitle'], fill=(180, 205, 230, 220), font=font_sub)
+    draw.text((50, 40), f"📊 {cat_info['title']}", fill=(255, 255, 255, 255), font=font_title)
+    draw.text((50, 92), cat_info['subtitle'], fill=(180, 210, 240, 230), font=font_sub)
 
-    badge_w = 220
-    draw.rounded_rectangle([(width - badge_w - 40, 32), (width - 40, 74)], radius=12,
-                           fill=(cat_info['color'][0]//4, cat_info['color'][1]//4, cat_info['color'][2]//4, 200),
+    badge_w = 300
+    draw.rounded_rectangle([(width - badge_w - 50, 40), (width - 50, 96)], radius=16,
+                           fill=(cat_info['color'][0]//4, cat_info['color'][1]//4, cat_info['color'][2]//4, 210),
                            outline=cat_info['color'] + (255,), width=2)
-    draw.text((width - badge_w - 20, 44), cat_info['badge'], fill=cat_info['color'] + (255,), font=font_badge)
+    draw.text((width - badge_w - 25, 54), cat_info['badge'], fill=cat_info['color'] + (255,), font=font_badge)
 
-    draw.line([(40, 102), (width - 40, 102)], fill=(60, 90, 130, 160), width=1)
+    draw.line([(50, 130), (width - 50, 130)], fill=(70, 105, 150, 180), width=2)
 
-    # Location Stats
-    y = 120
+    # Location Stats Rows
+    y = 155
     for loc, val in cat_info['stats']:
-        draw.rounded_rectangle([(40, y), (width - 40, y + 48)], radius=10, fill=(18, 32, 54, 180), outline=(45, 75, 115, 140), width=1)
-        draw.text((55, y + 14), loc, fill=cat_info['color'] + (255,), font=font_loc)
-        draw.text((360, y + 15), val, fill=(230, 240, 255, 250), font=font_val)
-        y += 58
+        draw.rounded_rectangle([(50, y), (width - 50, y + 64)], radius=14, fill=(18, 36, 64, 190), outline=(50, 90, 135, 160), width=2)
+        draw.text((70, y + 18), loc, fill=cat_info['color'] + (255,), font=font_loc)
+        draw.text((490, y + 20), val, fill=(235, 245, 255, 250), font=font_val)
+        y += 76
 
     # Summary Box
-    draw.rounded_rectangle([(40, height - 160), (width - 40, height - 55)], radius=12,
-                           fill=(20, 36, 60, 210), outline=(60, 110, 170, 180), width=1)
-    draw.text((55, height - 146), "SCIENTIFIC SYNTHESIS ACROSS ALL SITES:", fill=(100, 210, 255, 255), font=font_loc)
-    draw.text((55, height - 118), cat_info['summary'], fill=(220, 235, 250, 240), font=font_sum)
+    draw.rounded_rectangle([(50, height - 200), (width - 50, height - 70)], radius=16,
+                           fill=(22, 40, 70, 230), outline=(70, 125, 190, 200), width=2)
+    draw.text((70, height - 184), "SCIENTIFIC SYNTHESIS ACROSS ALL SITES:", fill=(110, 220, 255, 255), font=font_sum_h)
+    draw.text((70, height - 148), cat_info['summary'], fill=(230, 242, 255, 250), font=font_sum_b)
 
-    draw.text((45, height - 36), "10-Year In-Situ Data Archive (2015-2025) derived from NASA POWER & Curiosity REMS records.", fill=(130, 160, 190, 200), font=font_note)
-    draw.text((width - 320, height - 36), "Semi-Translucent OpenSpace 3D HUD", fill=(100, 180, 240, 200), font=font_note)
+    draw.text((60, height - 48), "10-Year In-Situ Data Archive (2015-2025) derived from NASA POWER & Curiosity REMS records.", fill=(140, 175, 210, 220), font=font_note)
+    draw.text((width - 420, height - 48), "Semi-Translucent OpenSpace 3D Viewport HUD", fill=(110, 195, 255, 220), font=font_note)
 
     out_path = os.path.join(OUTPUT_DIR, f"hud_overview_{cat_key}.png")
     im.save(out_path, "PNG")
-    print(f"Generated Category HUD: {os.path.basename(out_path)}")
+    print(f"Generated High-Res Category HUD: {os.path.basename(out_path)} ({width}x{height})")
 
 # Generate all Comparison HUD cards
 for k, v in COMPARISON_DATA.items():
@@ -319,4 +319,4 @@ for k, v in COMPARISON_DATA.items():
 for k, v in CATEGORY_OVERVIEWS.items():
     render_category_overview_hud(k, v)
 
-print("All Semi-Translucent Overview HUD Cards Successfully Generated!")
+print("All High-Resolution 1600x1020 Overview HUD Cards Successfully Generated!")
