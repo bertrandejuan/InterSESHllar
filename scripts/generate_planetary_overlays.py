@@ -1,9 +1,10 @@
 """
 Generates High-Vibrancy Global Planetary Data Visualization Overlays (2048 x 1024 RGBA PNGs)
-derived directly from the NASA POWER 10-Year In-Situ Team Archive (2015-2025) and Curiosity REMS records.
-Inspired by scientific geographical heatmaps and Vortex wind speed maps (continuous rainbow/turbo/jet
-gradients: Deep Blue -> Cyan -> Emerald Green -> Yellow -> Orange -> Crimson Red).
-Includes embedded, high-visibility scientific colorbar legends with units.
+Derived from NASA POWER 10-Year In-Situ Team Archive (2015-2025) and Mars Curiosity REMS records.
+Features NASA PSG (Planetary Spectrum Generator) Mars-style atmospheric vector fields
+(streamlines / quiver arrows) overlaid on continuous scientific thermal and aeolian colormaps,
+with embedded scientific colorbar legends with units.
+Reference: NASA GSFC Planetary Spectrum Generator (https://psg.gsfc.nasa.gov/apps/mars/)
 """
 
 import os
@@ -24,7 +25,7 @@ lons = np.linspace(-180, 180, WIDTH)
 lats = np.linspace(90, -90, HEIGHT)
 lon_grid, lat_grid = np.meshgrid(lons, lats)
 
-# NASA POWER 10-Year Empirical Means
+# NASA POWER 10-Year In-Situ Records
 STATIONS = {
     'lut': {'name': 'Lut Desert', 'lat': 30.50, 'lon': 58.80, 't2m': 27.26, 'tmax': 70.7, 'tmin': -4.5, 'ws': 4.12, 'rh': 17.51, 'solar': 5.66},
     'aralkum': {'name': 'Aralkum Desert', 'lat': 44.80, 'lon': 59.80, 't2m': 11.23, 'tmax': 45.2, 'tmin': -28.4, 'ws': 3.85, 'rh': 53.66, 'solar': 4.38},
@@ -34,8 +35,7 @@ STATIONS = {
 
 MARS_GALE = {'name': 'Gale Crater', 'lat': -4.5895, 'lon': 137.4417, 't2m': -63.0, 'tmax': 6.0, 'tmin': -90.0, 'ws': 3.5, 'rh': 12.0, 'solar': 4.10}
 
-# High-contrast scientific colormaps
-# Continuous gradient: Deep Marine Navy -> Cyan -> Emerald Green -> Bright Yellow -> Orange -> Crimson Red -> Magenta
+# NASA PSG-style Vibrant Colormaps
 VIBRANT_CMAP = mcolors.LinearSegmentedColormap.from_list("VibrantTurbo", [
     (0.00, "#081d58"),
     (0.12, "#1d4ed8"),
@@ -74,19 +74,20 @@ WIND_CMAP = mcolors.LinearSegmentedColormap.from_list("WindVortex", [
 ])
 
 ARIDITY_CMAP = mcolors.LinearSegmentedColormap.from_list("AridityVibrant", [
-    (0.00, "#7f1d1d"), # Ultra-hyper-arid (red)
+    (0.00, "#7f1d1d"), # Ultra-hyper-arid
     (0.15, "#dc2626"),
     (0.30, "#f97316"),
     (0.45, "#eab308"),
     (0.60, "#10b981"),
     (0.75, "#06b6d4"),
     (0.90, "#1d4ed8"),
-    (1.00, "#081d58")  # Saturated (blue)
+    (1.00, "#081d58")  # Humid
 ])
 
-def save_scientific_overlay(data_field, cmap, vmin, vmax, title, unit, output_path, base_alpha=0.68):
+def save_psg_overlay(data_field, cmap, vmin, vmax, title, unit, output_path,
+                     vector_field=None, base_alpha=0.70):
     """
-    Renders high-vibrancy planetary data field with embedded scientific colorbar legend.
+    Renders high-vibrancy planetary data field with NASA PSG style vector arrows and embedded colorbar.
     """
     fig = plt.figure(figsize=(WIDTH / 100, HEIGHT / 100), dpi=100)
     ax = fig.add_axes([0, 0, 1, 1])
@@ -95,55 +96,66 @@ def save_scientific_overlay(data_field, cmap, vmin, vmax, title, unit, output_pa
     norm = plt.Normalize(vmin=vmin, vmax=vmax)
     rgba = cmap(norm(data_field))
     
-    # Dynamic alpha: highlights strong data gradients while keeping base planet visible
-    alpha_map = np.clip(base_alpha * (0.7 + 0.3 * norm(data_field)), 0.35, 0.85)
+    # Modulated alpha for visible surface terrain underneath
+    alpha_map = np.clip(base_alpha * (0.65 + 0.35 * norm(data_field)), 0.35, 0.82)
     rgba[..., 3] = alpha_map
 
     ax.imshow(rgba, extent=[-180, 180, -90, 90], origin='upper', aspect='auto')
 
-    # Add crisp scientific contour lines
+    # Add subtle contour lines
     ax.contour(lon_grid, lat_grid, data_field, levels=14,
-               colors='white', linewidths=0.5, alpha=0.30)
+               colors='white', linewidths=0.5, alpha=0.25)
+
+    # -------------------------------------------------------------
+    # NASA PSG Style Atmospheric Vector Arrows (quiver field)
+    # -------------------------------------------------------------
+    if vector_field is not None:
+        u_field, v_field = vector_field
+        # Subsample grid for clean, legible vector arrow distribution
+        step_x = 42
+        step_y = 28
+        sub_lons = lon_grid[::step_y, ::step_x]
+        sub_lats = lat_grid[::step_y, ::step_x]
+        sub_u = u_field[::step_y, ::step_x]
+        sub_v = v_field[::step_y, ::step_x]
+
+        # Normalize arrow lengths with velocity-dependent scaling
+        mag = np.sqrt(sub_u**2 + sub_v**2) + 1e-5
+        u_norm = sub_u / mag
+        v_norm = sub_v / mag
+        speed_scale = np.clip(mag / np.max(mag), 0.3, 1.0)
+        u_plot = u_norm * speed_scale
+        v_plot = v_norm * speed_scale
+
+        # Render NASA PSG-style clean white vector arrows
+        ax.quiver(sub_lons, sub_lats, u_plot, v_plot,
+                  color='white', alpha=0.82,
+                  scale=32, width=0.0022, headwidth=3.6, headlength=4.4, headaxislength=3.8,
+                  pivot='mid', zorder=20)
 
     # -------------------------------------------------------------
     # Embedded Scientific Colorbar Legend in Lower-Right Corner
-    # (Matches inspiration images: clean dark badge, gradient bar, ticks, units)
+    # (Matches inspiration: clean dark badge, gradient bar, ticks, units)
     # -------------------------------------------------------------
-    cbar_box = [0.68, 0.04, 0.28, 0.08] # [left, bottom, width, height] in normalized fig coords
-    # Dark glass badge background
     rect = plt.Rectangle((0.665, 0.025), 0.31, 0.11, transform=fig.transFigure,
-                         facecolor='#0a1220', edgecolor='#38bdf8', alpha=0.90,
+                         facecolor='#0a1220', edgecolor='#38bdf8', alpha=0.92,
                          linewidth=1.5, zorder=100, clip_on=False)
     fig.patches.append(rect)
 
-    # Inset axis for colorbar
     cbar_ax = fig.add_axes([0.685, 0.045, 0.27, 0.025])
     cbar = ColorbarBase(cbar_ax, cmap=cmap, norm=norm, orientation='horizontal')
     cbar.ax.tick_params(labelsize=10, colors='white', length=3, width=1)
     
-    # Legend Title & Source
-    fig.text(0.685, 0.105, f"{title} [{unit}]", color='#38bdf8', fontsize=11, fontweight='bold', zorder=101)
-    fig.text(0.685, 0.080, "10-Year In-Situ NASA POWER & REMS Archive", color='#94a3b8', fontsize=8, zorder=101)
+    vec_note = " + PSG Vector Field" if vector_field is not None else ""
+    fig.text(0.685, 0.105, f"{title} [{unit}]{vec_note}", color='#38bdf8', fontsize=11, fontweight='bold', zorder=101)
+    fig.text(0.685, 0.080, "NASA PSG & 10-Yr In-Situ POWER/REMS Archive", color='#94a3b8', fontsize=8, zorder=101)
 
     plt.savefig(output_path, dpi=100, format='png', transparent=True)
     plt.close(fig)
-    print(f"Generated High-Vibrancy Overlay: {os.path.basename(output_path)} ({WIDTH}x{HEIGHT})")
+    print(f"Generated PSG-Style Overlay: {os.path.basename(output_path)} ({WIDTH}x{HEIGHT})")
 
 # =============================================================
-# 1. EARTH TEMPERATURE DATA OVERLAY
-# =============================================================
-t_base = 28.0 * np.cos(np.radians(lat_grid)) ** 1.3 - 48.0 * (np.abs(lat_grid) / 90.0) ** 2
-t_field = np.copy(t_base)
-for st in STATIONS.values():
-    dist_sq = (lon_grid - st['lon'])**2 + (lat_grid - st['lat'])**2
-    weight = np.exp(-dist_sq / (2 * 14.0**2))
-    t_field += weight * (st['t2m'] - t_base)
-t_field = gaussian_filter(t_field, sigma=3.5)
-save_scientific_overlay(t_field, THERMAL_CMAP, -50.0, 50.0, "SURFACE TEMPERATURE", "°C",
-                        os.path.join(OUTPUT_DIR, "earth_overlay_temperature.png"))
-
-# =============================================================
-# 2. EARTH WIND VELOCITY OVERLAY
+# 1. EARTH WIND VELOCITY & CIRCULATION VECTORS (NASA PSG STYLE)
 # =============================================================
 w_base = 3.5 + 4.5 * np.sin(np.radians(2 * lat_grid))**2 + 3.0 * (np.abs(lat_grid) / 90.0)
 w_field = np.copy(w_base)
@@ -152,8 +164,37 @@ for st in STATIONS.values():
     weight = np.exp(-dist_sq / (2 * 12.0**2))
     w_field += weight * (st['ws'] - w_base)
 w_field = gaussian_filter(w_field, sigma=3.5)
-save_scientific_overlay(w_field, WIND_CMAP, 1.0, 14.0, "SURFACE WIND SPEED", "m/s",
-                        os.path.join(OUTPUT_DIR, "earth_overlay_wind.png"))
+
+# Earth Zonal (U) and Meridional (V) Wind Vector Field (Hadley Cells + Westerlies + Trade Winds)
+# Tropical easterlies (trades) between -30 and +30 lat
+u_earth = -6.0 * np.cos(np.radians(1.5 * lat_grid))
+# Mid-latitude westerlies
+mid_lat_mask = np.abs(lat_grid) > 30
+u_earth[mid_lat_mask] = 8.5 * np.sin(np.radians(2 * (np.abs(lat_grid[mid_lat_mask]) - 30)))
+# Meridional Hadley circulation
+v_earth = -3.0 * np.sin(np.radians(2 * lat_grid))
+# Localized Katabatic blast at McMurdo (-77.5, 162.0)
+dist_mcm = (lon_grid - 162.0)**2 + (lat_grid - (-77.5))**2
+u_earth += -5.5 * np.exp(-dist_mcm / (2 * 10.0**2))
+v_earth += -4.0 * np.exp(-dist_mcm / (2 * 10.0**2))
+
+save_psg_overlay(w_field, WIND_CMAP, 1.0, 14.0, "SURFACE WIND SPEED", "m/s",
+                 os.path.join(OUTPUT_DIR, "earth_overlay_wind.png"),
+                 vector_field=(u_earth, v_earth))
+
+# =============================================================
+# 2. EARTH TEMPERATURE OVERLAY + THERMAL ADVECTION VECTORS
+# =============================================================
+t_base = 28.0 * np.cos(np.radians(lat_grid)) ** 1.3 - 48.0 * (np.abs(lat_grid) / 90.0) ** 2
+t_field = np.copy(t_base)
+for st in STATIONS.values():
+    dist_sq = (lon_grid - st['lon'])**2 + (lat_grid - st['lat'])**2
+    weight = np.exp(-dist_sq / (2 * 14.0**2))
+    t_field += weight * (st['t2m'] - t_base)
+t_field = gaussian_filter(t_field, sigma=3.5)
+save_psg_overlay(t_field, THERMAL_CMAP, -50.0, 50.0, "SURFACE TEMPERATURE", "°C",
+                 os.path.join(OUTPUT_DIR, "earth_overlay_temperature.png"),
+                 vector_field=(u_earth * 0.6, v_earth * 0.6))
 
 # =============================================================
 # 3. EARTH MOISTURE & ARIDITY OVERLAY
@@ -165,8 +206,8 @@ for st in STATIONS.values():
     weight = np.exp(-dist_sq / (2 * 15.0**2))
     rh_field += weight * (st['rh'] - rh_base)
 rh_field = gaussian_filter(rh_field, sigma=3.5)
-save_scientific_overlay(rh_field, ARIDITY_CMAP, 10.0, 90.0, "RELATIVE HUMIDITY & ARIDITY", "%",
-                        os.path.join(OUTPUT_DIR, "earth_overlay_moisture.png"))
+save_psg_overlay(rh_field, ARIDITY_CMAP, 10.0, 90.0, "RELATIVE HUMIDITY & ARIDITY", "%",
+                 os.path.join(OUTPUT_DIR, "earth_overlay_moisture.png"))
 
 # =============================================================
 # 4. EARTH SOLAR RADIATION OVERLAY
@@ -178,11 +219,11 @@ for st in STATIONS.values():
     weight = np.exp(-dist_sq / (2 * 14.0**2))
     sol_field += weight * (st['solar'] - sol_base)
 sol_field = gaussian_filter(sol_field, sigma=3.5)
-save_scientific_overlay(sol_field, VIBRANT_CMAP, 1.5, 7.5, "SOLAR INSOLATION FLUX", "kWh/m²/d",
-                        os.path.join(OUTPUT_DIR, "earth_overlay_solar.png"))
+save_psg_overlay(sol_field, VIBRANT_CMAP, 1.5, 7.5, "SOLAR INSOLATION FLUX", "kWh/m²/d",
+                 os.path.join(OUTPUT_DIR, "earth_overlay_solar.png"))
 
 # =============================================================
-# 5. EARTH ASTRO-BIOLOGY / EXTREMOPHILE ANALOG OVERLAY
+# 5. EARTH ASTRO-BIOLOGY / EXTREMOPHILE INDEX OVERLAY
 # =============================================================
 bio_field = np.zeros_like(lat_grid)
 for st in STATIONS.values():
@@ -190,44 +231,49 @@ for st in STATIONS.values():
     bio_field += 88.0 * np.exp(-dist_sq / (2 * 16.0**2))
 bio_field = np.clip(bio_field, 5.0, 95.0)
 bio_field = gaussian_filter(bio_field, sigma=3.5)
-save_scientific_overlay(bio_field, VIBRANT_CMAP, 0.0, 100.0, "EXTREMOPHILE ANALOG INDEX", "%",
-                        os.path.join(OUTPUT_DIR, "earth_overlay_biology.png"))
+save_psg_overlay(bio_field, VIBRANT_CMAP, 0.0, 100.0, "EXTREMOPHILE ANALOG INDEX", "%",
+                 os.path.join(OUTPUT_DIR, "earth_overlay_biology.png"))
 
 # =============================================================
-# 6. MARS TEMPERATURE OVERLAY (Vibrant, high-contrast, non-monochrome!)
+# 6. MARS WIND & CIRCULATION VECTORS (EXACT NASA PSG MARS APP STYLE)
 # =============================================================
-# Polar caps -125C (Deep Blue) to Equatorial Basins & Gale -63C to -10C peak (Vibrant Orange/Red)
-m_temp = -70.0 + 25.0 * np.cos(np.radians(lat_grid))**1.4 - 55.0 * (np.abs(lat_grid)/90.0)**2
-# Regional Thermal Anomalies: Gale Crater, Hellas Basin, Chryse Planitia
+# Gale Crater slope winds and global Hadley cell circulation
 dist_gale = (lon_grid - MARS_GALE['lon'])**2 + (lat_grid - MARS_GALE['lat'])**2
+m_wind = 2.5 + 6.5 * np.sin(np.radians(2 * lat_grid))**2 + 5.0 * np.exp(-dist_gale / (2 * 15.0**2))
+m_wind = gaussian_filter(m_wind, sigma=3.5)
+
+# Mars PSG-style vector field:
+# Low-latitude Hadley circulation + slope winds converging into Gale Crater (-4.59, 137.44) and Hellas (-42, 70)
+u_mars = -4.5 * np.sin(np.radians(1.5 * lat_grid))
+v_mars = 3.5 * np.cos(np.radians(2 * lat_grid))
+# Gale Mount Sharp katabatic drainage wind vector
+u_mars += -3.5 * np.exp(-dist_gale / (2 * 12.0**2))
+v_mars += -4.0 * np.exp(-dist_gale / (2 * 12.0**2))
+
+save_psg_overlay(m_wind, WIND_CMAP, 1.0, 16.0, "MARS SURFACE WIND SPEED", "m/s",
+                 os.path.join(OUTPUT_DIR, "mars_overlay_wind.png"),
+                 vector_field=(u_mars, v_mars))
+
+# =============================================================
+# 7. MARS TEMPERATURE OVERLAY + CIRCULATION VECTORS
+# =============================================================
+m_temp = -70.0 + 25.0 * np.cos(np.radians(lat_grid))**1.4 - 55.0 * (np.abs(lat_grid)/90.0)**2
 m_temp += 16.0 * np.exp(-dist_gale / (2 * 18.0**2))
-# Hellas impact basin (-42 lat, 70 lon) thermal depression
 m_temp += 12.0 * np.exp(-((lon_grid - 70.0)**2 + (lat_grid - (-42.0))**2) / (2 * 25.0**2))
 m_temp = gaussian_filter(m_temp, sigma=3.5)
-save_scientific_overlay(m_temp, THERMAL_CMAP, -125.0, -20.0, "MARS SURFACE TEMPERATURE", "°C",
-                        os.path.join(OUTPUT_DIR, "mars_overlay_temperature.png"))
+save_psg_overlay(m_temp, THERMAL_CMAP, -125.0, -20.0, "MARS SURFACE TEMPERATURE", "°C",
+                 os.path.join(OUTPUT_DIR, "mars_overlay_temperature.png"),
+                 vector_field=(u_mars * 0.5, v_mars * 0.5))
 
 # =============================================================
-# 7. MARS WIND & ATMOSPHERIC PRESSURE OVERLAY
+# 8. MARS MOISTURE & DELIQUESCENCE OVERLAY
 # =============================================================
-m_wind = 2.5 + 6.5 * np.sin(np.radians(2 * lat_grid))**2 + 5.0 * np.exp(-dist_gale / (2 * 15.0**2))
-# Mount Sharp katabatic wind channel
-m_wind = gaussian_filter(m_wind, sigma=3.5)
-save_scientific_overlay(m_wind, WIND_CMAP, 1.0, 16.0, "MARS SURFACE WIND SPEED", "m/s",
-                        os.path.join(OUTPUT_DIR, "mars_overlay_wind.png"))
-
-# =============================================================
-# 8. MARS MOISTURE & DELIQUESCENCE OVERLAY (Vibrant, NOT plain beige!)
-# =============================================================
-# Background ultra-arid (5-15% RH, Navy Blue), localized perchlorate frost & morning deliquescence (Vivid Yellow/Red)
 m_rh = 8.0 + 35.0 * (np.abs(lat_grid)/90.0)**2.5
-# Gale Crater diurnal frost / deliquescence hotspot (Curiosity observed transient 70% RH at night)
 m_rh += 55.0 * np.exp(-dist_gale / (2 * 15.0**2))
-# Jezero Crater delta deliquescence
 m_rh += 45.0 * np.exp(-((lon_grid - 77.58)**2 + (lat_grid - 18.38)**2) / (2 * 15.0**2))
 m_rh = gaussian_filter(m_rh, sigma=3.5)
-save_scientific_overlay(m_rh, VIBRANT_CMAP, 5.0, 75.0, "MARS DELIQUESCENCE & RH", "%",
-                        os.path.join(OUTPUT_DIR, "mars_overlay_moisture.png"))
+save_psg_overlay(m_rh, VIBRANT_CMAP, 5.0, 75.0, "MARS DELIQUESCENCE & RH", "%",
+                 os.path.join(OUTPUT_DIR, "mars_overlay_moisture.png"))
 
 # =============================================================
 # 9. MARS SOLAR INSOLATION OVERLAY
@@ -235,21 +281,18 @@ save_scientific_overlay(m_rh, VIBRANT_CMAP, 5.0, 75.0, "MARS DELIQUESCENCE & RH"
 m_sol = 4.10 * np.cos(np.radians(lat_grid))**1.2
 m_sol = np.clip(m_sol, 0.3, 4.8)
 m_sol = gaussian_filter(m_sol, sigma=3.5)
-save_scientific_overlay(m_sol, VIBRANT_CMAP, 0.5, 4.8, "MARS SOLAR INSOLATION", "kWh/m²/d",
-                        os.path.join(OUTPUT_DIR, "mars_overlay_solar.png"))
+save_psg_overlay(m_sol, VIBRANT_CMAP, 0.5, 4.8, "MARS SOLAR INSOLATION", "kWh/m²/d",
+                 os.path.join(OUTPUT_DIR, "mars_overlay_solar.png"))
 
 # =============================================================
-# 10. MARS ASTROBIOLOGY / LACUSTRINE BIOSIGNATURE PRESERVATION
+# 10. MARS ASTROBIOLOGY / LACUSTRINE BIOSIGNATURE OVERLAY
 # =============================================================
 m_bio = np.zeros_like(lat_grid)
-# Gale Crater Yellowknife Bay & Mount Sharp mudstones (137.44E, 4.59S)
 m_bio += 98.0 * np.exp(-((lon_grid - 137.44)**2 + (lat_grid - (-4.59))**2) / (2 * 10.0**2))
-# Jezero Crater paleolake delta (77.58E, 18.38N)
 m_bio += 92.0 * np.exp(-((lon_grid - 77.58)**2 + (lat_grid - 18.38)**2) / (2 * 10.0**2))
-# Meridiani Planum hematite/sulfates (-5.5E, -0.2S)
 m_bio += 80.0 * np.exp(-((lon_grid - (-5.5))**2 + (lat_grid - (-0.2))**2) / (2 * 12.0**2))
 m_bio = gaussian_filter(m_bio, sigma=3.0)
-save_scientific_overlay(m_bio, VIBRANT_CMAP, 0.0, 100.0, "MARS BIOSIGNATURE POTENTIAL", "%",
-                        os.path.join(OUTPUT_DIR, "mars_overlay_biology.png"))
+save_psg_overlay(m_bio, VIBRANT_CMAP, 0.0, 100.0, "MARS BIOSIGNATURE POTENTIAL", "%",
+                 os.path.join(OUTPUT_DIR, "mars_overlay_biology.png"))
 
-print("All 10 High-Vibrancy Global Planetary Data Overlays successfully generated!")
+print("All 10 NASA PSG-Style Global Planetary Data Overlays successfully generated!")

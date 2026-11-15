@@ -12,8 +12,8 @@ local OverviewHUD = {
   Enabled = false,
   Opacity = 0.94,
   Placement = {
-    CartesianPosition = { -0.28, 0.0, -2.0 },
-    Scale = 2.85
+    CartesianPosition = { -0.25, 0.0, -2.0 },
+    Scale = 1.65
   }
 }
 
