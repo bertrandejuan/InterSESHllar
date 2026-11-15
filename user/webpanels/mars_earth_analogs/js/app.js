@@ -502,24 +502,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----------------------------------------------------
   // Camera Topography Tilt: "Orient Sideways"
+  // Produces the low-altitude oblique panoramic surface view across mountains & valleys
   // ----------------------------------------------------
+  const SITE_SURFACE_ALTITUDES = {
+    mcmurdo: 2600.0,   // Taylor Valley floor & mountain ridges (matches verified view)
+    lut: 2100.0,       // Kalut yardang field & Gandom Beryan thermal basalt ridge
+    aralkum: 1800.0,   // Desiccated Aral Sea basin & Ustyurt plateau cliffs
+    uyuni: 5600.0,     // High-altitude Altiplano: 3,656m salt crust + 1,940m view toward Volcan Tunupa
+    mars_gale: 4500.0  // Aeolis Palus looking across Yellowknife Bay toward Mount Sharp
+  };
+
   function orientCameraSideways(enable) {
     state.isOrientSideways = enable;
+
+    // Synchronize all Orient Sideways checkboxes across all categories
+    document.querySelectorAll(".chk-orient").forEach(chk => {
+      chk.checked = enable;
+    });
+
     const site = window.TEAM_DATA[state.currentSiteKey] || window.TEAM_DATA.lut;
     const globe = site.globe || "Earth";
-    const lat = site.coordinates.lat;
-    const lon = site.coordinates.lon;
+    const targetLat = site.coordinates.lat;
+    const targetLon = site.coordinates.lon;
 
     if (enable) {
-      // Storyboard: "Orient sideways = automatically orient to view topography from ground"
-      // Smoothly tilt camera pitch to ~75 degrees looking across the ground topography
+      // Oblique ground-level topography view: low altitude looking across terrain toward horizon
+      const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2600.0;
       openSpace.executeLuaScript(`
-        openspace.navigation.flyToGeo("${globe}", ${lat}, ${lon}, 2800.0, 2.5)
+        openspace.navigation.flyToGeo("${globe}", ${targetLat}, ${targetLon}, ${groundAlt}, 2.5)
       `);
     } else {
-      // Reset to top-down nadir patch view
+      // Reset to regional top-down nadir patch view
       openSpace.executeLuaScript(`
-        openspace.navigation.flyToGeo("${globe}", ${lat}, ${lon}, 35000.0, 2.0)
+        openspace.navigation.flyToGeo("${globe}", ${targetLat}, ${targetLon}, 35000.0, 2.0)
       `);
     }
   }
