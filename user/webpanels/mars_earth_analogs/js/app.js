@@ -71,6 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnLocationOverviewHUD = document.getElementById("btn-location-overview-hud");
   const btnMarsRefOverview = document.getElementById("btn-mars-ref-overview");
   const btnLocationHUDText = document.getElementById("btn-location-hud-text");
+  const btnComparisonMatrixHUD = document.getElementById("btn-comparison-matrix-hud");
+  const btnComparisonMatrixText = document.getElementById("btn-comparison-matrix-text");
 
   // DOM Elements - One Accordion Container
   const scienceAccordion = document.getElementById("science-accordion");
@@ -262,12 +264,24 @@ document.addEventListener("DOMContentLoaded", () => {
       availabilityNote: "Spatial vector overlay available for Climatology layers; Astrobiology uses point station telemetry.",
       parameters: [
         {
+          key: "soil_ph",
+          label: "Soil / Regolith pH",
+          code: "SOIL_PH",
+          unit: "pH",
+          desc: "Acidity / alkalinity of surface soil and regolith solution influencing mineral dissolution, clay stability, and habitability.",
+          source: "Earth Analogs: In-Situ Soil Chemical Analyses (soil_ph_summary.csv) | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids",
+          scale: 1.5,
+          isQualitative: false,
+          getVal: (m) => m.soil_ph !== null && m.soil_ph !== undefined ? `${formatNumber(m.soil_ph, 2)} pH (Range: ${m.soil_ph_min}–${m.soil_ph_max})` : "N/A (Cryogenic)",
+          getMarsVal: () => "7.80 pH (Range: 7.0–8.5)"
+        },
+        {
           key: "soil_mineral_type",
           label: "Mineral Composition & Rock Type",
           code: "MINERAL_TYPE",
           unit: "Mineralogy",
           desc: "Dominant surface mineralogy providing geological substrates for biosignature preservation.",
-          source: "NASA EMIT (araldesert.tif / lut.tif / out.csv), earthaccess ICESat-2 (out.tif) & MSL CheMin",
+          source: "Mars: MSL CheMin XRD & SAM | Earth Analogs: NASA EMIT (araldesert.tif / lut.tif), ICESat-2 (out.tif) & Field Petrography",
           scale: null,
           isQualitative: true,
           getVal: (m) => m.soil_mineral_type || "Evaporite & Mudstone Matrix",
@@ -279,35 +293,35 @@ document.addEventListener("DOMContentLoaded", () => {
           code: "ORGANIC_FOCUS",
           unit: "Preservation",
           desc: "Target compounds, macromolecular organic carbon, and preservation mechanisms.",
-          source: "Terrestrial Astrobiology Surveys & MSL Sample Analysis at Mars",
+          source: "Mars: MSL SAM Pyrolysis Gas Chromatography | Earth Analogs: Astrobiology Extreme-Environment Surveys",
           scale: null,
           isQualitative: true,
           getVal: (m) => m.chemical_organic_focus || "Organic preservation target in sedimentary matrix",
-          getMarsVal: () => "Organic carbon preservation target via MSL SAM / CheMin"
+          getMarsVal: () => "Target for organic carbon preservation"
         },
         {
           key: "emit_mineral_matrix",
-          label: "NASA EMIT Mineral Spectroscopy",
+          label: "Surface Mineral Spectroscopy",
           code: "EMIT_SPEC",
           unit: "Matrix",
-          desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess araldesert.tif, lut.tif & out.csv).",
-          source: "NASA earthaccess EMIT L2B (araldesert.tif / lut.tif / out.csv / out.tif) & CRISM",
+          desc: "Surface mineral identification and spectral composition identifying dominant mineral species.",
+          source: "Mars: CRISM & Mastcam Multispectral | Aralkum: NASA EMIT L2B (araldesert.tif & out.csv) | Lut: NASA EMIT L2B (lut.tif) | McMurdo: In-Situ Reflectance | Uyuni: NASA EMIT L2B",
           scale: null,
           isQualitative: true,
-          getVal: (m) => m.emit_mineral_matrix || "EMIT L2B Imaging Spectroscopy",
-          getMarsVal: () => "CRISM & Mastcam multispectral mineral identification"
+          getVal: (m) => m.emit_mineral_matrix || "Mineral Spectroscopy Matrix",
+          getMarsVal: () => "Fe-Smectites, Jarosite & Calcium Sulfates"
         },
         {
           key: "surface_elevation_relief",
-          label: "Topographic Relief & Laser Altimetry",
+          label: "Topographic Relief & Elevation",
           code: "ELEV_TOPO",
           unit: "m",
-          desc: "Surface elevation and micro-topographic relief derived from satellite laser altimetry (ICESat-2 ATL06 out.tif) and digital elevation models.",
-          source: "NASA earthaccess ICESat-2 (out.tif) & NASA MOLA",
+          desc: "Surface elevation and micro-topographic relief.",
+          source: "Mars: NASA MOLA Laser Altimeter | Aralkum: NASA earthaccess ICESat-2 (ATL06 out.tif) | Lut, McMurdo, Uyuni: MERRA-2 Global DEM",
           scale: null,
           isQualitative: true,
-          getVal: (m) => m.surface_elevation_relief || "44 – 78 m relief (NASA ICESat-2 out.tif)",
-          getMarsVal: () => "-4,400 m floor / 5.5 km Mount Sharp relief (MOLA)"
+          getVal: (m) => m.surface_elevation_relief || "Elevated Terrain Relief",
+          getMarsVal: () => "-4,400 m crater floor / 5.5 km Mount Sharp relief"
         }
       ]
     },
@@ -765,6 +779,16 @@ document.addEventListener("DOMContentLoaded", () => {
       btnModalComparisonHUD.innerText = isOverviewActive ? "Hide overview" : "Show overview";
       btnModalComparisonHUD.classList.toggle("active", isOverviewActive);
       btnModalComparisonHUD.setAttribute("aria-pressed", isOverviewActive ? "true" : "false");
+    }
+
+    if (btnComparisonMatrixHUD) {
+      const isMatrixHUD = state.activeHUD === "hud_comparison_matrix.png";
+      const textSpan = document.getElementById("btn-comparison-matrix-text");
+      if (textSpan) {
+        textSpan.innerText = isMatrixHUD ? "Hide Matrix" : "Comparison Matrix";
+      }
+      btnComparisonMatrixHUD.classList.toggle("active", Boolean(isMatrixHUD));
+      btnComparisonMatrixHUD.setAttribute("aria-pressed", isMatrixHUD ? "true" : "false");
     }
 
     if (modalHudNotice && modalTableContent) {
@@ -1265,6 +1289,21 @@ document.addEventListener("DOMContentLoaded", () => {
     marsReferencePanel.addEventListener("click", (e) => {
       if (e.target && e.target.closest("button")) return;
       selectSite("mars_gale", true);
+    });
+  }
+
+  // ----------------------------------------------------
+  // Comparison Matrix Viewport HUD Toggle
+  // ----------------------------------------------------
+  if (btnComparisonMatrixHUD) {
+    btnComparisonMatrixHUD.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const matrixTexture = "hud_comparison_matrix.png";
+      if (state.activeHUD === matrixTexture) {
+        dismissHUD();
+      } else {
+        showHUDTexture(matrixTexture);
+      }
     });
   }
 

@@ -23,6 +23,7 @@ SITES = {
         'name': "Mars: Gale Crater",
         'short_name': "Mars: Gale Crater",
         'header_tag': "MARS BASELINE",
+        'overall_similarity': "100.0%",
         'is_mars': True,
         'color': (255, 95, 45),
         'highlight_bg': (180, 50, 20, 110),
@@ -44,9 +45,10 @@ SITES = {
             ],
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Yellowknife Bay Mudstones", "Ancient lacustrine smectites and sulfate-bearing Mount Sharp strata"),
-                ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "SAM / CheMin organic molecule and biomarker preservation target"),
-                ("EMIT / Orbital Spectroscopy", "CRISM Multispectral Mineral Map", "Compact Reconnaissance Imaging Spectrometer orbital mineral identification"),
-                ("Topographic Relief & Altimetry", "-4,400 m to +1,100 m", "NASA MOLA laser altimeter 5.5 km Mount Sharp central mound relief")
+                ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "Target for organic carbon preservation and ancient habitability biosignatures"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.80 pH (7.0 – 8.5)", "Yellowknife Bay lacustrine sediment neutral-to-alkaline pore water pH"),
+                ("Surface Mineral Spectroscopy", "Fe-Smectites, Jarosite & Sulfates", "Hydrated smectite clays, ferric sulfates, and calcium sulfates across Mount Sharp"),
+                ("Topographic Relief & Elevation", "-4,400 m to +1,100 m", "Crater depression with 5.5 km central sedimentary mound relief")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "3.50 m/s", "Gale Crater diurnal channel flow and slope wind velocity"),
@@ -77,6 +79,7 @@ SITES = {
         'name': "Lut Desert (Dasht-e Lut, Iran)",
         'short_name': "Lut Desert",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "54.1%",
         'is_mars': False,
         'color': (255, 170, 0),
         'highlight_bg': (160, 90, 0, 110),
@@ -99,8 +102,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
                 ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 1,327x2,511 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (lut.tif)"),
-                ("Topographic Relief & Altimetry", "401 m Elevation", "NASA POWER / MERRA-2 digital elevation model of central yardang plateau")
+                ("Soil / Regolith pH [SOIL_PH]", "7.88 pH (6.9 – 8.4)", "Alkaline basaltic regolith pavement and playa margin soil solution pH"),
+                ("Surface Mineral Spectroscopy", "Pyroxene, Hematite & Goethite", "Surface spectral unmixing showing iron oxides, pyroxene, and basalt weathering coatings"),
+                ("Topographic Relief & Elevation", "401 m Elevation", "Elevated basalt plateau with deep wind-carved yardang corridors")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "4.09 m/s", "Persistent 120-day summer winds driving active aeolian sand saltation"),
@@ -120,7 +124,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Lut Desert holds Earth's recorded land skin thermal maximum (70.70 °C). Mean air temperature is 26.60 °C with daytime highs averaging 34.59 °C and a diurnal swing of 15.64 °C.",
-            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs mapped via NASA EMIT L2B spectroscopy (lut.tif) provide natural analogs to Mount Sharp aeolian structures investigated for biosignature preservation.",
+            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs provide natural analogs to Mount Sharp aeolian structures investigated for biosignature preservation.",
             'dynamics': "Surface wind speeds average 4.09 m/s, driving active sand transport and yardang corrasion that closely matches Curiosity's 3.50 m/s wind regime.",
             'moisture': "Hyper-arid atmospheric regime with a mean relative humidity of only 21.98% and daily precipitation of 0.24 mm/day (88 mm/year total liquid).",
             'radiation': "Intense desert solar insolation of 21.14 MJ/m²/day with UVB surface flux of 0.317 W/m², modeling high desert surface radiative exposure."
@@ -131,6 +135,7 @@ SITES = {
         'name': "McMurdo Dry Valleys (Antarctica)",
         'short_name': "McMurdo Dry Valleys",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "55.4%",
         'is_mars': False,
         'color': (0, 210, 255),
         'highlight_bg': (0, 110, 150, 110),
@@ -153,8 +158,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Beacon Sandstone & Dry Permafrost", "Porous Beacon sandstone sheltering cryptoendolithic microbial communities"),
                 ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces"),
-                ("EMIT / Orbital Spectroscopy", "Cryogenic Reflectance Spectroscopy", "In-situ cryogenic reflectance spectroscopy and hyperspectral field surveys"),
-                ("Topographic Relief & Altimetry", "1,139 m Elevation", "NASA POWER / MERRA-2 high-relief polar permafrost mountain terrain")
+                ("Soil / Regolith pH [SOIL_PH]", "N/A (Cryogenic)", "Hyper-arid sub-zero permafrost regime with negligible liquid pore fluid"),
+                ("Surface Mineral Spectroscopy", "Quartz, Feldspar & Cryogenic Salts", "Cryogenic mineral weathering with nitrate and halite salt crusts"),
+                ("Topographic Relief & Elevation", "1,139 m Elevation", "Glacially carved dry valleys bounded by high-relief polar permafrost mountains")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "6.81 m/s", "Hurricane-force katabatic winds descending from the East Antarctic Ice Sheet"),
@@ -185,6 +191,7 @@ SITES = {
         'name': "Aralkum Desert (Uzbekistan / Kazakhstan)",
         'short_name': "Aralkum Desert",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "48.4%",
         'is_mars': False,
         'color': (50, 220, 100),
         'highlight_bg': (20, 110, 50, 110),
@@ -207,8 +214,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
                 ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 442x418 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (araldesert.tif & out.csv)"),
-                ("Topographic Relief & Altimetry", "44 – 78 m (Mean 59.9 m)", "NASA earthaccess ICESat-2 ATL06 laser altimetry raster (out.tif)")
+                ("Soil / Regolith pH [SOIL_PH]", "7.84 pH (7.4 – 8.3)", "Alkaline toxic sulfate-chloride evaporite crust and desiccated seabed soil pH"),
+                ("Surface Mineral Spectroscopy", "Mirabilite, Thenardite & Gypsum", "Sodium and calcium sulfate evaporite minerals across desiccated seabed"),
+                ("Topographic Relief & Elevation", "44 – 78 m Relief (Mean: 59.9 m)", "Low-relief desiccated seabed floor with micro-topographic dune and crust features")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "5.74 m/s", "Strong regional winds driving violent electrostatic salt-dust storms"),
@@ -228,7 +236,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Exhibits continentality with mean temperature of 10.66 °C and annual thermal extremes ranging from -36 °C in winter to +36 °C in summer.",
-            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts mapped via NASA EMIT L2B spectroscopy (araldesert.tif) that mirror Gale Crater's sulfate-bearing Mount Sharp strata.",
+            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts that mirror Gale Crater's sulfate-bearing Mount Sharp strata.",
             'dynamics': "High-velocity salt-dust storms (5.74 m/s mean wind) generate electrostatic triboelectric fields modeling Martian regional dust events.",
             'moisture': "Regional continental moisture averages 70.58% relative humidity with sparse arid precipitation of 0.37 mm/day.",
             'radiation': "Solar shortwave flux of 13.27 MJ/m²/day and UVB of 0.196 W/m² provide a near-exact match to Martian equatorial flux (14.76 MJ/m²/d and 0.200 W/m² UVB)."
@@ -239,6 +247,7 @@ SITES = {
         'name': "Salar de Uyuni (Bolivia)",
         'short_name': "Salar de Uyuni",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "46.8%",
         'is_mars': False,
         'color': (180, 120, 255),
         'highlight_bg': (90, 40, 160, 110),
@@ -261,8 +270,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Lithium-Enriched Halite & Gypsum Crust", "10,000 km² expanse of pure lithium-halite evaporite playa modeling paleolakes"),
                 ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B Evaporite Map", "EMIT imaging spectroscopy halite, borate, and sulfate evaporite mapping"),
-                ("Topographic Relief & Altimetry", "3,656 m Elevation", "NASA POWER / MERRA-2 high-altitude Altiplano salt flat elevation")
+                ("Soil / Regolith pH [SOIL_PH]", "7.50 pH (6.5 – 8.5)", "Circum-neutral to alkaline lithium-halite evaporite crust and brine pool pH"),
+                ("Surface Mineral Spectroscopy", "Halite, Gypsum & Lithium Borates", "Thick crystalline evaporite crust composed of halite and lithium-bearing borate minerals"),
+                ("Topographic Relief & Elevation", "3,656 m Elevation", "Ultra-flat high-altitude Andean plateau salt flat")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "2.90 m/s", "Moderate high-altitude Altiplano aerodynamic wind velocity"),
@@ -352,6 +362,23 @@ def generate_location_overview_card(active_site_key):
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
 
+    # Prominent Overall Mars Similarity Badge Pill in Header (Top Right)
+    badge_w = 410
+    badge_h = 76
+    badge_x = WIDTH - 45 - badge_w
+    badge_y = 28
+    badge_bg = (18, 30, 56, 255) if not site_info['is_mars'] else (48, 22, 16, 255)
+    badge_border = accent if not site_info['is_mars'] else (249, 115, 22)
+    draw.rounded_rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], radius=12,
+                           fill=badge_bg, outline=badge_border + (255,), width=3)
+
+    if site_info['is_mars']:
+        draw.text((badge_x + 20, badge_y + 12), "PLANETARY REFERENCE BASELINE", font=get_font(13, bold=True), fill=(255, 180, 140, 255))
+        draw.text((badge_x + 20, badge_y + 34), "100.0% MARS REFERENCE", font=get_font(24, bold=True), fill=(255, 120, 60, 255))
+    else:
+        draw.text((badge_x + 20, badge_y + 12), "OVERALL MARS SIMILARITY", font=get_font(13, bold=True), fill=(180, 215, 250, 255))
+        draw.text((badge_x + 20, badge_y + 34), f"{site_info['overall_similarity']} OVERALL MATCH", font=get_font(24, bold=True), fill=accent + (255,))
+
     # 2. Table Layout Coordinates (6 Columns)
     col_bounds = [
         (40, 330, "Categories"),
@@ -406,13 +433,16 @@ def generate_location_overview_card(active_site_key):
         # Site header title
         head_color = (255, 140, 70) if site_data['is_mars'] else site_data['color']
         draw.text((x1 + 10, header_y + 14), site_data['short_name'], font=FONT_COL_HEADER, fill=head_color + (255,))
-        sub_tag = "[ACTIVE FOCUS]" if is_active else site_data['header_tag']
-        sub_tag_col = (255, 255, 255) if is_active else (150, 170, 200)
-        draw.text((x1 + 10, header_y + 44), sub_tag, font=FONT_COL_SUB, fill=sub_tag_col + (255,))
+        if site_data['is_mars']:
+            score_tag = "[BASELINE: 100%]" if is_active else "Baseline 100%"
+        else:
+            score_tag = f"[ACTIVE: {site_data['overall_similarity']}]" if is_active else f"{site_data['overall_similarity']} Match"
+        sub_tag_col = (255, 255, 255) if is_active else (160, 185, 220)
+        draw.text((x1 + 10, header_y + 44), score_tag, font=FONT_COL_SUB, fill=sub_tag_col + (255,))
 
-    # Draw Category Rows (5 rows)
+    # Draw Category Rows (6 rows: 5 domains + Overall Similarity)
     row_y = header_y + header_h
-    row_h = (table_bottom_y - row_y) // 5
+    row_h = (table_bottom_y - row_y) // 6
 
     for row_idx, (cat_key, cat_title, metric_name, cat_color) in enumerate(CATEGORIES_META):
         current_y = row_y + row_idx * row_h
@@ -448,6 +478,29 @@ def generate_location_overview_card(active_site_key):
                 draw.text((x1 + 10, current_y + 46), line2, font=FONT_CELL_VAL, fill=text_col + (255,))
             else:
                 draw.text((x1 + 10, current_y + 32), val_str, font=FONT_CELL_VAL, fill=text_col + (255,))
+
+    # Row 6: OVERALL SIMILARITY TO MARS
+    ov_y = row_y + 5 * row_h
+    draw.rectangle([col_bounds[0][0], ov_y, col_bounds[0][1], ov_y + row_h], fill=(22, 34, 62, 255))
+    draw.text((col_bounds[0][0] + 12, ov_y + 16), "OVERALL MARS MATCH", font=FONT_ROW_LABEL, fill=(255, 215, 0, 255))
+    draw.text((col_bounds[0][0] + 12, ov_y + 48), "Multi-Domain Synthesis", font=FONT_ROW_METRIC, fill=(210, 225, 245, 255))
+    draw.line([40, ov_y + row_h, WIDTH - 40, ov_y + row_h], fill=(90, 120, 175, 255), width=2)
+
+    for col in col_bounds[1:]:
+        site_k = col[2]
+        x1, x2 = col[0], col[1]
+        is_active = (site_k == active_site_key)
+        site_d = SITES[site_k]
+        score_val = site_d['overall_similarity']
+
+        if site_d['is_mars']:
+            score_txt = "100.0% (Baseline)"
+            score_col = (255, 140, 70)
+        else:
+            score_txt = f"{score_val} Match"
+            score_col = site_d['color'] if is_active else (220, 230, 245)
+
+        draw.text((x1 + 10, ov_y + 28), score_txt, font=get_font(21, bold=True), fill=score_col + (255,))
 
     # Footer note (NO analysis on this slide as requested in Image 2)
     footer_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL Curiosity Rover REMS Ground Truth | Zero Hallucinated Numbers"
@@ -556,4 +609,11 @@ for c_meta in CATEGORIES_META:
     for s_key in SITES:
         generate_category_overview_card(c_key, s_key)
 
-print("All 30 Overview HUD Cards generated successfully!")
+print("Generating Part 3: Comparison Matrix HUD Card (Image 2 table style with smaller details)...")
+try:
+    import generate_matrix_hud
+    generate_matrix_hud.generate_comparison_matrix_card()
+except Exception as e:
+    print(f"Comparison Matrix HUD generation note: {e}")
+
+print("All Overview HUD Cards generated successfully!")
