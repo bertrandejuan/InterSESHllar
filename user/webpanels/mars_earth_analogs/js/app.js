@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Application State
   const state = {
     currentSiteKey: "lut",
-    currentPinId: "lut_gandom",
     activeCategoryFilter: "all",
     isGeminiLoading: false,
     activeHUD: null,
@@ -49,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const siteBlurbText = document.getElementById("site-blurb-text");
   const blurbSourceTag = document.getElementById("blurb-source-tag");
   const btnRegenGemini = document.getElementById("btn-regen-gemini");
-  const pinsButtonGrid = document.getElementById("pins-button-grid");
 
   // Active Pin Card & Ranking Bar Elements
   const pinCodeBadge = document.getElementById("pin-code-badge");
@@ -135,12 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   function getActiveSiteData() {
     return window.TEAM_DATA[state.currentSiteKey] || window.TEAM_DATA["lut"];
-  }
-
-  function getActivePinData() {
-    const site = getActiveSiteData();
-    const pin = site.pins ? site.pins.find(p => p.id === state.currentPinId) : null;
-    return pin || (site.pins ? site.pins[0] : null);
   }
 
   function formatNumber(val, decimals = 2) {
@@ -580,7 +572,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   async function loadComparisonBlurb(forceRegenerate = false) {
     const site = getActiveSiteData();
-    const pin = getActivePinData();
 
     if (forceRegenerate) {
       siteBlurbText.innerText = "Querying Google Gemini AI for planetary analog synthesis...";
@@ -599,7 +590,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await geminiService.generateComparativeBlurb(
           site.name,
           site.country || site.region,
-          pin,
+          site.coordinates,
+          site.desc,
           site.metrics,
           site.category_scores,
           site.blurb
@@ -619,73 +611,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // 9. Regional Stations (Pins) Selector
-  // ----------------------------------------------------
-  function renderPinButtons(site) {
-    pinsButtonGrid.innerHTML = "";
-    if (!site.pins || site.pins.length === 0) return;
-
-    site.pins.forEach(pin => {
-      const btn = document.createElement("button");
-      btn.className = `pin-chip-btn ${pin.id === state.currentPinId ? "active" : ""}`;
-      btn.dataset.pinId = pin.id;
-
-      btn.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 2px;">
-          <span style="font-weight: 700; color: #fff;">${pin.name}</span>
-          <span style="font-size: 0.66rem; color: #94a3b8;">${pin.lat.toFixed(2)}°, ${pin.lon.toFixed(2)}°</span>
-        </div>
-        <span class="pin-chip-code">${pin.code}</span>
-      `;
-
-      btn.addEventListener("click", () => {
-        selectPin(pin.id, true);
-      });
-
-      pinsButtonGrid.appendChild(btn);
-    });
-  }
-
-  function selectPin(pinId, flyCamera = true) {
-    state.currentPinId = pinId;
-    const site = getActiveSiteData();
-    const pin = getActivePinData();
-
-    // Update active chip styling
-    pinsButtonGrid.querySelectorAll(".pin-chip-btn").forEach(chip => {
-      chip.classList.toggle("active", chip.dataset.pinId === pinId);
-    });
-
-    // Update Active Pin Card details
-    updateActivePinCard();
-
-    // Update Metric Table
-    renderMetricTable();
-
-    // Fly camera close to station
-    if (flyCamera && openSpace.isConnected) {
-      openSpace.flyToGeo(site.globe, pin.lat, pin.lon, pin.alt || 20000, 2.5);
-    }
-  }
-
-  // ----------------------------------------------------
-  // 10. Update Active Pin Card & Glowing Ranking Bars
+  // 9. Update Active Location Card & Glowing Ranking Bars
   // ----------------------------------------------------
   function updateActivePinCard() {
     const site = getActiveSiteData();
-    const pin = getActivePinData();
     const scores = site.category_scores || { thermal: 50, atmospheric_dynamics: 50, atmospheric_moisture: 50, radiation: 50, overall: 50 };
+    const isMars = site.globe === "Mars";
 
-    if (pin) {
-      pinCodeBadge.innerText = pin.code;
-      activePinName.innerText = pin.name;
-      pinCoordsText.innerText = `Lat: ${pin.lat.toFixed(2)}° | Lon: ${pin.lon.toFixed(2)}° | Globe: ${site.globe}`;
-      pinDescriptionText.innerText = pin.desc;
-    }
+    pinCodeBadge.innerText = isMars ? "BASELINE" : "ANALOG PIN";
+    activePinName.innerText = site.name;
+    pinCoordsText.innerText = `Lat: ${site.coordinates.lat.toFixed(2)}° | Lon: ${site.coordinates.lon.toFixed(2)}° | Elevation: ${site.coordinates.elevation_m}m | Globe: ${site.globe}`;
+    pinDescriptionText.innerText = site.desc;
 
     // Overall Score
     overallScoreNum.innerText = scores.overall.toFixed(1);
-    overallScoreRank.innerText = site.globe === "Mars" ? "Curiosity Reference Baseline" : `${site.name} Analog`;
+    overallScoreRank.innerText = isMars ? "Curiosity Reference Baseline" : `${site.name} Analog`;
 
     // 1. Thermal Environment Bar
     scoreThermalVal.innerText = `${scores.thermal.toFixed(1)}%`;
@@ -704,13 +644,11 @@ document.addEventListener("DOMContentLoaded", () => {
     fillRadiation.style.width = `${scores.radiation}%`;
 
     // Table Column Header
-    if (pin) {
-      thSelectedSiteCol.innerText = `${site.name} [${pin.code}]`;
-    }
+    thSelectedSiteCol.innerText = site.name;
   }
 
   // ----------------------------------------------------
-  // 11. Render Climatology Metric Telemetry Table
+  // 10. Render Climatology Metric Telemetry Table
   // ----------------------------------------------------
   function renderMetricTable() {
     const site = getActiveSiteData();
@@ -829,7 +767,6 @@ document.addEventListener("DOMContentLoaded", () => {
     activeSiteTitle.innerText = site.name;
     activeSiteSubtitle.innerText = `${site.region || site.country} — 4,018 Daily Observations (2015–2025)`;
 
-    renderPinButtons(site);
     updateActivePinCard();
     renderMetricTable();
     renderCategories(siteKey);
@@ -913,22 +850,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ----------------------------------------------------
-  // 14. Automated Camera Tour Manager
+  // 14. Automated Camera Tour Manager (5 Locations: 1 Mars + 4 Earth)
   // ----------------------------------------------------
   const tourSequence = [
-    { site: "mars_gale", pin: "gale_bradbury" },
-    { site: "lut", pin: "lut_gandom" },
-    { site: "mcmurdo", pin: "mcmurdo_taylor" },
-    { site: "aralkum", pin: "aralkum_central" },
-    { site: "uyuni", pin: "uyuni_crust" }
+    "mars_gale",
+    "lut",
+    "mcmurdo",
+    "aralkum",
+    "uyuni"
   ];
 
   function runTourStep() {
     if (!state.tourActive) return;
 
     const currentTarget = tourSequence[state.tourIndex];
-    selectSite(currentTarget.site, false);
-    selectPin(currentTarget.pin, true);
+    selectSite(currentTarget, true);
 
     state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
 
@@ -960,8 +896,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (state.tourTimer) clearTimeout(state.tourTimer);
       state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
       const target = tourSequence[state.tourIndex];
-      selectSite(target.site, false);
-      selectPin(target.pin, true);
+      selectSite(target, true);
     });
   }
 
@@ -970,8 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (state.tourTimer) clearTimeout(state.tourTimer);
       state.tourIndex = (state.tourIndex - 1 + tourSequence.length) % tourSequence.length;
       const target = tourSequence[state.tourIndex];
-      selectSite(target.site, false);
-      selectPin(target.pin, true);
+      selectSite(target, true);
     });
   }
 

@@ -2,15 +2,14 @@ local LocationTagTexture = asset.resource("./textures/location_tag.png")
 local teamDataAsset = asset.require("./data/team_analog_data")
 local TeamData = teamDataAsset.TeamData
 
--- Regional Analog Stations & Multi-Pin Sites
+-- The 4 Premier Earth Planetary Desert Analogs
 local DesertSites = {
-  -- Aralkum Desert Stations (Uzbekistan)
   {
     SiteKey = "aralkum",
-    TagId = "EarthTagAralkumCentral",
-    LabelId = "EarthLabelAralkumCentral",
-    Name = "Aralkum Central Evaporite Station",
-    LabelText = "Aralkum Central [ARK-01]",
+    TagId = "EarthTagAralkum",
+    LabelId = "EarthLabelAralkum",
+    Name = "Aralkum Desert Station",
+    LabelText = "Aralkum Desert Station",
     Globe = "Earth",
     Lat = 44.80,
     Lon = 59.80,
@@ -20,99 +19,25 @@ local DesertSites = {
     TeamMetrics = TeamData.aralkum.metrics
   },
   {
-    SiteKey = "aralkum",
-    TagId = "EarthTagAralkumNorth",
-    LabelId = "EarthLabelAralkumNorth",
-    Name = "North Aral Dust Corridor",
-    LabelText = "North Aral Dust [ARK-02]",
-    Globe = "Earth",
-    Lat = 45.30,
-    Lon = 59.20,
-    Alt = 1500.0,
-    LabelAlt = 4500.0,
-    Color = { 0.20, 0.90, 0.45 },
-    TeamMetrics = TeamData.aralkum.metrics
-  },
-  {
-    SiteKey = "aralkum",
-    TagId = "EarthTagAralkumSouth",
-    LabelId = "EarthLabelAralkumSouth",
-    Name = "South Sarygamysh Plain",
-    LabelText = "South Sarygamysh [ARK-03]",
-    Globe = "Earth",
-    Lat = 44.10,
-    Lon = 60.30,
-    Alt = 1500.0,
-    LabelAlt = 4500.0,
-    Color = { 0.20, 0.90, 0.45 },
-    TeamMetrics = TeamData.aralkum.metrics
-  },
-
-  -- McMurdo Dry Valleys Stations (Antarctica)
-  {
     SiteKey = "mcmurdo",
-    TagId = "EarthTagMcMurdoTaylor",
-    LabelId = "EarthLabelMcMurdoTaylor",
-    Name = "Taylor Valley / Blood Falls",
-    LabelText = "Taylor Valley [MCM-01]",
+    TagId = "EarthTagMcMurdo",
+    LabelId = "EarthLabelMcMurdo",
+    Name = "McMurdo Dry Valleys Station",
+    LabelText = "McMurdo Dry Valleys Station",
     Globe = "Earth",
-    Lat = -77.72,
-    Lon = 162.25,
+    Lat = -77.50,
+    Lon = 162.00,
     Alt = 1800.0,
     LabelAlt = 4800.0,
     Color = { 0.15, 0.80, 1.00 },
     TeamMetrics = TeamData.mcmurdo.metrics
-  },
-  {
-    SiteKey = "mcmurdo",
-    TagId = "EarthTagMcMurdoWright",
-    LabelId = "EarthLabelMcMurdoWright",
-    Name = "Wright Valley / Lake Vanda",
-    LabelText = "Wright Valley [MCM-02]",
-    Globe = "Earth",
-    Lat = -77.52,
-    Lon = 161.68,
-    Alt = 1800.0,
-    LabelAlt = 4800.0,
-    Color = { 0.15, 0.80, 1.00 },
-    TeamMetrics = TeamData.mcmurdo.metrics
-  },
-  {
-    SiteKey = "mcmurdo",
-    TagId = "EarthTagMcMurdoVictoria",
-    LabelId = "EarthLabelMcMurdoVictoria",
-    Name = "Upper Victoria Valley Permafrost",
-    LabelText = "Victoria Valley [MCM-03]",
-    Globe = "Earth",
-    Lat = -77.35,
-    Lon = 161.90,
-    Alt = 1800.0,
-    LabelAlt = 4800.0,
-    Color = { 0.15, 0.80, 1.00 },
-    TeamMetrics = TeamData.mcmurdo.metrics
-  },
-
-  -- Lut Desert Stations (Iran)
-  {
-    SiteKey = "lut",
-    TagId = "EarthTagLutGandom",
-    LabelId = "EarthLabelLutGandom",
-    Name = "Gandom Beryan Thermal Ridge",
-    LabelText = "Gandom Beryan [LUT-01]",
-    Globe = "Earth",
-    Lat = 30.85,
-    Lon = 58.55,
-    Alt = 1600.0,
-    LabelAlt = 4600.0,
-    Color = { 1.00, 0.65, 0.10 },
-    TeamMetrics = TeamData.lut.metrics
   },
   {
     SiteKey = "lut",
-    TagId = "EarthTagLutYardang",
-    LabelId = "EarthLabelLutYardang",
-    Name = "Kalut Mega-Yardang Corridor",
-    LabelText = "Kalut Yardangs [LUT-02]",
+    TagId = "EarthTagLut",
+    LabelId = "EarthLabelLut",
+    Name = "Lut Desert Thermal Station",
+    LabelText = "Lut Desert Thermal Station",
     Globe = "Earth",
     Lat = 30.50,
     Lon = 58.80,
@@ -122,58 +47,14 @@ local DesertSites = {
     TeamMetrics = TeamData.lut.metrics
   },
   {
-    SiteKey = "lut",
-    TagId = "EarthTagLutSouth",
-    LabelId = "EarthLabelLutSouth",
-    Name = "Rig-e Yalan Mega-Erg",
-    LabelText = "Rig-e Yalan Dunes [LUT-03]",
-    Globe = "Earth",
-    Lat = 29.95,
-    Lon = 59.35,
-    Alt = 1600.0,
-    LabelAlt = 4600.0,
-    Color = { 1.00, 0.65, 0.10 },
-    TeamMetrics = TeamData.lut.metrics
-  },
-
-  -- Salar de Uyuni Stations (Bolivia)
-  {
     SiteKey = "uyuni",
-    TagId = "EarthTagUyuniCrust",
-    LabelId = "EarthLabelUyuniCrust",
-    Name = "Salar de Uyuni Central Crust",
-    LabelText = "Uyuni Salt Crust [UYU-01]",
+    TagId = "EarthTagUyuni",
+    LabelId = "EarthLabelUyuni",
+    Name = "Salar de Uyuni Station",
+    LabelText = "Salar de Uyuni Station",
     Globe = "Earth",
     Lat = -20.15,
     Lon = -67.60,
-    Alt = 3700.0,
-    LabelAlt = 6700.0,
-    Color = { 0.85, 0.45, 1.00 },
-    TeamMetrics = TeamData.uyuni.metrics
-  },
-  {
-    SiteKey = "uyuni",
-    TagId = "EarthTagUyuniIsla",
-    LabelId = "EarthLabelUyuniIsla",
-    Name = "Isla Incahuasi Fossil Coral",
-    LabelText = "Isla Incahuasi [UYU-02]",
-    Globe = "Earth",
-    Lat = -20.24,
-    Lon = -67.62,
-    Alt = 3700.0,
-    LabelAlt = 6700.0,
-    Color = { 0.85, 0.45, 1.00 },
-    TeamMetrics = TeamData.uyuni.metrics
-  },
-  {
-    SiteKey = "uyuni",
-    TagId = "EarthTagUyuniTunupa",
-    LabelId = "EarthLabelUyuniTunupa",
-    Name = "Tunupa Volcano Flank",
-    LabelText = "Volcan Tunupa [UYU-03]",
-    Globe = "Earth",
-    Lat = -19.85,
-    Lon = -67.50,
     Alt = 3700.0,
     LabelAlt = 6700.0,
     Color = { 0.85, 0.45, 1.00 },
@@ -182,7 +63,7 @@ local DesertSites = {
 }
 
 asset.onInitialize(function()
-  openspace.printInfo("Loaded Earth Desert Analogs with Multi-Station Pins & In-Situ Metrics.")
+  openspace.printInfo("Loaded Earth Desert Analogs (4 Sites) with In-Situ Metrics.")
   for _, site in ipairs(DesertSites) do
     -- 1. Adaptive Location Tag Marker
     openspace.addSceneGraphNode({
@@ -205,7 +86,7 @@ asset.onInitialize(function()
         Billboard = true,
         MultiplyColor = site.Color,
         BlendMode = "Normal",
-        Size = 80000,
+        Size = 85000,
         DistanceScalingSettings = {
           ScaleByDistance = true,
           ApparentSizeMultiplier = 0.035,
