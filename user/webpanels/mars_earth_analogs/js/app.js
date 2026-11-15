@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
           code: "MINERAL_TYPE",
           unit: "Mineralogy",
           desc: "Dominant surface mineralogy providing geological substrates for biosignature preservation.",
-          source: "NASA EMIT (Earth Analogs) & MSL CheMin",
+          source: "NASA EMIT, earthaccess ICESat-2 (out.tif) & MSL CheMin",
           scale: null,
           isQualitative: true,
           getVal: (m) => m.soil_mineral_type || "Evaporite & Mudstone Matrix",

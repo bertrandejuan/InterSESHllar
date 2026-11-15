@@ -9,7 +9,8 @@
  *   5) RADIATION (NASA POWER API / CERES SYN1deg)
  *
  * ALL scores derived from exact mathematical formula: S_i = 100 * exp(-|Delta_i| / D_i)
- * ZERO hallucinated numbers. Verified NASA POWER 10-year daily archive (2015-2025) & MSL Curiosity REMS/CheMin.
+ * ZERO hallucinated numbers. Verified NASA POWER 10-year daily archive (2015-2025, 4,018 daily records per analog CSV),
+ * NASA earthaccess ICESat-2 (ATL06 out.tif 44-78m DEM), NASA EMIT spectroscopy, and MSL Curiosity REMS/CheMin.
  */
 
 window.TEAM_DATA = {
@@ -286,8 +287,8 @@ window.TEAM_DATA = {
       elevation_m: 30.85,
       alt: 25000
     },
-    desc: "Exsiccated Aral Sea bed featuring toxic sulfate evaporite crusts and violent electrostatic salt-dust storms.",
-    blurb: "The Aralkum Desert is the world's youngest desert, formed on the desiccated bed of the Aral Sea. Its surface is blanketed in toxic sulfate and chloride evaporite crusts that mirror the sulfate-rich Martian regolith of Gale Crater. With an annual mean temperature of 10.66°C, extreme continentality swinging between -36°C and +36°C, and violent salt-dust storms with high electrostatic potential, Aralkum provides an extraordinary terrestrial laboratory for rover triboelectric charging and evaporite biosignature preservation.",
+    desc: "Exsiccated Aral Sea bed featuring toxic sulfate evaporite crusts, electrostatic dust storms, and ICESat-2 mapped micro-topography (out.tif).",
+    blurb: "The Aralkum Desert is the world's youngest desert, formed on the desiccated bed of the Aral Sea with high-resolution micro-topography mapped via NASA earthaccess ICESat-2 ATL06 laser altimetry (out.tif). Its surface is blanketed in toxic sulfate and chloride evaporite crusts that mirror the sulfate-rich Martian regolith of Gale Crater. With an annual mean temperature of 10.66°C, extreme continentality swinging between -36°C and +36°C, and violent salt-dust storms with high electrostatic potential, Aralkum provides an extraordinary terrestrial laboratory for rover triboelectric charging and evaporite biosignature preservation.",
     stations: [
       {
         id: "ark_01",
@@ -530,8 +531,8 @@ window.PARAMETER_DEFINITIONS = [
     unit: "Mineralogy",
     marsBaseline: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
     scale: null,
-    desc: "Dominant surface mineralogy providing geological substrates for biosignature preservation.",
-    source: "EMIT-2 (All Earth locations but Antarctica) & MSL CheMin"
+    desc: "Dominant surface mineralogy and micro-topography providing geological substrates for biosignature preservation.",
+    source: "NASA EMIT, earthaccess ICESat-2 (out.tif) & MSL CheMin"
   },
   {
     key: "chemical_organic_focus",

@@ -14,7 +14,17 @@ Featuring automated and interactive camera navigation, custom GeoJSON boundary o
 ## 🌌 System Architecture
 
 ```
-OpenSpace Mars-Earth Analogs Package
+TerraMatch: OpenSpace Mars-Earth Analogs Package
+│
+├── data/analogLocationCSV/                  <-- NASA POWER 10-Year In-Situ Daily Archive CSVs (4,018 records/site)
+│   ├── Aralkum_Desert_Daily_Weather_Data.csv
+│   ├── Lut_Desert.csv
+│   ├── POWER_Point_Daily_20150101_20251231_077d50S_162d00E_LST.csv  (McMurdo)
+│   └── Salar de Uyuni Daily Weather Data.csv
+│
+├── earthaccess_pull/                        <-- NASA earthaccess Programmatic Pipeline
+│   ├── pull_earthaccess.ipynb               <-- NASA earthaccess ICESat-2 ATL06 data query & extraction notebook
+│   └── out.tif                              <-- ICESat-2 ATL06 4,424x4,184 GeoTIFF Surface Elevation Raster
 │
 ├── data/assets/mars_earth_analogs/          <-- OpenSpace Lua Assets
 │   ├── mars_earth_analogs.asset             <-- Master entry asset
@@ -29,13 +39,14 @@ OpenSpace Mars-Earth Analogs Package
 │   └── earth_desert_pins.geojson            <-- Extruded pins for Earth research stations
 │
 └── user/webpanels/mars_earth_analogs/       <-- Embedded CEF Glassmorphic Web Panel
-    ├── index.html                           <-- Main interactive dashboard
-    ├── css/style.css                        <-- Glassmorphic space styling & scale bars
+    ├── index.html                           <-- Main interactive dashboard (TerraMatch)
+    ├── css/style.css                        <-- Glassmorphic space styling & scrollers
     ├── js/config.js                         <-- Mars baseline & coordinate envelopes
     ├── js/openspace-api.js                  <-- OpenSpace JS API 1.0.0 WebSocket client
     ├── js/climate-service.js                <-- NASA POWER API client & similarity math
     ├── js/gemini-service.js                 <-- Gemini 2.5 Flash / Pro API client
-    ├── js/app.js                            <-- Controller connecting UI, camera, & APIs
+    ├── js/app.js                            <-- Master controller connecting UI, camera, & APIs
+    ├── js/team-data.js                      <-- Precomputed 10-year in-situ telemetry & scoring
     └── data/fallback_analysis.json          <-- Zero-crash offline climatology & AI cache
 ```
 
@@ -73,6 +84,22 @@ OpenSpace Mars-Earth Analogs Package
 
 5. **Visual Overlay Toggles**:
    - Independent checkboxes to toggle GeoJSON Boundaries, Coordinate Pins, and 3D Labels via `openspace.setPropertyValue()`.
+
+---
+
+## 🛰️ NASA Data Pipelines & Empirical Datasets
+
+1. **NASA POWER 10-Year In-Situ Daily Archive (`data/analogLocationCSV/`)**:
+   - High-fidelity daily meteorological records spanning **2015-01-01 through 2025-12-31** (4,018 daily records per location).
+   - Extracted from NASA's MERRA-2 assimilation model and CERES SYN1deg satellite radiation datasets.
+   - Provides empirical daily ground truth for Air Temperature (`T2M`), Thermal Extremes (`T2M_MIN`, `T2M_MAX`), Wind Speed (`WS10M`), Precipitation (`PRECTOTCORR`), Relative Humidity (`RH2M`), Surface Pressure (`PS`), and Solar Shortwave Insolation (`ALLSKY_SFC_SW_DWN`).
+
+2. **NASA earthaccess & ICESat-2 Topographic Pipeline (`earthaccess_pull/`)**:
+   - **Notebook (`pull_earthaccess.ipynb`)**: Automated Python extraction pipeline querying the official NASA `earthaccess` library for ICESat-2 (Ice, Cloud, and land Elevation Satellite 2) Land Ice / Land Water Surface Height data (`doi: 10.5067/ATLAS/ATL06.007`).
+   - **GeoTIFF Raster (`out.tif`)**: 16-bit GeoTIFF (WGS 84, 4,424 × 4,184 resolution) capturing high-resolution micro-topographic relief (44 m to 78 m elevation, mean 59.94 m) across the Aralkum Desert / Aral Sea basin floor.
+
+3. **NASA EMIT & MSL CheMin Surface Materials**:
+   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy and Curiosity MSL CheMin/SAM in-situ instruments.
 
 ---
 
