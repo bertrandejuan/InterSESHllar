@@ -260,8 +260,8 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayLayerMars: null,
       hudTexture: "hud_overview_biology.png",
       hasOverlay: false,
-      isQualitativeCategory: true,
-      availabilityNote: "Spatial vector overlay available for Climatology layers; Astrobiology uses point station telemetry.",
+      isQualitativeCategory: false,
+      availabilityNote: "Empirical SoilGrids WCS & in-situ point station telemetry; vector overlays available for Climatology layers.",
       parameters: [
         {
           key: "soil_ph",
@@ -269,11 +269,35 @@ document.addEventListener("DOMContentLoaded", () => {
           code: "SOIL_PH",
           unit: "pH",
           desc: "Acidity / alkalinity of surface soil and regolith solution influencing mineral dissolution, clay stability, and habitability.",
-          source: "Earth Analogs: In-Situ Soil Chemical Analyses (soil_ph_summary.csv) | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids",
+          source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Polar Cryo-Regolith Surveys | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids",
           scale: 1.5,
           isQualitative: false,
           getVal: (m) => m.soil_ph !== null && m.soil_ph !== undefined ? `${formatNumber(m.soil_ph, 2)} pH (Range: ${m.soil_ph_min}–${m.soil_ph_max})` : "N/A (Cryogenic)",
           getMarsVal: () => "7.80 pH (Range: 7.0–8.5)"
+        },
+        {
+          key: "soil_organic_carbon_g_kg",
+          label: "Soil Organic Carbon (SOC)",
+          code: "SOC",
+          unit: "g/kg",
+          desc: "Mass fraction of organic carbon in regolith/soil matrix (0-5cm depth), critical for prebiotic habitability and biosignature preservation.",
+          source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Antarctic Cryo-Regolith Surveys | Mars: MSL Curiosity SAM Pyrolysis in Cumberland Mudstone (50-200 ppm C)",
+          scale: 5.0,
+          isQualitative: false,
+          getVal: (m) => m.soil_organic_carbon_g_kg !== null && m.soil_organic_carbon_g_kg !== undefined ? `${formatNumber(m.soil_organic_carbon_g_kg, 2)} g/kg (Range: ${m.soil_organic_carbon_min}–${m.soil_organic_carbon_max})` : "N/A",
+          getMarsVal: () => "0.10 g/kg (Range: 0.05–0.20)"
+        },
+        {
+          key: "soil_bulk_density_kg_dm3",
+          label: "Bulk Density (Fine Earth)",
+          code: "BDOD",
+          unit: "kg/dm³",
+          desc: "Dry bulk density of surface regolith / soil (0-5cm depth) determining packing porosity, permeability, and thermal inertia.",
+          source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Polar Soil Surveys | Mars: MSL Curiosity Rocknest Sand & Cumberland Drill Core Density (1.50-1.65 kg/dm³)",
+          scale: 0.40,
+          isQualitative: false,
+          getVal: (m) => m.soil_bulk_density_kg_dm3 !== null && m.soil_bulk_density_kg_dm3 !== undefined ? `${formatNumber(m.soil_bulk_density_kg_dm3, 2)} kg/dm³ (Range: ${m.soil_bulk_density_min}–${m.soil_bulk_density_max})` : "N/A",
+          getMarsVal: () => "1.58 kg/dm³ (Range: 1.50–1.65)"
         },
         {
           key: "soil_mineral_type",
@@ -504,14 +528,14 @@ document.addEventListener("DOMContentLoaded", () => {
       let scoreDisplay = "";
       if (isMars) {
         scoreDisplay = `<div class="accordion-score-pill"><span class="mini-score-text">Reference</span></div>`;
-      } else if (cat.isQualitativeCategory || cat.key === "astrobiology") {
-        scoreDisplay = `<div class="accordion-score-pill" style="border-color: rgba(168,85,247,0.5);"><span class="mini-score-text" style="color: #c084fc;">Analog Site</span></div>`;
       } else if (catScore !== null) {
         scoreDisplay = `
           <div class="accordion-score-pill">
             <div class="mini-score-bar-bg"><div class="mini-score-bar-fill" style="width: ${catScore}%;"></div></div>
             <span class="mini-score-text">${catScore.toFixed(1)}%</span>
           </div>`;
+      } else if (cat.isQualitativeCategory) {
+        scoreDisplay = `<div class="accordion-score-pill" style="border-color: rgba(168,85,247,0.5);"><span class="mini-score-text" style="color: #c084fc;">Analog Site</span></div>`;
       }
 
       headerBtn.innerHTML = `
@@ -978,18 +1002,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----------------------------------------------------
   // 7. Site Navigation & Mathematical Overall Score Calculation
-  // Overall score = arithmetic mean of active quantitative categories: (Thermal + Dynamics + Moisture + Radiation) / 4
+  // Overall score = arithmetic mean of active quantitative categories:
+  // (Thermal + Astrobiology/SoilGrids + Dynamics + Moisture + Radiation) / 5
   // ----------------------------------------------------
   function computeSiteOverallScore(siteMetrics, marsMetrics) {
     let catScores = [];
 
     SCIENCE_CATEGORIES.forEach((cat) => {
-      if (cat.key === "astrobiology" || cat.isQualitativeCategory || cat.isPendingSoilData) return; // Exclude qualitative astrobiology mineralogy from numeric exponential formula
-
       let sum = 0;
       let count = 0;
       cat.parameters.forEach((p) => {
-        if (p.scale && siteMetrics[p.key] !== undefined && marsMetrics[p.key] !== undefined) {
+        if (p.scale && siteMetrics[p.key] !== undefined && marsMetrics[p.key] !== undefined && siteMetrics[p.key] !== null) {
           const s = calcSimScore(siteMetrics[p.key], marsMetrics[p.key], p.scale);
           if (s !== null) {
             sum += s;

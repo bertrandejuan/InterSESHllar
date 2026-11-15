@@ -51,7 +51,7 @@ ANALOGS = [
         'short_name': "McMurdo Valleys",
         'region': "Antarctica (77.5° S)",
         'color': (56, 189, 248),
-        'overall': "55.4% ★",
+        'overall': "63.2% ★",
         'rank': "1ST RANK"
     },
     {
@@ -60,7 +60,7 @@ ANALOGS = [
         'short_name': "Lut Desert",
         'region': "Iran (30.2° N)",
         'color': (245, 158, 11),
-        'overall': "54.1%",
+        'overall': "58.8%",
         'rank': "2ND RANK"
     },
     {
@@ -69,7 +69,7 @@ ANALOGS = [
         'short_name': "Aralkum Desert",
         'region': "Uzbekistan (44.5° N)",
         'color': (74, 222, 128),
-        'overall': "48.4%",
+        'overall': "49.1%",
         'rank': "3RD RANK"
     },
     {
@@ -78,7 +78,7 @@ ANALOGS = [
         'short_name': "Salar de Uyuni",
         'region': "Bolivia (20.3° S)",
         'color': (45, 212, 191),
-        'overall': "46.8%",
+        'overall': "46.6%",
         'rank': "4TH RANK"
     }
 ]
@@ -101,12 +101,12 @@ ROWS_DATA = [
         'title': "2. Astrobiology / Makeup",
         'icon': "🧬",
         'color': (168, 85, 247),
-        'mars_baseline': "Gale Baseline: pH 7.80 | Smectites & Sulfate Mudstones",
+        'mars_baseline': "Gale: pH 7.80 | SOC 0.10 g/kg | BD 1.58 kg/dm³",
         'values': {
-            'mcmurdo': {'pct': "90.0%",   'lead': False, 'd1': "Cryopreserved Sandstone Matrix & Clays", 'd2': "Cryptoendolithic Biomolecules (Extreme Dry)", 'bar': 90.0},
-            'lut':     {'pct': "94.8%",   'lead': False, 'd1': "pH: 7.88 (6.9 – 8.4) Soil Alkalinity",   'd2': "Basalt Regolith Pavement & Fe-Yardangs", 'bar': 94.8},
-            'aralkum': {'pct': "97.4% ★", 'lead': True,  'd1': "pH: 7.84 (7.4 – 8.3) Soil Alkalinity",   'd2': "Toxic Sulfate (Mirabilite) & Halite Crust", 'bar': 97.4},
-            'uyuni':   {'pct': "81.9%",   'lead': False, 'd1': "pH: 7.50 (6.5 – 8.5) Salt Brines",       'd2': "Li-Enriched Halite, Gypsum & Borates", 'bar': 81.9}
+            'mcmurdo': {'pct': "94.4% ★", 'lead': True,  'd1': "pH: 7.80  |  SOC: 0.25 g/kg (97% Match)", 'd2': "Bulk Density: 1.52 kg/dm³ | Cryptoendolithic", 'bar': 94.4},
+            'lut':     {'pct': "77.6%",   'lead': False, 'd1': "pH: 7.94  |  SOC: 2.06 g/kg (68% Match)", 'd2': "Bulk Density: 1.46 kg/dm³ | Basalt Yardangs", 'bar': 77.6},
+            'aralkum': {'pct': "52.1%",   'lead': False, 'd1': "pH: 7.82  |  SOC: 54.45 g/kg (Seabed)",  'd2': "Bulk Density: 1.36 kg/dm³ | Sulfate Crust", 'bar': 52.1},
+            'uyuni':   {'pct': "45.5%",   'lead': False, 'd1': "pH: 7.78  |  SOC: 23.11 g/kg (Halite)",  'd2': "Bulk Density: 1.18 kg/dm³ | Porous Salt Crust", 'bar': 45.5}
         }
     },
     {
@@ -150,12 +150,12 @@ ROWS_DATA = [
         'icon': "🎯",
         'color': (56, 189, 248),
         'is_overall': True,
-        'mars_baseline': "Ground Truth Curiosity REMS & CheMin Baseline (100.0%)",
+        'mars_baseline': "Curiosity REMS, CheMin & SAM In-Situ Baseline (100.0%)",
         'values': {
-            'mcmurdo': {'pct': "55.4% ★", 'lead': True,  'd1': "Rank #1 Analog Overall to Gale Crater", 'd2': "Top Thermal & Cryo-lacustrine Environment", 'bar': 55.4},
-            'lut':     {'pct': "54.1%",   'lead': False, 'd1': "Rank #2 Analog Overall to Gale Crater", 'd2': "Top Hyper-Arid Moisture & Yardang Model", 'bar': 54.1},
-            'aralkum': {'pct': "48.4%",   'lead': False, 'd1': "Rank #3 Analog Overall to Gale Crater", 'd2': "Top Toxic Sulfate & Dust Dynamic Model", 'bar': 48.4},
-            'uyuni':   {'pct': "46.8%",   'lead': False, 'd1': "Rank #4 Analog Overall to Gale Crater", 'd2': "Top Hypobaric Evaporite Salt Flat Model", 'bar': 46.8}
+            'mcmurdo': {'pct': "63.2% ★", 'lead': True,  'd1': "Rank #1 Analog Overall to Gale Crater", 'd2': "Top Thermal, Astrobiology & Cryo-regolith", 'bar': 63.2},
+            'lut':     {'pct': "58.8%",   'lead': False, 'd1': "Rank #2 Analog Overall to Gale Crater", 'd2': "Top Hyper-Arid Moisture & Yardang Model", 'bar': 58.8},
+            'aralkum': {'pct': "49.1%",   'lead': False, 'd1': "Rank #3 Analog Overall to Gale Crater", 'd2': "Top Radiation Match & Sulfate Seabed Model", 'bar': 49.1},
+            'uyuni':   {'pct': "46.6%",   'lead': False, 'd1': "Rank #4 Analog Overall to Gale Crater", 'd2': "Top Atmospheric Dynamics & Evaporite Model", 'bar': 46.6}
         }
     }
 ]

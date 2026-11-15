@@ -47,6 +47,8 @@ SITES = {
                 ("Mineral Composition & Rock Type", "Yellowknife Bay Mudstones", "Ancient lacustrine smectites and sulfate-bearing Mount Sharp strata"),
                 ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "Target for organic carbon preservation and ancient habitability biosignatures"),
                 ("Soil / Regolith pH [SOIL_PH]", "7.80 pH (7.0 – 8.5)", "Yellowknife Bay lacustrine sediment neutral-to-alkaline pore water pH"),
+                ("Soil Organic Carbon [SOC]", "0.10 g/kg (50–200 ppm)", "MSL Curiosity SAM pyrolysis detected total organic carbon in mudstone"),
+                ("Bulk Density (Fine Earth) [BDOD]", "1.58 kg/dm³", "Rocknest aeolian sand & Cumberland drill core packing bulk density"),
                 ("Surface Mineral Spectroscopy", "Fe-Smectites, Jarosite & Sulfates", "Hydrated smectite clays, ferric sulfates, and calcium sulfates across Mount Sharp"),
                 ("Topographic Relief & Elevation", "-4,400 m to +1,100 m", "Crater depression with 5.5 km central sedimentary mound relief")
             ],
@@ -79,7 +81,7 @@ SITES = {
         'name': "Lut Desert (Dasht-e Lut, Iran)",
         'short_name': "Lut Desert",
         'header_tag': "EARTH ANALOG",
-        'overall_similarity': "54.1%",
+        'overall_similarity': "58.8%",
         'is_mars': False,
         'color': (255, 170, 0),
         'highlight_bg': (160, 90, 0, 110),
@@ -102,7 +104,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
                 ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments"),
-                ("Soil / Regolith pH [SOIL_PH]", "7.88 pH (6.9 – 8.4)", "Alkaline basaltic regolith pavement and playa margin soil solution pH"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.94 pH (7.7 – 8.2)", "ISRIC SoilGrids 0-5cm alkaline basaltic regolith pavement soil pH"),
+                ("Soil Organic Carbon [SOC]", "2.06 g/kg (0.8 – 8.2)", "ISRIC SoilGrids 0-5cm ultra-low organic carbon in hyper-arid desert"),
+                ("Bulk Density (Fine Earth) [BDOD]", "1.46 kg/dm³ (1.34 – 1.52)", "ISRIC SoilGrids 0-5cm basalt pavement & sand fine earth bulk density"),
                 ("Surface Mineral Spectroscopy", "Pyroxene, Hematite & Goethite", "Surface spectral unmixing showing iron oxides, pyroxene, and basalt weathering coatings"),
                 ("Topographic Relief & Elevation", "401 m Elevation", "Elevated basalt plateau with deep wind-carved yardang corridors")
             ],
@@ -135,7 +139,7 @@ SITES = {
         'name': "McMurdo Dry Valleys (Antarctica)",
         'short_name': "McMurdo Dry Valleys",
         'header_tag': "EARTH ANALOG",
-        'overall_similarity': "55.4%",
+        'overall_similarity': "63.2%",
         'is_mars': False,
         'color': (0, 210, 255),
         'highlight_bg': (0, 110, 150, 110),
@@ -158,7 +162,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Beacon Sandstone & Dry Permafrost", "Porous Beacon sandstone sheltering cryptoendolithic microbial communities"),
                 ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces"),
-                ("Soil / Regolith pH [SOIL_PH]", "N/A (Cryogenic)", "Hyper-arid sub-zero permafrost regime with negligible liquid pore fluid"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.80 pH (7.6 – 8.8)", "Antarctic cryo-regolith slightly alkaline dry permafrost pH (Cary et al.)"),
+                ("Soil Organic Carbon [SOC]", "0.25 g/kg (< 0.30 g/kg)", "Ultra-oligotrophic polar cold desert regolith mirroring Mars baseline"),
+                ("Bulk Density (Fine Earth) [BDOD]", "1.52 kg/dm³ (1.45 – 1.60)", "Unconsolidated glacial till & sandstone regolith dry bulk density"),
                 ("Surface Mineral Spectroscopy", "Quartz, Feldspar & Cryogenic Salts", "Cryogenic mineral weathering with nitrate and halite salt crusts"),
                 ("Topographic Relief & Elevation", "1,139 m Elevation", "Glacially carved dry valleys bounded by high-relief polar permafrost mountains")
             ],
@@ -191,7 +197,7 @@ SITES = {
         'name': "Aralkum Desert (Uzbekistan / Kazakhstan)",
         'short_name': "Aralkum Desert",
         'header_tag': "EARTH ANALOG",
-        'overall_similarity': "48.4%",
+        'overall_similarity': "49.1%",
         'is_mars': False,
         'color': (50, 220, 100),
         'highlight_bg': (20, 110, 50, 110),
@@ -214,7 +220,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
                 ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures"),
-                ("Soil / Regolith pH [SOIL_PH]", "7.84 pH (7.4 – 8.3)", "Alkaline toxic sulfate-chloride evaporite crust and desiccated seabed soil pH"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.82 pH (7.5 – 8.2)", "ISRIC SoilGrids 0-5cm alkaline sulfate-chloride evaporite seabed soil pH"),
+                ("Soil Organic Carbon [SOC]", "54.45 g/kg (13.4 – 154.2)", "ISRIC SoilGrids 0-5cm organic-rich desiccated seabed sediment"),
+                ("Bulk Density (Fine Earth) [BDOD]", "1.36 kg/dm³ (1.23 – 1.46)", "ISRIC SoilGrids 0-5cm fine earth evaporite seabed bulk density"),
                 ("Surface Mineral Spectroscopy", "Mirabilite, Thenardite & Gypsum", "Sodium and calcium sulfate evaporite minerals across desiccated seabed"),
                 ("Topographic Relief & Elevation", "44 – 78 m Relief (Mean: 59.9 m)", "Low-relief desiccated seabed floor with micro-topographic dune and crust features")
             ],
@@ -247,7 +255,7 @@ SITES = {
         'name': "Salar de Uyuni (Bolivia)",
         'short_name': "Salar de Uyuni",
         'header_tag': "EARTH ANALOG",
-        'overall_similarity': "46.8%",
+        'overall_similarity': "46.6%",
         'is_mars': False,
         'color': (180, 120, 255),
         'highlight_bg': (90, 40, 160, 110),
@@ -270,7 +278,9 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Lithium-Enriched Halite & Gypsum Crust", "10,000 km² expanse of pure lithium-halite evaporite playa modeling paleolakes"),
                 ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions"),
-                ("Soil / Regolith pH [SOIL_PH]", "7.50 pH (6.5 – 8.5)", "Circum-neutral to alkaline lithium-halite evaporite crust and brine pool pH"),
+                ("Soil / Regolith pH [SOIL_PH]", "7.78 pH (6.5 – 8.6)", "ISRIC SoilGrids 0-5cm salt flat evaporite crust and interstitial brine pH"),
+                ("Soil Organic Carbon [SOC]", "23.11 g/kg (7.9 – 80.4)", "ISRIC SoilGrids 0-5cm halophilic biomass organic carbon in salt crust"),
+                ("Bulk Density (Fine Earth) [BDOD]", "1.18 kg/dm³ (0.94 – 1.40)", "ISRIC SoilGrids 0-5cm porous evaporite halite crust bulk density"),
                 ("Surface Mineral Spectroscopy", "Halite, Gypsum & Lithium Borates", "Thick crystalline evaporite crust composed of halite and lithium-bearing borate minerals"),
                 ("Topographic Relief & Elevation", "3,656 m Elevation", "Ultra-flat high-altitude Andean plateau salt flat")
             ],
@@ -553,15 +563,20 @@ def generate_category_overview_card(cat_key, site_key):
         draw.rounded_rectangle([45, item_y, WIDTH - 45, item_y + item_h - 10], radius=10,
                                fill=bg_col, outline=(65, 85, 120, 255), width=2)
 
+        # Dynamic offsets for vertical centering depending on item count
+        y_title_offset = 10 if len(param_items) > 5 else 14
+        y_desc_offset = 44 if len(param_items) > 5 else 50
+        y_val_offset = 18 if len(param_items) > 5 else 24
+
         # Title on left
-        draw.text((68, item_y + 14), p_title, font=FONT_PARAM_NAME, fill=cat_color + (255,))
-        draw.text((68, item_y + 50), p_desc, font=FONT_PARAM_DESC, fill=(170, 190, 220, 255))
+        draw.text((68, item_y + y_title_offset), p_title, font=FONT_PARAM_NAME, fill=cat_color + (255,))
+        draw.text((68, item_y + y_desc_offset), p_desc, font=FONT_PARAM_DESC, fill=(170, 190, 220, 255))
 
         # Number on right
         val_w = draw.textlength(p_num, font=FONT_PARAM_VAL) if hasattr(draw, 'textlength') else 200
         val_x = WIDTH - 75 - val_w
         num_color = (255, 255, 255)
-        draw.text((val_x, item_y + 24), p_num, font=FONT_PARAM_VAL, fill=num_color + (255,))
+        draw.text((val_x, item_y + y_val_offset), p_num, font=FONT_PARAM_VAL, fill=num_color + (255,))
 
     # 3. Gemini API Summary Box at bottom (solid opaque)
     box_y = HEIGHT - summary_box_h - 55

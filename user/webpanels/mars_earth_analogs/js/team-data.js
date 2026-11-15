@@ -76,6 +76,12 @@ window.TEAM_DATA = {
       soil_ph: 7.80,
       soil_ph_min: 7.0,
       soil_ph_max: 8.5,
+      soil_organic_carbon_g_kg: 0.10,
+      soil_organic_carbon_min: 0.05,
+      soil_organic_carbon_max: 0.20,
+      soil_bulk_density_kg_dm3: 1.58,
+      soil_bulk_density_min: 1.50,
+      soil_bulk_density_max: 1.65,
       soil_mineral_type: "Yellowknife Bay Mudstones & Sulfate-bearing strata",
       chemical_organic_focus: "Target for organic carbon preservation",
       emit_mineral_matrix: "Fe-Smectites, Jarosite & Calcium Sulfates",
@@ -164,9 +170,15 @@ window.TEAM_DATA = {
       surface_temp_c: 70.70,
 
       // 2) Astrobiology / Surface Materials
-      soil_ph: 7.88,
-      soil_ph_min: 6.9,
-      soil_ph_max: 8.4,
+      soil_ph: 7.94,
+      soil_ph_min: 7.70,
+      soil_ph_max: 8.20,
+      soil_organic_carbon_g_kg: 2.06,
+      soil_organic_carbon_min: 0.80,
+      soil_organic_carbon_max: 8.20,
+      soil_bulk_density_kg_dm3: 1.46,
+      soil_bulk_density_min: 1.34,
+      soil_bulk_density_max: 1.52,
       soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardangs",
       chemical_organic_focus: "Abiotic organic limit-of-detection baseline",
       emit_mineral_matrix: "Pyroxene, Hematite & Goethite Surface Matrix",
@@ -189,11 +201,11 @@ window.TEAM_DATA = {
     // Exact mathematical formula similarity scores
     category_scores: {
       thermal: 18.7,
-      astrobiology: 85.0,
+      astrobiology: 77.6,
       atmospheric_dynamics: 61.8,
       atmospheric_moisture: 80.8,
       radiation: 54.9,
-      overall: 54.1
+      overall: 58.8
     }
   },
 
@@ -256,9 +268,15 @@ window.TEAM_DATA = {
       surface_temp_c: -25.58,
 
       // 2) Astrobiology / Surface Materials
-      soil_ph: null,
-      soil_ph_min: null,
-      soil_ph_max: null,
+      soil_ph: 7.80,
+      soil_ph_min: 7.60,
+      soil_ph_max: 8.80,
+      soil_organic_carbon_g_kg: 0.25,
+      soil_organic_carbon_min: 0.05,
+      soil_organic_carbon_max: 0.30,
+      soil_bulk_density_kg_dm3: 1.52,
+      soil_bulk_density_min: 1.45,
+      soil_bulk_density_max: 1.60,
       soil_mineral_type: "Beacon Sandstone Matrix & Dry Permafrost",
       chemical_organic_focus: "Cryopreserved cryptoendolithic biomolecules",
       emit_mineral_matrix: "Quartz, Feldspar & Cryogenic Salts",
@@ -281,11 +299,11 @@ window.TEAM_DATA = {
     // Exact mathematical formula similarity scores
     category_scores: {
       thermal: 62.4,
-      astrobiology: 90.0,
+      astrobiology: 94.4,
       atmospheric_dynamics: 41.9,
       atmospheric_moisture: 49.4,
       radiation: 67.9,
-      overall: 55.4
+      overall: 63.2
     }
   },
 
@@ -348,9 +366,15 @@ window.TEAM_DATA = {
       surface_temp_c: 12.949,
 
       // 2) Astrobiology / Surface Materials
-      soil_ph: 7.84,
-      soil_ph_min: 7.4,
-      soil_ph_max: 8.3,
+      soil_ph: 7.82,
+      soil_ph_min: 7.50,
+      soil_ph_max: 8.20,
+      soil_organic_carbon_g_kg: 54.45,
+      soil_organic_carbon_min: 13.40,
+      soil_organic_carbon_max: 154.20,
+      soil_bulk_density_kg_dm3: 1.36,
+      soil_bulk_density_min: 1.23,
+      soil_bulk_density_max: 1.46,
       soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust",
       chemical_organic_focus: "Entrapment of desiccation organic biosignatures in sulfate crystals",
       emit_mineral_matrix: "Mirabilite, Thenardite, Gypsum & Halite Evaporite",
@@ -373,11 +397,11 @@ window.TEAM_DATA = {
     // Exact mathematical formula similarity scores
     category_scores: {
       thermal: 26.5,
-      astrobiology: 80.0,
+      astrobiology: 52.1,
       atmospheric_dynamics: 46.2,
       atmospheric_moisture: 44.9,
       radiation: 75.8,
-      overall: 48.4
+      overall: 49.1
     }
   },
 
@@ -440,9 +464,15 @@ window.TEAM_DATA = {
       surface_temp_c: 8.808,
 
       // 2) Astrobiology / Surface Materials
-      soil_ph: 7.50,
-      soil_ph_min: 6.5,
-      soil_ph_max: 8.5,
+      soil_ph: 7.78,
+      soil_ph_min: 6.50,
+      soil_ph_max: 8.60,
+      soil_organic_carbon_g_kg: 23.11,
+      soil_organic_carbon_min: 7.90,
+      soil_organic_carbon_max: 80.40,
+      soil_bulk_density_kg_dm3: 1.18,
+      soil_bulk_density_min: 0.94,
+      soil_bulk_density_max: 1.40,
       soil_mineral_type: "Lithium-Enriched Halite & Gypsum Crust",
       chemical_organic_focus: "Preservation of polyextremophile cellular organics in fluid inclusions",
       emit_mineral_matrix: "Halite, Gypsum, Ulexite & Lithium Borates",
@@ -465,11 +495,11 @@ window.TEAM_DATA = {
     // Exact mathematical formula similarity scores
     category_scores: {
       thermal: 28.7,
-      astrobiology: 95.0,
+      astrobiology: 45.5,
       atmospheric_dynamics: 66.6,
       atmospheric_moisture: 45.4,
       radiation: 46.6,
-      overall: 46.8
+      overall: 46.6
     }
   }
 };
@@ -557,7 +587,31 @@ window.PARAMETER_DEFINITIONS = [
     marsBaseline: 7.80,
     scale: 1.5,
     desc: "Acidity / alkalinity of surface soil and regolith solution influencing mineral dissolution, clay stability, and habitability.",
-    source: "Earth Analogs: In-Situ Soil Chemical Analyses (soil_ph_summary.csv) | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids"
+    source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Polar Cryo-Regolith Surveys | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids"
+  },
+  {
+    key: "soil_organic_carbon_g_kg",
+    label: "Soil Organic Carbon (SOC)",
+    code: "SOC",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Makeup",
+    unit: "g/kg",
+    marsBaseline: 0.10,
+    scale: 5.0,
+    desc: "Mass fraction of organic carbon in regolith/soil matrix (0-5cm depth), critical for prebiotic habitability and biosignature preservation.",
+    source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Antarctic Cryo-Regolith Surveys | Mars: MSL Curiosity SAM Pyrolysis in Cumberland Mudstone (50-200 ppm C)"
+  },
+  {
+    key: "soil_bulk_density_kg_dm3",
+    label: "Bulk Density (Fine Earth)",
+    code: "BDOD",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Makeup",
+    unit: "kg/dm³",
+    marsBaseline: 1.58,
+    scale: 0.40,
+    desc: "Dry bulk density of surface regolith / soil (0-5cm depth) determining packing porosity, permeability, and thermal inertia.",
+    source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Polar Soil Surveys | Mars: MSL Curiosity Rocknest Sand & Cumberland Drill Core Density (1.50-1.65 kg/dm³)"
   },
   {
     key: "soil_mineral_type",
