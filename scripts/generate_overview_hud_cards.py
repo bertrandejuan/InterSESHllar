@@ -23,6 +23,7 @@ SITES = {
         'name': "Mars: Gale Crater",
         'short_name': "Mars: Gale Crater",
         'header_tag': "MARS BASELINE",
+        'overall_similarity': "100.0%",
         'is_mars': True,
         'color': (255, 95, 45),
         'highlight_bg': (180, 50, 20, 110),
@@ -78,6 +79,7 @@ SITES = {
         'name': "Lut Desert (Dasht-e Lut, Iran)",
         'short_name': "Lut Desert",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "54.1%",
         'is_mars': False,
         'color': (255, 170, 0),
         'highlight_bg': (160, 90, 0, 110),
@@ -133,6 +135,7 @@ SITES = {
         'name': "McMurdo Dry Valleys (Antarctica)",
         'short_name': "McMurdo Dry Valleys",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "55.4%",
         'is_mars': False,
         'color': (0, 210, 255),
         'highlight_bg': (0, 110, 150, 110),
@@ -188,6 +191,7 @@ SITES = {
         'name': "Aralkum Desert (Uzbekistan / Kazakhstan)",
         'short_name': "Aralkum Desert",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "48.4%",
         'is_mars': False,
         'color': (50, 220, 100),
         'highlight_bg': (20, 110, 50, 110),
@@ -243,6 +247,7 @@ SITES = {
         'name': "Salar de Uyuni (Bolivia)",
         'short_name': "Salar de Uyuni",
         'header_tag': "EARTH ANALOG",
+        'overall_similarity': "46.8%",
         'is_mars': False,
         'color': (180, 120, 255),
         'highlight_bg': (90, 40, 160, 110),
@@ -357,6 +362,23 @@ def generate_location_overview_card(active_site_key):
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
 
+    # Prominent Overall Mars Similarity Badge Pill in Header (Top Right)
+    badge_w = 410
+    badge_h = 76
+    badge_x = WIDTH - 45 - badge_w
+    badge_y = 28
+    badge_bg = (18, 30, 56, 255) if not site_info['is_mars'] else (48, 22, 16, 255)
+    badge_border = accent if not site_info['is_mars'] else (249, 115, 22)
+    draw.rounded_rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], radius=12,
+                           fill=badge_bg, outline=badge_border + (255,), width=3)
+
+    if site_info['is_mars']:
+        draw.text((badge_x + 20, badge_y + 12), "PLANETARY REFERENCE BASELINE", font=get_font(13, bold=True), fill=(255, 180, 140, 255))
+        draw.text((badge_x + 20, badge_y + 34), "100.0% MARS REFERENCE", font=get_font(24, bold=True), fill=(255, 120, 60, 255))
+    else:
+        draw.text((badge_x + 20, badge_y + 12), "OVERALL MARS SIMILARITY", font=get_font(13, bold=True), fill=(180, 215, 250, 255))
+        draw.text((badge_x + 20, badge_y + 34), f"{site_info['overall_similarity']} OVERALL MATCH", font=get_font(24, bold=True), fill=accent + (255,))
+
     # 2. Table Layout Coordinates (6 Columns)
     col_bounds = [
         (40, 330, "Categories"),
@@ -411,13 +433,16 @@ def generate_location_overview_card(active_site_key):
         # Site header title
         head_color = (255, 140, 70) if site_data['is_mars'] else site_data['color']
         draw.text((x1 + 10, header_y + 14), site_data['short_name'], font=FONT_COL_HEADER, fill=head_color + (255,))
-        sub_tag = "[ACTIVE FOCUS]" if is_active else site_data['header_tag']
-        sub_tag_col = (255, 255, 255) if is_active else (150, 170, 200)
-        draw.text((x1 + 10, header_y + 44), sub_tag, font=FONT_COL_SUB, fill=sub_tag_col + (255,))
+        if site_data['is_mars']:
+            score_tag = "[BASELINE: 100%]" if is_active else "Baseline 100%"
+        else:
+            score_tag = f"[ACTIVE: {site_data['overall_similarity']}]" if is_active else f"{site_data['overall_similarity']} Match"
+        sub_tag_col = (255, 255, 255) if is_active else (160, 185, 220)
+        draw.text((x1 + 10, header_y + 44), score_tag, font=FONT_COL_SUB, fill=sub_tag_col + (255,))
 
-    # Draw Category Rows (5 rows)
+    # Draw Category Rows (6 rows: 5 domains + Overall Similarity)
     row_y = header_y + header_h
-    row_h = (table_bottom_y - row_y) // 5
+    row_h = (table_bottom_y - row_y) // 6
 
     for row_idx, (cat_key, cat_title, metric_name, cat_color) in enumerate(CATEGORIES_META):
         current_y = row_y + row_idx * row_h
@@ -453,6 +478,29 @@ def generate_location_overview_card(active_site_key):
                 draw.text((x1 + 10, current_y + 46), line2, font=FONT_CELL_VAL, fill=text_col + (255,))
             else:
                 draw.text((x1 + 10, current_y + 32), val_str, font=FONT_CELL_VAL, fill=text_col + (255,))
+
+    # Row 6: OVERALL SIMILARITY TO MARS
+    ov_y = row_y + 5 * row_h
+    draw.rectangle([col_bounds[0][0], ov_y, col_bounds[0][1], ov_y + row_h], fill=(22, 34, 62, 255))
+    draw.text((col_bounds[0][0] + 12, ov_y + 16), "OVERALL MARS MATCH", font=FONT_ROW_LABEL, fill=(255, 215, 0, 255))
+    draw.text((col_bounds[0][0] + 12, ov_y + 48), "Multi-Domain Synthesis", font=FONT_ROW_METRIC, fill=(210, 225, 245, 255))
+    draw.line([40, ov_y + row_h, WIDTH - 40, ov_y + row_h], fill=(90, 120, 175, 255), width=2)
+
+    for col in col_bounds[1:]:
+        site_k = col[2]
+        x1, x2 = col[0], col[1]
+        is_active = (site_k == active_site_key)
+        site_d = SITES[site_k]
+        score_val = site_d['overall_similarity']
+
+        if site_d['is_mars']:
+            score_txt = "100.0% (Baseline)"
+            score_col = (255, 140, 70)
+        else:
+            score_txt = f"{score_val} Match"
+            score_col = site_d['color'] if is_active else (220, 230, 245)
+
+        draw.text((x1 + 10, ov_y + 28), score_txt, font=get_font(21, bold=True), fill=score_col + (255,))
 
     # Footer note (NO analysis on this slide as requested in Image 2)
     footer_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL Curiosity Rover REMS Ground Truth | Zero Hallucinated Numbers"
