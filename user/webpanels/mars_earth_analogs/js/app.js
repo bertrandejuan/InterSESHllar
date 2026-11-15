@@ -734,6 +734,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const lon = site.coordinates.lon;
     const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2500.0;
 
+    // When focusing down to ground terrain level, fade out Mars_Texture so surface is 100% crisp, unblotched CTX imagery
+    if (globe === "Mars") {
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
+    }
+
     openSpace.flyToGeo(globe, lat, lon, groundAlt, 2.5);
   }
 
@@ -844,10 +850,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const enable = !isCurrentlyActive;
 
     const propPath = `Scene.${globeName}.Renderable.Layers.ColorLayers.${layerName}.Enabled`;
+    const opacityPath1 = `Scene.${globeName}.Renderable.Layers.ColorLayers.${layerName}.Opacity`;
+    const opacityPath2 = `Scene.${globeName}.Renderable.Layers.ColorLayers.${layerName}.Settings.Opacity`;
 
     openSpace.executeLuaScript(`
       if openspace.hasProperty("${propPath}") then
         openspace.setPropertyValueSingle("${propPath}", ${enable})
+      end
+      if openspace.hasProperty("${opacityPath1}") then
+        openspace.setPropertyValueSingle("${opacityPath1}", 0.88)
+      end
+      if openspace.hasProperty("${opacityPath2}") then
+        openspace.setPropertyValueSingle("${opacityPath2}", 0.88)
       end
     `);
 
@@ -877,9 +891,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const lon = site.coordinates.lon;
 
     if (state.isOrientSideways) {
+      if (globe === "Mars") {
+        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
+        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
+      }
       const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2500.0;
       openSpace.flyToGeo(globe, lat, lon, groundAlt, 2.5);
     } else {
+      if (globe === "Mars") {
+        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0);
+        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0);
+      }
       openSpace.flyToGeo(globe, lat, lon, 35000.0, 2.0);
     }
 
@@ -1369,6 +1391,10 @@ document.addEventListener("DOMContentLoaded", () => {
     btnOrbitReturn.addEventListener("click", () => {
       const site = getActiveSiteData();
       const globe = site.globe || "Earth";
+      if (globe === "Mars") {
+        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0);
+        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0);
+      }
       openSpace.flyToGeo(globe, 0.0, 0.0, 18000000.0, 3.5);
     });
   }

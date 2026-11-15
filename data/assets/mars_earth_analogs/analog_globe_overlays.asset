@@ -8,7 +8,7 @@ local EarthOverlays = {
     Name = "Team Data: Surface Temperature Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.70,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/earth_overlay_temperature.png"),
     Description = "Global surface temperature data visualization derived from 10-year in-situ team records."
   },
@@ -17,7 +17,7 @@ local EarthOverlays = {
     Name = "Team Data: Aeolian Wind Speed Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.65,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/earth_overlay_wind.png"),
     Description = "Global surface wind velocity data visualization."
   },
@@ -26,7 +26,7 @@ local EarthOverlays = {
     Name = "Team Data: Aridity & Relative Humidity Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.65,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/earth_overlay_moisture.png"),
     Description = "Global relative humidity and precipitation deficit data visualization."
   },
@@ -35,7 +35,7 @@ local EarthOverlays = {
     Name = "Team Data: Solar Insolation Flux Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.65,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/earth_overlay_solar.png"),
     Description = "Global solar downward shortwave insolation flux."
   },
@@ -44,7 +44,7 @@ local EarthOverlays = {
     Name = "Team Data: Extremophile Analog Habitability Index",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.70,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/earth_overlay_biology.png"),
     Description = "Composite planetary extremophile analog habitability index."
   }
@@ -56,7 +56,7 @@ local MarsOverlays = {
     Name = "Team Data: Mars REMS Climatology Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.70,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/mars_overlay_temperature.png"),
     Description = "Martian thermal field centered on Gale Crater Curiosity REMS baseline."
   },
@@ -65,7 +65,7 @@ local MarsOverlays = {
     Name = "Team Data: Mars Wind & Barometric Field",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.65,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/mars_overlay_wind.png"),
     Description = "Martian slope winds and hypobaric barometric field."
   },
@@ -74,7 +74,7 @@ local MarsOverlays = {
     Name = "Team Data: Mars Perchlorate Deliquescence Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.65,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/mars_overlay_moisture.png"),
     Description = "Martian atmospheric vapor bounds and nighttime frost potential."
   },
@@ -83,7 +83,7 @@ local MarsOverlays = {
     Name = "Team Data: Mars Solar Insolation Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.65,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/mars_overlay_solar.png"),
     Description = "Solar downwelling flux at 1.52 AU."
   },
@@ -92,7 +92,7 @@ local MarsOverlays = {
     Name = "Team Data: Mars Lacustrine Biosignature Map",
     Enabled = false,
     ZIndex = 30,
-    Opacity = 0.75,
+    Opacity = 0.88,
     FilePath = asset.resource("./textures/mars_overlay_biology.png"),
     Description = "Lacustrine mudstone biosignature preservation zones (Gale, Jezero, Meridiani)."
   }
