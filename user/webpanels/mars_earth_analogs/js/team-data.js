@@ -75,6 +75,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
       soil_mineral_type: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
       chemical_organic_focus: "Target for organic carbon preservation via MSL SAM / CheMin instruments",
+      surface_elevation_relief: "-4,400 m crater floor / 5.5 km Mount Sharp relief (MOLA altimetry)",
 
       // 3) Atmospheric Dynamics
       avg_wind_speed_ms: 3.50,
@@ -161,6 +162,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
       soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardang Bedrock (EMIT-2 target)",
       chemical_organic_focus: "Abiotic limit-of-detection testing for rover organic detection instruments",
+      surface_elevation_relief: "401 m elevation (Basalt plateau & yardang mega-corridor relief)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 4.0933,
@@ -248,6 +250,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT & Field Surveys)
       soil_mineral_type: "Beacon Sandstone Matrix & Dry Permafrost (EMIT-2 excludes >60°S; field surveys)",
       chemical_organic_focus: "Cryopreserved cryptoendolithic lichen biomolecules inside porous sandstone matrix",
+      surface_elevation_relief: "1,139 m elevation (Polar mountain permafrost & valley relief)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 6.8127,
@@ -332,9 +335,10 @@ window.TEAM_DATA = {
       mean_daily_temp_range_c: 4.3622,
       surface_temp_c: 12.949,
 
-      // 2) Astrobiology / Surface Materials (NASA EMIT & Field Surveys)
+      // 2) Astrobiology / Surface Materials (NASA EMIT, earthaccess ICESat-2 Topography & Field Surveys)
       soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust (EMIT-2 target)",
       chemical_organic_focus: "Entrapment of catastrophic desiccation organic biosignatures in sulfate crystals",
+      surface_elevation_relief: "44 – 78 m relief (Mean 59.9 m; NASA earthaccess ICESat-2 ATL06 out.tif)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 5.7403,
@@ -422,6 +426,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT Mineralogy)
       soil_mineral_type: "Lithium-Enriched Halite & Gypsum Evaporite Playa (EMIT-2 target)",
       chemical_organic_focus: "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions",
+      surface_elevation_relief: "3,656 m elevation (High-altitude hypobaric Altiplano salt flat)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 2.9037,
@@ -545,6 +550,18 @@ window.PARAMETER_DEFINITIONS = [
     scale: null,
     desc: "Target compounds, macromolecular organic carbon, and preservation mechanisms.",
     source: "Terrestrial Astrobiology Surveys & MSL Sample Analysis at Mars"
+  },
+  {
+    key: "surface_elevation_relief",
+    label: "Topographic Relief & Laser Altimetry",
+    code: "ELEV_TOPO",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Topography",
+    unit: "m",
+    marsBaseline: "-4,400 m floor / 5.5 km Mount Sharp relief (MOLA)",
+    scale: null,
+    desc: "Surface elevation and micro-topographic relief derived from satellite laser altimetry (ICESat-2 ATL06 out.tif) and digital elevation models.",
+    source: "NASA earthaccess ICESat-2 (ATL06 out.tif DEM) & NASA MOLA"
   },
 
   // 3) Atmospheric Dynamics

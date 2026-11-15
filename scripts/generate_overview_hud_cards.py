@@ -44,7 +44,8 @@ SITES = {
             ],
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Yellowknife Bay Mudstones", "Ancient lacustrine smectites and sulfate-bearing Mount Sharp strata"),
-                ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "SAM / CheMin organic molecule and biomarker preservation target")
+                ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "SAM / CheMin organic molecule and biomarker preservation target"),
+                ("Topographic Relief & Altimetry", "-4,400 m to +1,100 m", "NASA MOLA laser altimeter 5.5 km Mount Sharp central mound relief")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "3.50 m/s", "Gale Crater diurnal channel flow and slope wind velocity"),
@@ -81,7 +82,7 @@ SITES = {
         'highlight_border': (255, 185, 40, 255),
         'key_points': {
             'thermal': "26.60 °C",
-            'astrobiology': "Basalt Regolith (pH Pending)",
+            'astrobiology': "Basalt Regolith Pavement",
             'dynamics': "4.09 m/s",
             'moisture': "21.98 %",
             'radiation': "21.14 MJ/m²/d"
@@ -96,7 +97,8 @@ SITES = {
             ],
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
-                ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments")
+                ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments"),
+                ("Topographic Relief & Altimetry", "401 m Elevation", "NASA POWER / MERRA-2 digital elevation model of central yardang plateau")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "4.09 m/s", "Persistent 120-day summer winds driving active aeolian sand saltation"),
@@ -148,7 +150,8 @@ SITES = {
             ],
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Beacon Sandstone & Dry Permafrost", "Porous Beacon sandstone sheltering cryptoendolithic microbial communities"),
-                ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces")
+                ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces"),
+                ("Topographic Relief & Altimetry", "1,139 m Elevation", "NASA POWER / MERRA-2 high-relief polar permafrost mountain terrain")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "6.81 m/s", "Hurricane-force katabatic winds descending from the East Antarctic Ice Sheet"),
@@ -185,7 +188,7 @@ SITES = {
         'highlight_border': (90, 240, 140, 255),
         'key_points': {
             'thermal': "10.66 °C",
-            'astrobiology': "Sulfate Evaporite (pH Pending)",
+            'astrobiology': "Toxic Sulfate / ICESat-2",
             'dynamics': "5.74 m/s",
             'moisture': "70.58 %",
             'radiation': "13.27 MJ/m²/d"
@@ -200,7 +203,8 @@ SITES = {
             ],
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
-                ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures")
+                ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures"),
+                ("Topographic Relief & Altimetry", "44 – 78 m (Mean 59.9 m)", "NASA earthaccess ICESat-2 ATL06 laser altimetry raster (out.tif)")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "5.74 m/s", "Strong regional winds driving violent electrostatic salt-dust storms"),
@@ -252,7 +256,8 @@ SITES = {
             ],
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Lithium-Enriched Halite & Gypsum Crust", "10,000 km² expanse of pure lithium-halite evaporite playa modeling paleolakes"),
-                ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions")
+                ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions"),
+                ("Topographic Relief & Altimetry", "3,656 m Elevation", "NASA POWER / MERRA-2 high-altitude Altiplano salt flat elevation")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "2.90 m/s", "Moderate high-altitude Altiplano aerodynamic wind velocity"),

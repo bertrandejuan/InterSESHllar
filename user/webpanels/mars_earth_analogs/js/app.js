@@ -284,6 +284,18 @@ document.addEventListener("DOMContentLoaded", () => {
           isQualitative: true,
           getVal: (m) => m.chemical_organic_focus || "Organic preservation target in sedimentary matrix",
           getMarsVal: () => "Organic carbon preservation target via MSL SAM / CheMin"
+        },
+        {
+          key: "surface_elevation_relief",
+          label: "Topographic Relief & Laser Altimetry",
+          code: "ELEV_TOPO",
+          unit: "m",
+          desc: "Surface elevation and micro-topographic relief derived from satellite laser altimetry (ICESat-2 ATL06 out.tif) and digital elevation models.",
+          source: "NASA earthaccess ICESat-2 (out.tif) & NASA MOLA",
+          scale: null,
+          isQualitative: true,
+          getVal: (m) => m.surface_elevation_relief || "44 – 78 m relief (NASA ICESat-2 out.tif)",
+          getMarsVal: () => "-4,400 m floor / 5.5 km Mount Sharp relief (MOLA)"
         }
       ]
     },
