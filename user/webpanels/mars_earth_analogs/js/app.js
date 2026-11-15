@@ -3,14 +3,13 @@
  * Unified Application Controller
  * Categories strictly aligned with research whiteboard:
  *   1) THERMAL CONDITIONS (NASA POWER API)
- *   2) ASTROBIOLOGY / ENVIRONMENTAL MAKEUP (EMIT-2 / Soil Telemetry Placeholders)
+ *   2) ASTROBIOLOGY / SURFACE MATERIALS (NASA EMIT & MSL CheMin Mineralogy)
  *   3) ATMOSPHERIC DYNAMICS (NASA POWER API)
  *   4) ATMOSPHERIC MOISTURE (NASA POWER API)
  *   5) RADIATION (NASA POWER API / CERES SYN1deg)
  *
  * Grounded in empirical 10-year NASA POWER daily archives (4,018 records) vs Curiosity REMS.
  * All similarity scores computed strictly from mathematical formula: S = 100 * exp(-|Delta| / Scale).
- * Soil parameters explicitly held as non-hallucinated placeholders pending laboratory collection.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -173,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   // 3. Category Definitions Strictly Matching Whiteboard Sequence
   //   1) Thermal Conditions (NASA POWER API)
-  //   2) Astrobiology / Environmental Makeup (EMIT-2 / Soil Telemetry Placeholders)
+  //   2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
   //   3) Atmospheric Dynamics (NASA POWER API)
   //   4) Atmospheric Moisture (NASA POWER API)
   //   5) Radiation (NASA POWER API / CERES SYN1deg)
@@ -250,8 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       key: "astrobiology",
-      title: "2) Astrobiology / Environmental Makeup",
-      subtitle: "EMIT-2 (All Earth locations but Antarctica) & In-Situ Soil Sampling",
+      title: "2) Astrobiology & Mineralogy",
+      subtitle: "NASA EMIT & MSL CheMin Surface Materials",
       icon: "🧬",
       cssClass: "cat-astrobiology",
       scoreKey: "astrobiology",
@@ -259,40 +258,16 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayLayerMars: null,
       hudTexture: "hud_overview_biology.png",
       hasOverlay: false,
-      isPendingSoilData: true,
+      isQualitativeCategory: true,
       availabilityNote: "Spatial vector overlay available for Climatology layers; Astrobiology uses point station telemetry.",
       parameters: [
-        {
-          key: "soil_ph",
-          label: "Soil Characteristics (pH)",
-          code: "SOIL_PH",
-          unit: "pH",
-          desc: "Regolith acidity/alkalinity influencing chemical weathering and prebiotic habitability.",
-          source: "EMIT-2 Imaging Spectroscopy & In-Situ Soil Telemetry",
-          scale: null,
-          isPlaceholder: true,
-          getVal: (m) => m.soil_ph || "[Placeholder: In-situ / EMIT-2 soil sampling in progress]",
-          getMarsVal: () => "[Placeholder: APXS / CheMin soil pH telemetry in progress]"
-        },
-        {
-          key: "soil_granularity",
-          label: "Granularity (Grain Size Distribution)",
-          code: "SOIL_GRAIN",
-          unit: "Grain Size",
-          desc: "Regolith particle size and porosity governing capillary brine migration and niche sheltering.",
-          source: "In-Situ Sieve Granulometry & Rover Microscopic Imagers",
-          scale: null,
-          isPlaceholder: true,
-          getVal: (m) => m.soil_granularity || "[Placeholder: Regolith grain size distribution pending]",
-          getMarsVal: () => "[Placeholder: MAHLI / Mastcam sediment grain size analysis in progress]"
-        },
         {
           key: "soil_mineral_type",
           label: "Mineral Composition & Rock Type",
           code: "MINERAL_TYPE",
           unit: "Mineralogy",
           desc: "Dominant surface mineralogy providing geological substrates for biosignature preservation.",
-          source: "EMIT-2 (All Earth locations but Antarctica) & MSL CheMin",
+          source: "NASA EMIT (Earth Analogs) & MSL CheMin",
           scale: null,
           isQualitative: true,
           getVal: (m) => m.soil_mineral_type || "Evaporite & Mudstone Matrix",
@@ -491,8 +466,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let scoreDisplay = "";
       if (isMars) {
         scoreDisplay = `<div class="accordion-score-pill"><span class="mini-score-text">Reference</span></div>`;
-      } else if (cat.isPendingSoilData) {
-        scoreDisplay = `<div class="accordion-score-pill" style="border-color: rgba(168,85,247,0.5);"><span class="mini-score-text" style="color: #c084fc;">Pending Soil Data</span></div>`;
+      } else if (cat.isQualitativeCategory || cat.key === "astrobiology") {
+        scoreDisplay = `<div class="accordion-score-pill" style="border-color: rgba(168,85,247,0.5);"><span class="mini-score-text" style="color: #c084fc;">Analog Site</span></div>`;
       } else if (catScore !== null) {
         scoreDisplay = `
           <div class="accordion-score-pill">
@@ -639,10 +614,8 @@ document.addEventListener("DOMContentLoaded", () => {
             rowGroup.appendChild(card);
           } else {
             let matchBadgeHtml = `<span class="cstat-match-badge match-pending">—</span>`;
-            if (param.isPlaceholder) {
-              matchBadgeHtml = `<span class="cstat-match-badge match-pending">Pending</span>`;
-            } else if (param.isQualitative) {
-              matchBadgeHtml = `<span class="cstat-match-badge match-high">Analog</span>`;
+            if (param.isQualitative) {
+              matchBadgeHtml = `<span class="cstat-match-badge match-high" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4);">Analog</span>`;
             } else if (param.scale && metrics[param.key] !== null && metrics[param.key] !== undefined && marsMetrics[param.key] !== null && marsMetrics[param.key] !== undefined) {
               const earthVal = metrics[param.key];
               const marsRef = marsMetrics[param.key];
@@ -653,6 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             }
 
+            const gridClass = param.isQualitative ? "cstat-values-grid qualitative-stacked" : "cstat-values-grid";
             const card = document.createElement("div");
             card.className = "cstat-card";
             card.innerHTML = `
@@ -663,7 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 ${matchBadgeHtml}
               </div>
-              <div class="cstat-values-grid">
+              <div class="${gridClass}">
                 <div class="cstat-val-box earth-box">
                   <span class="cstat-val-label">${site.name}</span>
                   <span class="cstat-val-num">${earthValStr}</span>
@@ -962,7 +936,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let catScores = [];
 
     SCIENCE_CATEGORIES.forEach((cat) => {
-      if (cat.isPendingSoilData) return; // Exclude soil telemetry from math formula until collection completes
+      if (cat.key === "astrobiology" || cat.isQualitativeCategory || cat.isPendingSoilData) return; // Exclude qualitative astrobiology mineralogy from numeric exponential formula
 
       let sum = 0;
       let count = 0;
@@ -1134,12 +1108,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let matchBadge = `<span class="param-match-badge match-mid">Moderate</span>`;
 
       if (def.category === "astrobiology") {
-        deltaStr = "Qualitative / Pending";
-        if (typeof earthVal === "string" && earthVal.includes("Placeholder")) {
-          matchBadge = `<span class="param-match-badge" style="background: rgba(168,85,247,0.25); color: #c084fc;">Data Pending</span>`;
-        } else {
-          matchBadge = `<span class="param-match-badge match-high">Geological Analog</span>`;
-        }
+        deltaStr = "Qualitative Analog";
+        matchBadge = `<span class="param-match-badge match-high" style="background: rgba(168,85,247,0.25); color: #c084fc; border: 1px solid rgba(168,85,247,0.4);">Analog Site</span>`;
       } else if (earthVal !== null && marsVal !== null && !isNaN(earthVal) && !isNaN(marsVal)) {
         const delta = earthVal - marsVal;
         const sign = delta > 0 ? "+" : "";
@@ -1149,11 +1119,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const simScore = def.scale ? 100 * Math.exp(-absDelta / def.scale) : 50;
 
         if (simScore >= 60) {
-          matchBadge = `<span class="param-match-badge match-high">${simScore.toFixed(0)}% Math</span>`;
+          matchBadge = `<span class="param-match-badge match-high">${simScore.toFixed(0)}% Match</span>`;
         } else if (simScore >= 35) {
-          matchBadge = `<span class="param-match-badge match-mid">${simScore.toFixed(0)}% Math</span>`;
+          matchBadge = `<span class="param-match-badge match-mid">${simScore.toFixed(0)}% Match</span>`;
         } else {
-          matchBadge = `<span class="param-match-badge match-low">${simScore.toFixed(0)}% Math</span>`;
+          matchBadge = `<span class="param-match-badge match-low">${simScore.toFixed(0)}% Match</span>`;
         }
       } else if (isMars) {
         deltaStr = "0.00 (Baseline)";
