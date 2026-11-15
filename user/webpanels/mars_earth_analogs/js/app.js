@@ -533,8 +533,10 @@ document.addEventListener("DOMContentLoaded", () => {
         focusOnSurface();
       });
 
+      const currentCatHUD = `hud_cat_${cat.key}_${state.currentSiteKey}.png`;
+      const isCatHUDActive = state.activeHUD === currentCatHUD;
       const btnOverview = document.createElement("button");
-      btnOverview.className = `btn-vp-action btn-overview-hud${state.activeHUD === cat.hudTexture ? " active" : ""}`;
+      btnOverview.className = `btn-vp-action btn-overview-hud${isCatHUDActive ? " active" : ""}`;
       btnOverview.innerHTML = `<span>◉ Overview HUD</span>`;
       btnOverview.title = "Toggle semi-translucent 3D viewport card for this category";
       btnOverview.addEventListener("click", (e) => {
@@ -727,7 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function toggleCategoryHUD(cat) {
-    const hudTexture = cat.hudTexture;
+    const hudTexture = `hud_cat_${cat.key}_${state.currentSiteKey}.png`;
     if (state.activeHUD === hudTexture) {
       dismissHUD();
       return;
@@ -736,7 +738,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function toggleComparisonHUD(siteKey) {
-    const hudTexture = `hud_comparison_${siteKey}.png`;
+    const hudTexture = `hud_overview_location_${siteKey}.png`;
     if (state.activeHUD === hudTexture) {
       dismissHUD();
       return;
@@ -745,14 +747,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showHUDTexture(textureFilename) {
-    // Calibrated Scale = 0.62 and position = {-0.22, 0.0, -2.0} ensures HUD fits in middle viewport
+    // Calibrated Scale = 0.72 and position = {-0.22, 0.02, -2.0} ensures flat, legible, screen-facing HUD
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 0.62)
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 0.72)
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.CartesianPosition") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.22, 0.0, -2.0 })
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.22, 0.02, -2.0 })
+        end
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Rotation") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Rotation", { 0.0, 0.0, 0.0 })
+        end
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.FaceCamera") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.FaceCamera", true)
         end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${textureFilename}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
@@ -762,8 +770,13 @@ document.addEventListener("DOMContentLoaded", () => {
     state.activeHUD = textureFilename;
 
     if (btnModalComparisonHUD) {
-      btnModalComparisonHUD.classList.add("active");
-      btnModalComparisonHUD.innerText = "🪐 HUD Active (Click to Close)";
+      if (textureFilename.startsWith("hud_overview_location_")) {
+        btnModalComparisonHUD.classList.add("active");
+        btnModalComparisonHUD.innerText = "🪐 HUD Active (Click to Close)";
+      } else {
+        btnModalComparisonHUD.classList.remove("active");
+        btnModalComparisonHUD.innerText = "🪐 Viewport Comparison HUD";
+      }
     }
 
     renderScienceAccordion();
@@ -974,8 +987,16 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.flyToGeo(globe, lat, lon, alt, 2.5);
     }
 
-    if (state.activeHUD && state.activeHUD.startsWith("hud_comparison_")) {
-      showHUDTexture(`hud_comparison_${siteKey}.png`);
+    if (state.activeHUD) {
+      if (state.activeHUD.startsWith("hud_overview_location_") || state.activeHUD.startsWith("hud_comparison_")) {
+        showHUDTexture(`hud_overview_location_${siteKey}.png`);
+      } else if (state.activeHUD.startsWith("hud_cat_")) {
+        const match = state.activeHUD.match(/^hud_cat_([a-z]+)_/);
+        if (match) {
+          const catKey = match[1];
+          showHUDTexture(`hud_cat_${catKey}_${siteKey}.png`);
+        }
+      }
     }
   }
 

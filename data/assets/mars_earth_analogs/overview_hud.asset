@@ -1,9 +1,9 @@
 -- OpenSpace ScreenSpace Overview & Comparison HUD Asset
 -- Projects semi-translucent overview cards directly into the 3D viewport (empty space of screen)
--- Toggled when user clicks "Comparison to Mars (All Categories)" or "Overview"
--- Scale = 0.62 ensures the card fits cleanly in the viewport without covering the globe edges
+-- Flat screen-facing orientation (FaceCamera = true, Rotation = {0,0,0})
+-- Scale = 0.72 and CartesianPosition = {-0.22, 0.02, -2.0} ensures HUD fits clearly and legibly in the middle viewport
 
-local defaultTexture = asset.resource("./textures/hud_comparison_lut.png")
+local defaultTexture = asset.resource("./textures/hud_overview_location_mars_gale.png")
 
 local OverviewHUD = {
   Type = "ScreenSpaceImageLocal",
@@ -13,8 +13,10 @@ local OverviewHUD = {
   Enabled = false,
   Opacity = 0.94,
   Placement = {
-    CartesianPosition = { -0.22, 0.0, -2.0 },
-    Scale = 0.62
+    CartesianPosition = { -0.22, 0.02, -2.0 },
+    Scale = 0.72,
+    FaceCamera = true,
+    Rotation = { 0.0, 0.0, 0.0 }
   }
 }
 
