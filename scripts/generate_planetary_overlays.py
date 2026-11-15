@@ -133,26 +133,34 @@ def save_psg_overlay(data_field, cmap, vmin, vmax, title, unit, output_path,
                   scale=32, width=0.0022, headwidth=3.6, headlength=4.4, headaxislength=3.8,
                   pivot='mid', zorder=20)
 
-    # -------------------------------------------------------------
-    # Embedded Scientific Colorbar Legend in Lower-Right Corner
-    # (Matches inspiration: clean dark badge, gradient bar, ticks, units)
-    # -------------------------------------------------------------
-    rect = plt.Rectangle((0.665, 0.025), 0.31, 0.11, transform=fig.transFigure,
-                         facecolor='#0a1220', edgecolor='#38bdf8', alpha=0.92,
-                         linewidth=1.5, zorder=100, clip_on=False)
-    fig.patches.append(rect)
-
-    cbar_ax = fig.add_axes([0.685, 0.045, 0.27, 0.025])
-    cbar = ColorbarBase(cbar_ax, cmap=cmap, norm=norm, orientation='horizontal')
-    cbar.ax.tick_params(labelsize=10, colors='white', length=3, width=1)
-    
-    vec_note = " + PSG Vector Field" if vector_field is not None else ""
-    fig.text(0.685, 0.105, f"{title} [{unit}]{vec_note}", color='#38bdf8', fontsize=11, fontweight='bold', zorder=101)
-    fig.text(0.685, 0.080, "NASA PSG & 10-Yr In-Situ POWER/REMS Archive", color='#94a3b8', fontsize=8, zorder=101)
-
+    # South Pole is kept completely clean without embedded map rectangle
     plt.savefig(output_path, dpi=100, format='png', transparent=True)
     plt.close(fig)
     print(f"Generated PSG-Style Overlay: {os.path.basename(output_path)} ({WIDTH}x{HEIGHT})")
+
+def save_overlay_legend_badge(title, unit, cmap, vmin, vmax, output_path, has_vectors=False):
+    # Standalone screen-space badge (compact box underneath position & altitude)
+    fig = plt.figure(figsize=(4.8, 1.5), dpi=120)
+    rect = plt.Rectangle((0.02, 0.05), 0.96, 0.90, transform=fig.transFigure,
+                         facecolor='#0b1329', edgecolor='#38bdf8', alpha=0.96,
+                         linewidth=1.8, zorder=10, clip_on=False)
+    fig.patches.append(rect)
+
+    norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+    cbar_ax = fig.add_axes([0.08, 0.22, 0.84, 0.22])
+    cbar = ColorbarBase(cbar_ax, cmap=cmap, norm=norm, orientation='horizontal')
+    cbar.ax.tick_params(labelsize=8.5, colors='white', length=3, width=1)
+    for t in cbar.ax.get_xticklabels():
+        t.set_color('#e2e8f0')
+        t.set_fontweight('semibold')
+
+    vec_note = " + PSG Vector Field" if has_vectors else ""
+    fig.text(0.08, 0.76, f"{title} [{unit}]{vec_note}", color='#38bdf8', fontsize=10.5, fontweight='bold', zorder=15)
+    fig.text(0.08, 0.56, "NASA POWER & In-Situ Planetary Climatology", color='#94a3b8', fontsize=7.5, zorder=15)
+
+    plt.savefig(output_path, dpi=120, format='png', transparent=True)
+    plt.close(fig)
+    print(f"Generated Overlay Legend Badge: {os.path.basename(output_path)}")
 
 # =============================================================
 # 1. EARTH WIND VELOCITY & CIRCULATION VECTORS (NASA PSG STYLE)
@@ -181,6 +189,8 @@ v_earth += -4.0 * np.exp(-dist_mcm / (2 * 10.0**2))
 save_psg_overlay(w_field, WIND_CMAP, 1.0, 14.0, "SURFACE WIND SPEED", "m/s",
                  os.path.join(OUTPUT_DIR, "earth_overlay_wind.png"),
                  vector_field=(u_earth, v_earth))
+save_overlay_legend_badge("SURFACE WIND SPEED", "m/s", WIND_CMAP, 1.0, 14.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_dynamics.png"), has_vectors=True)
 
 # =============================================================
 # 2. EARTH TEMPERATURE OVERLAY + THERMAL ADVECTION VECTORS
@@ -195,6 +205,8 @@ t_field = gaussian_filter(t_field, sigma=3.5)
 save_psg_overlay(t_field, THERMAL_CMAP, -50.0, 50.0, "SURFACE TEMPERATURE", "°C",
                  os.path.join(OUTPUT_DIR, "earth_overlay_temperature.png"),
                  vector_field=(u_earth * 0.6, v_earth * 0.6))
+save_overlay_legend_badge("SURFACE TEMPERATURE", "°C", THERMAL_CMAP, -50.0, 50.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_thermal.png"), has_vectors=True)
 
 # =============================================================
 # 3. EARTH MOISTURE & ARIDITY OVERLAY
@@ -208,6 +220,8 @@ for st in STATIONS.values():
 rh_field = gaussian_filter(rh_field, sigma=3.5)
 save_psg_overlay(rh_field, ARIDITY_CMAP, 10.0, 90.0, "RELATIVE HUMIDITY & ARIDITY", "%",
                  os.path.join(OUTPUT_DIR, "earth_overlay_moisture.png"))
+save_overlay_legend_badge("RELATIVE HUMIDITY & ARIDITY", "%", ARIDITY_CMAP, 10.0, 90.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_moisture.png"), has_vectors=False)
 
 # =============================================================
 # 4. EARTH SOLAR RADIATION OVERLAY
@@ -221,6 +235,8 @@ for st in STATIONS.values():
 sol_field = gaussian_filter(sol_field, sigma=3.5)
 save_psg_overlay(sol_field, VIBRANT_CMAP, 1.5, 7.5, "SOLAR INSOLATION FLUX", "kWh/m²/d",
                  os.path.join(OUTPUT_DIR, "earth_overlay_solar.png"))
+save_overlay_legend_badge("SOLAR INSOLATION FLUX", "kWh/m²/d", VIBRANT_CMAP, 1.5, 7.5,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_radiation.png"), has_vectors=False)
 
 # =============================================================
 # 5. EARTH ASTRO-BIOLOGY / EXTREMOPHILE INDEX OVERLAY
@@ -233,6 +249,8 @@ bio_field = np.clip(bio_field, 5.0, 95.0)
 bio_field = gaussian_filter(bio_field, sigma=3.5)
 save_psg_overlay(bio_field, VIBRANT_CMAP, 0.0, 100.0, "EXTREMOPHILE ANALOG INDEX", "%",
                  os.path.join(OUTPUT_DIR, "earth_overlay_biology.png"))
+save_overlay_legend_badge("EXTREMOPHILE ANALOG INDEX", "%", VIBRANT_CMAP, 0.0, 100.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_astrobiology.png"), has_vectors=False)
 
 # =============================================================
 # 6. MARS WIND & CIRCULATION VECTORS (EXACT NASA PSG MARS APP STYLE)
@@ -253,6 +271,8 @@ v_mars += -4.0 * np.exp(-dist_gale / (2 * 12.0**2))
 save_psg_overlay(m_wind, WIND_CMAP, 1.0, 16.0, "MARS SURFACE WIND SPEED", "m/s",
                  os.path.join(OUTPUT_DIR, "mars_overlay_wind.png"),
                  vector_field=(u_mars, v_mars))
+save_overlay_legend_badge("MARS SURFACE WIND SPEED", "m/s", WIND_CMAP, 1.0, 16.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_dynamics.png"), has_vectors=True)
 
 # =============================================================
 # 7. MARS TEMPERATURE OVERLAY + CIRCULATION VECTORS
@@ -264,6 +284,8 @@ m_temp = gaussian_filter(m_temp, sigma=3.5)
 save_psg_overlay(m_temp, THERMAL_CMAP, -125.0, -20.0, "MARS SURFACE TEMPERATURE", "°C",
                  os.path.join(OUTPUT_DIR, "mars_overlay_temperature.png"),
                  vector_field=(u_mars * 0.5, v_mars * 0.5))
+save_overlay_legend_badge("MARS SURFACE TEMPERATURE", "°C", THERMAL_CMAP, -125.0, -20.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_thermal.png"), has_vectors=True)
 
 # =============================================================
 # 8. MARS MOISTURE & DELIQUESCENCE OVERLAY
@@ -274,6 +296,8 @@ m_rh += 45.0 * np.exp(-((lon_grid - 77.58)**2 + (lat_grid - 18.38)**2) / (2 * 15
 m_rh = gaussian_filter(m_rh, sigma=3.5)
 save_psg_overlay(m_rh, VIBRANT_CMAP, 5.0, 75.0, "MARS DELIQUESCENCE & RH", "%",
                  os.path.join(OUTPUT_DIR, "mars_overlay_moisture.png"))
+save_overlay_legend_badge("MARS DELIQUESCENCE & RH", "%", VIBRANT_CMAP, 5.0, 75.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_moisture.png"), has_vectors=False)
 
 # =============================================================
 # 9. MARS SOLAR INSOLATION OVERLAY
@@ -283,6 +307,8 @@ m_sol = np.clip(m_sol, 0.3, 4.8)
 m_sol = gaussian_filter(m_sol, sigma=3.5)
 save_psg_overlay(m_sol, VIBRANT_CMAP, 0.5, 4.8, "MARS SOLAR INSOLATION", "kWh/m²/d",
                  os.path.join(OUTPUT_DIR, "mars_overlay_solar.png"))
+save_overlay_legend_badge("MARS SOLAR INSOLATION", "kWh/m²/d", VIBRANT_CMAP, 0.5, 4.8,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_radiation.png"), has_vectors=False)
 
 # =============================================================
 # 10. MARS ASTROBIOLOGY / LACUSTRINE BIOSIGNATURE OVERLAY
@@ -294,5 +320,7 @@ m_bio += 80.0 * np.exp(-((lon_grid - (-5.5))**2 + (lat_grid - (-0.2))**2) / (2 *
 m_bio = gaussian_filter(m_bio, sigma=3.0)
 save_psg_overlay(m_bio, VIBRANT_CMAP, 0.0, 100.0, "MARS BIOSIGNATURE POTENTIAL", "%",
                  os.path.join(OUTPUT_DIR, "mars_overlay_biology.png"))
+save_overlay_legend_badge("MARS BIOSIGNATURE POTENTIAL", "%", VIBRANT_CMAP, 0.0, 100.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_astrobiology.png"), has_vectors=False)
 
-print("All 10 NASA PSG-Style Global Planetary Data Overlays successfully generated!")
+print("All 10 NASA PSG-Style Global Planetary Data Overlays and 10 Legend Badges successfully generated!")

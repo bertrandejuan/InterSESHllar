@@ -75,8 +75,8 @@ SITES = {
     'lut': {
         'id': 'lut',
         'name': "Lut Desert (Dasht-e Lut, Iran)",
-        'short_name': "Lut Desert (Place 1)",
-        'header_tag': "EARTH ANALOG 1",
+        'short_name': "Lut Desert",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (255, 170, 0),
         'highlight_bg': (160, 90, 0, 110),
@@ -129,8 +129,8 @@ SITES = {
     'mcmurdo': {
         'id': 'mcmurdo',
         'name': "McMurdo Dry Valleys (Antarctica)",
-        'short_name': "McMurdo (Place 2)",
-        'header_tag': "EARTH ANALOG 2",
+        'short_name': "McMurdo Dry Valleys",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (0, 210, 255),
         'highlight_bg': (0, 110, 150, 110),
@@ -183,8 +183,8 @@ SITES = {
     'aralkum': {
         'id': 'aralkum',
         'name': "Aralkum Desert (Uzbekistan / Kazakhstan)",
-        'short_name': "Aralkum (Place 3)",
-        'header_tag': "EARTH ANALOG 3",
+        'short_name': "Aralkum Desert",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (50, 220, 100),
         'highlight_bg': (20, 110, 50, 110),
@@ -237,8 +237,8 @@ SITES = {
     'uyuni': {
         'id': 'uyuni',
         'name': "Salar de Uyuni (Bolivia)",
-        'short_name': "Salar de Uyuni (Place 4)",
-        'header_tag': "EARTH ANALOG 4",
+        'short_name': "Salar de Uyuni",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (180, 120, 255),
         'highlight_bg': (90, 40, 160, 110),
@@ -351,21 +351,6 @@ def generate_location_overview_card(active_site_key):
     sub_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) vs Curiosity REMS Baseline"
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
-
-    # Prominent Close Button at top right
-    close_btn_w = 125
-    close_btn_x = WIDTH - 35 - close_btn_w
-    draw.rounded_rectangle([close_btn_x, 42, close_btn_x + close_btn_w, 94], radius=8,
-                           fill=(220, 38, 38, 255), outline=(255, 120, 120, 255), width=2)
-    draw.text((close_btn_x + 18, 54), "Close ✕", font=FONT_BADGE, fill=(255, 255, 255, 255))
-
-    # Active Location Badge to left of close button
-    badge_w = 230
-    badge_x = close_btn_x - 15 - badge_w
-    draw.rounded_rectangle([badge_x, 42, badge_x + badge_w, 94], radius=8,
-                           fill=accent + (55,), outline=accent + (230,), width=2)
-    badge_label = f"FOCUS: {site_info['short_name'][:13]}"
-    draw.text((badge_x + 16, 56), badge_label, font=FONT_BADGE, fill=accent + (255,))
 
     # 2. Table Layout Coordinates (6 Columns)
     col_bounds = [
@@ -500,19 +485,6 @@ def generate_category_overview_card(cat_key, site_key):
     sub_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) / Empirical Meteorological Telemetry"
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
-
-    # Prominent Close Button at top right
-    close_btn_w = 125
-    close_btn_x = WIDTH - 35 - close_btn_w
-    draw.rounded_rectangle([close_btn_x, 42, close_btn_x + close_btn_w, 94], radius=8,
-                           fill=(220, 38, 38, 255), outline=(255, 120, 120, 255), width=2)
-    draw.text((close_btn_x + 18, 54), "Close ✕", font=FONT_BADGE, fill=(255, 255, 255, 255))
-
-    badge_w = 230
-    badge_x = close_btn_x - 15 - badge_w
-    draw.rounded_rectangle([badge_x, 42, badge_x + badge_w, 94], radius=8,
-                           fill=cat_color + (55,), outline=cat_color + (230,), width=2)
-    draw.text((badge_x + 16, 56), site_info['short_name'][:14], font=FONT_BADGE, fill=cat_color + (255,))
 
     # 2. Parameter rows for ONLY THIS LOCATION (solid opaque backgrounds)
     param_items = site_info['category_data'][cat_key]

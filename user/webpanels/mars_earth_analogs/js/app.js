@@ -854,6 +854,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const opacityPath1 = `Scene.${globeName}.Renderable.Layers.ColorLayers.${layerName}.Opacity`;
     const opacityPath2 = `Scene.${globeName}.Renderable.Layers.ColorLayers.${layerName}.Settings.Opacity`;
 
+    const keyTexture = `overlay_key_${globeName.toLowerCase()}_${cat.key}.png`;
+
     openSpace.executeLuaScript(`
       if openspace.hasProperty("${propPath}") then
         openspace.setPropertyValueSingle("${propPath}", ${enable})
@@ -863,6 +865,44 @@ document.addEventListener("DOMContentLoaded", () => {
       end
       if openspace.hasProperty("${opacityPath2}") then
         openspace.setPropertyValueSingle("${opacityPath2}", 0.88)
+      end
+
+      -- If on Mars, toggle Mars surface texture off when overlay is on so vectors/arrows are clearly visible
+      if ${isMars} then
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", ${!enable})
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", ${enable ? 0.0 : 1.0})
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", ${enable ? 0.0 : 1.0})
+        end
+      end
+
+      -- Overlay Legend Badge in the top corner underneath position & altitude, facing user flat
+      if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+        if ${enable} then
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.CartesianPosition") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.CartesianPosition", { -0.65, 0.60, -2.0 })
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Scale") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Scale", 0.28)
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Rotation") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Rotation", { 0.0, 0.0, 0.0 })
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.FaceCamera") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.FaceCamera", false)
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Opacity") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Opacity", 1.0)
+          end
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${keyTexture}"))
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", true)
+        else
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
+        end
       end
     `);
 
@@ -878,6 +918,18 @@ document.addEventListener("DOMContentLoaded", () => {
         end
         if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
           openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", true)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0)
+        end
+        if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
         end
       `);
       state.activeOverlay = null;
