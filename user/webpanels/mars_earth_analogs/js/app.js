@@ -609,23 +609,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const statsInner = document.createElement("div");
         statsInner.className = `compact-stats-inner${isMars ? " mars-mode" : ""}`;
 
-        const headerRow = document.createElement("div");
-        headerRow.className = `compact-stats-header${isMars ? " mars-mode" : ""}`;
-        if (isMars) {
-          headerRow.innerHTML = `
-            <span>Parameter</span>
-            <span style="text-align: right;">Gale Crater Reference</span>
-          `;
-        } else {
-          headerRow.innerHTML = `
-            <span>Parameter</span>
-            <span style="text-align: right;">${site.name}</span>
-            <span style="text-align: right;">Gale Crater</span>
-            <span style="text-align: right;">Match</span>
-          `;
-        }
-        statsInner.appendChild(headerRow);
-
         cat.parameters.forEach((param) => {
           const rowGroup = document.createElement("div");
           rowGroup.className = "compact-stats-row-group";
@@ -634,18 +617,26 @@ document.addEventListener("DOMContentLoaded", () => {
           const marsValStr = param.getMarsVal();
 
           if (isMars) {
-            const row = document.createElement("div");
-            row.className = "compact-stats-row mars-mode";
-            row.innerHTML = `
-              <div class="cstat-td param-col">
-                <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
-                <span class="cstat-param-name">${param.label}</span>
+            const card = document.createElement("div");
+            card.className = "cstat-card mars-mode";
+            card.innerHTML = `
+              <div class="cstat-card-header">
+                <div class="cstat-param-group">
+                  <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
+                  <span class="cstat-param-name">${param.label}</span>
+                </div>
+                <span class="cstat-match-badge match-baseline">Mars Baseline</span>
               </div>
-              <div class="cstat-td mars-col" style="text-align: right;">${marsValStr}</div>
+              <div class="cstat-values-grid mars-single">
+                <div class="cstat-val-box mars-box">
+                  <span class="cstat-val-label">MSL Curiosity In-Situ Ground Truth</span>
+                  <span class="cstat-val-num">${marsValStr}</span>
+                </div>
+              </div>
             `;
-            rowGroup.appendChild(row);
+            rowGroup.appendChild(card);
           } else {
-            let matchBadgeHtml = "—";
+            let matchBadgeHtml = `<span class="cstat-match-badge match-pending">—</span>`;
             if (param.isPlaceholder) {
               matchBadgeHtml = `<span class="cstat-match-badge match-pending">Pending</span>`;
             } else if (param.isQualitative) {
@@ -656,22 +647,32 @@ document.addEventListener("DOMContentLoaded", () => {
               const s = calcSimScore(earthVal, marsRef, param.scale);
               if (s !== null) {
                 const badgeClass = s >= 60 ? "match-high" : s >= 35 ? "match-mid" : "match-low";
-                matchBadgeHtml = `<span class="cstat-match-badge ${badgeClass}">${s.toFixed(0)}%</span>`;
+                matchBadgeHtml = `<span class="cstat-match-badge ${badgeClass}">${s.toFixed(0)}% Match</span>`;
               }
             }
 
-            const row = document.createElement("div");
-            row.className = "compact-stats-row";
-            row.innerHTML = `
-              <div class="cstat-td param-col">
-                <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
-                <span class="cstat-param-name">${param.label}</span>
+            const card = document.createElement("div");
+            card.className = "cstat-card";
+            card.innerHTML = `
+              <div class="cstat-card-header">
+                <div class="cstat-param-group">
+                  <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
+                  <span class="cstat-param-name">${param.label}</span>
+                </div>
+                ${matchBadgeHtml}
               </div>
-              <div class="cstat-td earth-col" style="text-align: right;">${earthValStr}</div>
-              <div class="cstat-td mars-col" style="text-align: right;">${marsValStr}</div>
-              <div class="cstat-td" style="text-align: right;">${matchBadgeHtml}</div>
+              <div class="cstat-values-grid">
+                <div class="cstat-val-box earth-box">
+                  <span class="cstat-val-label">${site.name}</span>
+                  <span class="cstat-val-num">${earthValStr}</span>
+                </div>
+                <div class="cstat-val-box mars-box">
+                  <span class="cstat-val-label">Gale Crater Ref</span>
+                  <span class="cstat-val-num">${marsValStr}</span>
+                </div>
+              </div>
             `;
-            rowGroup.appendChild(row);
+            rowGroup.appendChild(card);
           }
 
           // On-demand detail drawer
