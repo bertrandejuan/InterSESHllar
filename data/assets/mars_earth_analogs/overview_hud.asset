@@ -1,6 +1,6 @@
 -- OpenSpace ScreenSpace Overview & Comparison HUD Asset
 -- Projects semi-translucent overview cards directly into the 3D viewport (empty space of screen)
--- Toggled when user clicks "Comparison to Mars (All Categories)" or "◉ Overview"
+-- Toggled when user clicks "Comparison to Mars (All Categories)" or "Overview"
 
 local defaultTexture = asset.resource("./textures/hud_comparison_lut.png")
 
