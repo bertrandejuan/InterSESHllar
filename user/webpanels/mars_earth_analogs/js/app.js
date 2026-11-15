@@ -38,10 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const activeSiteSubtitle = document.getElementById("active-site-subtitle");
   const stationPillsRow = document.getElementById("station-pills-row");
 
-  const hudStatusBanner = document.getElementById("hud-status-banner");
-  const hudStatusText = document.getElementById("hud-status-text");
-  const btnDismissHud = document.getElementById("btn-dismiss-hud");
-
   const btnToggleMarsComparison = document.getElementById("btn-toggle-mars-comparison");
 
   const categoriesContainer = document.getElementById("categories-container");
@@ -377,6 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----------------------------------------------------
   // 3D Viewport Overview HUD Manager (ScreenSpaceRenderable)
+  // Direct Toggle: clicking the button turns HUD on; clicking again turns it off
   // ----------------------------------------------------
   function toggleComparisonHUD(siteKey) {
     const hudFile = `hud_comparison_${siteKey}.png`;
@@ -391,14 +388,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const siteData = window.TEAM_DATA[siteKey] || window.TEAM_DATA.lut;
     const hudFile = `hud_comparison_${siteKey}.png`;
 
-    // Project large, screen-wide semi-translucent HUD into OpenSpace 3D Viewport
+    // Project screen-wide semi-translucent HUD into OpenSpace 3D Viewport
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
-        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.Scale") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.Scale", 2.05)
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 2.85)
         end
-        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.CartesianPosition") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.CartesianPosition", { -0.26, 0.02, -2.0 })
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.CartesianPosition") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.28, 0.0, -2.0 })
         end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${hudFile}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
@@ -407,11 +404,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.activeHUD = hudFile;
 
-    // Highlight button & show HUD status banner (NO side menu popup!)
+    // Direct toggle UI state
     btnToggleMarsComparison.classList.add("active");
-    document.querySelectorAll(".btn-overview").forEach(b => b.classList.remove("active"));
-    hudStatusBanner.style.display = "flex";
-    hudStatusText.innerText = `3D Viewport HUD: Mars vs ${siteData.name} Active`;
+    const badge = btnToggleMarsComparison.querySelector(".comp-badge");
+    if (badge) badge.innerText = "Active (Click to Close)";
+    document.querySelectorAll(".btn-overview").forEach(b => {
+      b.classList.remove("active");
+      b.innerHTML = "◉ Overview";
+    });
   }
 
   function toggleCategoryOverviewHUD(cat, buttonElem) {
@@ -428,11 +428,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
-        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.Scale") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.Scale", 2.05)
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 2.85)
         end
-        if openspace.hasProperty("ScreenSpace.OverviewHUD.Placement.CartesianPosition") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Placement.CartesianPosition", { -0.26, 0.02, -2.0 })
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.CartesianPosition") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.28, 0.0, -2.0 })
         end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${hudFile}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
@@ -441,13 +441,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.activeHUD = hudFile;
 
-    // Highlight clicked button, clear comparison button active state
+    // Reset comparison button state, highlight this overview toggle
     btnToggleMarsComparison.classList.remove("active");
-    document.querySelectorAll(".btn-overview").forEach(b => b.classList.remove("active"));
-    if (buttonElem) buttonElem.classList.add("active");
+    const compBadge = btnToggleMarsComparison.querySelector(".comp-badge");
+    if (compBadge) compBadge.innerText = "3D Viewport HUD";
 
-    hudStatusBanner.style.display = "flex";
-    hudStatusText.innerText = `3D Viewport HUD: ${cat.name} Active`;
+    document.querySelectorAll(".btn-overview").forEach(b => {
+      b.classList.remove("active");
+      b.innerHTML = "◉ Overview";
+    });
+
+    if (buttonElem) {
+      buttonElem.classList.add("active");
+      buttonElem.innerHTML = "◉ Overview (Active)";
+    }
   }
 
   function dismiss3DHUD() {
@@ -458,12 +465,13 @@ document.addEventListener("DOMContentLoaded", () => {
     `);
     state.activeHUD = null;
     btnToggleMarsComparison.classList.remove("active");
-    document.querySelectorAll(".btn-overview").forEach(b => b.classList.remove("active"));
-    hudStatusBanner.style.display = "none";
-  }
+    const compBadge = btnToggleMarsComparison.querySelector(".comp-badge");
+    if (compBadge) compBadge.innerText = "3D Viewport HUD";
 
-  if (btnDismissHud) {
-    btnDismissHud.addEventListener("click", dismiss3DHUD);
+    document.querySelectorAll(".btn-overview").forEach(b => {
+      b.classList.remove("active");
+      b.innerHTML = "◉ Overview";
+    });
   }
 
   // ----------------------------------------------------
@@ -550,8 +558,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Smoothly fly camera to this analog site
     flyToActiveSite(siteKey, true);
 
-    // If 3D HUD is currently open, update its texture to the new site
-    if (state.activeHUD) {
+    // If comparison HUD is currently open, update its texture to the new site
+    if (state.activeHUD && state.activeHUD.startsWith("hud_comparison_")) {
       showComparisonHUD(siteKey);
     }
   }
