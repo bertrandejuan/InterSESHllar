@@ -7,7 +7,9 @@
     "scene/solarsystem/planets/earth/layers/colorlayers/esri_world_imagery",
     "scene/solarsystem/planets/earth/layers/heightlayers/terrain_tileset",
     "scene/solarsystem/planets/mars/mars",
+    "scene/solarsystem/planets/mars/layers/colorlayers/mars_texture",
     "scene/solarsystem/planets/mars/layers/colorlayers/ctx_blended",
+    "scene/solarsystem/planets/mars/layers/heightlayers/mdem200m",
     "mars_earth_analogs/mars_earth_analogs"
   ],
   "camera": {

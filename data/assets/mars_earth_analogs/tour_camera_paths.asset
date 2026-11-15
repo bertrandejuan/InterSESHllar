@@ -58,6 +58,14 @@ local Actions = {
       if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", true)
       end
+      local earthTags = { "Scene.EarthTagAralkum", "Scene.EarthTagMcMurdo", "Scene.EarthTagLut", "Scene.EarthTagUyuni" }
+      local earthLabels = { "Scene.EarthLabelAralkum", "Scene.EarthLabelMcMurdo", "Scene.EarthLabelLut", "Scene.EarthLabelUyuni" }
+      for _, t in ipairs(earthTags) do
+        if openspace.hasProperty(t .. ".Renderable.Enabled") then openspace.setPropertyValueSingle(t .. ".Renderable.Enabled", false) end
+      end
+      for _, l in ipairs(earthLabels) do
+        if openspace.hasProperty(l .. ".Renderable.Enabled") then openspace.setPropertyValueSingle(l .. ".Renderable.Enabled", false) end
+      end
     ]],
     Documentation = "Fly close to Gale Crater with high-res CTX satellite imagery and location tag",
     GuiPath = "/Planetary Analogs/Navigation",
@@ -68,6 +76,12 @@ local Actions = {
     Name = "Fly to Earth: Aralkum Desert",
     Command = [[
       openspace.navigation.flyToGeo('Earth', 44.80, 59.80, 850000, 4.0)
+      if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
+      end
+      if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", false)
+      end
       if openspace.hasProperty("Scene.EarthTagAralkum.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.EarthTagAralkum.Renderable.Enabled", true)
       end
@@ -84,6 +98,12 @@ local Actions = {
     Name = "Fly to Earth: McMurdo Dry Valleys",
     Command = [[
       openspace.navigation.flyToGeo('Earth', -77.50, 162.00, 650000, 4.0)
+      if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
+      end
+      if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", false)
+      end
       if openspace.hasProperty("Scene.EarthTagMcMurdo.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.EarthTagMcMurdo.Renderable.Enabled", true)
       end
@@ -100,6 +120,12 @@ local Actions = {
     Name = "Fly to Earth: Lut Desert",
     Command = [[
       openspace.navigation.flyToGeo('Earth', 30.50, 58.80, 850000, 4.0)
+      if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
+      end
+      if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", false)
+      end
       if openspace.hasProperty("Scene.EarthTagLut.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.EarthTagLut.Renderable.Enabled", true)
       end
@@ -116,6 +142,12 @@ local Actions = {
     Name = "Fly to Earth: Salar de Uyuni",
     Command = [[
       openspace.navigation.flyToGeo('Earth', -20.15, -67.60, 650000, 4.0)
+      if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
+      end
+      if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
+        openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", false)
+      end
       if openspace.hasProperty("Scene.EarthTagUyuni.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.EarthTagUyuni.Renderable.Enabled", true)
       end

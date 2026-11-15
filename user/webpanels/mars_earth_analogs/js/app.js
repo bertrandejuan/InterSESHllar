@@ -126,9 +126,16 @@ document.addEventListener("DOMContentLoaded", () => {
     openSpace.setPropertyValue("Scene.Mars.Renderable.LodScaleFactor", 15.0);
     openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
 
-    // Make Gale Crater pin and label visible and legible
+    // Ensure red Mars texture is enabled
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", true);
+
+    // Make Gale Crater pin and label visible and legible; ensure Earth pins/labels are hidden initially
     openSpace.setPropertyValue("Scene.MarsTagGaleCrater.Renderable.Enabled", true);
     openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", true);
+    ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach((s) => {
+      openSpace.setPropertyValue(`Scene.EarthTag${s}.Renderable.Enabled`, false);
+      openSpace.setPropertyValue(`Scene.EarthLabel${s}.Renderable.Enabled`, false);
+    });
 
     // Initial camera flight to Gale Crater on Mars
     openSpace.flyToGeo("Mars", -4.5895, 137.4417, 35000.0, 2.5);
@@ -1015,6 +1022,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const lon = site.coordinates.lon;
       const alt = isMars ? 35000.0 : 25000.0;
       openSpace.flyToGeo(globe, lat, lon, alt, 2.5);
+    }
+
+    // Isolate planetary tags and labels so labels never bleed across interplanetary space
+    if (isMars) {
+      openSpace.setPropertyValue("Scene.MarsTagGaleCrater.Renderable.Enabled", true);
+      openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", true);
+      ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach((s) => {
+        openSpace.setPropertyValue(`Scene.EarthTag${s}.Renderable.Enabled`, false);
+        openSpace.setPropertyValue(`Scene.EarthLabel${s}.Renderable.Enabled`, false);
+      });
+    } else {
+      openSpace.setPropertyValue("Scene.MarsTagGaleCrater.Renderable.Enabled", false);
+      openSpace.setPropertyValue("Scene.MarsGaleCraterLabel.Renderable.Enabled", false);
+      ["Aralkum", "McMurdo", "Lut", "Uyuni"].forEach((s) => {
+        openSpace.setPropertyValue(`Scene.EarthTag${s}.Renderable.Enabled`, true);
+        openSpace.setPropertyValue(`Scene.EarthLabel${s}.Renderable.Enabled`, true);
+      });
     }
 
     if (state.activeHUD) {

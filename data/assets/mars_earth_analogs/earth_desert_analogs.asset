@@ -9,7 +9,7 @@ local DesertSites = {
     TagId = "EarthTagAralkum",
     LabelId = "EarthLabelAralkum",
     Name = "Aralkum Desert Station",
-    LabelText = "Aralkum Desert Station",
+    LabelText = "Aralkum Desert (Uzbekistan)",
     Globe = "Earth",
     Lat = 44.80,
     Lon = 59.80,
@@ -23,7 +23,7 @@ local DesertSites = {
     TagId = "EarthTagMcMurdo",
     LabelId = "EarthLabelMcMurdo",
     Name = "McMurdo Dry Valleys Station",
-    LabelText = "McMurdo Dry Valleys Station",
+    LabelText = "McMurdo Valleys (Antarctica)",
     Globe = "Earth",
     Lat = -77.50,
     Lon = 162.00,
@@ -37,7 +37,7 @@ local DesertSites = {
     TagId = "EarthTagLut",
     LabelId = "EarthLabelLut",
     Name = "Lut Desert Thermal Station",
-    LabelText = "Lut Desert Thermal Station",
+    LabelText = "Lut Desert (Iran)",
     Globe = "Earth",
     Lat = 30.50,
     Lon = 58.80,
@@ -51,7 +51,7 @@ local DesertSites = {
     TagId = "EarthTagUyuni",
     LabelId = "EarthLabelUyuni",
     Name = "Salar de Uyuni Station",
-    LabelText = "Salar de Uyuni Station",
+    LabelText = "Salar de Uyuni (Bolivia)",
     Globe = "Earth",
     Lat = -20.15,
     Lon = -67.60,
@@ -65,7 +65,7 @@ local DesertSites = {
 asset.onInitialize(function()
   openspace.printInfo("Loaded Earth Desert Analogs (4 Sites) with In-Situ Metrics.")
   for _, site in ipairs(DesertSites) do
-    -- 1. Adaptive Location Tag Marker
+    -- 1. Adaptive Location Tag Marker (Initializes false on Mars startup)
     openspace.addSceneGraphNode({
       Identifier = site.TagId,
       Parent = site.Globe,
@@ -81,7 +81,7 @@ asset.onInitialize(function()
       },
       Renderable = {
         Type = "RenderablePlaneImageLocal",
-        Enabled = true,
+        Enabled = false,
         Texture = LocationTagTexture,
         Billboard = true,
         MultiplyColor = site.Color,
@@ -100,7 +100,7 @@ asset.onInitialize(function()
       }
     })
 
-    -- 2. 3D Billboard Location Label on Screen
+    -- 2. 3D Billboard Location Label on Screen (Initializes false on Mars startup, with distance fading)
     openspace.addSceneGraphNode({
       Identifier = site.LabelId,
       Parent = site.Globe,
@@ -116,11 +116,15 @@ asset.onInitialize(function()
       },
       Renderable = {
         Type = "RenderableLabel",
-        Enabled = true,
+        Enabled = false,
         Text = site.LabelText,
-        FontSize = 36.0,
+        FontSize = 32.0,
         Color = site.Color,
-        MinMaxSize = { 14, 46 },
+        MinMaxSize = { 0, 32 },
+        EnableFading = true,
+        FadeUnit = "km",
+        FadeDistances = { 50.0, 3500.0 },
+        FadeWidths = { 20.0, 1500.0 },
         OrientationOption = "Camera View Direction",
         BlendMode = "Normal"
       },
