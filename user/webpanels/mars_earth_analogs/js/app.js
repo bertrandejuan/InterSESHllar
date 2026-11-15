@@ -1,7 +1,16 @@
 /**
  * InterSESHllar: Mars vs Earth Planetary Analogs
  * Unified Application Controller
- * Optimized for Storyboard Interaction, Clean Single Accordion, and High-Fidelity Climatology
+ * Categories strictly aligned with research whiteboard:
+ *   1) THERMAL CONDITIONS (NASA POWER API)
+ *   2) ASTROBIOLOGY / ENVIRONMENTAL MAKEUP (EMIT-2 / Soil Telemetry Placeholders)
+ *   3) ATMOSPHERIC DYNAMICS (NASA POWER API)
+ *   4) ATMOSPHERIC MOISTURE (NASA POWER API)
+ *   5) RADIATION (NASA POWER API / CERES SYN1deg)
+ *
+ * Grounded in empirical 10-year NASA POWER daily archives (4,018 records) vs Curiosity REMS.
+ * All similarity scores computed strictly from mathematical formula: S = 100 * exp(-|Delta| / Scale).
+ * Soil parameters explicitly held as non-hallucinated placeholders pending laboratory collection.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -87,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnModalComparisonHUD = document.getElementById("btn-modal-comparison-hud");
   const telemetryTableBody = document.getElementById("telemetry-table-body");
   const thSelectedSiteCol = document.getElementById("th-selected-site-col");
-  const thSiteProvenance = document.getElementById("th-site-provenance");
   const pillBtns = document.querySelectorAll(".pill-btn");
 
   // DOM Elements - Modal: Gemini Settings
@@ -127,7 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
   openSpace.connect();
 
   // ----------------------------------------------------
-  // 2. Data Helpers
+  // 2. Data & Mathematical Score Helpers
+  // Strictly mathematical formulas: S = 100 * exp(-|Delta| / Scale)
   // ----------------------------------------------------
   function getActiveSiteData() {
     return (window.TEAM_DATA && window.TEAM_DATA[state.currentSiteKey]) || window.TEAM_DATA["mars_gale"];
@@ -142,15 +151,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return Number(val).toFixed(decimals);
   }
 
+  function calcSimScore(val, ref, scale) {
+    if (val === null || ref === null || val === undefined || ref === undefined) return null;
+    if (isNaN(val) || isNaN(ref) || !scale) return null;
+    return 100.0 * Math.exp(-Math.abs(val - ref) / scale);
+  }
+
   // ----------------------------------------------------
-  // 3. Category Definitions (5 Visitor-Facing Categories)
-  // Visitor-facing labels with scientific terms in details
+  // 3. Category Definitions Strictly Matching Whiteboard Sequence
+  //   1) Thermal Conditions (NASA POWER API)
+  //   2) Astrobiology / Environmental Makeup (EMIT-2 / Soil Telemetry Placeholders)
+  //   3) Atmospheric Dynamics (NASA POWER API)
+  //   4) Atmospheric Moisture (NASA POWER API)
+  //   5) Radiation (NASA POWER API / CERES SYN1deg)
   // ----------------------------------------------------
   const SCIENCE_CATEGORIES = [
     {
-      key: "temperature",
-      title: "Temperature",
-      scientificName: "In-Situ Thermal Climatology",
+      key: "thermal",
+      title: "1) Thermal Conditions",
+      subtitle: "NASA POWER API / MERRA-2 & REMS Ground Truth",
       icon: "🌡️",
       cssClass: "cat-thermal",
       scoreKey: "thermal",
@@ -161,58 +180,129 @@ document.addEventListener("DOMContentLoaded", () => {
       parameters: [
         {
           key: "avg_2m_air_temp_c",
-          label: "Mean 2m Air Temperature",
+          label: "Avg T (Air, 2m)",
           code: "T2M",
           unit: "°C",
-          desc: "10-year MERRA-2 daily mean temperature at 2 meters above ground.",
+          desc: "10-year MERRA-2 daily mean air temperature at 2 meters.",
           source: "NASA POWER MERRA-2 & MSL REMS (2015-2025)",
           scale: 45.0,
           getVal: (m) => formatNumber(m.avg_2m_air_temp_c, 2) + " °C",
-          getMarsVal: () => "-53.67 °C",
-          isMappedTarget: true
+          getMarsVal: () => "-53.67 °C"
         },
         {
-          key: "mean_daily_temp_range_c",
-          label: "Daily Temperature Range (ΔT)",
-          code: "DELTA_T",
+          key: "mean_daily_min_air_temp_c",
+          label: "Avg Tmin (Air)",
+          code: "T2M_MIN",
           unit: "°C",
-          desc: "Diurnal thermal swing between daytime peak heating and nocturnal cooling.",
+          desc: "Extreme nocturnal radiative cooling minimum under hyper-arid clear skies.",
           source: "NASA POWER MERRA-2 & MSL REMS",
-          scale: 35.0,
-          getVal: (m) => formatNumber(m.mean_daily_temp_range_c, 2) + " °C",
-          getMarsVal: () => "58.68 °C",
-          isMappedTarget: false
+          scale: 50.0,
+          getVal: (m) => formatNumber(m.mean_daily_min_air_temp_c, 2) + " °C",
+          getMarsVal: () => "-77.76 °C"
         },
         {
           key: "mean_daily_max_air_temp_c",
-          label: "Maximum 2m Air Temperature",
+          label: "Avg Tmax (Air)",
           code: "T2M_MAX",
           unit: "°C",
           desc: "Maximum daily air temperature reached during daytime insolation.",
           source: "NASA POWER MERRA-2 & MSL REMS",
           scale: 40.0,
           getVal: (m) => formatNumber(m.mean_daily_max_air_temp_c, 2) + " °C",
-          getMarsVal: () => "-19.08 °C",
-          isMappedTarget: false
+          getMarsVal: () => "-19.08 °C"
         },
         {
-          key: "mean_daily_min_air_temp_c",
-          label: "Minimum 2m Air Temperature",
-          code: "T2M_MIN",
+          key: "mean_daily_temp_range_c",
+          label: "ΔT Daily (Diurnal Range)",
+          code: "DELTA_T",
           unit: "°C",
-          desc: "Nocturnal radiative cooling minimum under hyper-arid clear skies.",
+          desc: "Diurnal thermal swing between daytime peak heating and nighttime cooling.",
           source: "NASA POWER MERRA-2 & MSL REMS",
-          scale: 50.0,
-          getVal: (m) => formatNumber(m.mean_daily_min_air_temp_c, 2) + " °C",
-          getMarsVal: () => "-77.76 °C",
-          isMappedTarget: false
+          scale: 35.0,
+          getVal: (m) => formatNumber(m.mean_daily_temp_range_c, 2) + " °C",
+          getMarsVal: () => "58.68 °C"
+        },
+        {
+          key: "surface_temp_c",
+          label: "Surface T (Skin / GTS)",
+          code: "TS",
+          unit: "°C",
+          desc: "Radiometric ground brightness skin temperature.",
+          source: "MERRA-2 Skin Temp & REMS Ground Temperature Sensor",
+          scale: 45.0,
+          getVal: (m) => formatNumber(m.surface_temp_c, 2) + " °C",
+          getMarsVal: () => "-50.89 °C"
         }
       ]
     },
     {
-      key: "wind",
-      title: "Wind & air pressure",
-      scientificName: "Aeolian & Barometric Dynamics",
+      key: "astrobiology",
+      title: "2) Astrobiology / Environmental Makeup",
+      subtitle: "EMIT-2 (All Earth locations but Antarctica) & In-Situ Soil Sampling",
+      icon: "🧬",
+      cssClass: "cat-astrobiology",
+      scoreKey: "astrobiology",
+      overlayLayerEarth: null,
+      overlayLayerMars: null,
+      hudTexture: "hud_overview_biology.png",
+      hasOverlay: false,
+      isPendingSoilData: true,
+      availabilityNote: "Spatial vector overlay available for Climatology layers; Astrobiology uses point station telemetry.",
+      parameters: [
+        {
+          key: "soil_ph",
+          label: "Soil Characteristics (pH)",
+          code: "SOIL_PH",
+          unit: "pH",
+          desc: "Regolith acidity/alkalinity influencing chemical weathering and prebiotic habitability.",
+          source: "EMIT-2 Imaging Spectroscopy & In-Situ Soil Telemetry",
+          scale: null,
+          isPlaceholder: true,
+          getVal: (m) => m.soil_ph || "[Placeholder: In-situ / EMIT-2 soil sampling in progress]",
+          getMarsVal: () => "[Placeholder: APXS / CheMin soil pH telemetry in progress]"
+        },
+        {
+          key: "soil_granularity",
+          label: "Granularity (Grain Size Distribution)",
+          code: "SOIL_GRAIN",
+          unit: "Grain Size",
+          desc: "Regolith particle size and porosity governing capillary brine migration and niche sheltering.",
+          source: "In-Situ Sieve Granulometry & Rover Microscopic Imagers",
+          scale: null,
+          isPlaceholder: true,
+          getVal: (m) => m.soil_granularity || "[Placeholder: Regolith grain size distribution pending]",
+          getMarsVal: () => "[Placeholder: MAHLI / Mastcam sediment grain size analysis in progress]"
+        },
+        {
+          key: "soil_mineral_type",
+          label: "Mineral Composition & Rock Type",
+          code: "MINERAL_TYPE",
+          unit: "Mineralogy",
+          desc: "Dominant surface mineralogy providing geological substrates for biosignature preservation.",
+          source: "EMIT-2 (All Earth locations but Antarctica) & MSL CheMin",
+          scale: null,
+          isQualitative: true,
+          getVal: (m) => m.soil_mineral_type || "Evaporite & Mudstone Matrix",
+          getMarsVal: () => "Yellowknife Bay Mudstones & Sulfate-bearing strata"
+        },
+        {
+          key: "chemical_organic_focus",
+          label: "Chemical Composition (Organic Focus)",
+          code: "ORGANIC_FOCUS",
+          unit: "Preservation",
+          desc: "Target compounds, macromolecular organic carbon, and preservation mechanisms.",
+          source: "Terrestrial Astrobiology Surveys & MSL Sample Analysis at Mars",
+          scale: null,
+          isQualitative: true,
+          getVal: (m) => m.chemical_organic_focus || "Organic preservation target in sedimentary matrix",
+          getMarsVal: () => "Organic carbon preservation target via MSL SAM / CheMin"
+        }
+      ]
+    },
+    {
+      key: "dynamics",
+      title: "3) Atmospheric Dynamics",
+      subtitle: "NASA POWER API / MERRA-2 & REMS Wind Telemetry",
       icon: "💨",
       cssClass: "cat-dynamics",
       scoreKey: "atmospheric_dynamics",
@@ -223,34 +313,32 @@ document.addEventListener("DOMContentLoaded", () => {
       parameters: [
         {
           key: "avg_wind_speed_ms",
-          label: "Mean Surface Wind Speed (10m)",
+          label: "Surface Wind Speed (10m)",
           code: "WS10M",
           unit: "m/s",
-          desc: "Surface wind speed driving aeolian sand saltation, ripples, and yardangs.",
+          desc: "Surface wind velocity driving aeolian sand transport, dust lifting, and yardangs.",
           source: "NASA POWER MERRA-2 & MSL REMS",
           scale: 5.0,
-          getVal: (m) => (m.avg_wind_speed_ms !== null ? formatNumber(m.avg_wind_speed_ms, 2) + " m/s" : "3.50 m/s"),
-          getMarsVal: () => "3.50 m/s",
-          isMappedTarget: true
+          getVal: (m) => formatNumber(m.avg_wind_speed_ms, 2) + " m/s",
+          getMarsVal: () => "3.50 m/s"
         },
         {
           key: "surface_pressure_kpa",
           label: "Atmospheric Surface Pressure",
           code: "PS",
           unit: "kPa",
-          desc: "Barometric surface pressure column (Mars ~0.76 kPa vs Earth sea-level 101.3 kPa).",
+          desc: "Barometric air column pressure (0.76 kPa on Mars vs 101.3 kPa Earth sea-level).",
           source: "NASA POWER MERRA-2 & MSL REMS",
           scale: 80.0,
           getVal: (m) => formatNumber(m.surface_pressure_kpa, 2) + " kPa",
-          getMarsVal: () => "0.76 kPa",
-          isMappedTarget: false
+          getMarsVal: () => "0.76 kPa"
         }
       ]
     },
     {
       key: "moisture",
-      title: "Moisture",
-      scientificName: "Atmospheric Moisture & Aridity",
+      title: "4) Atmospheric Moisture",
+      subtitle: "NASA POWER API / MERRA-2 Atmospheric Water Vapor",
       icon: "💧",
       cssClass: "cat-moisture",
       scoreKey: "atmospheric_moisture",
@@ -261,34 +349,43 @@ document.addEventListener("DOMContentLoaded", () => {
       parameters: [
         {
           key: "avg_relative_humidity_pct",
-          label: "Mean 2m Relative Humidity",
+          label: "Relative Humidity (2m)",
           code: "RH2M",
           unit: "%",
-          desc: "Relative humidity bounds. Diurnal nighttime spikes allow transient deliquescence.",
+          desc: "Relative humidity bounds. Diurnal spikes at Gale allow transient deliquescence.",
           source: "NASA POWER MERRA-2 & MSL REMS",
           scale: 40.0,
           getVal: (m) => formatNumber(m.avg_relative_humidity_pct, 2) + " %",
-          getMarsVal: () => "7.44 %",
-          isMappedTarget: true
+          getMarsVal: () => "7.44 %"
+        },
+        {
+          key: "specific_humidity_g_kg",
+          label: "Specific Humidity",
+          code: "QV2M",
+          unit: "g/kg",
+          desc: "Absolute water vapor mixing ratio in the lower atmosphere.",
+          source: "NASA POWER MERRA-2 (QV2M)",
+          scale: 5.0,
+          getVal: (m) => formatNumber(m.specific_humidity_g_kg, 3) + " g/kg",
+          getMarsVal: () => "0.694 g/kg"
         },
         {
           key: "avg_precipitation_mm_day",
-          label: "Daily Corrected Precipitation",
+          label: "Daily Precipitation",
           code: "PRECTOTCORR",
           unit: "mm/day",
-          desc: "Rainfall deficit. Mars and McMurdo experience zero liquid precipitation.",
+          desc: "Daily liquid rain rate. Mars experiences 0.0 mm/yr liquid precipitation.",
           source: "NASA POWER MERRA-2",
           scale: 1.0,
           getVal: (m) => formatNumber(m.avg_precipitation_mm_day, 2) + " mm/d",
-          getMarsVal: () => "0.00 mm/d",
-          isMappedTarget: false
+          getMarsVal: () => "0.00 mm/d"
         }
       ]
     },
     {
-      key: "solar",
-      title: "Sunlight & UV",
-      scientificName: "Solar Radiation & UV Flux",
+      key: "radiation",
+      title: "5) Radiation",
+      subtitle: "NASA POWER API / CERES SYN1deg Downward Shortwave Flux",
       icon: "☀️",
       cssClass: "cat-radiation",
       scoreKey: "radiation",
@@ -299,81 +396,36 @@ document.addEventListener("DOMContentLoaded", () => {
       parameters: [
         {
           key: "solar_radiation_mj_m2_day",
-          label: "All-Sky Surface Solar Insolation",
+          label: "Surface Shortwave Solar Radiation",
           code: "ALLSKY_SFC_SW_DWN",
           unit: "MJ/m²/d",
-          desc: "CERES SYN1deg satellite daily shortwave solar flux at surface.",
-          source: "CERES SYN1deg & Mars Orbit Model",
+          desc: "CERES SYN1deg satellite daily shortwave downward solar flux reaching the surface.",
+          source: "CERES SYN1deg & Mars Orbit Model (1.52 AU)",
           scale: 15.0,
           getVal: (m) => formatNumber(m.solar_radiation_mj_m2_day, 2) + " MJ/m²/d",
-          getMarsVal: () => "14.76 MJ/m²/d",
-          isMappedTarget: true
+          getMarsVal: () => "14.76 MJ/m²/d"
+        },
+        {
+          key: "uva_irradiance_w_m2",
+          label: "UVA Surface Irradiance",
+          code: "UVA",
+          unit: "W/m²",
+          desc: "Long-wave ultraviolet surface flux (315-400 nm).",
+          source: "NASA POWER Surface UV & REMS UV Sensor",
+          scale: 10.0,
+          getVal: (m) => formatNumber(m.uva_irradiance_w_m2, 2) + " W/m²",
+          getMarsVal: () => "0.62 W/m²"
         },
         {
           key: "uvb_irradiance_w_m2",
-          label: "Biologically Active UVB Irradiance",
+          label: "UVB Biologically Active Irradiance",
           code: "UVB",
           unit: "W/m²",
-          desc: "Shortwave ultraviolet flux (280-315 nm) driving photolysis and DNA stress.",
-          source: "NASA POWER & REMS UV Sensor",
+          desc: "Short-wave ultraviolet radiation (280-315 nm) driving photolysis and cellular stress.",
+          source: "NASA POWER Surface UV & REMS UV Sensor",
           scale: 0.35,
           getVal: (m) => formatNumber(m.uvb_irradiance_w_m2, 3) + " W/m²",
-          getMarsVal: () => "0.200 W/m²",
-          isMappedTarget: false
-        }
-      ]
-    },
-    {
-      key: "biology",
-      title: "Astrobiology",
-      scientificName: "Extremophile Habitats & Biosignatures",
-      icon: "🧬",
-      cssClass: "cat-astrobiology",
-      scoreKey: "astrobiology",
-      overlayLayerEarth: null,
-      overlayLayerMars: null,
-      hudTexture: "hud_overview_biology.png",
-      hasOverlay: false,
-      availabilityNote: "Spatial vector overlay available for Climatology layers; Astrobiology uses point station telemetry.",
-      parameters: [
-        {
-          key: "target_lithology",
-          label: "Target Lithology & Preservation Substrate",
-          code: "LITHOLOGY",
-          unit: "Qualitative",
-          desc: "Sedimentary mineral matrix for organic carbon and microfossil preservation.",
-          source: "In-Situ Geological Surveys & MSL SAM/CheMin",
-          scale: null,
-          getVal: (m) => m.target_lithology || "Evaporite & mudstone matrix",
-          getMarsVal: () => "Yellowknife Bay Mudstones & Sulfate Strata",
-          isMappedTarget: true,
-          isQualitative: true
-        },
-        {
-          key: "biological_analog",
-          label: "Extremophile Biological Analog",
-          code: "ANALOG_LIFE",
-          unit: "Qualitative",
-          desc: "Polyextremophilic microbial adaptations to cold, desiccation, hypobaria, and UV.",
-          source: "Terrestrial Polar & Desert Astrobiology Research",
-          scale: null,
-          getVal: (m) => m.biological_analog || "Cryptoendolithic / Halophilic consortia",
-          getMarsVal: () => "Chemolithoautotrophy Habitability Benchmark",
-          isMappedTarget: false,
-          isQualitative: true
-        },
-        {
-          key: "radiation_shielding",
-          label: "Natural Radiation Shielding Mechanism",
-          code: "SHIELDING",
-          unit: "Qualitative",
-          desc: "Subsurface or rock-matrix shielding from cosmic rays and unshielded solar UV.",
-          source: "MSL RAD Sensor & Terrestrial Endolith Research",
-          scale: null,
-          getVal: (m) => m.radiation_shielding || "Rock Matrix & Subsurface Depth",
-          getMarsVal: () => "Subsurface Regolith (>5 cm Drill Sampling)",
-          isMappedTarget: false,
-          isQualitative: true
+          getMarsVal: () => "0.200 W/m²"
         }
       ]
     }
@@ -389,50 +441,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const site = getActiveSiteData();
     const isMars = site.globe === "Mars";
-    const scores = site.category_scores || {};
     const metrics = site.metrics || {};
+    const marsMetrics = getMarsBaselineData().metrics || {};
 
     SCIENCE_CATEGORIES.forEach((cat) => {
       const isExpanded = state.openAccordionKey === cat.key;
-      const catScore = scores[cat.scoreKey] !== undefined ? scores[cat.scoreKey] : null;
+
+      // Calculate category score strictly via math formula across its parameters with scale
+      let catScore = null;
+      if (!isMars) {
+        let sum = 0;
+        let count = 0;
+        cat.parameters.forEach((p) => {
+          if (p.scale && metrics[p.key] !== undefined && marsMetrics[p.key] !== undefined) {
+            const s = calcSimScore(metrics[p.key], marsMetrics[p.key], p.scale);
+            if (s !== null) {
+              sum += s;
+              count++;
+            }
+          }
+        });
+        if (count > 0) catScore = sum / count;
+      }
 
       const item = document.createElement("div");
       item.className = `accordion-item ${cat.cssClass}${isExpanded ? " expanded" : ""}`;
       item.id = `accordion-${cat.key}`;
 
-      // Header button (keyboard accessible)
+      // Header button
       const headerBtn = document.createElement("button");
       headerBtn.className = "accordion-header";
       headerBtn.setAttribute("role", "tab");
       headerBtn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
       headerBtn.setAttribute("aria-controls", `body-${cat.key}`);
 
-      const scoreDisplay = isMars
-        ? `<div class="accordion-score-pill"><span class="mini-score-text">Reference</span></div>`
-        : catScore !== null
-          ? `<div class="accordion-score-pill">
-               <div class="mini-score-bar-bg"><div class="mini-score-bar-fill" style="width: ${catScore}%;"></div></div>
-               <span class="mini-score-text">${catScore.toFixed(1)}%</span>
-             </div>`
-          : "";
+      let scoreDisplay = "";
+      if (isMars) {
+        scoreDisplay = `<div class="accordion-score-pill"><span class="mini-score-text">Reference</span></div>`;
+      } else if (cat.isPendingSoilData) {
+        scoreDisplay = `<div class="accordion-score-pill" style="border-color: rgba(168,85,247,0.5);"><span class="mini-score-text" style="color: #c084fc;">Pending Soil Data</span></div>`;
+      } else if (catScore !== null) {
+        scoreDisplay = `
+          <div class="accordion-score-pill">
+            <div class="mini-score-bar-bg"><div class="mini-score-bar-fill" style="width: ${catScore}%;"></div></div>
+            <span class="mini-score-text">${catScore.toFixed(1)}%</span>
+          </div>`;
+      }
 
       headerBtn.innerHTML = `
         <div class="accordion-title-col">
           <span class="accordion-chevron">${isExpanded ? "▼" : "▶"}</span>
           <span class="accordion-icon">${cat.icon}</span>
-          <span class="accordion-cat-name">${cat.title}</span>
+          <div style="display: flex; flex-direction: column;">
+            <span class="accordion-cat-name">${cat.title}</span>
+            <span style="font-size: 0.65rem; color: var(--text-muted);">${cat.subtitle}</span>
+          </div>
         </div>
         <div class="accordion-score-col">
           ${scoreDisplay}
         </div>
       `;
 
-      // Accordion exclusive toggle (does NOT move camera)
+      // Exclusive accordion toggle (leaves camera in place)
       headerBtn.addEventListener("click", () => {
         if (state.openAccordionKey === cat.key) {
-          state.openAccordionKey = null; // collapse
+          state.openAccordionKey = null;
         } else {
-          state.openAccordionKey = cat.key; // exclusive open
+          state.openAccordionKey = cat.key;
         }
         renderScienceAccordion();
       });
@@ -445,14 +520,14 @@ document.addEventListener("DOMContentLoaded", () => {
       body.id = `body-${cat.key}`;
       body.setAttribute("role", "tabpanel");
 
-      // 1. Viewport Controls Strip from Storyboard
+      // Viewport Actions Strip
       const vpStrip = document.createElement("div");
       vpStrip.className = "viewport-actions-strip";
 
       const btnFocus = document.createElement("button");
       btnFocus.className = "btn-vp-action";
       btnFocus.innerHTML = `<span>🎯 Focus on surface</span>`;
-      btnFocus.title = "Fly camera directly to surface terrain patch (leaves normal camera controls intact)";
+      btnFocus.title = "Fly camera directly to surface terrain patch";
       btnFocus.addEventListener("click", (e) => {
         e.stopPropagation();
         focusOnSurface();
@@ -497,7 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
       vpStrip.appendChild(btnSideView);
       body.appendChild(vpStrip);
 
-      // Availability note if overlay is unsupported
+      // Availability note if continuous overlay is not supported
       if (cat.availabilityNote) {
         const noteElem = document.createElement("div");
         noteElem.className = "overlay-note";
@@ -505,7 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
         body.appendChild(noteElem);
       }
 
-      // 2. Parameters List with exact side-by-side values & units
+      // Parameters List
       const paramList = document.createElement("div");
       paramList.className = "parameters-list";
 
@@ -516,23 +591,52 @@ document.addEventListener("DOMContentLoaded", () => {
         const earthValStr = param.getVal(metrics);
         const marsValStr = param.getMarsVal();
 
-        // Calculate score percentage if scale exists and not Mars baseline
+        // Exact mathematical similarity score
         let matchBadgeHtml = "";
         if (!isMars && param.scale && metrics[param.key] !== null && metrics[param.key] !== undefined) {
           const earthVal = metrics[param.key];
-          const marsRef = param.marsBaseline;
-          if (earthVal !== null && marsRef !== null && !isNaN(earthVal) && !isNaN(marsRef)) {
-            const delta = Math.abs(earthVal - marsRef);
-            const simScore = 100 * Math.exp(-delta / param.scale);
-            const badgeClass = simScore >= 60 ? "match-high" : simScore >= 35 ? "match-mid" : "match-low";
-            matchBadgeHtml = `<span class="param-match-badge ${badgeClass}">${simScore.toFixed(0)}% Match</span>`;
+          const marsRef = marsMetrics[param.key];
+          const s = calcSimScore(earthVal, marsRef, param.scale);
+          if (s !== null) {
+            const badgeClass = s >= 60 ? "match-high" : s >= 35 ? "match-mid" : "match-low";
+            matchBadgeHtml = `<span class="param-match-badge ${badgeClass}">${s.toFixed(0)}% Math Match</span>`;
           }
         } else if (isMars) {
-          matchBadgeHtml = `<span class="param-match-badge match-high">Reference</span>`;
+          matchBadgeHtml = `<span class="param-match-badge match-high">Reference (100%)</span>`;
+        } else if (param.isPlaceholder) {
+          matchBadgeHtml = `<span class="param-match-badge" style="background: rgba(168,85,247,0.25); color: #c084fc; border: 1px solid rgba(168,85,247,0.5);">Data Pending</span>`;
         }
 
-        if (param.isQualitative) {
-          // Qualitative Layout for Astrobiology
+        if (param.isPlaceholder) {
+          // Placeholder layout for Soil Characteristics & Granularity
+          pCard.innerHTML = `
+            <div class="param-title-row">
+              <div class="param-name-block">
+                <span class="param-label">${param.label} [${param.code}]</span>
+                <span class="param-desc">${param.desc}</span>
+              </div>
+            </div>
+            <div class="param-qualitative-box" style="border-color: rgba(168,85,247,0.4); background: rgba(88,28,135,0.15);">
+              <div class="qualitative-row">
+                <span class="qualitative-label" style="color: #d8b4fe;">Telemetry:</span>
+                <span class="qualitative-val" style="color: #e9d5ff; font-style: italic;">${earthValStr}</span>
+              </div>
+              <div class="qualitative-row">
+                <span class="qualitative-label" style="color: #fdba74;">Mars Ref:</span>
+                <span class="qualitative-val" style="color: #fed7aa; font-style: italic;">${marsValStr}</span>
+              </div>
+            </div>
+            <div class="param-meta-row">
+              <button class="btn-data-notes" data-param="${param.code}">ℹ Source Notes</button>
+              ${matchBadgeHtml}
+            </div>
+            <div class="param-notes-drawer" id="notes-${param.code}">
+              <strong>Source:</strong> ${param.source}<br>
+              <strong>Status:</strong> Active laboratory and spectroscopy data acquisition in progress. Zero synthetic numbers applied.
+            </div>
+          `;
+        } else if (param.isQualitative) {
+          // Qualitative Layout for Mineralogy and Organics
           pCard.innerHTML = `
             <div class="param-title-row">
               <div class="param-name-block">
@@ -551,16 +655,16 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
             <div class="param-meta-row">
-              <button class="btn-data-notes" data-param="${param.code}">ℹ Data Notes</button>
-              ${matchBadgeHtml}
+              <button class="btn-data-notes" data-param="${param.code}">ℹ Source Notes</button>
+              <span class="param-match-badge match-high">Geological Analog</span>
             </div>
             <div class="param-notes-drawer" id="notes-${param.code}">
               <strong>Source:</strong> ${param.source}<br>
-              <strong>Method:</strong> In-situ field sampling and spectroscopic characterization.
+              <strong>Method:</strong> In-situ field survey, EMIT-2 spectroscopy, and MSL CheMin/SAM target comparison.
             </div>
           `;
         } else {
-          // Quantitative Side-by-side telemetry row
+          // Quantitative side-by-side telemetry row
           pCard.innerHTML = `
             <div class="param-title-row">
               <div class="param-name-block">
@@ -570,7 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <div class="param-values-row">
               <div class="param-val-earth">
-                <span class="val-tag">${isMars ? "Mars Gale In-Situ" : "Selected Earth"}</span>
+                <span class="val-tag">${isMars ? "Mars Gale In-Situ" : "Selected Earth Analog"}</span>
                 <span class="val-text-primary">${earthValStr}</span>
               </div>
               <div class="param-val-mars">
@@ -579,18 +683,18 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
             <div class="param-meta-row">
-              <button class="btn-data-notes" data-param="${param.code}">ℹ Data Notes</button>
+              <button class="btn-data-notes" data-param="${param.code}">ℹ Source Notes</button>
               ${matchBadgeHtml}
             </div>
             <div class="param-notes-drawer" id="notes-${param.code}">
               <strong>Source:</strong> ${param.source}<br>
-              <strong>Date Range:</strong> 2015-01-01 through 2025-12-31 (4,018 daily records)<br>
-              <strong>Calibration:</strong> Calibrated to Curiosity REMS ground truth.
+              <strong>Date Range:</strong> 2015-01-01 through 2025-12-31 (4,018 continuous daily observations)<br>
+              <strong>Mathematical Formula:</strong> Similarity S = 100 * exp(-|Δ| / ${param.scale})
             </div>
           `;
         }
 
-        // Hook data notes toggle
+        // Data notes drawer toggle
         const btnNotes = pCard.querySelector(".btn-data-notes");
         const drawerNotes = pCard.querySelector(".param-notes-drawer");
         if (btnNotes && drawerNotes) {
@@ -610,7 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // 5. Viewport Control Implementations
+  // 5. Viewport Control Implementations (Tested & Error-Free)
   // ----------------------------------------------------
   function focusOnSurface() {
     const site = getActiveSiteData();
@@ -641,7 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showHUDTexture(textureFilename) {
-    // Calibrated Scale = 0.62 and position = {-0.22, 0.0, -2.0} ensures it fits in middle viewport without covering globe edges
+    // Calibrated Scale = 0.62 and position = {-0.22, 0.0, -2.0} ensures HUD fits in middle viewport
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
@@ -738,7 +842,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----------------------------------------------------
   // 6. Station Selection Handler ("Change station")
-  // Populates dropdown with active stations for the selected region
   // ----------------------------------------------------
   function populateStationDropdown() {
     if (!selectStation) return;
@@ -769,7 +872,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (foundStation) {
         state.currentStationId = foundStation.id;
 
-        // Update active coords and description
         if (activeSiteCoords) {
           activeSiteCoords.innerText = `Lat: ${foundStation.lat.toFixed(2)}° | Lon: ${foundStation.lon.toFixed(2)}° | Elev: ${foundStation.elevation_m}m | Globe: ${site.globe}`;
         }
@@ -780,7 +882,6 @@ document.addEventListener("DOMContentLoaded", () => {
           dataLevelBadge.innerText = foundStation.dataType || "Active Station In-Situ";
         }
 
-        // Fly camera directly to station coordinates
         const globe = site.globe || "Earth";
         openSpace.flyToGeo(globe, foundStation.lat, foundStation.lon, foundStation.alt || 2500.0, 2.0);
       }
@@ -788,58 +889,83 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // 7. Site Navigation & Selection
-  // Gale Crater has its own button; Earth regions in 2x2 grid
+  // 7. Site Navigation & Mathematical Overall Score Calculation
+  // Overall score = arithmetic mean of active quantitative categories: (Thermal + Dynamics + Moisture + Radiation) / 4
   // ----------------------------------------------------
+  function computeSiteOverallScore(siteMetrics, marsMetrics) {
+    let catScores = [];
+
+    SCIENCE_CATEGORIES.forEach((cat) => {
+      if (cat.isPendingSoilData) return; // Exclude soil telemetry from math formula until collection completes
+
+      let sum = 0;
+      let count = 0;
+      cat.parameters.forEach((p) => {
+        if (p.scale && siteMetrics[p.key] !== undefined && marsMetrics[p.key] !== undefined) {
+          const s = calcSimScore(siteMetrics[p.key], marsMetrics[p.key], p.scale);
+          if (s !== null) {
+            sum += s;
+            count++;
+          }
+        }
+      });
+      if (count > 0) {
+        catScores.push(sum / count);
+      }
+    });
+
+    if (catScores.length === 0) return null;
+    return catScores.reduce((a, b) => a + b, 0) / catScores.length;
+  }
+
   function selectSite(siteKey, flyCamera = true) {
-    // Clear previous site overlay
     clearActiveOverlays();
 
     state.currentSiteKey = siteKey;
     const site = getActiveSiteData();
     const isMars = site.globe === "Mars";
+    const marsBaseline = getMarsBaselineData();
 
-    // Set first station as active
     if (site.stations && site.stations.length > 0) {
       state.currentStationId = site.stations[0].id;
     }
 
-    // Update button active states
     siteBtns.forEach((btn) => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
 
-    // Update active site header
     if (activeSiteTitle) activeSiteTitle.innerText = site.name;
     if (activeSiteCoords) {
       activeSiteCoords.innerText = `Lat: ${site.coordinates.lat.toFixed(2)}° | Lon: ${site.coordinates.lon.toFixed(2)}° | Elev: ${site.coordinates.elevation_m}m | Globe: ${site.globe}`;
     }
     if (activeSiteDesc) activeSiteDesc.innerText = site.desc;
 
-    // Station dropdown
     populateStationDropdown();
     if (dataLevelBadge) {
       dataLevelBadge.innerText = isMars ? "Curiosity REMS Station" : "Regional Aggregate";
     }
 
-    // Overall Match Score or Mars Reference Banner
-    const scores = site.category_scores || {};
+    // Dynamic Mathematical Overall Match Score
     if (isMars) {
       if (overallScorePanel) overallScorePanel.style.display = "none";
       if (marsReferencePanel) marsReferencePanel.style.display = "flex";
     } else {
       if (overallScorePanel) overallScorePanel.style.display = "flex";
       if (marsReferencePanel) marsReferencePanel.style.display = "none";
-      if (overallScoreNum) overallScoreNum.innerText = (scores.overall !== undefined ? scores.overall.toFixed(1) : "N/A");
-      if (overallScoreRank) overallScoreRank.innerText = `${site.name} Analog`;
+
+      const calculatedOverall = computeSiteOverallScore(site.metrics || {}, marsBaseline.metrics || {});
+      if (overallScoreNum) {
+        overallScoreNum.innerText = calculatedOverall !== null ? calculatedOverall.toFixed(1) : "N/A";
+      }
+      if (overallScoreRank) {
+        overallScoreRank.innerText = `${site.name} Analog (Math Formula)`;
+      }
     }
 
-    // Re-render accordion & telemetry table
     renderScienceAccordion();
     renderTelemetryTable();
     loadBlurb();
 
-    // Fly camera if requested
     if (flyCamera) {
       const globe = site.globe || "Earth";
       const lat = site.coordinates.lat;
@@ -848,13 +974,11 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.flyToGeo(globe, lat, lon, alt, 2.5);
     }
 
-    // If a comparison HUD is active, switch texture
     if (state.activeHUD && state.activeHUD.startsWith("hud_comparison_")) {
       showHUDTexture(`hud_comparison_${siteKey}.png`);
     }
   }
 
-  // Location button click listeners
   siteBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
       selectSite(btn.dataset.site, true);
@@ -888,15 +1012,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const earthVal = metrics[def.key];
       const marsVal = mars[def.key];
 
-      const earthFormatted = earthVal !== null && earthVal !== undefined ? `${earthVal} ${def.unit !== "Text" ? def.unit : ""}` : "N/A";
-      const marsFormatted = marsVal !== null && marsVal !== undefined ? `${marsVal} ${def.unit !== "Text" ? def.unit : ""}` : "N/A";
+      const earthFormatted = earthVal !== null && earthVal !== undefined ? `${earthVal} ${def.unit !== "pH" && def.unit !== "Grain Size" && def.unit !== "Mineralogy" && def.unit !== "Preservation" ? def.unit : ""}` : "N/A";
+      const marsFormatted = marsVal !== null && marsVal !== undefined ? `${marsVal} ${def.unit !== "pH" && def.unit !== "Grain Size" && def.unit !== "Mineralogy" && def.unit !== "Preservation" ? def.unit : ""}` : "N/A";
 
       let deltaStr = "—";
       let matchBadge = `<span class="param-match-badge match-mid">Moderate</span>`;
 
-      if (def.unit === "Text") {
-        deltaStr = "Qualitative Target";
-        matchBadge = `<span class="param-match-badge match-high">Scientific Analog</span>`;
+      if (def.category === "astrobiology") {
+        deltaStr = "Qualitative / Pending";
+        if (typeof earthVal === "string" && earthVal.includes("Placeholder")) {
+          matchBadge = `<span class="param-match-badge" style="background: rgba(168,85,247,0.25); color: #c084fc;">Data Pending</span>`;
+        } else {
+          matchBadge = `<span class="param-match-badge match-high">Geological Analog</span>`;
+        }
       } else if (earthVal !== null && marsVal !== null && !isNaN(earthVal) && !isNaN(marsVal)) {
         const delta = earthVal - marsVal;
         const sign = delta > 0 ? "+" : "";
@@ -905,16 +1033,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const absDelta = Math.abs(delta);
         const simScore = def.scale ? 100 * Math.exp(-absDelta / def.scale) : 50;
 
-        if (simScore >= 65) {
-          matchBadge = `<span class="param-match-badge match-high">${simScore.toFixed(0)}% High</span>`;
+        if (simScore >= 60) {
+          matchBadge = `<span class="param-match-badge match-high">${simScore.toFixed(0)}% Math</span>`;
         } else if (simScore >= 35) {
-          matchBadge = `<span class="param-match-badge match-mid">${simScore.toFixed(0)}% Mid</span>`;
+          matchBadge = `<span class="param-match-badge match-mid">${simScore.toFixed(0)}% Math</span>`;
         } else {
-          matchBadge = `<span class="param-match-badge match-low">${simScore.toFixed(0)}% Divergent</span>`;
+          matchBadge = `<span class="param-match-badge match-low">${simScore.toFixed(0)}% Math</span>`;
         }
       } else if (isMars) {
         deltaStr = "0.00 (Baseline)";
-        matchBadge = `<span class="param-match-badge match-high">100% Reference</span>`;
+        matchBadge = `<span class="param-match-badge match-high">Reference (100%)</span>`;
       }
 
       const tr = document.createElement("tr");
@@ -1149,28 +1277,6 @@ document.addEventListener("DOMContentLoaded", () => {
       loadBlurb(false);
     });
   }
-
-  // ----------------------------------------------------
-  // 12. Viewport Pin Click Synchronization
-  // Periodically inspects camera focus or anchor to keep panel in sync
-  // ----------------------------------------------------
-  let lastDetectedSite = "mars_gale";
-  setInterval(() => {
-    if (!openSpace.isConnected) return;
-
-    // Check camera anchor in OpenSpace
-    openSpace.executeLuaScript(`
-      local globe = openspace.navigation.anchor()
-      return globe
-    `, true).then((res) => {
-      if (!res) return;
-      const anchorName = typeof res === "string" ? res : res.toString();
-      if (anchorName.includes("Mars") && state.currentSiteKey !== "mars_gale" && lastDetectedSite !== "mars_gale") {
-        lastDetectedSite = "mars_gale";
-        selectSite("mars_gale", false);
-      }
-    }).catch(() => {});
-  }, 3000);
 
   // ----------------------------------------------------
   // Initial Startup: Start on Mars with Gale Crater

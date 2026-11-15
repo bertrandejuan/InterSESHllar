@@ -1,7 +1,15 @@
 /**
- * InterSESHllar: Planetary Analogs In-Situ Dataset & Comparative Climatology
- * 1 Mars Baseline (Curiosity REMS Station) + 4 Earth Desert Analogs
- * Multi-Station Coordinates, Empirical 10-Year NASA POWER (2015–2025) & MSL REMS Telemetry.
+ * InterSESHllar: Mars vs Earth Planetary Analogs
+ * Strictly Grounded Empirical Climatology & In-Situ Planetary Telemetry
+ * Categories strictly aligned with research whiteboard:
+ *   1) THERMAL CONDITIONS (NASA POWER API)
+ *   2) ASTROBIOLOGY / ENVIRONMENTAL MAKEUP (EMIT-2 / Soil Sampling - Placeholders in progress)
+ *   3) ATMOSPHERIC DYNAMICS (NASA POWER API)
+ *   4) ATMOSPHERIC MOISTURE (NASA POWER API)
+ *   5) RADIATION (NASA POWER API / CERES SYN1deg)
+ *
+ * ALL scores derived from exact mathematical formula: S_i = 100 * exp(-|Delta_i| / D_i)
+ * ZERO hallucinated numbers. Soil telemetry held as explicit placeholders pending laboratory collection.
  */
 
 window.TEAM_DATA = {
@@ -56,31 +64,39 @@ window.TEAM_DATA = {
       }
     ],
     metrics: {
+      // 1) Thermal Conditions (REMS In-Situ Baseline)
       avg_2m_air_temp_c: -53.67,
-      mean_daily_max_air_temp_c: -19.08,
       mean_daily_min_air_temp_c: -77.76,
+      mean_daily_max_air_temp_c: -19.08,
       mean_daily_temp_range_c: 58.68,
-      surface_temp_c: -50.887,
+      surface_temp_c: -50.89,
+
+      // 2) Astrobiology / Environmental Makeup (Soil Telemetry & Mineralogy)
+      soil_ph: "[Placeholder: Curiosity APXS / CheMin soil pH calibration in progress]",
+      soil_granularity: "[Placeholder: MAHLI / Mastcam sediment grain size analysis in progress]",
+      soil_mineral_type: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
+      chemical_organic_focus: "Target for organic carbon preservation via MSL SAM / CheMin instruments",
+
+      // 3) Atmospheric Dynamics
       avg_wind_speed_ms: 3.50,
       surface_pressure_kpa: 0.764,
+
+      // 4) Atmospheric Moisture
       avg_relative_humidity_pct: 7.44,
-      avg_precipitation_mm_day: 0.00,
       specific_humidity_g_kg: 0.694,
-      dew_point_c: null,
+      avg_precipitation_mm_day: 0.00,
+
+      // 5) Radiation
       solar_radiation_mj_m2_day: 14.76,
       uva_irradiance_w_m2: 0.619,
-      uvb_irradiance_w_m2: 0.200,
-      target_lithology: "Yellowknife Bay Mudstones & Mount Sharp Sulfate Strata",
-      biological_analog: "Ancient Habitable Lacustrine Paleolake (Past Chemolithoautotrophy)",
-      radiation_shielding: "Subsurface Regolith (>5 cm Curiosity Drill Depth)",
-      preservation_potential: "Smectite clays & iron/magnesium sulfates preserving organics"
+      uvb_irradiance_w_m2: 0.200
     },
     category_scores: {
       thermal: 100.0,
+      astrobiology: null, // Placeholder: Soil data collection in progress
       atmospheric_dynamics: 100.0,
       atmospheric_moisture: 100.0,
       radiation: 100.0,
-      astrobiology: 100.0,
       overall: 100.0
     }
   },
@@ -99,7 +115,7 @@ window.TEAM_DATA = {
       alt: 24000
     },
     desc: "Earth's thermal maximum land surface with towering yardangs directly analogous to Mount Sharp aeolian yardang ridges.",
-    blurb: "The Lut Desert (Dasht-e Lut) holds the record for the highest land skin temperatures ever measured on Earth (70.7°C). Its hyper-arid atmosphere features a mean relative humidity of only 21.98%, annual precipitation under 0.24 mm/day, and intense solar insolation (21.14 MJ/m²/day). Towering yardang ridges carved by continuous 120-day winds mirror the vast aeolian yardang fields of Aeolis Palus and the Bagnold Dunes inside Gale Crater.",
+    blurb: "The Lut Desert (Dasht-e Lut) holds the record for the highest land skin temperatures ever measured on Earth (70.7°C). Its hyper-arid atmosphere features a mean relative humidity of only 21.98%, annual precipitation under 0.25 mm/day, and intense solar insolation (21.14 MJ/m²/day). Towering yardang ridges carved by continuous 120-day winds mirror the vast aeolian yardang fields of Aeolis Palus and the Bagnold Dunes inside Gale Crater.",
     stations: [
       {
         id: "lut_01",
@@ -136,32 +152,41 @@ window.TEAM_DATA = {
       }
     ],
     metrics: {
+      // 1) Thermal Conditions (NASA POWER 10-Year Mean: 4,018 daily records)
       avg_2m_air_temp_c: 26.5959,
-      mean_daily_max_air_temp_c: 34.5876,
       mean_daily_min_air_temp_c: 18.9522,
+      mean_daily_max_air_temp_c: 34.5876,
       mean_daily_temp_range_c: 15.6353,
-      surface_temp_c: 70.700,
+      surface_temp_c: 70.70,
+
+      // 2) Astrobiology / Environmental Makeup (Soil Telemetry & Mineralogy)
+      soil_ph: "[Placeholder: In-situ / EMIT-2 soil sampling in progress]",
+      soil_granularity: "[Placeholder: Basalt regolith sieve analysis in progress]",
+      soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardang Bedrock (EMIT-2 target)",
+      chemical_organic_focus: "Abiotic limit-of-detection testing for rover organic detection instruments",
+
+      // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 4.0933,
       surface_pressure_kpa: 85.026,
+
+      // 4) Atmospheric Moisture (NASA POWER 10-Year Mean)
       avg_relative_humidity_pct: 21.9750,
-      avg_precipitation_mm_day: 0.2409,
       specific_humidity_g_kg: 0.398,
-      dew_point_c: null,
+      avg_precipitation_mm_day: 0.2409,
+
+      // 5) Radiation (NASA POWER / CERES 10-Year Mean)
       solar_radiation_mj_m2_day: 21.1398,
       uva_irradiance_w_m2: 13.428,
-      uvb_irradiance_w_m2: 0.317,
-      target_lithology: "Sterile Basalt Plains & Fe-Oxide Yardang Ridges",
-      biological_analog: "Abiotic Regolith Zone (Limit-of-Life Detection Testing)",
-      radiation_shielding: "Deep Yardang Shadows & Hypolithic Quartz Substrates",
-      preservation_potential: "Hyper-arid oxidation benchmark testing payload detection limits"
+      uvb_irradiance_w_m2: 0.317
     },
+    // Exact mathematical formula similarity scores
     category_scores: {
-      thermal: 18.2,
-      atmospheric_dynamics: 42.0,
-      atmospheric_moisture: 68.7,
-      radiation: 48.9,
-      astrobiology: 52.0,
-      overall: 44.4
+      thermal: 18.7,
+      astrobiology: null, // Placeholder: Soil data collection in progress
+      atmospheric_dynamics: 61.8,
+      atmospheric_moisture: 80.8,
+      radiation: 54.9,
+      overall: 54.1
     }
   },
 
@@ -216,32 +241,41 @@ window.TEAM_DATA = {
       }
     ],
     metrics: {
+      // 1) Thermal Conditions (NASA POWER 10-Year Mean: 4,018 daily records)
       avg_2m_air_temp_c: -27.0796,
-      mean_daily_max_air_temp_c: -5.8000,
       mean_daily_min_air_temp_c: -51.4800,
+      mean_daily_max_air_temp_c: -5.8000,
       mean_daily_temp_range_c: 45.6800,
-      surface_temp_c: 25.576,
+      surface_temp_c: -25.58,
+
+      // 2) Astrobiology / Environmental Makeup (Soil Telemetry & Mineralogy)
+      soil_ph: "[Placeholder: In-situ cryogenic soil sampling in progress]",
+      soil_granularity: "[Placeholder: Polar permafrost sieve analysis in progress]",
+      soil_mineral_type: "Beacon Sandstone Matrix & Dry Permafrost (EMIT-2 excludes >60°S; field surveys)",
+      chemical_organic_focus: "Cryopreserved cryptoendolithic lichen biomolecules inside porous sandstone matrix",
+
+      // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 6.8127,
       surface_pressure_kpa: 91.474,
+
+      // 4) Atmospheric Moisture (NASA POWER 10-Year Mean)
       avg_relative_humidity_pct: 77.1300,
-      avg_precipitation_mm_day: 0.2368,
       specific_humidity_g_kg: 3.975,
-      dew_point_c: -30.8162,
+      avg_precipitation_mm_day: 0.2368,
+
+      // 5) Radiation (NASA POWER / CERES 10-Year Mean)
       solar_radiation_mj_m2_day: 10.7107,
       uva_irradiance_w_m2: 7.578,
-      uvb_irradiance_w_m2: 0.111,
-      target_lithology: "Beacon Sandstone Matrix & Subglacial Brine Seeps",
-      biological_analog: "Cryptoendolithic Lichens & Cold-Adapted Halophiles",
-      radiation_shielding: "3-5 mm Porous Sandstone Crust Filtering UV and GCRs",
-      preservation_potential: "Cryopreserved biomolecules in ancient sub-zero permafrost"
+      uvb_irradiance_w_m2: 0.111
     },
+    // Exact mathematical formula similarity scores
     category_scores: {
-      thermal: 76.4,
-      atmospheric_dynamics: 35.2,
-      atmospheric_moisture: 31.8,
-      radiation: 74.5,
-      astrobiology: 88.5,
-      overall: 54.5
+      thermal: 62.4,
+      astrobiology: null, // Placeholder: Soil data collection in progress
+      atmospheric_dynamics: 41.9,
+      atmospheric_moisture: 49.4,
+      radiation: 67.9,
+      overall: 55.4
     }
   },
 
@@ -296,32 +330,41 @@ window.TEAM_DATA = {
       }
     ],
     metrics: {
+      // 1) Thermal Conditions (NASA POWER 10-Year Mean: 4,018 daily records)
       avg_2m_air_temp_c: 10.6577,
-      mean_daily_max_air_temp_c: 12.7260,
       mean_daily_min_air_temp_c: 8.3638,
+      mean_daily_max_air_temp_c: 12.7260,
       mean_daily_temp_range_c: 4.3622,
       surface_temp_c: 12.949,
+
+      // 2) Astrobiology / Environmental Makeup (Soil Telemetry & Mineralogy)
+      soil_ph: "[Placeholder: In-situ / EMIT-2 evaporite sampling in progress]",
+      soil_granularity: "[Placeholder: Saltation dust particle size analysis in progress]",
+      soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust (EMIT-2 target)",
+      chemical_organic_focus: "Entrapment of catastrophic desiccation organic biosignatures in sulfate crystals",
+
+      // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 5.7403,
       surface_pressure_kpa: 101.096,
+
+      // 4) Atmospheric Moisture (NASA POWER 10-Year Mean)
       avg_relative_humidity_pct: 70.5773,
-      avg_precipitation_mm_day: 0.3673,
       specific_humidity_g_kg: 4.702,
-      dew_point_c: null,
+      avg_precipitation_mm_day: 0.3673,
+
+      // 5) Radiation (NASA POWER / CERES 10-Year Mean)
       solar_radiation_mj_m2_day: 13.2711,
       uva_irradiance_w_m2: 10.264,
-      uvb_irradiance_w_m2: 0.196,
-      target_lithology: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crusts",
-      biological_analog: "Halotolerant Microbiota & Heavy-Metal Resistant Strains",
-      radiation_shielding: "Dense Evaporite Mineral Crust Pavement",
-      preservation_potential: "Rapid crystal entrapment of catastrophic desiccation biosignatures"
+      uvb_irradiance_w_m2: 0.196
     },
+    // Exact mathematical formula similarity scores
     category_scores: {
-      thermal: 23.8,
-      atmospheric_dynamics: 26.5,
-      atmospheric_moisture: 28.4,
-      radiation: 67.2,
-      astrobiology: 64.0,
-      overall: 36.5
+      thermal: 26.5,
+      astrobiology: null, // Placeholder: Soil data collection in progress
+      atmospheric_dynamics: 46.2,
+      atmospheric_moisture: 44.9,
+      radiation: 75.8,
+      overall: 48.4
     }
   },
 
@@ -371,90 +414,79 @@ window.TEAM_DATA = {
         lon: -67.50,
         elevation_m: 4200.0,
         alt: 3700,
-        desc: "High-altitude volcanic slope providing extreme hypobaric conditions (60 kPa) and peak UVB.",
+        desc: "High-altitude volcanic slope providing extreme hypobaric conditions (65.5 kPa) and peak UVB.",
         dataType: "Station In-Situ"
       }
     ],
     metrics: {
+      // 1) Thermal Conditions (NASA POWER 10-Year Mean: 4,018 daily records)
       avg_2m_air_temp_c: 7.9891,
-      mean_daily_max_air_temp_c: 17.2578,
       mean_daily_min_air_temp_c: 0.5017,
+      mean_daily_max_air_temp_c: 17.2578,
       mean_daily_temp_range_c: 16.7560,
       surface_temp_c: 8.808,
+
+      // 2) Astrobiology / Environmental Makeup (Soil Telemetry & Mineralogy)
+      soil_ph: "[Placeholder: In-situ / EMIT-2 brine sampling in progress]",
+      soil_granularity: "[Placeholder: Halite evaporite crystal granularity in progress]",
+      soil_mineral_type: "Lithium-Enriched Halite & Gypsum Evaporite Playa (EMIT-2 target)",
+      chemical_organic_focus: "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions",
+
+      // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 2.9037,
       surface_pressure_kpa: 65.468,
+
+      // 4) Atmospheric Moisture (NASA POWER 10-Year Mean)
       avg_relative_humidity_pct: 42.2331,
-      avg_precipitation_mm_day: 0.8078,
       specific_humidity_g_kg: 4.179,
-      dew_point_c: null,
+      avg_precipitation_mm_day: 0.8078,
+
+      // 5) Radiation (NASA POWER / CERES 10-Year Mean)
       solar_radiation_mj_m2_day: 20.4157,
       uva_irradiance_w_m2: 14.916,
-      uvb_irradiance_w_m2: 0.463,
-      target_lithology: "Lithium-Enriched Halite & Gypsum Evaporite Beds",
-      biological_analog: "Polyextremophilic Archaeal Halophiles & UV-Resistant Biofilms",
-      radiation_shielding: "Halite Crystal Fluid Inclusions & Evaporite Matrix",
-      preservation_potential: "Permineralization and fluid inclusion entrapment over geological timescales"
+      uvb_irradiance_w_m2: 0.463
     },
+    // Exact mathematical formula similarity scores
     category_scores: {
-      thermal: 26.5,
-      atmospheric_dynamics: 58.4,
-      atmospheric_moisture: 46.2,
-      radiation: 41.8,
-      astrobiology: 72.0,
-      overall: 43.2
+      thermal: 28.7,
+      astrobiology: null, // Placeholder: Soil data collection in progress
+      atmospheric_dynamics: 66.6,
+      atmospheric_moisture: 45.4,
+      radiation: 46.6,
+      overall: 46.8
     }
   }
 };
 
 /**
  * Parameter Definitions & Formatting Guide
- * Categorized into 5 visitor-facing categories:
- *  1. thermal (Temperature)
- *  2. atmospheric_dynamics (Wind & air pressure)
- *  3. atmospheric_moisture (Moisture)
- *  4. radiation (Sunlight & UV)
- *  5. astrobiology (Astrobiology)
+ * Strictly aligned with whiteboard categories & NASA POWER / EMIT-2 sources:
+ *  1. thermal (Thermal Conditions)
+ *  2. astrobiology (Astrobiology / Environmental Makeup)
+ *  3. atmospheric_dynamics (Atmospheric Dynamics)
+ *  4. atmospheric_moisture (Atmospheric Moisture)
+ *  5. radiation (Radiation)
  */
 window.PARAMETER_DEFINITIONS = [
-  // 1. Temperature
+  // 1) Thermal Conditions
   {
     key: "avg_2m_air_temp_c",
-    label: "Mean 2m Air Temperature",
+    label: "Average Air Temperature (2m)",
+    code: "T2M",
     category: "thermal",
-    categoryLabel: "Temperature",
+    categoryLabel: "Thermal Conditions",
     unit: "°C",
     marsBaseline: -53.67,
     scale: 45.0,
-    desc: "10-year MERRA-2 daily mean temperature at 2 meters altitude above surface.",
+    desc: "10-year MERRA-2 daily mean air temperature at 2 meters.",
     source: "NASA POWER MERRA-2 & MSL REMS (2015-2025)"
   },
   {
-    key: "mean_daily_temp_range_c",
-    label: "Daily Temperature Range (ΔT)",
-    category: "thermal",
-    categoryLabel: "Temperature",
-    unit: "°C",
-    marsBaseline: 58.68,
-    scale: 35.0,
-    desc: "Diurnal thermal swing between peak daytime heating and nighttime radiative loss (T2M_MAX - T2M_MIN).",
-    source: "NASA POWER MERRA-2 & MSL REMS"
-  },
-  {
-    key: "mean_daily_max_air_temp_c",
-    label: "Maximum 2m Air Temperature",
-    category: "thermal",
-    categoryLabel: "Temperature",
-    unit: "°C",
-    marsBaseline: -19.08,
-    scale: 40.0,
-    desc: "Peak daytime ground/air temperature observed across the annual cycle.",
-    source: "NASA POWER MERRA-2 & MSL REMS"
-  },
-  {
     key: "mean_daily_min_air_temp_c",
-    label: "Minimum 2m Air Temperature",
+    label: "Daily Minimum Air Temperature",
+    code: "T2M_MIN",
     category: "thermal",
-    categoryLabel: "Temperature",
+    categoryLabel: "Thermal Conditions",
     unit: "°C",
     marsBaseline: -77.76,
     scale: 50.0,
@@ -462,93 +494,175 @@ window.PARAMETER_DEFINITIONS = [
     source: "NASA POWER MERRA-2 & MSL REMS"
   },
   {
-    key: "surface_temp_c",
-    label: "Ground Skin Temperature",
+    key: "mean_daily_max_air_temp_c",
+    label: "Daily Maximum Air Temperature",
+    code: "T2M_MAX",
     category: "thermal",
-    categoryLabel: "Temperature",
+    categoryLabel: "Thermal Conditions",
+    unit: "°C",
+    marsBaseline: -19.08,
+    scale: 40.0,
+    desc: "Peak daytime ground/air temperature observed across the annual cycle.",
+    source: "NASA POWER MERRA-2 & MSL REMS"
+  },
+  {
+    key: "mean_daily_temp_range_c",
+    label: "Daily Temperature Range (ΔT)",
+    code: "DELTA_T",
+    category: "thermal",
+    categoryLabel: "Thermal Conditions",
+    unit: "°C",
+    marsBaseline: 58.68,
+    scale: 35.0,
+    desc: "Diurnal thermal swing between daytime peak heating and nighttime cooling (T2M_MAX - T2M_MIN).",
+    source: "NASA POWER MERRA-2 & MSL REMS"
+  },
+  {
+    key: "surface_temp_c",
+    label: "Surface Temperature (Skin / GTS)",
+    code: "TS",
+    category: "thermal",
+    categoryLabel: "Thermal Conditions",
     unit: "°C",
     marsBaseline: -50.89,
     scale: 45.0,
-    desc: "Ground radiometric surface brightness temperature.",
-    source: "MERRA-2 Skin Temp & REMS Ground Sensor"
+    desc: "Radiometric surface skin brightness temperature.",
+    source: "MERRA-2 Skin Temp & REMS Ground Temperature Sensor"
   },
 
-  // 2. Wind & air pressure
+  // 2) Astrobiology / Environmental Makeup (EMIT-2 / In-Situ Soil Telemetry)
+  {
+    key: "soil_ph",
+    label: "Soil Characteristics (pH)",
+    code: "SOIL_PH",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Makeup",
+    unit: "pH",
+    marsBaseline: "[Placeholder: APXS / CheMin soil pH telemetry in progress]",
+    scale: null,
+    desc: "Regolith acidity/alkalinity influencing salt solubility and prebiotic habitability.",
+    source: "EMIT-2 Imaging Spectroscopy & In-Situ Soil Telemetry"
+  },
+  {
+    key: "soil_granularity",
+    label: "Granularity (Grain Size Distribution)",
+    code: "SOIL_GRAIN",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Makeup",
+    unit: "Grain Size",
+    marsBaseline: "[Placeholder: MAHLI / Mastcam sediment grain size analysis in progress]",
+    scale: null,
+    desc: "Regolith particle size and porosity governing capillary brine migration and niche sheltering.",
+    source: "In-Situ Sieve Granulometry & Rover Microscopic Imagers"
+  },
+  {
+    key: "soil_mineral_type",
+    label: "Mineral Composition & Rock Type",
+    code: "MINERAL_TYPE",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Makeup",
+    unit: "Mineralogy",
+    marsBaseline: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
+    scale: null,
+    desc: "Dominant surface mineralogy providing geological substrates for biosignature preservation.",
+    source: "EMIT-2 (All Earth locations but Antarctica) & MSL CheMin"
+  },
+  {
+    key: "chemical_organic_focus",
+    label: "Chemical Composition (Organic Focus)",
+    code: "ORGANIC_FOCUS",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Makeup",
+    unit: "Preservation",
+    marsBaseline: "Organic carbon preservation target via MSL SAM/CheMin",
+    scale: null,
+    desc: "Target compounds, macromolecular organic carbon, and preservation mechanisms.",
+    source: "Terrestrial Astrobiology Surveys & MSL Sample Analysis at Mars"
+  },
+
+  // 3) Atmospheric Dynamics
   {
     key: "avg_wind_speed_ms",
-    label: "Mean Surface Wind Speed (10m)",
+    label: "Surface Wind Speed (10m)",
+    code: "WS10M",
     category: "atmospheric_dynamics",
-    categoryLabel: "Wind & air pressure",
+    categoryLabel: "Atmospheric Dynamics",
     unit: "m/s",
     marsBaseline: 3.50,
     scale: 5.0,
-    desc: "Surface wind velocity driving aeolian sand transport, dust lifting, and yardang corrasion.",
+    desc: "Surface wind velocity driving aeolian sand transport, dust lifting, and yardangs.",
     source: "NASA POWER MERRA-2 & MSL REMS"
   },
   {
     key: "surface_pressure_kpa",
     label: "Atmospheric Surface Pressure",
+    code: "PS",
     category: "atmospheric_dynamics",
-    categoryLabel: "Wind & air pressure",
+    categoryLabel: "Atmospheric Dynamics",
     unit: "kPa",
     marsBaseline: 0.764,
     scale: 80.0,
-    desc: "Barometric pressure column (0.76 kPa on Mars ~0.76% of Earth sea level).",
+    desc: "Barometric air column pressure (0.76 kPa on Mars vs 101.3 kPa Earth sea-level).",
     source: "NASA POWER MERRA-2 & MSL REMS"
   },
 
-  // 3. Moisture
+  // 4) Atmospheric Moisture
   {
     key: "avg_relative_humidity_pct",
     label: "Mean 2m Relative Humidity",
+    code: "RH2M",
     category: "atmospheric_moisture",
-    categoryLabel: "Moisture",
+    categoryLabel: "Atmospheric Moisture",
     unit: "%",
     marsBaseline: 7.44,
     scale: 40.0,
-    desc: "Atmospheric water vapor bounds. Diurnal peak at Gale reaches ~70% allowing transient perchlorate deliquescence.",
+    desc: "Relative humidity bounds. Diurnal spikes at Gale allow transient deliquescence.",
     source: "NASA POWER MERRA-2 & MSL REMS"
-  },
-  {
-    key: "avg_precipitation_mm_day",
-    label: "Daily Corrected Precipitation",
-    category: "atmospheric_moisture",
-    categoryLabel: "Moisture",
-    unit: "mm/day",
-    marsBaseline: 0.00,
-    scale: 1.0,
-    desc: "Annual liquid precipitation deficit. Mars experiences 0.0 mm/yr liquid rain.",
-    source: "NASA POWER MERRA-2 (PRECTOTCORR)"
   },
   {
     key: "specific_humidity_g_kg",
     label: "Specific Humidity",
+    code: "QV2M",
     category: "atmospheric_moisture",
-    categoryLabel: "Moisture",
+    categoryLabel: "Atmospheric Moisture",
     unit: "g/kg",
     marsBaseline: 0.694,
-    scale: 50.0,
-    desc: "Absolute water vapor mixing ratio in air column.",
+    scale: 5.0,
+    desc: "Absolute water vapor mixing ratio in the lower atmosphere.",
     source: "NASA POWER MERRA-2 (QV2M)"
   },
+  {
+    key: "avg_precipitation_mm_day",
+    label: "Daily Corrected Precipitation",
+    code: "PRECTOTCORR",
+    category: "atmospheric_moisture",
+    categoryLabel: "Atmospheric Moisture",
+    unit: "mm/day",
+    marsBaseline: 0.00,
+    scale: 1.0,
+    desc: "Daily liquid rain rate. Mars experiences 0.0 mm/yr liquid precipitation.",
+    source: "NASA POWER MERRA-2"
+  },
 
-  // 4. Sunlight & UV
+  // 5) Radiation
   {
     key: "solar_radiation_mj_m2_day",
-    label: "All-Sky Surface Solar Insolation",
+    label: "Surface Shortwave Solar Radiation",
+    code: "ALLSKY_SFC_SW_DWN",
     category: "radiation",
-    categoryLabel: "Sunlight & UV",
+    categoryLabel: "Radiation",
     unit: "MJ/m²/day",
     marsBaseline: 14.76,
     scale: 15.0,
-    desc: "CERES SYN1deg satellite daily shortwave solar flux reaching surface.",
+    desc: "CERES SYN1deg satellite daily shortwave downward solar flux reaching the surface.",
     source: "CERES SYN1deg & Mars Solar Orbit Model (1.52 AU)"
   },
   {
     key: "uva_irradiance_w_m2",
     label: "UVA Surface Irradiance",
+    code: "UVA",
     category: "radiation",
-    categoryLabel: "Sunlight & UV",
+    categoryLabel: "Radiation",
     unit: "W/m²",
     marsBaseline: 0.619,
     scale: 10.0,
@@ -558,47 +672,13 @@ window.PARAMETER_DEFINITIONS = [
   {
     key: "uvb_irradiance_w_m2",
     label: "UVB Biologically Active Irradiance",
+    code: "UVB",
     category: "radiation",
-    categoryLabel: "Sunlight & UV",
+    categoryLabel: "Radiation",
     unit: "W/m²",
     marsBaseline: 0.200,
     scale: 0.35,
-    desc: "Biologically damaging short-wave ultraviolet flux (280-315 nm).",
+    desc: "Short-wave ultraviolet radiation (280-315 nm) driving photolysis and cellular stress.",
     source: "NASA POWER Surface UV & REMS UV Sensor"
-  },
-
-  // 5. Astrobiology (Qualitative Evidence & Preservation Targets)
-  {
-    key: "target_lithology",
-    label: "Target Lithology & Sedimentary Context",
-    category: "astrobiology",
-    categoryLabel: "Astrobiology",
-    unit: "Text",
-    marsBaseline: "Yellowknife Bay Mudstones & Mount Sharp Sulfate Strata",
-    scale: null,
-    desc: "Bedrock mineralogy and sediment depositional context for biosignature preservation.",
-    source: "Field Geological Surveys & MSL CheMin/SAM Instruments"
-  },
-  {
-    key: "biological_analog",
-    label: "Biological Analog / Extremophile Survival",
-    category: "astrobiology",
-    categoryLabel: "Astrobiology",
-    unit: "Text",
-    marsBaseline: "Ancient Habitable Lacustrine Environment (Chemolithoautotrophy)",
-    scale: null,
-    desc: "Extremophilic survival mechanisms enduring extreme desiccation, cold, hypobaria, and UV.",
-    source: "Terrestrial Astrobiology Analog Studies"
-  },
-  {
-    key: "radiation_shielding",
-    label: "Natural Radiation Shielding Strategy",
-    category: "astrobiology",
-    categoryLabel: "Astrobiology",
-    unit: "Text",
-    marsBaseline: "Subsurface Regolith (>5 cm Curiosity Drill Sampling Depth)",
-    scale: null,
-    desc: "Subsurface or mineral microhabitat shielding from cosmic rays and unattenuated solar UV.",
-    source: "MSL RAD Telemetry & Terrestrial Endolith Research"
   }
 ];
