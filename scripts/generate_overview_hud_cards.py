@@ -207,7 +207,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
                 ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 4,424x4,184 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (out.csv)"),
+                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 442x418 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (araldesert.tif & out.csv)"),
                 ("Topographic Relief & Altimetry", "44 – 78 m (Mean 59.9 m)", "NASA earthaccess ICESat-2 ATL06 laser altimetry raster (out.tif)")
             ],
             'dynamics': [
@@ -228,7 +228,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Exhibits continentality with mean temperature of 10.66 °C and annual thermal extremes ranging from -36 °C in winter to +36 °C in summer.",
-            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts that mirror Gale Crater's sulfate-bearing Mount Sharp strata.",
+            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts mapped via NASA EMIT L2B spectroscopy (araldesert.tif) that mirror Gale Crater's sulfate-bearing Mount Sharp strata.",
             'dynamics': "High-velocity salt-dust storms (5.74 m/s mean wind) generate electrostatic triboelectric fields modeling Martian regional dust events.",
             'moisture': "Regional continental moisture averages 70.58% relative humidity with sparse arid precipitation of 0.37 mm/day.",
             'radiation': "Solar shortwave flux of 13.27 MJ/m²/day and UVB of 0.196 W/m² provide a near-exact match to Martian equatorial flux (14.76 MJ/m²/d and 0.200 W/m² UVB)."

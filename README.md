@@ -27,7 +27,8 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 │   ├── tiff_convert.py                      <-- TIFF raster to matrix CSV conversion utility
 │   ├── out.tif                              <-- ICESat-2 ATL06 4,424x4,184 GeoTIFF Surface Elevation Raster
 │   ├── out.csv                              <-- NASA EMIT L2B Mineral Grid (4,424x4,184 matrix)
-│   └── lut.tif                              <-- NASA EMIT L2B Mineral GeoTIFF Raster (1,327x2,511; Lut Desert)
+│   ├── lut.tif                              <-- NASA EMIT L2B Mineral GeoTIFF Raster (1,327x2,511; Lut Desert)
+│   └── araldesert.tif                       <-- NASA EMIT L2B Mineral GeoTIFF Raster (442x418; Aralkum Desert)
 │
 ├── data/assets/mars_earth_analogs/          <-- OpenSpace Lua Assets
 │   ├── mars_earth_analogs.asset             <-- Master entry asset
@@ -102,9 +103,10 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
    - **GeoTIFF Elevation Raster (`out.tif`)**: 16-bit GeoTIFF (WGS 84, 4,424 × 4,184 resolution) capturing high-resolution micro-topographic relief (44 m to 78 m elevation, mean 59.94 m) across the Aralkum Desert / Aral Sea basin floor.
    - **EMIT Mineral CSV Grid (`out.csv`)**: 4,424 × 4,184 mineral classification matrix converted from EMIT imaging spectroscopy.
    - **EMIT Mineral GeoTIFF Raster (`lut.tif`)**: High-resolution GeoTIFF (WGS 84, 1,327 × 2,511 resolution, Lon 57°–60°E, Lat 25°–31°N) containing discrete mineral classification codes (IDs 69–84) for pyroxene, hematite, goethite, and basalt evaporite coatings across the Lut Desert, Iran.
+   - **EMIT Mineral GeoTIFF Raster (`araldesert.tif`)**: High-resolution GeoTIFF (WGS 84, 442 × 418 resolution) containing discrete mineral classification codes (IDs 45–57) for mirabilite, thenardite, gypsum, and toxic sulfate evaporites across the Aralkum Desert / Aral Sea bed.
 
 3. **NASA EMIT & MSL CheMin Surface Materials**:
-   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy (`lut.tif` & `out.csv`) and Curiosity MSL CheMin/SAM in-situ instruments.
+   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy (`araldesert.tif`, `lut.tif` & `out.csv`) and Curiosity MSL CheMin/SAM in-situ instruments.
 
 ---
 

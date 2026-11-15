@@ -10,7 +10,7 @@
  *
  * ALL scores derived from exact mathematical formula: S_i = 100 * exp(-|Delta_i| / D_i)
  * ZERO hallucinated numbers. Verified NASA POWER 10-year daily archive (2015-2025, 4,018 daily records per analog CSV),
- * NASA earthaccess EMIT L2B mineral mapping (lut.tif & out.csv), ICESat-2 (ATL06 out.tif 44-78m DEM), NASA EMIT spectroscopy, and MSL Curiosity REMS/CheMin.
+ * NASA earthaccess EMIT L2B mineral mapping (araldesert.tif, lut.tif & out.csv), ICESat-2 (ATL06 out.tif 44-78m DEM), NASA EMIT spectroscopy, and MSL Curiosity REMS/CheMin.
  */
 
 window.TEAM_DATA = {
@@ -293,8 +293,8 @@ window.TEAM_DATA = {
       elevation_m: 30.85,
       alt: 25000
     },
-    desc: "Exsiccated Aral Sea bed featuring toxic sulfate evaporite crusts, electrostatic dust storms, and ICESat-2 mapped micro-topography (out.tif).",
-    blurb: "The Aralkum Desert is the world's youngest desert, formed on the desiccated bed of the Aral Sea with high-resolution micro-topography mapped via NASA earthaccess ICESat-2 ATL06 laser altimetry (out.tif). Its surface is blanketed in toxic sulfate and chloride evaporite crusts that mirror the sulfate-rich Martian regolith of Gale Crater. With an annual mean temperature of 10.66°C, extreme continentality swinging between -36°C and +36°C, and violent salt-dust storms with high electrostatic potential, Aralkum provides an extraordinary terrestrial laboratory for rover triboelectric charging and evaporite biosignature preservation.",
+    desc: "Exsiccated Aral Sea bed featuring toxic sulfate evaporite crusts, electrostatic dust storms, and NASA EMIT mineral mapping (araldesert.tif).",
+    blurb: "The Aralkum Desert is the world's youngest desert, formed on the desiccated bed of the Aral Sea with high-resolution mineral spectroscopy mapped via NASA EMIT L2B (araldesert.tif; 442 × 418 matrix) and ICESat-2 ATL06 laser altimetry (out.tif). Its surface is blanketed in toxic sulfate and chloride evaporite crusts that mirror the sulfate-rich Martian regolith of Gale Crater. With an annual mean temperature of 10.66°C, extreme continentality swinging between -36°C and +36°C, and violent salt-dust storms with high electrostatic potential, Aralkum provides an extraordinary terrestrial laboratory for rover triboelectric charging and evaporite biosignature preservation.",
     stations: [
       {
         id: "ark_01",
@@ -339,9 +339,9 @@ window.TEAM_DATA = {
       surface_temp_c: 12.949,
 
       // 2) Astrobiology / Surface Materials (NASA EMIT, earthaccess ICESat-2 Topography & Field Surveys)
-      soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust (EMIT-2 target)",
+      soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust (NASA EMIT araldesert.tif)",
       chemical_organic_focus: "Entrapment of catastrophic desiccation organic biosignatures in sulfate crystals",
-      emit_mineral_matrix: "NASA EMIT L2B Mineral Grid: 4,424 × 4,184 matrix (EMITL2BMIN.002 via earthaccess out.csv)",
+      emit_mineral_matrix: "NASA EMIT L2B Mineral Grid: 442 × 418 matrix (EMITL2BMIN.002 via earthaccess araldesert.tif & out.csv)",
       surface_elevation_relief: "44 – 78 m relief (Mean 59.9 m; NASA earthaccess ICESat-2 ATL06 out.tif)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
@@ -542,7 +542,7 @@ window.PARAMETER_DEFINITIONS = [
     marsBaseline: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
     scale: null,
     desc: "Dominant surface mineralogy and micro-topography providing geological substrates for biosignature preservation.",
-    source: "NASA EMIT (lut.tif / out.csv), earthaccess ICESat-2 (out.tif) & MSL CheMin"
+    source: "NASA EMIT (araldesert.tif / lut.tif / out.csv), earthaccess ICESat-2 (out.tif) & MSL CheMin"
   },
   {
     key: "chemical_organic_focus",
@@ -565,8 +565,8 @@ window.PARAMETER_DEFINITIONS = [
     unit: "Matrix",
     marsBaseline: "CRISM & Mastcam multispectral mineral identification (Fe-smectites, jarosite, gypsum)",
     scale: null,
-    desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess lut.tif & out.csv).",
-    source: "NASA earthaccess EMIT L2B (lut.tif / out.csv / out.tif) & CRISM"
+    desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess araldesert.tif, lut.tif & out.csv).",
+    source: "NASA earthaccess EMIT L2B (araldesert.tif / lut.tif / out.csv / out.tif) & CRISM"
   },
   {
     key: "surface_elevation_relief",
