@@ -29,7 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
     tourActive: false,
     tourIndex: 0,
     tourSpeed: 1.0,
-    tourTimer: null
+    tourTimer: null,
+    hasTourEverRun: false,
+    tourRestartNeeded: false
   };
 
   // OpenSpace API & Gemini Services
@@ -39,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Camera focus targets centered in the left viewport area (offset by the right-hand webpanel)
   // At altitude ~240-260 km, full geographic feature (e.g. 154-km Gale Crater) is recognizable and complete
   const SITE_CAMERA_TARGETS = {
-    mars_gale: { lat: -5.4801, lon: 138.4162, alt: 240000.0 },
+    mars_gale: { lat: -5.41, lon: 137.19, alt: 240000.0 },
     lut: { lat: 30.01, lon: 59.42, alt: 250000.0 },
     mcmurdo: { lat: -78.00, lon: 164.48, alt: 250000.0 },
     aralkum: { lat: 44.29, lon: 60.59, alt: 260000.0 },
@@ -135,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Initial camera flight to Gale Crater on Mars centered in left viewport region (~240 km altitude)
-    openSpace.flyToGeo("Mars", -5.4801, 138.4162, 240000.0, 2.5);
+    openSpace.flyToGeo("Mars", -5.41, 137.19, 240000.0, 2.5);
   });
 
   openSpace.onDisconnect(() => {
@@ -927,7 +929,7 @@ document.addEventListener("DOMContentLoaded", () => {
           openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
         end
       `);
-      const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: -5.4801, lon: 138.4162, alt: 240000.0 };
+      const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: -5.41, lon: 137.19, alt: 240000.0 };
       openSpace.flyToGeo(state.currentSiteKey === "mars_gale" ? "Mars" : "Earth", target.lat, target.lon, target.alt, 2.5);
       state.activeOverlay = null;
     }
@@ -1268,7 +1270,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (marsReferencePanel) {
     marsReferencePanel.addEventListener("click", (e) => {
       if (e.target && e.target.closest("button")) return;
-      toggleComparisonHUD("mars_gale");
+      selectSite("mars_gale", true);
     });
   }
 
@@ -1408,6 +1410,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearTourOverlayQuietly();
     dismissHUD();
     state.tourIndex = 0;
+    state.tourRestartNeeded = true;
     if (btnTourPlay) {
       btnTourPlay.innerText = "▶ Start Tour";
       btnTourPlay.classList.remove("btn-tour-end");
@@ -1477,13 +1480,26 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1. MARS: GALE CRATER
         // --------------------------------------------------
         if (siteKey === "mars_gale") {
-          updateTourStatus("1/5 Mars: Gale Crater (In Focus)");
+          updateTourStatus("1/5 Mars: Gale Crater");
           clearTourOverlayQuietly();
           dismissHUD();
           setIdleMotion(false);
-          // Already in focus from startup; update site state without camera refly
-          selectSite("mars_gale", false);
 
+          // Fly back to Mars Gale Crater if restarting tour, or if not currently on Mars
+          const needsFlight = state.tourRestartNeeded || state.currentSiteKey !== "mars_gale" || state.hasTourEverRun;
+          state.hasTourEverRun = true;
+          state.tourRestartNeeded = false;
+
+          if (needsFlight) {
+            updateTourStatus("1/5 Flying to Mars: Gale Crater...");
+            selectSite("mars_gale", true);
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+          } else {
+            selectSite("mars_gale", false);
+          }
+
+          updateTourStatus("1/5 Mars: Gale Crater (In Focus)");
           // Half-second pause at the crater
           await tourDelay(500);
           if (!state.tourActive || tourCancellation) break;

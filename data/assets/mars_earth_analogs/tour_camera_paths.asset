@@ -1,5 +1,5 @@
 local AnalogSites = {
-  MarsGale = { Globe = "Mars", Lat = -5.4801, Lon = 138.4162, Alt = 240000, Name = "Mars: Gale Crater" },
+  MarsGale = { Globe = "Mars", Lat = -5.41, Lon = 137.19, Alt = 240000, Name = "Mars: Gale Crater" },
   Aralkum = { Globe = "Earth", Lat = 44.29, Lon = 60.59, Alt = 260000, Name = "Earth: Aralkum Desert" },
   McMurdo = { Globe = "Earth", Lat = -78.00, Lon = 164.48, Alt = 250000, Name = "Earth: McMurdo Dry Valleys" },
   Lut = { Globe = "Earth", Lat = 30.01, Lon = 59.42, Alt = 250000, Name = "Earth: Lut Desert" },
@@ -54,7 +54,7 @@ local Actions = {
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('Mars')
       end
-      openspace.navigation.flyToGeo('Mars', -5.4801, 138.4162, 240000, 3.5)
+      openspace.navigation.flyToGeo('Mars', -5.41, 137.19, 240000, 3.5)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", true)
       end
