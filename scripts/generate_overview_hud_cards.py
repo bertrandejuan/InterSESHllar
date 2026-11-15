@@ -44,9 +44,9 @@ SITES = {
             ],
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Yellowknife Bay Mudstones", "Ancient lacustrine smectites and sulfate-bearing Mount Sharp strata"),
-                ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "SAM / CheMin organic molecule and biomarker preservation target"),
-                ("EMIT / Orbital Spectroscopy", "CRISM Multispectral Mineral Map", "Compact Reconnaissance Imaging Spectrometer orbital mineral identification"),
-                ("Topographic Relief & Altimetry", "-4,400 m to +1,100 m", "NASA MOLA laser altimeter 5.5 km Mount Sharp central mound relief")
+                ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "Target for organic carbon preservation and ancient habitability biosignatures"),
+                ("Surface Mineral Spectroscopy", "Fe-Smectites, Jarosite & Sulfates", "Hydrated smectite clays, ferric sulfates, and calcium sulfates across Mount Sharp"),
+                ("Topographic Relief & Elevation", "-4,400 m to +1,100 m", "Crater depression with 5.5 km central sedimentary mound relief")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "3.50 m/s", "Gale Crater diurnal channel flow and slope wind velocity"),
@@ -99,8 +99,8 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
                 ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 1,327x2,511 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (lut.tif)"),
-                ("Topographic Relief & Altimetry", "401 m Elevation", "NASA POWER / MERRA-2 digital elevation model of central yardang plateau")
+                ("Surface Mineral Spectroscopy", "Pyroxene, Hematite & Goethite", "Surface spectral unmixing showing iron oxides, pyroxene, and basalt weathering coatings"),
+                ("Topographic Relief & Elevation", "401 m Elevation", "Elevated basalt plateau with deep wind-carved yardang corridors")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "4.09 m/s", "Persistent 120-day summer winds driving active aeolian sand saltation"),
@@ -120,7 +120,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Lut Desert holds Earth's recorded land skin thermal maximum (70.70 °C). Mean air temperature is 26.60 °C with daytime highs averaging 34.59 °C and a diurnal swing of 15.64 °C.",
-            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs mapped via NASA EMIT L2B spectroscopy (lut.tif) provide natural analogs to Mount Sharp aeolian structures investigated for biosignature preservation.",
+            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs provide natural analogs to Mount Sharp aeolian structures investigated for biosignature preservation.",
             'dynamics': "Surface wind speeds average 4.09 m/s, driving active sand transport and yardang corrasion that closely matches Curiosity's 3.50 m/s wind regime.",
             'moisture': "Hyper-arid atmospheric regime with a mean relative humidity of only 21.98% and daily precipitation of 0.24 mm/day (88 mm/year total liquid).",
             'radiation': "Intense desert solar insolation of 21.14 MJ/m²/day with UVB surface flux of 0.317 W/m², modeling high desert surface radiative exposure."
@@ -153,8 +153,8 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Beacon Sandstone & Dry Permafrost", "Porous Beacon sandstone sheltering cryptoendolithic microbial communities"),
                 ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces"),
-                ("EMIT / Orbital Spectroscopy", "Cryogenic Reflectance Spectroscopy", "In-situ cryogenic reflectance spectroscopy and hyperspectral field surveys"),
-                ("Topographic Relief & Altimetry", "1,139 m Elevation", "NASA POWER / MERRA-2 high-relief polar permafrost mountain terrain")
+                ("Surface Mineral Spectroscopy", "Quartz, Feldspar & Cryogenic Salts", "Cryogenic mineral weathering with nitrate and halite salt crusts"),
+                ("Topographic Relief & Elevation", "1,139 m Elevation", "Glacially carved dry valleys bounded by high-relief polar permafrost mountains")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "6.81 m/s", "Hurricane-force katabatic winds descending from the East Antarctic Ice Sheet"),
@@ -207,8 +207,8 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
                 ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 442x418 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (araldesert.tif & out.csv)"),
-                ("Topographic Relief & Altimetry", "44 – 78 m (Mean 59.9 m)", "NASA earthaccess ICESat-2 ATL06 laser altimetry raster (out.tif)")
+                ("Surface Mineral Spectroscopy", "Mirabilite, Thenardite & Gypsum", "Sodium and calcium sulfate evaporite minerals across desiccated seabed"),
+                ("Topographic Relief & Elevation", "44 – 78 m Relief (Mean: 59.9 m)", "Low-relief desiccated seabed floor with micro-topographic dune and crust features")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "5.74 m/s", "Strong regional winds driving violent electrostatic salt-dust storms"),
@@ -228,7 +228,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Exhibits continentality with mean temperature of 10.66 °C and annual thermal extremes ranging from -36 °C in winter to +36 °C in summer.",
-            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts mapped via NASA EMIT L2B spectroscopy (araldesert.tif) that mirror Gale Crater's sulfate-bearing Mount Sharp strata.",
+            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts that mirror Gale Crater's sulfate-bearing Mount Sharp strata.",
             'dynamics': "High-velocity salt-dust storms (5.74 m/s mean wind) generate electrostatic triboelectric fields modeling Martian regional dust events.",
             'moisture': "Regional continental moisture averages 70.58% relative humidity with sparse arid precipitation of 0.37 mm/day.",
             'radiation': "Solar shortwave flux of 13.27 MJ/m²/day and UVB of 0.196 W/m² provide a near-exact match to Martian equatorial flux (14.76 MJ/m²/d and 0.200 W/m² UVB)."
@@ -261,8 +261,8 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Lithium-Enriched Halite & Gypsum Crust", "10,000 km² expanse of pure lithium-halite evaporite playa modeling paleolakes"),
                 ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions"),
-                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B Evaporite Map", "EMIT imaging spectroscopy halite, borate, and sulfate evaporite mapping"),
-                ("Topographic Relief & Altimetry", "3,656 m Elevation", "NASA POWER / MERRA-2 high-altitude Altiplano salt flat elevation")
+                ("Surface Mineral Spectroscopy", "Halite, Gypsum & Lithium Borates", "Thick crystalline evaporite crust composed of halite and lithium-bearing borate minerals"),
+                ("Topographic Relief & Elevation", "3,656 m Elevation", "Ultra-flat high-altitude Andean plateau salt flat")
             ],
             'dynamics': [
                 ("Surface Wind Speed (10m) [WS10M]", "2.90 m/s", "Moderate high-altitude Altiplano aerodynamic wind velocity"),

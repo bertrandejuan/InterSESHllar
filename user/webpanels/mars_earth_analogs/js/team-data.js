@@ -73,10 +73,10 @@ window.TEAM_DATA = {
       surface_temp_c: -50.89,
 
       // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
-      soil_mineral_type: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
-      chemical_organic_focus: "Target for organic carbon preservation via MSL SAM / CheMin instruments",
-      emit_mineral_matrix: "CRISM & Mastcam multispectral mineral identification (Fe-smectites, jarosite, gypsum)",
-      surface_elevation_relief: "-4,400 m crater floor / 5.5 km Mount Sharp relief (MOLA altimetry)",
+      soil_mineral_type: "Yellowknife Bay Mudstones & Sulfate-bearing strata",
+      chemical_organic_focus: "Target for organic carbon preservation",
+      emit_mineral_matrix: "Fe-Smectites, Jarosite & Calcium Sulfates",
+      surface_elevation_relief: "-4,400 m crater floor / 5.5 km Mount Sharp relief",
 
       // 3) Atmospheric Dynamics
       avg_wind_speed_ms: 3.50,
@@ -115,8 +115,8 @@ window.TEAM_DATA = {
       elevation_m: 256.0,
       alt: 24000
     },
-    desc: "Earth's thermal maximum land surface with towering yardangs and NASA EMIT L2B mineral spectrometry (lut.tif), directly analogous to Mount Sharp aeolian yardang ridges.",
-    blurb: "The Lut Desert (Dasht-e Lut) holds the record for the highest land skin temperatures ever measured on Earth (70.7°C). Surface mineralogy is characterized by a 1,327 × 2,511 NASA EMIT L2B mineral mapping matrix (lut.tif) spanning 25°–31°N, 57°–60°E. Its hyper-arid atmosphere features a mean relative humidity of only 21.98%, annual precipitation under 0.25 mm/day, and intense solar insolation (21.14 MJ/m²/day). Towering yardang ridges carved by continuous 120-day winds mirror the vast aeolian yardang fields of Aeolis Palus and the Bagnold Dunes inside Gale Crater.",
+    desc: "Earth's thermal maximum land surface with towering yardangs directly analogous to Mount Sharp aeolian yardang ridges.",
+    blurb: "The Lut Desert (Dasht-e Lut) holds the record for the highest land skin temperatures ever measured on Earth (70.7°C). Its hyper-arid atmosphere features a mean relative humidity of only 21.98%, annual precipitation under 0.25 mm/day, and intense solar insolation (21.14 MJ/m²/day). Towering yardang ridges carved by continuous 120-day winds mirror the vast aeolian yardang fields of Aeolis Palus and the Bagnold Dunes inside Gale Crater.",
     stations: [
       {
         id: "lut_01",
@@ -161,10 +161,10 @@ window.TEAM_DATA = {
       surface_temp_c: 70.70,
 
       // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
-      soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardangs (NASA EMIT L2B lut.tif)",
-      chemical_organic_focus: "Abiotic limit-of-detection testing for rover organic detection instruments",
-      emit_mineral_matrix: "NASA EMIT L2B Mineral Grid: 1,327 × 2,511 matrix (EMITL2BMIN.002 via earthaccess lut.tif)",
-      surface_elevation_relief: "401 m elevation (Basalt plateau & yardang mega-corridor relief)",
+      soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardangs",
+      chemical_organic_focus: "Abiotic organic limit-of-detection baseline",
+      emit_mineral_matrix: "Pyroxene, Hematite & Goethite Surface Matrix",
+      surface_elevation_relief: "401 m elevation / 150 m yardang corridor relief",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 4.0933,
@@ -250,10 +250,10 @@ window.TEAM_DATA = {
       surface_temp_c: -25.58,
 
       // 2) Astrobiology / Surface Materials (NASA EMIT & Field Surveys)
-      soil_mineral_type: "Beacon Sandstone Matrix & Dry Permafrost (EMIT-2 excludes >60°S; field surveys)",
-      chemical_organic_focus: "Cryopreserved cryptoendolithic lichen biomolecules inside porous sandstone matrix",
-      emit_mineral_matrix: "In-situ cryogenic reflectance spectroscopy & hyperspectral field surveys",
-      surface_elevation_relief: "1,139 m elevation (Polar mountain permafrost & valley relief)",
+      soil_mineral_type: "Beacon Sandstone Matrix & Dry Permafrost",
+      chemical_organic_focus: "Cryopreserved cryptoendolithic biomolecules",
+      emit_mineral_matrix: "Quartz, Feldspar & Cryogenic Salts",
+      surface_elevation_relief: "1,139 m elevation / 800 m glacial valley relief",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 6.8127,
@@ -293,8 +293,8 @@ window.TEAM_DATA = {
       elevation_m: 30.85,
       alt: 25000
     },
-    desc: "Exsiccated Aral Sea bed featuring toxic sulfate evaporite crusts, electrostatic dust storms, and NASA EMIT mineral mapping (araldesert.tif).",
-    blurb: "The Aralkum Desert is the world's youngest desert, formed on the desiccated bed of the Aral Sea with high-resolution mineral spectroscopy mapped via NASA EMIT L2B (araldesert.tif; 442 × 418 matrix) and ICESat-2 ATL06 laser altimetry (out.tif). Its surface is blanketed in toxic sulfate and chloride evaporite crusts that mirror the sulfate-rich Martian regolith of Gale Crater. With an annual mean temperature of 10.66°C, extreme continentality swinging between -36°C and +36°C, and violent salt-dust storms with high electrostatic potential, Aralkum provides an extraordinary terrestrial laboratory for rover triboelectric charging and evaporite biosignature preservation.",
+    desc: "Exsiccated Aral Sea bed featuring toxic sulfate evaporite crusts, electrostatic dust storms, and low-relief lakebed topography.",
+    blurb: "The Aralkum Desert is the world's youngest desert, formed on the desiccated bed of the Aral Sea. Its surface is blanketed in toxic sulfate and chloride evaporite crusts that mirror the sulfate-rich Martian regolith of Gale Crater. With an annual mean temperature of 10.66°C, extreme continentality swinging between -36°C and +36°C, and violent salt-dust storms with high electrostatic potential, Aralkum provides an extraordinary terrestrial laboratory for rover triboelectric charging and evaporite biosignature preservation.",
     stations: [
       {
         id: "ark_01",
@@ -339,10 +339,10 @@ window.TEAM_DATA = {
       surface_temp_c: 12.949,
 
       // 2) Astrobiology / Surface Materials (NASA EMIT, earthaccess ICESat-2 Topography & Field Surveys)
-      soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust (NASA EMIT araldesert.tif)",
-      chemical_organic_focus: "Entrapment of catastrophic desiccation organic biosignatures in sulfate crystals",
-      emit_mineral_matrix: "NASA EMIT L2B Mineral Grid: 442 × 418 matrix (EMITL2BMIN.002 via earthaccess araldesert.tif & out.csv)",
-      surface_elevation_relief: "44 – 78 m relief (Mean 59.9 m; NASA earthaccess ICESat-2 ATL06 out.tif)",
+      soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust",
+      chemical_organic_focus: "Entrapment of desiccation organic biosignatures in sulfate crystals",
+      emit_mineral_matrix: "Mirabilite, Thenardite, Gypsum & Halite Evaporite",
+      surface_elevation_relief: "44 – 78 m relief (Mean: 59.9 m)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 5.7403,
@@ -428,10 +428,10 @@ window.TEAM_DATA = {
       surface_temp_c: 8.808,
 
       // 2) Astrobiology / Surface Materials (NASA EMIT Mineralogy)
-      soil_mineral_type: "Lithium-Enriched Halite & Gypsum Evaporite Playa (EMIT-2 target)",
-      chemical_organic_focus: "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions",
-      emit_mineral_matrix: "NASA EMIT L2B halite/gypsum/borate evaporite surface mapping & band-depth matrix",
-      surface_elevation_relief: "3,656 m elevation (High-altitude hypobaric Altiplano salt flat)",
+      soil_mineral_type: "Lithium-Enriched Halite & Gypsum Crust",
+      chemical_organic_focus: "Preservation of polyextremophile cellular organics in fluid inclusions",
+      emit_mineral_matrix: "Halite, Gypsum, Ulexite & Lithium Borates",
+      surface_elevation_relief: "3,656 m elevation (Salt flat playa)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
       avg_wind_speed_ms: 2.9037,
@@ -531,7 +531,7 @@ window.PARAMETER_DEFINITIONS = [
     source: "MERRA-2 Skin Temp & REMS Ground Temperature Sensor"
   },
 
-  // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
+  // 2) Astrobiology / Surface Materials
   {
     key: "soil_mineral_type",
     label: "Mineral Composition & Rock Type",
@@ -539,10 +539,10 @@ window.PARAMETER_DEFINITIONS = [
     category: "astrobiology",
     categoryLabel: "Astrobiology / Makeup",
     unit: "Mineralogy",
-    marsBaseline: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
+    marsBaseline: "Yellowknife Bay Mudstones & Sulfate-bearing strata",
     scale: null,
     desc: "Dominant surface mineralogy and micro-topography providing geological substrates for biosignature preservation.",
-    source: "NASA EMIT (araldesert.tif / lut.tif / out.csv), earthaccess ICESat-2 (out.tif) & MSL CheMin"
+    source: "Mars: MSL CheMin XRD & SAM | Earth Analogs: NASA EMIT (araldesert.tif / lut.tif), ICESat-2 (out.tif) & Field Petrography"
   },
   {
     key: "chemical_organic_focus",
@@ -551,34 +551,34 @@ window.PARAMETER_DEFINITIONS = [
     category: "astrobiology",
     categoryLabel: "Astrobiology / Makeup",
     unit: "Preservation",
-    marsBaseline: "Organic carbon preservation target via MSL SAM/CheMin",
+    marsBaseline: "Organic carbon preservation target in mudstones",
     scale: null,
-    desc: "Target compounds, macromolecular organic carbon, and preservation mechanisms.",
-    source: "Terrestrial Astrobiology Surveys & MSL Sample Analysis at Mars"
+    desc: "Target compounds, macromolecular organic carbon, and biosignature preservation mechanisms.",
+    source: "Mars: MSL SAM Pyrolysis Gas Chromatography | Earth Analogs: Astrobiology Extreme-Environment Surveys"
   },
   {
     key: "emit_mineral_matrix",
-    label: "NASA EMIT Mineral Spectroscopy",
+    label: "Surface Mineral Spectroscopy",
     code: "EMIT_SPEC",
     category: "astrobiology",
     categoryLabel: "Astrobiology / Spectroscopy",
     unit: "Matrix",
-    marsBaseline: "CRISM & Mastcam multispectral mineral identification (Fe-smectites, jarosite, gypsum)",
+    marsBaseline: "Fe-Smectites, Jarosite & Calcium Sulfates",
     scale: null,
-    desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess araldesert.tif, lut.tif & out.csv).",
-    source: "NASA earthaccess EMIT L2B (araldesert.tif / lut.tif / out.csv / out.tif) & CRISM"
+    desc: "Surface mineral identification and spectral composition identifying dominant mineral species.",
+    source: "Mars: CRISM & Mastcam Multispectral | Aralkum: NASA EMIT L2B (araldesert.tif & out.csv) | Lut: NASA EMIT L2B (lut.tif) | McMurdo: In-Situ Reflectance | Uyuni: NASA EMIT L2B"
   },
   {
     key: "surface_elevation_relief",
-    label: "Topographic Relief & Laser Altimetry",
+    label: "Topographic Relief & Elevation",
     code: "ELEV_TOPO",
     category: "astrobiology",
     categoryLabel: "Astrobiology / Topography",
     unit: "m",
-    marsBaseline: "-4,400 m floor / 5.5 km Mount Sharp relief (MOLA)",
+    marsBaseline: "-4,400 m floor / 5.5 km Mount Sharp relief",
     scale: null,
-    desc: "Surface elevation and micro-topographic relief derived from satellite laser altimetry (ICESat-2 ATL06 out.tif) and digital elevation models.",
-    source: "NASA earthaccess ICESat-2 (ATL06 out.tif DEM) & NASA MOLA"
+    desc: "Surface elevation and micro-topographic relief.",
+    source: "Mars: NASA MOLA Laser Altimeter | Aralkum: NASA earthaccess ICESat-2 (ATL06 out.tif) | Lut, McMurdo, Uyuni: MERRA-2 Global DEM"
   },
 
   // 3) Atmospheric Dynamics
