@@ -883,7 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
         if ${enable} then
           if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.CartesianPosition") then
-            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.CartesianPosition", { -0.68, 0.68, -2.0 })
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.CartesianPosition", { -1.13, 0.55, -2.0 })
           end
           if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Scale") then
             openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Scale", 0.44)
