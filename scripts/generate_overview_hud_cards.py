@@ -83,7 +83,7 @@ SITES = {
         'highlight_border': (255, 185, 40, 255),
         'key_points': {
             'thermal': "26.60 °C",
-            'astrobiology': "Basalt Regolith / EMIT lut.tif",
+            'astrobiology': "Basalt Regolith Pavement",
             'dynamics': "4.09 m/s",
             'moisture': "21.98 %",
             'radiation': "21.14 MJ/m²/d"
@@ -191,7 +191,7 @@ SITES = {
         'highlight_border': (90, 240, 140, 255),
         'key_points': {
             'thermal': "10.66 °C",
-            'astrobiology': "Toxic Sulfate / ICESat-2",
+            'astrobiology': "Toxic Sulfate Crust",
             'dynamics': "5.74 m/s",
             'moisture': "70.58 %",
             'radiation': "13.27 MJ/m²/d"
