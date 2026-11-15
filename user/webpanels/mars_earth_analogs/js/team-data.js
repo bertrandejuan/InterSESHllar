@@ -75,6 +75,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
       soil_mineral_type: "Yellowknife Bay Mudstones & Sulfate-bearing strata (CheMin verified)",
       chemical_organic_focus: "Target for organic carbon preservation via MSL SAM / CheMin instruments",
+      emit_mineral_matrix: "CRISM & Mastcam multispectral mineral identification (Fe-smectites, jarosite, gypsum)",
       surface_elevation_relief: "-4,400 m crater floor / 5.5 km Mount Sharp relief (MOLA altimetry)",
 
       // 3) Atmospheric Dynamics
@@ -162,6 +163,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
       soil_mineral_type: "Basalt Regolith Pavement & Iron-Oxide Yardang Bedrock (EMIT-2 target)",
       chemical_organic_focus: "Abiotic limit-of-detection testing for rover organic detection instruments",
+      emit_mineral_matrix: "NASA EMIT L2B pyroxene/iron-oxide imaging spectroscopy & spectral unmixing",
       surface_elevation_relief: "401 m elevation (Basalt plateau & yardang mega-corridor relief)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
@@ -250,6 +252,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT & Field Surveys)
       soil_mineral_type: "Beacon Sandstone Matrix & Dry Permafrost (EMIT-2 excludes >60°S; field surveys)",
       chemical_organic_focus: "Cryopreserved cryptoendolithic lichen biomolecules inside porous sandstone matrix",
+      emit_mineral_matrix: "In-situ cryogenic reflectance spectroscopy & hyperspectral field surveys",
       surface_elevation_relief: "1,139 m elevation (Polar mountain permafrost & valley relief)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
@@ -338,6 +341,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT, earthaccess ICESat-2 Topography & Field Surveys)
       soil_mineral_type: "Toxic Sulfate (Mirabilite/Thenardite) & Halite Crust (EMIT-2 target)",
       chemical_organic_focus: "Entrapment of catastrophic desiccation organic biosignatures in sulfate crystals",
+      emit_mineral_matrix: "NASA EMIT L2B Mineral Grid: 4,424 × 4,184 matrix (EMITL2BMIN.002 via earthaccess out.csv)",
       surface_elevation_relief: "44 – 78 m relief (Mean 59.9 m; NASA earthaccess ICESat-2 ATL06 out.tif)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
@@ -426,6 +430,7 @@ window.TEAM_DATA = {
       // 2) Astrobiology / Surface Materials (NASA EMIT Mineralogy)
       soil_mineral_type: "Lithium-Enriched Halite & Gypsum Evaporite Playa (EMIT-2 target)",
       chemical_organic_focus: "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions",
+      emit_mineral_matrix: "NASA EMIT L2B halite/gypsum/borate evaporite surface mapping & band-depth matrix",
       surface_elevation_relief: "3,656 m elevation (High-altitude hypobaric Altiplano salt flat)",
 
       // 3) Atmospheric Dynamics (NASA POWER 10-Year Mean)
@@ -550,6 +555,18 @@ window.PARAMETER_DEFINITIONS = [
     scale: null,
     desc: "Target compounds, macromolecular organic carbon, and preservation mechanisms.",
     source: "Terrestrial Astrobiology Surveys & MSL Sample Analysis at Mars"
+  },
+  {
+    key: "emit_mineral_matrix",
+    label: "NASA EMIT Mineral Spectroscopy",
+    code: "EMIT_SPEC",
+    category: "astrobiology",
+    categoryLabel: "Astrobiology / Spectroscopy",
+    unit: "Matrix",
+    marsBaseline: "CRISM & Mastcam multispectral mineral identification (Fe-smectites, jarosite, gypsum)",
+    scale: null,
+    desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess out.csv).",
+    source: "NASA earthaccess EMIT L2B (out.csv / out.tif) & CRISM"
   },
   {
     key: "surface_elevation_relief",

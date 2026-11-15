@@ -45,6 +45,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Yellowknife Bay Mudstones", "Ancient lacustrine smectites and sulfate-bearing Mount Sharp strata"),
                 ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "SAM / CheMin organic molecule and biomarker preservation target"),
+                ("EMIT / Orbital Spectroscopy", "CRISM Multispectral Mineral Map", "Compact Reconnaissance Imaging Spectrometer orbital mineral identification"),
                 ("Topographic Relief & Altimetry", "-4,400 m to +1,100 m", "NASA MOLA laser altimeter 5.5 km Mount Sharp central mound relief")
             ],
             'dynamics': [
@@ -98,6 +99,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
                 ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments"),
+                ("EMIT / Orbital Spectroscopy", "NASA EMIT Pyroxene/Iron-Oxide Map", "EMIT imaging spectroscopy pyroxene and ferric oxide spectral unmixing"),
                 ("Topographic Relief & Altimetry", "401 m Elevation", "NASA POWER / MERRA-2 digital elevation model of central yardang plateau")
             ],
             'dynamics': [
@@ -151,6 +153,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Beacon Sandstone & Dry Permafrost", "Porous Beacon sandstone sheltering cryptoendolithic microbial communities"),
                 ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces"),
+                ("EMIT / Orbital Spectroscopy", "Cryogenic Reflectance Spectroscopy", "In-situ cryogenic reflectance spectroscopy and hyperspectral field surveys"),
                 ("Topographic Relief & Altimetry", "1,139 m Elevation", "NASA POWER / MERRA-2 high-relief polar permafrost mountain terrain")
             ],
             'dynamics': [
@@ -204,6 +207,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
                 ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures"),
+                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B 4,424x4,184 Grid", "NASA earthaccess EMITL2BMIN.002 mineral composition matrix (out.csv)"),
                 ("Topographic Relief & Altimetry", "44 – 78 m (Mean 59.9 m)", "NASA earthaccess ICESat-2 ATL06 laser altimetry raster (out.tif)")
             ],
             'dynamics': [
@@ -257,6 +261,7 @@ SITES = {
             'astrobiology': [
                 ("Mineral Composition & Rock Type", "Lithium-Enriched Halite & Gypsum Crust", "10,000 km² expanse of pure lithium-halite evaporite playa modeling paleolakes"),
                 ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions"),
+                ("EMIT / Orbital Spectroscopy", "NASA EMIT L2B Evaporite Map", "EMIT imaging spectroscopy halite, borate, and sulfate evaporite mapping"),
                 ("Topographic Relief & Altimetry", "3,656 m Elevation", "NASA POWER / MERRA-2 high-altitude Altiplano salt flat elevation")
             ],
             'dynamics': [

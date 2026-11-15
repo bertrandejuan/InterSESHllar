@@ -286,6 +286,18 @@ document.addEventListener("DOMContentLoaded", () => {
           getMarsVal: () => "Organic carbon preservation target via MSL SAM / CheMin"
         },
         {
+          key: "emit_mineral_matrix",
+          label: "NASA EMIT Mineral Spectroscopy",
+          code: "EMIT_SPEC",
+          unit: "Matrix",
+          desc: "Surface mineral identification matrix derived from NASA EMIT imaging spectroscopy (EMITL2BMIN.002 via earthaccess out.csv).",
+          source: "NASA earthaccess EMIT L2B (out.csv / out.tif) & CRISM",
+          scale: null,
+          isQualitative: true,
+          getVal: (m) => m.emit_mineral_matrix || "EMIT L2B Imaging Spectroscopy",
+          getMarsVal: () => "CRISM & Mastcam multispectral mineral identification"
+        },
+        {
           key: "surface_elevation_relief",
           label: "Topographic Relief & Laser Altimetry",
           code: "ELEV_TOPO",
