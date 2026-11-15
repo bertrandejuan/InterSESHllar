@@ -237,11 +237,11 @@ asset.onInitialize(function()
         Type = "RenderableLabel",
         Enabled = true,
         Text = site.LabelText,
-        FontSize = 30.0,
+        FontSize = 36.0,
         Color = site.Color,
-        MinMaxSize = { 10, 36 },
+        MinMaxSize = { 14, 46 },
         OrientationOption = "Camera View Direction",
-        BlendMode = "Additive"
+        BlendMode = "Normal"
       },
       GUI = {
         Name = site.Name .. " Label",

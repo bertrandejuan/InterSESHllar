@@ -6,6 +6,7 @@ local earthAnalogs = asset.require("./earth_desert_analogs")
 local cameraPaths = asset.require("./tour_camera_paths")
 local teamDataAsset = asset.require("./data/team_analog_data")
 local globeOverlays = asset.require("./analog_globe_overlays")
+local overviewHUD = asset.require("./overview_hud")
 
 asset.onInitialize(function()
   openspace.printInfo("Loaded Mars Gale Crater & Earth Desert Analogs with Team 10-Yr Planetary Surface Data Overlays.")

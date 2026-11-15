@@ -50,12 +50,12 @@ local MarsGaleLabelNode = {
   Renderable = {
     Type = "RenderableLabel",
     Enabled = true,
-    Text = "Gale Crater: MSL Curiosity Station",
-    FontSize = 32.0,
-    Color = { 1.0, 0.65, 0.35 },
-    MinMaxSize = { 12, 38 },
+    Text = "Mars: Gale Crater (Curiosity REMS Station)",
+    FontSize = 38.0,
+    Color = { 1.0, 0.75, 0.35 },
+    MinMaxSize = { 16, 48 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Normal"
   },
   GUI = {
     Name = "Mars Gale Crater Label",

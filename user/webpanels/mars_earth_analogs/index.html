@@ -4,26 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>InterSESHllar: Mars Gale Crater & Earth Desert Analogs</title>
-  <link rel="stylesheet" href="css/style.css?v=5.0.0">
+  <link rel="stylesheet" href="css/style.css?v=6.0.0">
 </head>
 <body>
 
-  <!-- Top Dashboard Header -->
+  <!-- Top Header with Refresh Button & Connection Status -->
   <header class="glass-panel header-row">
     <div class="title-area">
       <h1>
-        <span class="brand-mars">InterSESHllar:</span>
-        <span>Planetary Analogs Dashboard</span>
+        <span class="brand-mars">Planetary Analogs:</span>
+        <span>Mars & Earth</span>
       </h1>
-      <div class="header-subtitle">Cooper Union Mars Gale Crater & Earth Desert Analogs Visualization</div>
+      <div class="header-subtitle">Cooper Union Mars Gale Crater & Earth Desert Analogs</div>
     </div>
     <div class="header-controls">
       <div class="status-pill">
         <span id="dot-openspace" class="indicator-dot offline"></span>
-        <span id="status-openspace">OpenSpace: Connecting...</span>
+        <span id="status-openspace">Connecting...</span>
       </div>
-      <button id="btn-settings-gemini" class="btn btn-secondary" title="Configure Gemini AI Key">
-        ✨ Gemini Key
+      <button id="btn-refresh-panel" class="btn btn-refresh" title="Reload Panel (CEF Hard Refresh)">
+        🔄 Reload Panel
       </button>
       <button id="btn-orbit-return" class="btn btn-orbit" title="Return to high planetary orbit">
         🌐 Orbit View
@@ -31,10 +31,10 @@
     </div>
   </header>
 
-  <!-- Mars & Earth Location Selection Grid -->
+  <!-- Mars & Earth Location Selection Grid (Storyboard Layout) -->
   <section class="glass-panel location-selector-panel">
     <div class="selector-group">
-      <div class="selector-label">Mars Baseline:</div>
+      <div class="selector-label">MARS:</div>
       <button class="btn site-btn mars" data-site="mars_gale">
         <span class="site-icon">🔴</span>
         <span class="site-name">Gale Crater</span>
@@ -42,221 +42,123 @@
     </div>
 
     <div class="selector-group" style="margin-top: 10px;">
-      <div class="selector-label">Earth Desert Analogs:</div>
+      <div class="selector-label">EARTH:</div>
       <div class="earth-buttons-grid">
         <button class="btn site-btn lut btn-active" data-site="lut">
           <span class="site-icon">☀️</span>
           <span class="site-name">Lut Desert</span>
-          <span class="site-country">Iran</span>
         </button>
         <button class="btn site-btn mcmurdo" data-site="mcmurdo">
           <span class="site-icon">❄️</span>
-          <span class="site-name">McMurdo Valleys</span>
-          <span class="site-country">Antarctica</span>
+          <span class="site-name">McMurdo Dry Valleys</span>
         </button>
         <button class="btn site-btn aralkum" data-site="aralkum">
           <span class="site-icon">🏜️</span>
           <span class="site-name">Aralkum Desert</span>
-          <span class="site-country">Uzbekistan</span>
         </button>
         <button class="btn site-btn uyuni" data-site="uyuni">
           <span class="site-icon">🧂</span>
           <span class="site-name">Salar de Uyuni</span>
-          <span class="site-country">Bolivia</span>
         </button>
       </div>
     </div>
   </section>
 
-  <!-- Location Overview & Comparative Blurb Section -->
-  <section class="glass-panel site-blurb-panel" id="site-blurb-panel">
-    <div class="blurb-header">
-      <div class="blurb-title-box">
+  <!-- Active Location Explorer Panel -->
+  <main class="glass-panel main-explorer-panel" id="main-explorer-panel">
+
+    <!-- Active Site Title & Regional Station Pills -->
+    <div class="active-site-header">
+      <div class="active-site-info">
         <h2 id="active-site-title">Lut Desert (Dasht-e Lut)</h2>
         <div id="active-site-subtitle" class="active-site-subtitle">
           Kerman / Sistan, Iran — 4,018 Daily Observations (2015–2025)
         </div>
       </div>
-      <button id="btn-regen-gemini" class="btn btn-gemini-ai" title="Generate fresh comparison using Gemini AI">
-        ✨ Regenerate Blurb via Gemini AI
+      <div class="station-pills-row" id="station-pills-row">
+        <!-- Station buttons: Gandom Beryan [LUT-01], etc. -->
+      </div>
+    </div>
+
+    <!-- Active 3D Viewport HUD Status Notification -->
+    <div id="hud-status-banner" class="hud-status-banner" style="display: none;">
+      <div class="hud-banner-left">
+        <span class="hud-pulse-dot"></span>
+        <span id="hud-status-text" class="hud-status-text">3D Viewport HUD: Mars Comparison Active</span>
+      </div>
+      <button id="btn-dismiss-hud" class="btn-dismiss-hud" title="Close 3D Viewport HUD">✕ Close HUD</button>
+    </div>
+
+    <!-- Overall Comparison to Mars (Right before Biology as requested in Storyboard) -->
+    <div class="mars-comparison-bar" id="mars-comparison-bar">
+      <button id="btn-toggle-mars-comparison" class="btn btn-comparison-mars" title="Toggle overall cross-category comparison with Mars Gale Crater">
+        <div class="comp-btn-left">
+          <span class="comp-icon">🪐</span>
+          <span class="comp-title" id="comp-title-text">Comparison to Mars (All Categories)</span>
+        </div>
+        <div class="comp-btn-right">
+          <span class="comp-badge">3D Viewport HUD</span>
+          <span class="comp-arrow" id="comp-arrow">▶</span>
+        </div>
       </button>
     </div>
 
-    <!-- The Comparative Blurb Comparing Location to Gale Crater -->
-    <div class="blurb-content-card">
-      <div class="blurb-badge">
-        <span class="blurb-sparkle">🪐</span>
-        <span id="blurb-source-tag">Gemini Comparative Synthesis vs Mars Gale Crater</span>
-      </div>
-      <p id="site-blurb-text" class="blurb-paragraph">
-        Loading comparative planetary blurb...
-      </p>
+    <!-- Storyboard Categories & Data Points Container -->
+    <div class="categories-container" id="categories-container">
+      <!-- Injected dynamically by app.js:
+           - Astro-Biology / Biology
+           - Temperature
+           - Wind & Atmosphere
+           - Moisture & Relative Humidity
+           - Solar Radiation
+           Each data point has switch -> [◉ Overview] [○ Overlay] [ ] Orient Sideways
+      -->
     </div>
 
-    <!-- Regional Stations / Multi-Pin Selector -->
-    <div class="regional-pins-section">
-      <div class="pins-section-header">
-        <span class="pins-section-title">📍 Regional Research Stations (Pins):</span>
-        <span class="pins-section-hint">Select a pin to fly camera and inspect detailed telemetry</span>
+  </main>
+
+  <!-- Semi-Translucent Viewport Modal for Comparison Table (Fallback / In-Browser view) -->
+  <div id="modal-mars-backdrop" class="modal-backdrop-overlay" style="display: none;">
+    <div class="modal-semi-translucent-card" id="modal-mars-card">
+      <div class="comp-modal-header">
+        <div class="comp-modal-title">
+          <span>🪐 Comparison to Mars: <span id="comp-site-name">Lut Desert</span> vs Gale Crater</span>
+        </div>
+        <button id="btn-close-comp" class="overview-close-btn" title="Close comparison">&times;</button>
       </div>
-      <div class="pins-button-grid" id="pins-button-grid">
-        <!-- Injected dynamically with 3 pins per region -->
+      <div class="comp-modal-subtitle">
+        Semi-translucent cross-category parameter overview derived from 10-year in-situ daily records (2015–2025) vs Curiosity REMS baseline.
       </div>
-    </div>
-  </section>
-
-  <!-- Active Pin Card: Ranking Bars & Telemetry -->
-  <main class="glass-panel active-pin-card" id="active-pin-card">
-    <div class="pin-card-header">
-      <div class="pin-info-left">
-        <div class="pin-badge-row">
-          <span class="pin-code-badge" id="pin-code-badge">LUT-01</span>
-          <span class="pin-type-badge">Primary Analog Field Site</span>
-        </div>
-        <h3 id="active-pin-name">Gandom Beryan Thermal Ridge</h3>
-        <div class="pin-coords-row" id="pin-coords-text">
-          Lat: 30.85°N | Lon: 58.55°E | Elevation: 256m
-        </div>
-      </div>
-
-      <!-- Overall Mars Similarity Holographic Score Card -->
-      <div class="overall-score-card">
-        <div class="overall-score-title">Overall Mars Match</div>
-        <div class="overall-score-value-row">
-          <span class="overall-score-num" id="overall-score-num">44.4</span>
-          <span class="overall-score-pct">%</span>
-        </div>
-        <div class="overall-score-rank" id="overall-score-rank">Hyper-Arid Yardang Analog</div>
-      </div>
-    </div>
-
-    <div class="pin-description-box" id="pin-description-text">
-      Dark volcanic basalt plateau generating extreme land surface temperatures, modeling thermal absorption of dark Martian basaltic lavas.
-    </div>
-
-    <!-- Ranking Bars for the 4 Categories (Vibrant Neon Glow) -->
-    <div class="category-bars-container">
-      <div class="bars-container-title">
-        <span>Planetary Analog Category Rankings</span>
-        <span class="bars-instruction">Click any category bar to expand the metric data table below</span>
-      </div>
-
-      <div class="ranking-bars-grid">
-        <!-- 1. Thermal Environment -->
-        <div class="ranking-bar-card bar-thermal" data-category="thermal" tabindex="0">
-          <div class="bar-top-row">
-            <div class="bar-label-group">
-              <span class="bar-icon">🟣</span>
-              <span class="bar-title">Thermal Environment</span>
-            </div>
-            <div class="bar-score-group">
-              <span class="bar-score-val" id="score-thermal-val">18.2%</span>
-              <span class="bar-toggle-hint">View Table ▶</span>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill fill-thermal" id="fill-thermal" style="width: 18.2%;"></div>
-          </div>
-          <div class="bar-subtext">Avg Temp: 26.6°C | Sol Delta: 15.6°C | Mars: -53.7°C (58.7°C swing)</div>
-        </div>
-
-        <!-- 2. Atmospheric Dynamics -->
-        <div class="ranking-bar-card bar-dynamics" data-category="atmospheric_dynamics" tabindex="0">
-          <div class="bar-top-row">
-            <div class="bar-label-group">
-              <span class="bar-icon">💨</span>
-              <span class="bar-title">Atmospheric Dynamics</span>
-            </div>
-            <div class="bar-score-group">
-              <span class="bar-score-val" id="score-dynamics-val">42.0%</span>
-              <span class="bar-toggle-hint">View Table ▶</span>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill fill-dynamics" id="fill-dynamics" style="width: 42.0%;"></div>
-          </div>
-          <div class="bar-subtext">Surface Pressure: 85.0 kPa | Wind: 4.09 m/s | Mars: 0.76 kPa</div>
-        </div>
-
-        <!-- 3. Atmospheric Moisture -->
-        <div class="ranking-bar-card bar-moisture" data-category="atmospheric_moisture" tabindex="0">
-          <div class="bar-top-row">
-            <div class="bar-label-group">
-              <span class="bar-icon">💧</span>
-              <span class="bar-title">Atmospheric Moisture</span>
-            </div>
-            <div class="bar-score-group">
-              <span class="bar-score-val" id="score-moisture-val">68.7%</span>
-              <span class="bar-toggle-hint">View Table ▶</span>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill fill-moisture" id="fill-moisture" style="width: 68.7%;"></div>
-          </div>
-          <div class="bar-subtext">Relative Humidity: 22.0% | Precip: 0.24 mm/day | Mars: 7.4% (0mm)</div>
-        </div>
-
-        <!-- 4. Radiation Environment -->
-        <div class="ranking-bar-card bar-radiation" data-category="radiation" tabindex="0">
-          <div class="bar-top-row">
-            <div class="bar-label-group">
-              <span class="bar-icon">☀️</span>
-              <span class="bar-title">Radiation Environment</span>
-            </div>
-            <div class="bar-score-group">
-              <span class="bar-score-val" id="score-radiation-val">48.9%</span>
-              <span class="bar-toggle-hint">View Table ▶</span>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill fill-radiation" id="fill-radiation" style="width: 48.9%;"></div>
-          </div>
-          <div class="bar-subtext">Solar Flux: 21.14 MJ/m²/day | UVA: 13.43 W/m² | UVB: 0.32 W/m²</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Expandable Detailed Climatology Metric Table -->
-    <section class="details-table-section" id="details-table-section">
-      <div class="table-section-header">
-        <div class="table-title-group">
-          <span class="table-title-icon">📊</span>
-          <h4 id="table-filter-title">Detailed Planetary Telemetry Table (Metric)</h4>
-        </div>
-        <div class="table-filter-pills">
-          <button class="pill-btn active" data-filter="all">All Parameters</button>
-          <button class="pill-btn" data-filter="thermal">Thermal</button>
-          <button class="pill-btn" data-filter="atmospheric_dynamics">Atmospheric Dynamics</button>
-          <button class="pill-btn" data-filter="atmospheric_moisture">Moisture</button>
-          <button class="pill-btn" data-filter="radiation">Radiation</button>
-        </div>
-      </div>
-
-      <div class="table-responsive-wrapper">
-        <table class="metric-data-table">
+      <div class="comp-table-wrapper">
+        <table class="comp-table">
           <thead>
             <tr>
-              <th>Parameter</th>
-              <th>Category</th>
-              <th id="th-selected-site-col">Earth Analog Value</th>
-              <th>Mars Gale Crater (REMS)</th>
-              <th>Variance (Δ)</th>
-              <th>Similarity Match</th>
+              <th>Category / Parameter</th>
+              <th id="th-site-label">Analog Value</th>
+              <th>Mars Gale (REMS)</th>
+              <th>Difference (Δ)</th>
+              <th>Analog Match</th>
             </tr>
           </thead>
-          <tbody id="metric-table-body">
-            <!-- Rendered dynamically -->
+          <tbody id="comp-table-body">
+            <!-- Populated dynamically -->
           </tbody>
         </table>
       </div>
-    </section>
-  </main>
+      <div class="comp-modal-footer">
+        <span class="comp-footer-note">Projected into OpenSpace 3D Viewport HUD.</span>
+        <button id="btn-close-comp-bottom" class="btn btn-primary" style="padding: 6px 16px;">Done</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Automated Camera Tour Panel (Preserved for Planetarium Dome Presentations) -->
+  <!-- Automated Camera Tour (Preserved at the bottom as requested) -->
   <section class="glass-panel tour-panel">
     <div class="tour-header">
-      <h3>Automated Camera Tour</h3>
-      <span style="font-size: 0.72rem; color: var(--text-muted);">Cinematic fly-through of all planetary analog sites</span>
+      <div class="tour-title-box">
+        <h3>Automated Camera Tour</h3>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">Cycles all planetary analogs</span>
+      </div>
     </div>
     <div class="btn-group" style="align-items: center; margin-top: 8px;">
       <button id="btn-tour-play" class="btn btn-primary">▶ Start Tour</button>
@@ -272,37 +174,9 @@
     </div>
   </section>
 
-  <!-- Gemini API Key Settings Modal -->
-  <div id="modal-gemini-settings" class="modal-backdrop-overlay" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>✨ Configure Gemini API Key</h3>
-        <button id="btn-close-gemini-modal" class="modal-close-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
-          Enter your Google AI Studio Gemini API key to enable live astrobiological synthesis and dynamic comparison blurb generation. If omitted, the panel uses verified peer-reviewed fallback climatology.
-        </p>
-        <div class="form-group">
-          <label for="input-gemini-key" style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 6px;">
-            Gemini API Key:
-          </label>
-          <input type="password" id="input-gemini-key" class="form-input" placeholder="AIzaSy..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #fff; border-radius: 6px;">
-        </div>
-      </div>
-      <div class="modal-footer" style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px;">
-        <button id="btn-clear-gemini-key" class="btn btn-danger">Clear Key</button>
-        <button id="btn-save-gemini-key" class="btn btn-primary">Save Key</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Scripts -->
-  <script src="js/config.js?v=5.0.0"></script>
-  <script src="js/team-data.js?v=5.0.0"></script>
-  <script src="js/gemini-service.js?v=5.0.0"></script>
-  <script src="js/climate-service.js?v=5.0.0"></script>
-  <script src="js/openspace-api.js?v=5.0.0"></script>
-  <script src="js/app.js?v=5.0.0"></script>
+  <script src="js/team-data.js?v=6.0.0"></script>
+  <script src="js/openspace-api.js?v=6.0.0"></script>
+  <script src="js/app.js?v=6.0.0"></script>
 </body>
 </html>

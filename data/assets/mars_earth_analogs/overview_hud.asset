@@ -1,0 +1,31 @@
+-- OpenSpace ScreenSpace Overview & Comparison HUD Asset
+-- Projects semi-translucent overview cards directly into the 3D viewport (empty space of screen)
+-- Toggled when user clicks "Comparison to Mars (All Categories)" or "◉ Overview"
+
+local defaultTexture = asset.resource("./textures/hud_comparison_lut.png")
+
+local OverviewHUD = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "OverviewHUD",
+  Name = "Overview Comparison HUD",
+  TexturePath = defaultTexture,
+  Enabled = false,
+  Opacity = 0.92,
+  Placement = {
+    CartesianPosition = { -0.32, 0.0, -2.0 },
+    Scale = 0.58
+  }
+}
+
+asset.onInitialize(function()
+  if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
+    openspace.removeScreenSpaceRenderable("OverviewHUD")
+  end
+  openspace.addScreenSpaceRenderable(OverviewHUD)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable("OverviewHUD")
+end)
+
+asset.export("OverviewHUD", OverviewHUD)
