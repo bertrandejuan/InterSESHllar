@@ -798,14 +798,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showHUDTexture(textureFilename) {
-    // Calibrated Scale = 0.82 and CartesianPosition = {-0.24, 0.03, -2.0} ensures flat, screen-facing HUD filling available viewport
+    // User-verified screen coordinates: Scale = 1.19, CartesianPosition = {-0.42, 0.03, -2.0}, FaceCamera = false
+    // FaceCamera = false keeps the HUD strictly flat to the viewport plane, perpendicular to camera view without keystone angle tilt
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 0.82)
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 1.19)
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.CartesianPosition") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.24, 0.03, -2.0 })
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.42, 0.03, -2.0 })
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Rotation") then
           openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Rotation", { 0.0, 0.0, 0.0 })
@@ -1008,9 +1009,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if openspace.action and openspace.action.hasAction("${actionName}") then
           openspace.action.triggerAction("${actionName}")
         else
-          if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
-            openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "${globe}")
-            openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+          if openspace.navigation and openspace.navigation.setFocus then
+            openspace.navigation.setFocus('${globe}')
           end
           openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, 3.5)
         end

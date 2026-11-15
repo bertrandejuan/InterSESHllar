@@ -122,7 +122,7 @@ asset.onInitialize(function()
         Color = site.Color,
         MinMaxSize = { 0, 32 },
         EnableFading = true,
-        FadeUnit = "km",
+        FadeUnit = "Km",
         FadeDistances = { 50.0, 3500.0 },
         FadeWidths = { 20.0, 1500.0 },
         OrientationOption = "Camera View Direction",

@@ -13,8 +13,8 @@ local OverviewHUD = {
   Enabled = false,
   Opacity = 1.0,
   Placement = {
-    CartesianPosition = { -0.24, 0.03, -2.0 },
-    Scale = 0.82,
+    CartesianPosition = { -0.42, 0.03, -2.0 },
+    Scale = 1.19,
     FaceCamera = false,
     Rotation = { 0.0, 0.0, 0.0 }
   }

@@ -109,9 +109,8 @@ class OpenSpaceClient {
 
   flyToGeo(globe, lat, lon, alt = 650000, duration = 3.5) {
     const script = `
-      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.Anchor") then
-        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "${globe}")
-        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+      if openspace.navigation and openspace.navigation.setFocus then
+        openspace.navigation.setFocus('${globe}')
       end
       openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, ${duration})
     `;
