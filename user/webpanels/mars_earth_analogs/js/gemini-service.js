@@ -23,14 +23,14 @@ class GeminiService {
   /**
    * Generates a comparative planetary blurb comparing the selected analog location to Mars Gale Crater
    */
-  async generateComparativeBlurb(siteName, country, pin, metrics, scores, defaultBlurb) {
+  async generateComparativeBlurb(siteName, country, coords, desc, metrics, scores, defaultBlurb) {
     const apiKey = this.getApiKey();
 
     if (!apiKey) {
       console.log("No Gemini API key supplied. Displaying verified peer-reviewed scientific blurb.");
       return {
         source: "In-Situ Climatology & Team Research Archive",
-        text: defaultBlurb || `At ${siteName} (${country}), this planetary analog station demonstrates an overall Mars similarity rating of ${scores.overall}%. Its extreme environmental conditions offer critical insights into Martian surface processes.`
+        text: defaultBlurb || `At ${siteName} (${country}), this planetary analog demonstrates an overall Mars similarity rating of ${scores.overall}%. Its extreme environmental conditions offer critical insights into Martian surface processes.`
       };
     }
 
@@ -49,8 +49,8 @@ You are a senior NASA astrobiologist and planetary scientist writing for an inte
 Generate a concise, captivating, and scientifically rigorous 3 to 4-sentence comparative blurb comparing this terrestrial desert analog location to Mars Gale Crater (Curiosity Rover REMS baseline).
 
 SITE: ${siteName} (${country})
-STATION PIN: ${pin.name} (Lat: ${pin.lat}°, Lon: ${pin.lon}°)
-PIN DESCRIPTION: ${pin.desc}
+COORDINATES: Lat ${coords.lat}°, Lon ${coords.lon}°, Elevation ${coords.elevation_m || 0}m
+SITE DESCRIPTION: ${desc}
 
 IN-SITU METRIC DATA COMPARISON (Earth Site vs Mars Gale Crater Baseline):
 - Average 2m Air Temperature: Earth ${metrics.avg_2m_air_temp_c}°C vs Mars ${mars.avgTemp} (Thermal Match: ${scores.thermal}%)

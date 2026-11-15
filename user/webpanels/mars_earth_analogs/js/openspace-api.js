@@ -15,6 +15,10 @@ class OpenSpaceClient {
     this.onDisconnectListeners = [];
   }
 
+  get isConnected() {
+    return this.connected;
+  }
+
   onConnect(fn) {
     this.onConnectListeners.push(fn);
   }
