@@ -1,5 +1,5 @@
 /**
- * InterSESHllar: Mars vs Earth Planetary Analogs
+ * TerraMatch: Mars vs Earth Planetary Analogs
  * Unified Application Controller
  * Categories strictly aligned with research whiteboard:
  *   1) THERMAL CONDITIONS (NASA POWER API)

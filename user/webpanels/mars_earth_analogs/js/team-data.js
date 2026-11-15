@@ -1,5 +1,5 @@
 /**
- * InterSESHllar: Mars vs Earth Planetary Analogs
+ * TerraMatch: Mars vs Earth Planetary Analogs
  * Strictly Grounded Empirical Climatology & In-Situ Planetary Telemetry
  * Categories strictly aligned with research whiteboard:
  *   1) THERMAL CONDITIONS (NASA POWER API)
