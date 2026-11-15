@@ -1373,6 +1373,33 @@ document.addEventListener("DOMContentLoaded", () => {
     `);
   }
 
+  // Turns off overlay layers and screen-space key HUD without triggering surface zoom flight
+  function clearTourOverlayQuietly() {
+    if (state.activeOverlay) {
+      openSpace.executeLuaScript(`
+        if openspace.hasProperty("Scene.Earth.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", true)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0)
+        end
+        if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
+        end
+      `);
+      state.activeOverlay = null;
+    }
+  }
+
   function tourDelay(ms) {
     return new Promise((resolve) => {
       const speed = state.tourSpeed || 1.0;
@@ -1396,6 +1423,8 @@ document.addEventListener("DOMContentLoaded", () => {
       state.tourTimer = null;
     }
     setIdleMotion(false);
+    clearTourOverlayQuietly();
+    dismissHUD();
     if (btnTourPlay) btnTourPlay.innerText = "▶ Start Tour";
     updateTourStatus("Tour Paused");
   }
@@ -1417,27 +1446,29 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1. MARS: GALE CRATER
         // --------------------------------------------------
         if (siteKey === "mars_gale") {
-          updateTourStatus("1/5 Mars: Gale Crater (Focusing)");
-          clearActiveOverlays();
+          updateTourStatus("1/5 Mars: Gale Crater (In Focus)");
+          clearTourOverlayQuietly();
           dismissHUD();
           setIdleMotion(false);
-          selectSite("mars_gale", true);
-          // Flight animation (3.5s) + linger (3.0s) after animation finishes
-          await tourDelay(6500);
+          // Already in focus from startup; update site state without camera refly
+          selectSite("mars_gale", false);
+
+          // Half-second pause at the crater
+          await tourDelay(500);
           if (!state.tourActive || tourCancellation) break;
 
-          // Toggle thermal conditions overview (3 seconds) and turn off
-          updateTourStatus("1/5 Mars: Thermal Conditions Overview (3s)");
+          // Toggle thermal conditions overview (keep data table for extra second: 4s) and turn off
+          updateTourStatus("1/5 Mars: Thermal Conditions Overview (4s)");
           const thermalCat = SCIENCE_CATEGORIES.find((c) => c.key === "thermal");
           if (thermalCat) {
             state.openAccordionKey = "thermal";
             renderScienceAccordion();
             toggleCategoryHUD(thermalCat);
-            await tourDelay(3000);
+            await tourDelay(4000);
             if (!state.tourActive || tourCancellation) break;
 
             dismissHUD();
-            await tourDelay(400);
+            await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
             // Toggle thermal conditions overlay (linger for 1s after animation finishes)
@@ -1447,16 +1478,14 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(3500);
             if (!state.tourActive || tourCancellation) break;
 
-            // Turn idle mode on mars thermal conditions (1 second) and turn off overlay
-            updateTourStatus("1/5 Mars: Thermal Conditions Idle Orbit (1s)");
+            // Turn idle mode on mars thermal conditions for extra second (2s)
+            updateTourStatus("1/5 Mars: Thermal Conditions Idle Orbit (2s)");
             setIdleMotion(true);
-            await tourDelay(1000);
+            await tourDelay(2000);
             setIdleMotion(false);
 
-            updateTourStatus("1/5 Mars: Turning Off Overlay & Zooming In");
-            clearActiveOverlays();
-            // Zoom back into localized Gale Crater feature (2.5s) + 500ms
-            await tourDelay(3000);
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
           }
         }
 
@@ -1465,26 +1494,27 @@ document.addEventListener("DOMContentLoaded", () => {
         // --------------------------------------------------
         else if (siteKey === "lut") {
           updateTourStatus("2/5 Earth: Lut Desert (Flying from Mars)");
-          clearActiveOverlays();
+          clearTourOverlayQuietly();
           dismissHUD();
           setIdleMotion(false);
           selectSite("lut", true);
-          // Interplanetary flight (3.5s) + linger (3.0s) after animation finishes
-          await tourDelay(6500);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
           if (!state.tourActive || tourCancellation) break;
 
-          // Toggle astrobiology overview (3 seconds) and turn off
-          updateTourStatus("2/5 Lut Desert: Astrobiology Overview (3s)");
+          // Toggle astrobiology overview (extra second: 4s) and turn off
+          updateTourStatus("2/5 Lut Desert: Astrobiology Overview (4s)");
           const astrobioCat = SCIENCE_CATEGORIES.find((c) => c.key === "astrobiology");
           if (astrobioCat) {
             state.openAccordionKey = "astrobiology";
             renderScienceAccordion();
             toggleCategoryHUD(astrobioCat);
-            await tourDelay(3000);
+            await tourDelay(4000);
             if (!state.tourActive || tourCancellation) break;
 
             dismissHUD();
-            await tourDelay(600);
+            await tourDelay(300);
           }
         }
 
@@ -1492,27 +1522,28 @@ document.addEventListener("DOMContentLoaded", () => {
         // 3. MCMURDO VALLEY (ANTARCTICA)
         // --------------------------------------------------
         else if (siteKey === "mcmurdo") {
-          updateTourStatus("3/5 Earth: McMurdo Dry Valleys (Focusing)");
-          clearActiveOverlays();
+          updateTourStatus("3/5 Earth: McMurdo Dry Valleys (Flying to Site)");
+          clearTourOverlayQuietly();
           dismissHUD();
           setIdleMotion(false);
           selectSite("mcmurdo", true);
-          // Flight animation (3.5s) + linger (3.0s) after animation finishes
-          await tourDelay(6500);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
           if (!state.tourActive || tourCancellation) break;
 
-          // Toggle atmospheric dynamics overview (3 seconds) and turn off
-          updateTourStatus("3/5 McMurdo: Atmospheric Dynamics Overview (3s)");
+          // Toggle atmospheric dynamics overview (extra second: 4s) and turn off
+          updateTourStatus("3/5 McMurdo: Atmospheric Dynamics Overview (4s)");
           const dynamicsCat = SCIENCE_CATEGORIES.find((c) => c.key === "dynamics");
           if (dynamicsCat) {
             state.openAccordionKey = "dynamics";
             renderScienceAccordion();
             toggleCategoryHUD(dynamicsCat);
-            await tourDelay(3000);
+            await tourDelay(4000);
             if (!state.tourActive || tourCancellation) break;
 
             dismissHUD();
-            await tourDelay(400);
+            await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
             // Toggle atmospheric dynamics overlay (linger for 1s after animation finishes)
@@ -1522,16 +1553,14 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(3500);
             if (!state.tourActive || tourCancellation) break;
 
-            // Turn idle mode on earth atmospheric dynamics (1 second) and turn off overlay
-            updateTourStatus("3/5 Earth: Atmospheric Dynamics Idle Orbit (1s)");
+            // Turn idle mode on earth atmospheric dynamics for extra second (2s)
+            updateTourStatus("3/5 Earth: Atmospheric Dynamics Idle Orbit (2s)");
             setIdleMotion(true);
-            await tourDelay(1000);
+            await tourDelay(2000);
             setIdleMotion(false);
 
-            updateTourStatus("3/5 McMurdo: Turning Off Overlay & Zooming In");
-            clearActiveOverlays();
-            // Zoom back into McMurdo feature (2.5s) + 500ms
-            await tourDelay(3000);
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
           }
         }
 
@@ -1539,27 +1568,28 @@ document.addEventListener("DOMContentLoaded", () => {
         // 4. ARALKUM DESERT (CENTRAL ASIA)
         // --------------------------------------------------
         else if (siteKey === "aralkum") {
-          updateTourStatus("4/5 Earth: Aralkum Desert (Focusing)");
-          clearActiveOverlays();
+          updateTourStatus("4/5 Earth: Aralkum Desert (Flying to Site)");
+          clearTourOverlayQuietly();
           dismissHUD();
           setIdleMotion(false);
           selectSite("aralkum", true);
-          // Flight animation (3.5s) + linger (3.0s) after animation finishes
-          await tourDelay(6500);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
           if (!state.tourActive || tourCancellation) break;
 
-          // Toggle atmospheric moisture overview (3 seconds) and turn off
-          updateTourStatus("4/5 Aralkum: Atmospheric Moisture Overview (3s)");
+          // Toggle atmospheric moisture overview (extra second: 4s) and turn off
+          updateTourStatus("4/5 Aralkum: Atmospheric Moisture Overview (4s)");
           const moistureCat = SCIENCE_CATEGORIES.find((c) => c.key === "moisture");
           if (moistureCat) {
             state.openAccordionKey = "moisture";
             renderScienceAccordion();
             toggleCategoryHUD(moistureCat);
-            await tourDelay(3000);
+            await tourDelay(4000);
             if (!state.tourActive || tourCancellation) break;
 
             dismissHUD();
-            await tourDelay(400);
+            await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
             // Toggle atmospheric moisture overlay (linger for 1s after animation finishes)
@@ -1569,16 +1599,14 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(3500);
             if (!state.tourActive || tourCancellation) break;
 
-            // Turn idle mode on earth atmospheric moisture (1 second) and turn off overlay
-            updateTourStatus("4/5 Earth: Moisture Idle Orbit (1s)");
+            // Turn idle mode on earth atmospheric moisture for extra second (2s)
+            updateTourStatus("4/5 Earth: Moisture Idle Orbit (2s)");
             setIdleMotion(true);
-            await tourDelay(1000);
+            await tourDelay(2000);
             setIdleMotion(false);
 
-            updateTourStatus("4/5 Aralkum: Turning Off Overlay & Zooming In");
-            clearActiveOverlays();
-            // Zoom back into Aralkum feature (2.5s) + 500ms
-            await tourDelay(3000);
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
           }
         }
 
@@ -1586,27 +1614,28 @@ document.addEventListener("DOMContentLoaded", () => {
         // 5. SALAR DE UYUNI (BOLIVIA)
         // --------------------------------------------------
         else if (siteKey === "uyuni") {
-          updateTourStatus("5/5 Earth: Salar de Uyuni (Focusing)");
-          clearActiveOverlays();
+          updateTourStatus("5/5 Earth: Salar de Uyuni (Flying to Site)");
+          clearTourOverlayQuietly();
           dismissHUD();
           setIdleMotion(false);
           selectSite("uyuni", true);
-          // Flight animation (3.5s) + linger (3.0s) after animation finishes
-          await tourDelay(6500);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
           if (!state.tourActive || tourCancellation) break;
 
-          // Toggle radiation overview (3 seconds) and turn off
-          updateTourStatus("5/5 Salar de Uyuni: Radiation Overview (3s)");
+          // Toggle radiation overview (extra second: 4s) and turn off
+          updateTourStatus("5/5 Salar de Uyuni: Radiation Overview (4s)");
           const radiationCat = SCIENCE_CATEGORIES.find((c) => c.key === "radiation");
           if (radiationCat) {
             state.openAccordionKey = "radiation";
             renderScienceAccordion();
             toggleCategoryHUD(radiationCat);
-            await tourDelay(3000);
+            await tourDelay(4000);
             if (!state.tourActive || tourCancellation) break;
 
             dismissHUD();
-            await tourDelay(400);
+            await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
             // Toggle radiation overlay (linger for 1s after animation finishes)
@@ -1616,24 +1645,22 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(3500);
             if (!state.tourActive || tourCancellation) break;
 
-            // Turn idle mode on earth radiation (1 second) and turn off overlay
-            updateTourStatus("5/5 Earth: Radiation Idle Orbit (1s)");
+            // Turn idle mode on earth radiation for extra second (2s)
+            updateTourStatus("5/5 Earth: Radiation Idle Orbit (2s)");
             setIdleMotion(true);
-            await tourDelay(1000);
+            await tourDelay(2000);
             setIdleMotion(false);
 
-            updateTourStatus("5/5 Uyuni: Turning Off Overlay & Zooming In");
-            clearActiveOverlays();
-            // Zoom back into Uyuni feature (2.5s) + 500ms
-            await tourDelay(3000);
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
           }
 
           if (!state.tourActive || tourCancellation) break;
 
-          // Then idle without overlay on earth (1 second)
-          updateTourStatus("Earth: Final Idle Orbit Without Overlay (1s)");
+          // Final Earth Idle without overlay (extra second: 2s)
+          updateTourStatus("Earth: Final Idle Orbit Without Overlay (2s)");
           setIdleMotion(true);
-          await tourDelay(1000);
+          await tourDelay(2000);
           setIdleMotion(false);
         }
       }
