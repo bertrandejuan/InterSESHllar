@@ -1,16 +1,15 @@
 /**
- * InterSESHllar: Mars vs Earth Planetary Analogs
+ * TerraMatch: Mars vs Earth Planetary Analogs
  * Unified Application Controller
  * Categories strictly aligned with research whiteboard:
  *   1) THERMAL CONDITIONS (NASA POWER API)
- *   2) ASTROBIOLOGY / ENVIRONMENTAL MAKEUP (EMIT-2 / Soil Telemetry Placeholders)
+ *   2) ASTROBIOLOGY / SURFACE MATERIALS (NASA EMIT & MSL CheMin Mineralogy)
  *   3) ATMOSPHERIC DYNAMICS (NASA POWER API)
  *   4) ATMOSPHERIC MOISTURE (NASA POWER API)
  *   5) RADIATION (NASA POWER API / CERES SYN1deg)
  *
  * Grounded in empirical 10-year NASA POWER daily archives (4,018 records) vs Curiosity REMS.
  * All similarity scores computed strictly from mathematical formula: S = 100 * exp(-|Delta| / Scale).
- * Soil parameters explicitly held as non-hallucinated placeholders pending laboratory collection.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,24 +25,26 @@ document.addEventListener("DOMContentLoaded", () => {
     isGeminiLoading: false,
     activeHUD: null,        // Starts with HUD closed so 3D viewport is dominant
     activeOverlay: null,
-    isOrientSideways: false,
     tourActive: false,
     tourIndex: 0,
     tourSpeed: 1.0,
-    tourTimer: null
+    tourTimer: null,
+    hasTourEverRun: false,
+    tourRestartNeeded: false
   };
 
   // OpenSpace API & Gemini Services
   const openSpace = new OpenSpaceAPI();
   const geminiService = new GeminiService(window.CONFIG);
 
-  // Surface altitudes for low-altitude oblique horizon perspective ("Orient Sideways" / "Side view")
-  const SITE_SURFACE_ALTITUDES = {
-    mars_gale: 4500.0,
-    lut: 2100.0,
-    mcmurdo: 2600.0,
-    aralkum: 1800.0,
-    uyuni: 5600.0
+  // Camera focus targets centered in the left viewport area (offset by the right-hand webpanel)
+  // At altitude ~240-260 km, full geographic feature (e.g. 154-km Gale Crater) is recognizable and complete
+  const SITE_CAMERA_TARGETS = {
+    mars_gale: { lat: -5.41, lon: 137.19, alt: 240000.0 },
+    lut: { lat: 30.01, lon: 59.42, alt: 250000.0 },
+    mcmurdo: { lat: -78.00, lon: 164.48, alt: 250000.0 },
+    aralkum: { lat: 44.29, lon: 60.59, alt: 260000.0 },
+    uyuni: { lat: -20.63, lon: -67.05, alt: 240000.0 }
   };
 
   // DOM Elements - Header & Tools
@@ -134,8 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.setPropertyValue(`Scene.EarthLabel${s}.Renderable.Enabled`, false);
     });
 
-    // Initial camera flight to Gale Crater on Mars
-    openSpace.flyToGeo("Mars", -4.5895, 137.4417, 35000.0, 2.5);
+    // Initial camera flight to Gale Crater on Mars centered in left viewport region (~240 km altitude)
+    openSpace.flyToGeo("Mars", -5.41, 137.19, 240000.0, 2.5);
   });
 
   openSpace.onDisconnect(() => {
@@ -171,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   // 3. Category Definitions Strictly Matching Whiteboard Sequence
   //   1) Thermal Conditions (NASA POWER API)
-  //   2) Astrobiology / Environmental Makeup (EMIT-2 / Soil Telemetry Placeholders)
+  //   2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
   //   3) Atmospheric Dynamics (NASA POWER API)
   //   4) Atmospheric Moisture (NASA POWER API)
   //   5) Radiation (NASA POWER API / CERES SYN1deg)
@@ -248,8 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       key: "astrobiology",
-      title: "2) Astrobiology / Environmental Makeup",
-      subtitle: "EMIT-2 (All Earth locations but Antarctica) & In-Situ Soil Sampling",
+      title: "2) Astrobiology & Mineralogy",
+      subtitle: "NASA EMIT & MSL CheMin Surface Materials",
       icon: "🧬",
       cssClass: "cat-astrobiology",
       scoreKey: "astrobiology",
@@ -257,40 +258,16 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayLayerMars: null,
       hudTexture: "hud_overview_biology.png",
       hasOverlay: false,
-      isPendingSoilData: true,
+      isQualitativeCategory: true,
       availabilityNote: "Spatial vector overlay available for Climatology layers; Astrobiology uses point station telemetry.",
       parameters: [
-        {
-          key: "soil_ph",
-          label: "Soil Characteristics (pH)",
-          code: "SOIL_PH",
-          unit: "pH",
-          desc: "Regolith acidity/alkalinity influencing chemical weathering and prebiotic habitability.",
-          source: "EMIT-2 Imaging Spectroscopy & In-Situ Soil Telemetry",
-          scale: null,
-          isPlaceholder: true,
-          getVal: (m) => m.soil_ph || "[Placeholder: In-situ / EMIT-2 soil sampling in progress]",
-          getMarsVal: () => "[Placeholder: APXS / CheMin soil pH telemetry in progress]"
-        },
-        {
-          key: "soil_granularity",
-          label: "Granularity (Grain Size Distribution)",
-          code: "SOIL_GRAIN",
-          unit: "Grain Size",
-          desc: "Regolith particle size and porosity governing capillary brine migration and niche sheltering.",
-          source: "In-Situ Sieve Granulometry & Rover Microscopic Imagers",
-          scale: null,
-          isPlaceholder: true,
-          getVal: (m) => m.soil_granularity || "[Placeholder: Regolith grain size distribution pending]",
-          getMarsVal: () => "[Placeholder: MAHLI / Mastcam sediment grain size analysis in progress]"
-        },
         {
           key: "soil_mineral_type",
           label: "Mineral Composition & Rock Type",
           code: "MINERAL_TYPE",
           unit: "Mineralogy",
           desc: "Dominant surface mineralogy providing geological substrates for biosignature preservation.",
-          source: "EMIT-2 (All Earth locations but Antarctica) & MSL CheMin",
+          source: "NASA EMIT, earthaccess ICESat-2 (out.tif) & MSL CheMin",
           scale: null,
           isQualitative: true,
           getVal: (m) => m.soil_mineral_type || "Evaporite & Mudstone Matrix",
@@ -489,8 +466,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let scoreDisplay = "";
       if (isMars) {
         scoreDisplay = `<div class="accordion-score-pill"><span class="mini-score-text">Reference</span></div>`;
-      } else if (cat.isPendingSoilData) {
-        scoreDisplay = `<div class="accordion-score-pill" style="border-color: rgba(168,85,247,0.5);"><span class="mini-score-text" style="color: #c084fc;">Pending Soil Data</span></div>`;
+      } else if (cat.isQualitativeCategory || cat.key === "astrobiology") {
+        scoreDisplay = `<div class="accordion-score-pill" style="border-color: rgba(168,85,247,0.5);"><span class="mini-score-text" style="color: #c084fc;">Analog Site</span></div>`;
       } else if (catScore !== null) {
         scoreDisplay = `
           <div class="accordion-score-pill">
@@ -574,20 +551,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      const btnSideView = document.createElement("button");
-      btnSideView.className = `btn-vp-action${state.isOrientSideways ? " active" : ""}`;
-      btnSideView.setAttribute("aria-pressed", state.isOrientSideways ? "true" : "false");
-      btnSideView.innerText = "Side view";
-      btnSideView.title = "Tilt camera sideways across surface topography for ground-level horizon perspective";
-      btnSideView.addEventListener("click", (e) => {
+      const isStatsOpen = state.openStatsCatKey === cat.key;
+      const btnStats = document.createElement("button");
+      btnStats.className = `btn-vp-action btn-category-stats${isStatsOpen ? " active" : ""}`;
+      btnStats.setAttribute("aria-pressed", isStatsOpen ? "true" : "false");
+      btnStats.setAttribute("aria-expanded", isStatsOpen ? "true" : "false");
+      btnStats.innerText = isStatsOpen ? "Hide info on stats" : "More info on stats";
+      btnStats.title = "Toggle detailed statistics and measurements for this category";
+      btnStats.addEventListener("click", (e) => {
         e.stopPropagation();
-        toggleSideView();
+        state.openStatsCatKey = isStatsOpen ? null : cat.key;
+        renderScienceAccordion();
       });
 
       vpStrip.appendChild(btnFocus);
       vpStrip.appendChild(btnOverview);
       vpStrip.appendChild(btnOverlay);
-      vpStrip.appendChild(btnSideView);
+      vpStrip.appendChild(btnStats);
       body.appendChild(vpStrip);
 
       // Availability note if continuous overlay is not supported
@@ -598,52 +578,13 @@ document.addEventListener("DOMContentLoaded", () => {
         body.appendChild(noteElem);
       }
 
-      // --------------------------------------------------
-      // Opt-in Statistics Disclosure ("More info on stats")
-      // --------------------------------------------------
-      const isStatsOpen = state.openStatsCatKey === cat.key;
-      const disclosureBox = document.createElement("div");
-      disclosureBox.className = "stats-disclosure-box";
-
-      const btnDisclosure = document.createElement("button");
-      btnDisclosure.className = `btn-stats-disclosure${isStatsOpen ? " active" : ""}`;
-      btnDisclosure.setAttribute("aria-expanded", isStatsOpen ? "true" : "false");
-      btnDisclosure.innerHTML = `
-        <span class="disclosure-main">
-          <span class="disclosure-arrow">${isStatsOpen ? "▾" : "▸"}</span>
-          <span>More info on stats</span>
-        </span>
-        <span class="disclosure-action-badge">${isStatsOpen ? "Hide stats" : "Show stats"}</span>
-      `;
-      btnDisclosure.addEventListener("click", (e) => {
-        e.stopPropagation();
-        state.openStatsCatKey = isStatsOpen ? null : cat.key;
-        renderScienceAccordion();
-      });
-      disclosureBox.appendChild(btnDisclosure);
-      body.appendChild(disclosureBox);
-
-      // Render compact statistics table ONLY when disclosure is explicitly opened
+      // Render compact statistics table ONLY when stats are explicitly toggled on
       if (isStatsOpen) {
         const statsContainer = document.createElement("div");
         statsContainer.className = "compact-stats-container";
 
-        const headerRow = document.createElement("div");
-        headerRow.className = `compact-stats-header${isMars ? " mars-mode" : ""}`;
-        if (isMars) {
-          headerRow.innerHTML = `
-            <span>Parameter</span>
-            <span style="text-align: right;">Gale Crater Reference</span>
-          `;
-        } else {
-          headerRow.innerHTML = `
-            <span>Parameter</span>
-            <span style="text-align: right;">${site.name}</span>
-            <span style="text-align: right;">Gale Crater</span>
-            <span style="text-align: right;">Match</span>
-          `;
-        }
-        statsContainer.appendChild(headerRow);
+        const statsInner = document.createElement("div");
+        statsInner.className = `compact-stats-inner${isMars ? " mars-mode" : ""}`;
 
         cat.parameters.forEach((param) => {
           const rowGroup = document.createElement("div");
@@ -653,44 +594,61 @@ document.addEventListener("DOMContentLoaded", () => {
           const marsValStr = param.getMarsVal();
 
           if (isMars) {
-            const row = document.createElement("div");
-            row.className = "compact-stats-row mars-mode";
-            row.innerHTML = `
-              <div class="cstat-td param-col">
-                <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
-                <span class="cstat-param-name">${param.label}</span>
+            const card = document.createElement("div");
+            card.className = "cstat-card mars-mode";
+            card.innerHTML = `
+              <div class="cstat-card-header">
+                <div class="cstat-param-group">
+                  <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
+                  <span class="cstat-param-name">${param.label}</span>
+                </div>
+                <span class="cstat-match-badge match-baseline">Mars Baseline</span>
               </div>
-              <div class="cstat-td mars-col" style="text-align: right;">${marsValStr}</div>
+              <div class="cstat-values-grid mars-single">
+                <div class="cstat-val-box mars-box">
+                  <span class="cstat-val-label">MSL Curiosity In-Situ Ground Truth</span>
+                  <span class="cstat-val-num">${marsValStr}</span>
+                </div>
+              </div>
             `;
-            rowGroup.appendChild(row);
+            rowGroup.appendChild(card);
           } else {
-            let matchBadgeHtml = "—";
-            if (param.isPlaceholder) {
-              matchBadgeHtml = `<span class="cstat-match-badge match-pending">Pending</span>`;
-            } else if (param.isQualitative) {
-              matchBadgeHtml = `<span class="cstat-match-badge match-high">Analog</span>`;
+            let matchBadgeHtml = `<span class="cstat-match-badge match-pending">—</span>`;
+            if (param.isQualitative) {
+              matchBadgeHtml = `<span class="cstat-match-badge match-high" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4);">Analog</span>`;
             } else if (param.scale && metrics[param.key] !== null && metrics[param.key] !== undefined && marsMetrics[param.key] !== null && marsMetrics[param.key] !== undefined) {
               const earthVal = metrics[param.key];
               const marsRef = marsMetrics[param.key];
               const s = calcSimScore(earthVal, marsRef, param.scale);
               if (s !== null) {
                 const badgeClass = s >= 60 ? "match-high" : s >= 35 ? "match-mid" : "match-low";
-                matchBadgeHtml = `<span class="cstat-match-badge ${badgeClass}">${s.toFixed(0)}%</span>`;
+                matchBadgeHtml = `<span class="cstat-match-badge ${badgeClass}">${s.toFixed(0)}% Match</span>`;
               }
             }
 
-            const row = document.createElement("div");
-            row.className = "compact-stats-row";
-            row.innerHTML = `
-              <div class="cstat-td param-col">
-                <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
-                <span class="cstat-param-name">${param.label}</span>
+            const gridClass = param.isQualitative ? "cstat-values-grid qualitative-stacked" : "cstat-values-grid";
+            const card = document.createElement("div");
+            card.className = "cstat-card";
+            card.innerHTML = `
+              <div class="cstat-card-header">
+                <div class="cstat-param-group">
+                  <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
+                  <span class="cstat-param-name">${param.label}</span>
+                </div>
+                ${matchBadgeHtml}
               </div>
-              <div class="cstat-td earth-col" style="text-align: right;">${earthValStr}</div>
-              <div class="cstat-td mars-col" style="text-align: right;">${marsValStr}</div>
-              <div class="cstat-td" style="text-align: right;">${matchBadgeHtml}</div>
+              <div class="${gridClass}">
+                <div class="cstat-val-box earth-box">
+                  <span class="cstat-val-label">${site.name}</span>
+                  <span class="cstat-val-num">${earthValStr}</span>
+                </div>
+                <div class="cstat-val-box mars-box">
+                  <span class="cstat-val-label">Gale Crater Ref</span>
+                  <span class="cstat-val-num">${marsValStr}</span>
+                </div>
+              </div>
             `;
-            rowGroup.appendChild(row);
+            rowGroup.appendChild(card);
           }
 
           // On-demand detail drawer
@@ -713,9 +671,10 @@ document.addEventListener("DOMContentLoaded", () => {
             btnToggle.classList.toggle("active", isHidden);
           });
 
-          statsContainer.appendChild(rowGroup);
+          statsInner.appendChild(rowGroup);
         });
 
+        statsContainer.appendChild(statsInner);
         body.appendChild(statsContainer);
       }
 
@@ -730,9 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function focusOnSurface() {
     const site = getActiveSiteData();
     const globe = site.globe || "Earth";
-    const lat = site.coordinates.lat;
-    const lon = site.coordinates.lon;
-    const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2500.0;
+    const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
 
     // When focusing down to ground terrain level, fade out Mars_Texture so surface is 100% crisp, unblotched CTX imagery
     if (globe === "Mars") {
@@ -740,7 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
     }
 
-    openSpace.flyToGeo(globe, lat, lon, groundAlt, 2.5);
+    openSpace.flyToGeo(globe, target.lat, target.lon, target.alt, 2.5);
   }
 
   function toggleCategoryHUD(cat) {
@@ -854,6 +811,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const opacityPath1 = `Scene.${globeName}.Renderable.Layers.ColorLayers.${layerName}.Opacity`;
     const opacityPath2 = `Scene.${globeName}.Renderable.Layers.ColorLayers.${layerName}.Settings.Opacity`;
 
+    const keyTexture = `overlay_key_${globeName.toLowerCase()}_${cat.key}.png`;
+
     openSpace.executeLuaScript(`
       if openspace.hasProperty("${propPath}") then
         openspace.setPropertyValueSingle("${propPath}", ${enable})
@@ -864,7 +823,59 @@ document.addEventListener("DOMContentLoaded", () => {
       if openspace.hasProperty("${opacityPath2}") then
         openspace.setPropertyValueSingle("${opacityPath2}", 0.88)
       end
+
+      -- If on Mars, toggle Mars surface texture off when overlay is on so vectors/arrows are clearly visible
+      if ${isMars} then
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", ${!enable})
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", ${enable ? 0.0 : 1.0})
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", ${enable ? 0.0 : 1.0})
+        end
+      end
+
+      -- Overlay Legend Badge in the top corner underneath position & altitude, facing user flat
+      if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+        if ${enable} then
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.CartesianPosition") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.CartesianPosition", { -1.13, 0.55, -2.0 })
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Scale") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Scale", 0.44)
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Rotation") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Rotation", { 0.0, 0.0, 0.0 })
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.FaceCamera") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.FaceCamera", false)
+          end
+          if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Opacity") then
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Opacity", 1.0)
+          end
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${keyTexture}"))
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", true)
+        else
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
+        end
+      end
     `);
+
+    // Camera zoom dynamics:
+    // When overlay toggled ON, zoom out to global planetary orbit to view data in full context
+    // When overlay toggled OFF, zoom back in to localized feature (~240 km)
+    if (enable) {
+      if (isMars) {
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 6500000.0, 2.5);
+      } else {
+        openSpace.flyToGeo("Earth", site.coordinates.lat, site.coordinates.lon, 9000000.0, 2.5);
+      }
+    } else {
+      const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
+      openSpace.flyToGeo(globeName, target.lat, target.lon, target.alt, 2.5);
+    }
 
     state.activeOverlay = enable ? layerName : null;
     renderScienceAccordion();
@@ -879,34 +890,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
           openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
         end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", true)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0)
+        end
+        if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
+        end
       `);
+      const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: -5.41, lon: 137.19, alt: 240000.0 };
+      openSpace.flyToGeo(state.currentSiteKey === "mars_gale" ? "Mars" : "Earth", target.lat, target.lon, target.alt, 2.5);
       state.activeOverlay = null;
     }
-  }
-
-  function toggleSideView() {
-    state.isOrientSideways = !state.isOrientSideways;
-    const site = getActiveSiteData();
-    const globe = site.globe || "Earth";
-    const lat = site.coordinates.lat;
-    const lon = site.coordinates.lon;
-
-    if (state.isOrientSideways) {
-      if (globe === "Mars") {
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
-      }
-      const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2500.0;
-      openSpace.flyToGeo(globe, lat, lon, groundAlt, 2.5);
-    } else {
-      if (globe === "Mars") {
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0);
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0);
-      }
-      openSpace.flyToGeo(globe, lat, lon, 35000.0, 2.0);
-    }
-
-    renderScienceAccordion();
   }
 
   // ----------------------------------------------------
@@ -921,11 +921,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const SITE_ORBITAL_ALTITUDES = {
-    mars_gale: 550000.0,
-    lut: 850000.0,
-    mcmurdo: 650000.0,
-    aralkum: 850000.0,
-    uyuni: 650000.0
+    mars_gale: 240000.0,
+    lut: 250000.0,
+    mcmurdo: 250000.0,
+    aralkum: 260000.0,
+    uyuni: 240000.0
   };
 
   // ----------------------------------------------------
@@ -936,7 +936,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let catScores = [];
 
     SCIENCE_CATEGORIES.forEach((cat) => {
-      if (cat.isPendingSoilData) return; // Exclude soil telemetry from math formula until collection completes
+      if (cat.key === "astrobiology" || cat.isQualitativeCategory || cat.isPendingSoilData) return; // Exclude qualitative astrobiology mineralogy from numeric exponential formula
 
       let sum = 0;
       let count = 0;
@@ -1000,9 +1000,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (flyCamera) {
       const globe = site.globe || "Earth";
-      const lat = site.coordinates.lat;
-      const lon = site.coordinates.lon;
-      const alt = SITE_ORBITAL_ALTITUDES[siteKey] || (isMars ? 550000.0 : 750000.0);
+      const target = SITE_CAMERA_TARGETS[siteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
       const actionName = SITE_ACTIONS[siteKey];
 
       const flightLua = `
@@ -1012,7 +1010,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if openspace.navigation and openspace.navigation.setFocus then
             openspace.navigation.setFocus('${globe}')
           end
-          openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, 3.5)
+          openspace.navigation.flyToGeo('${globe}', ${target.lat}, ${target.lon}, ${target.alt}, 3.5)
         end
       `;
       openSpace.executeLuaScript(flightLua);
@@ -1055,6 +1053,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const targetSite = btn.getAttribute("data-site");
       if (targetSite) {
+        if (state.tourActive) pauseTour();
         selectSite(targetSite, true);
       }
     });
@@ -1068,6 +1067,7 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const targetSite = el.getAttribute("data-site");
         if (targetSite) {
+          if (state.tourActive) pauseTour();
           selectSite(targetSite, true);
         }
       });
@@ -1108,12 +1108,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let matchBadge = `<span class="param-match-badge match-mid">Moderate</span>`;
 
       if (def.category === "astrobiology") {
-        deltaStr = "Qualitative / Pending";
-        if (typeof earthVal === "string" && earthVal.includes("Placeholder")) {
-          matchBadge = `<span class="param-match-badge" style="background: rgba(168,85,247,0.25); color: #c084fc;">Data Pending</span>`;
-        } else {
-          matchBadge = `<span class="param-match-badge match-high">Geological Analog</span>`;
-        }
+        deltaStr = "Qualitative Analog";
+        matchBadge = `<span class="param-match-badge match-high" style="background: rgba(168,85,247,0.25); color: #c084fc; border: 1px solid rgba(168,85,247,0.4);">Analog Site</span>`;
       } else if (earthVal !== null && marsVal !== null && !isNaN(earthVal) && !isNaN(marsVal)) {
         const delta = earthVal - marsVal;
         const sign = delta > 0 ? "+" : "";
@@ -1123,11 +1119,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const simScore = def.scale ? 100 * Math.exp(-absDelta / def.scale) : 50;
 
         if (simScore >= 60) {
-          matchBadge = `<span class="param-match-badge match-high">${simScore.toFixed(0)}% Math</span>`;
+          matchBadge = `<span class="param-match-badge match-high">${simScore.toFixed(0)}% Match</span>`;
         } else if (simScore >= 35) {
-          matchBadge = `<span class="param-match-badge match-mid">${simScore.toFixed(0)}% Math</span>`;
+          matchBadge = `<span class="param-match-badge match-mid">${simScore.toFixed(0)}% Match</span>`;
         } else {
-          matchBadge = `<span class="param-match-badge match-low">${simScore.toFixed(0)}% Math</span>`;
+          matchBadge = `<span class="param-match-badge match-low">${simScore.toFixed(0)}% Match</span>`;
         }
       } else if (isMars) {
         deltaStr = "0.00 (Baseline)";
@@ -1244,7 +1240,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (marsReferencePanel) {
     marsReferencePanel.addEventListener("click", (e) => {
       if (e.target && e.target.closest("button")) return;
-      toggleComparisonHUD("mars_gale");
+      selectSite("mars_gale", true);
     });
   }
 
@@ -1308,6 +1304,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   // 10. Tour Drawer & Camera Flythrough Controls
   // ----------------------------------------------------
+  // 10. Automated Planetary Flythrough Tour Engine
+  // Orchestrates multi-planetary flythrough, category overviews,
+  // planetary continuous data overlays, and idle motion orbits
+  // ----------------------------------------------------
   if (btnToggleTour) {
     btnToggleTour.addEventListener("click", () => {
       const isOpen = drawerTour.style.display === "flex";
@@ -1317,50 +1317,415 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const tourSequence = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+  let tourCancellation = false;
 
-  function runTourStep() {
+  function setIdleMotion(enable) {
+    openSpace.executeLuaScript(`
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.IdleMotion.Apply") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleMotion.Apply", ${Boolean(enable)})
+      end
+    `);
+  }
+
+  // Turns off overlay layers and screen-space key HUD without triggering surface zoom flight
+  function clearTourOverlayQuietly() {
+    if (state.activeOverlay) {
+      openSpace.executeLuaScript(`
+        if openspace.hasProperty("Scene.Earth.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", true)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0)
+        end
+        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
+          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0)
+        end
+        if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
+        end
+      `);
+      state.activeOverlay = null;
+    }
+  }
+
+  function tourDelay(ms) {
+    return new Promise((resolve) => {
+      const speed = state.tourSpeed || 1.0;
+      const adjustedMs = Math.max(100, Math.round(ms / speed));
+      state.tourTimer = setTimeout(resolve, adjustedMs);
+    });
+  }
+
+  function updateTourStatus(text) {
+    const statusEl = document.getElementById("tour-status-text");
+    if (statusEl) {
+      statusEl.innerText = text;
+    }
+  }
+
+  function stopTour() {
+    state.tourActive = false;
+    tourCancellation = true;
+    if (state.tourTimer) {
+      clearTimeout(state.tourTimer);
+      state.tourTimer = null;
+    }
+    setIdleMotion(false);
+    clearTourOverlayQuietly();
+    dismissHUD();
+    state.tourIndex = 0;
+    state.tourRestartNeeded = true;
+    if (btnTourPlay) {
+      btnTourPlay.innerText = "▶ Start Tour";
+      btnTourPlay.classList.remove("btn-tour-end");
+      btnTourPlay.classList.add("btn-primary");
+    }
+    if (btnTourPause) {
+      btnTourPause.innerText = "⏸ Pause";
+      btnTourPause.classList.remove("btn-tour-resume");
+    }
+    updateTourStatus("Tour Stopped");
+  }
+
+  function pauseTour() {
+    state.tourActive = false;
+    tourCancellation = true;
+    if (state.tourTimer) {
+      clearTimeout(state.tourTimer);
+      state.tourTimer = null;
+    }
+    setIdleMotion(false);
+    clearTourOverlayQuietly();
+    dismissHUD();
+    if (btnTourPlay) {
+      btnTourPlay.innerText = "⏹ End Tour";
+      btnTourPlay.classList.add("btn-tour-end");
+      btnTourPlay.classList.remove("btn-primary");
+    }
+    if (btnTourPause) {
+      btnTourPause.innerText = "▶ Play";
+      btnTourPause.classList.add("btn-tour-resume");
+    }
+    updateTourStatus("Tour Paused");
+  }
+
+  function startOrResumeTour(startIndex = null) {
+    state.tourActive = true;
+    tourCancellation = false;
+    if (startIndex !== null) {
+      state.tourIndex = startIndex;
+    }
+    if (btnTourPlay) {
+      btnTourPlay.innerText = "⏹ End Tour";
+      btnTourPlay.classList.add("btn-tour-end");
+      btnTourPlay.classList.remove("btn-primary");
+    }
+    if (btnTourPause) {
+      btnTourPause.innerText = "⏸ Pause";
+      btnTourPause.classList.remove("btn-tour-resume");
+    }
+    runTourSequence(state.tourIndex || 0);
+  }
+
+  async function runTourSequence(startSiteIndex = 0) {
     if (!state.tourActive) return;
+    tourCancellation = false;
 
-    const currentTarget = tourSequence[state.tourIndex];
-    selectSite(currentTarget, true);
+    const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
 
-    state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
+    try {
+      for (let i = startSiteIndex; i < siteKeys.length; i++) {
+        state.tourIndex = i;
+        const siteKey = siteKeys[i];
 
-    const baseDelayMs = 9000;
-    const actualDelay = baseDelayMs / state.tourSpeed;
-    state.tourTimer = setTimeout(runTourStep, actualDelay);
+        if (!state.tourActive || tourCancellation) break;
+
+        // --------------------------------------------------
+        // 1. MARS: GALE CRATER
+        // --------------------------------------------------
+        if (siteKey === "mars_gale") {
+          updateTourStatus("1/5 Mars: Gale Crater");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+
+          // Fly back to Mars Gale Crater if restarting tour, or if not currently on Mars
+          const needsFlight = state.tourRestartNeeded || state.currentSiteKey !== "mars_gale" || state.hasTourEverRun;
+          state.hasTourEverRun = true;
+          state.tourRestartNeeded = false;
+
+          if (needsFlight) {
+            updateTourStatus("1/5 Flying to Mars: Gale Crater...");
+            selectSite("mars_gale", true);
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+          } else {
+            selectSite("mars_gale", false);
+          }
+
+          updateTourStatus("1/5 Mars: Gale Crater (In Focus)");
+          // Half-second pause at the crater
+          await tourDelay(500);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle thermal conditions overview (keep data table for extra second: 4s) and turn off
+          updateTourStatus("1/5 Mars: Thermal Conditions Overview (4s)");
+          const thermalCat = SCIENCE_CATEGORIES.find((c) => c.key === "thermal");
+          if (thermalCat) {
+            state.openAccordionKey = "thermal";
+            renderScienceAccordion();
+            toggleCategoryHUD(thermalCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle thermal conditions overlay (linger for 1s after animation finishes)
+            updateTourStatus("1/5 Mars: Thermal Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(thermalCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on mars thermal conditions for extra second (2s)
+            updateTourStatus("1/5 Mars: Thermal Conditions Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
+          }
+        }
+
+        // --------------------------------------------------
+        // 2. LUT DESERT (IRAN)
+        // --------------------------------------------------
+        else if (siteKey === "lut") {
+          updateTourStatus("2/5 Earth: Lut Desert (Flying from Mars)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("lut", true);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle astrobiology overview (extra second: 4s) and turn off
+          updateTourStatus("2/5 Lut Desert: Astrobiology Overview (4s)");
+          const astrobioCat = SCIENCE_CATEGORIES.find((c) => c.key === "astrobiology");
+          if (astrobioCat) {
+            state.openAccordionKey = "astrobiology";
+            renderScienceAccordion();
+            toggleCategoryHUD(astrobioCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+          }
+        }
+
+        // --------------------------------------------------
+        // 3. MCMURDO VALLEY (ANTARCTICA)
+        // --------------------------------------------------
+        else if (siteKey === "mcmurdo") {
+          updateTourStatus("3/5 Earth: McMurdo Dry Valleys (Flying to Site)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("mcmurdo", true);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle atmospheric dynamics overview (extra second: 4s) and turn off
+          updateTourStatus("3/5 McMurdo: Atmospheric Dynamics Overview (4s)");
+          const dynamicsCat = SCIENCE_CATEGORIES.find((c) => c.key === "dynamics");
+          if (dynamicsCat) {
+            state.openAccordionKey = "dynamics";
+            renderScienceAccordion();
+            toggleCategoryHUD(dynamicsCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle atmospheric dynamics overlay (linger for 1s after animation finishes)
+            updateTourStatus("3/5 Earth: Dynamics Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(dynamicsCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth atmospheric dynamics for extra second (2s)
+            updateTourStatus("3/5 Earth: Atmospheric Dynamics Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
+          }
+        }
+
+        // --------------------------------------------------
+        // 4. ARALKUM DESERT (CENTRAL ASIA)
+        // --------------------------------------------------
+        else if (siteKey === "aralkum") {
+          updateTourStatus("4/5 Earth: Aralkum Desert (Flying to Site)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("aralkum", true);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle atmospheric moisture overview (extra second: 4s) and turn off
+          updateTourStatus("4/5 Aralkum: Atmospheric Moisture Overview (4s)");
+          const moistureCat = SCIENCE_CATEGORIES.find((c) => c.key === "moisture");
+          if (moistureCat) {
+            state.openAccordionKey = "moisture";
+            renderScienceAccordion();
+            toggleCategoryHUD(moistureCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle atmospheric moisture overlay (linger for 1s after animation finishes)
+            updateTourStatus("4/5 Earth: Moisture Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(moistureCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth atmospheric moisture for extra second (2s)
+            updateTourStatus("4/5 Earth: Moisture Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
+          }
+        }
+
+        // --------------------------------------------------
+        // 5. SALAR DE UYUNI (BOLIVIA)
+        // --------------------------------------------------
+        else if (siteKey === "uyuni") {
+          updateTourStatus("5/5 Earth: Salar de Uyuni (Flying to Site)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("uyuni", true);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle radiation overview (extra second: 4s) and turn off
+          updateTourStatus("5/5 Salar de Uyuni: Radiation Overview (4s)");
+          const radiationCat = SCIENCE_CATEGORIES.find((c) => c.key === "radiation");
+          if (radiationCat) {
+            state.openAccordionKey = "radiation";
+            renderScienceAccordion();
+            toggleCategoryHUD(radiationCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle radiation overlay (linger for 1s after animation finishes)
+            updateTourStatus("5/5 Earth: Radiation Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(radiationCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth radiation for extra second (2s)
+            updateTourStatus("5/5 Earth: Radiation Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
+          }
+
+          if (!state.tourActive || tourCancellation) break;
+
+          // Final Earth Idle without overlay (extra second: 2s)
+          updateTourStatus("Earth: Final Idle Orbit Without Overlay (2s)");
+          setIdleMotion(true);
+          await tourDelay(2000);
+          setIdleMotion(false);
+        }
+      }
+
+      if (state.tourActive && !tourCancellation) {
+        updateTourStatus("Tour Completed Successfully");
+        stopTour();
+      }
+    } catch (err) {
+      console.error("Tour sequence error:", err);
+      stopTour();
+    }
   }
 
   if (btnTourPlay) {
     btnTourPlay.addEventListener("click", () => {
-      state.tourActive = true;
-      btnTourPlay.innerText = "▶ Running";
-      runTourStep();
+      // If clicked while tour is active or started (showing "End Tour"), immediately stop the tour!
+      if (state.tourActive || (btnTourPlay.innerText && btnTourPlay.innerText.includes("End Tour"))) {
+        stopTour();
+      } else {
+        startOrResumeTour(0);
+      }
     });
   }
 
   if (btnTourPause) {
     btnTourPause.addEventListener("click", () => {
-      state.tourActive = false;
-      btnTourPlay.innerText = "▶ Start Tour";
-      if (state.tourTimer) clearTimeout(state.tourTimer);
+      if (state.tourActive) {
+        pauseTour();
+      } else {
+        startOrResumeTour(state.tourIndex || 0);
+      }
     });
   }
 
   if (btnTourNext) {
     btnTourNext.addEventListener("click", () => {
-      if (state.tourTimer) clearTimeout(state.tourTimer);
-      state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
-      selectSite(tourSequence[state.tourIndex], true);
+      const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+      const nextIdx = (state.tourIndex + 1) % siteKeys.length;
+      startOrResumeTour(nextIdx);
     });
   }
 
   if (btnTourPrev) {
     btnTourPrev.addEventListener("click", () => {
-      if (state.tourTimer) clearTimeout(state.tourTimer);
-      state.tourIndex = (state.tourIndex - 1 + tourSequence.length) % tourSequence.length;
-      selectSite(tourSequence[state.tourIndex], true);
+      const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+      const prevIdx = (state.tourIndex - 1 + siteKeys.length) % siteKeys.length;
+      startOrResumeTour(prevIdx);
     });
   }
 

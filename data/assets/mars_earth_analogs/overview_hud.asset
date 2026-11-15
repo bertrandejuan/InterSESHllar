@@ -20,15 +20,40 @@ local OverviewHUD = {
   }
 }
 
+-- Screen-space Overlay Legend Badge in the top corner of the screen underneath position and altitude
+local defaultKeyTexture = asset.resource("./textures/overlay_key_mars_thermal.png")
+
+local OverlayLegendHUD = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "OverlayLegendHUD",
+  Name = "Overlay Legend HUD",
+  TexturePath = defaultKeyTexture,
+  Enabled = false,
+  Opacity = 1.0,
+  Placement = {
+    CartesianPosition = { -1.13, 0.55, -2.0 },
+    Scale = 0.44,
+    FaceCamera = false,
+    Rotation = { 0.0, 0.0, 0.0 }
+  }
+}
+
 asset.onInitialize(function()
   if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
     openspace.removeScreenSpaceRenderable("OverviewHUD")
   end
   openspace.addScreenSpaceRenderable(OverviewHUD)
+
+  if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+    openspace.removeScreenSpaceRenderable("OverlayLegendHUD")
+  end
+  openspace.addScreenSpaceRenderable(OverlayLegendHUD)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable("OverlayLegendHUD")
   openspace.removeScreenSpaceRenderable("OverviewHUD")
 end)
 
 asset.export("OverviewHUD", OverviewHUD)
+asset.export("OverlayLegendHUD", OverlayLegendHUD)

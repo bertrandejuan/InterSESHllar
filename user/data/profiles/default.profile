@@ -37,10 +37,10 @@
     "Sun"
   ],
   "meta": {
-    "author": "OpenSpace Mars vs Earth Team",
-    "description": "Streamlined OpenSpace profile for Mars vs Earth Desert Analogs.",
+    "author": "TerraMatch Team",
+    "description": "Streamlined OpenSpace profile for TerraMatch: Mars vs Earth Desert Analogs.",
     "license": "MIT License",
-    "name": "Mars vs Earth Analogs",
+    "name": "TerraMatch: Mars vs Earth Analogs",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },

@@ -29,7 +29,7 @@ SITES = {
         'highlight_border': (255, 120, 60, 255),
         'key_points': {
             'thermal': "-53.67 °C",
-            'astrobiology': "Lacustrine Mudstones (pH Pending)",
+            'astrobiology': "Lacustrine Mudstones",
             'dynamics': "3.50 m/s",
             'moisture': "7.44 %",
             'radiation': "14.76 MJ/m²/d"
@@ -43,8 +43,6 @@ SITES = {
                 ("Surface T (Skin / GTS) [TS]", "-50.89 °C", "REMS Ground Temperature Sensor (GTS) radiometric skin temperature")
             ],
             'astrobiology': [
-                ("Soil Characteristics (pH) [SOIL_PH]", "[Placeholder: Pending APXS / CheMin]", "In-situ APXS / CheMin soil pH telemetry calibration in progress"),
-                ("Granularity [SOIL_GRAIN]", "[Placeholder: Pending Sieve Analysis]", "Curiosity MAHLI sediment grain size analysis in progress"),
                 ("Mineral Composition & Rock Type", "Yellowknife Bay Mudstones", "Ancient lacustrine smectites and sulfate-bearing Mount Sharp strata"),
                 ("Chemical Composition (Organic Focus)", "Organic Carbon Preservation Target", "SAM / CheMin organic molecule and biomarker preservation target")
             ],
@@ -66,7 +64,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Curiosity REMS measures a mean air temperature of -53.67 °C with an extreme daily thermal swing of 58.68 °C. Nocturnal temperatures plunge to -77.76 °C before rising to -19.08 °C in peak afternoon sun.",
-            'astrobiology': "Gale Crater's lacustrine mudstones at Yellowknife Bay preserve smectite clays and ancient habitable lake deposits. Soil pH and granularity are currently being analyzed from rover telemetry.",
+            'astrobiology': "Gale Crater's lacustrine mudstones at Yellowknife Bay preserve smectite clays and ancient habitable lake deposits investigated by CheMin and SAM instruments.",
             'dynamics': "Surface winds at Aeolis Palus average 3.50 m/s driven by crater-wall channel flows and diurnal katabatic circulation, under a hypobaric atmospheric surface pressure of 0.764 kPa.",
             'moisture': "Mean relative humidity is 7.44% with 0.00 mm liquid precipitation. Cold nighttime conditions briefly push near-ground relative humidity to ~70%, permitting transient perchlorate brine deliquescence.",
             'radiation': "Solar shortwave insolation averages 14.76 MJ/m²/day at Mars's 1.52 AU orbit. Low atmospheric optical depth permits UVB flux of 0.200 W/m² reaching the surface."
@@ -75,8 +73,8 @@ SITES = {
     'lut': {
         'id': 'lut',
         'name': "Lut Desert (Dasht-e Lut, Iran)",
-        'short_name': "Lut Desert (Place 1)",
-        'header_tag': "EARTH ANALOG 1",
+        'short_name': "Lut Desert",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (255, 170, 0),
         'highlight_bg': (160, 90, 0, 110),
@@ -97,8 +95,6 @@ SITES = {
                 ("Surface T (Skin / GTS) [TS]", "70.70 °C", "Earth's satellite-recorded land surface skin thermal maximum (MODIS/MERRA-2)")
             ],
             'astrobiology': [
-                ("Soil Characteristics (pH) [SOIL_PH]", "[Placeholder: Pending EMIT-2 / Lab]", "In-situ and EMIT-2 spectroscopy soil pH sampling in progress"),
-                ("Granularity [SOIL_GRAIN]", "[Placeholder: Pending Sieve Analysis]", "Basalt regolith grain size and sieve analysis in progress"),
                 ("Mineral Composition & Rock Type", "Basalt Pavement & Iron-Oxide Yardangs", "Dark basalt plateau with towering wind-carved yardang mega-corridors"),
                 ("Chemical Composition (Organic Focus)", "Abiotic Payload Detection Limit Testing", "Hyper-arid abiotic baseline for testing rover life detection instruments")
             ],
@@ -120,7 +116,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Lut Desert holds Earth's recorded land skin thermal maximum (70.70 °C). Mean air temperature is 26.60 °C with daytime highs averaging 34.59 °C and a diurnal swing of 15.64 °C.",
-            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs provide natural analogs to Mount Sharp aeolian structures. Soil characteristics (pH, granularity) are currently in progress.",
+            'astrobiology': "Hyper-arid basalt pavements and towering mega-yardangs provide natural analogs to Mount Sharp aeolian structures investigated for biosignature preservation.",
             'dynamics': "Surface wind speeds average 4.09 m/s, driving active sand transport and yardang corrasion that closely matches Curiosity's 3.50 m/s wind regime.",
             'moisture': "Hyper-arid atmospheric regime with a mean relative humidity of only 21.98% and daily precipitation of 0.24 mm/day (88 mm/year total liquid).",
             'radiation': "Intense desert solar insolation of 21.14 MJ/m²/day with UVB surface flux of 0.317 W/m², modeling high desert surface radiative exposure."
@@ -129,15 +125,15 @@ SITES = {
     'mcmurdo': {
         'id': 'mcmurdo',
         'name': "McMurdo Dry Valleys (Antarctica)",
-        'short_name': "McMurdo (Place 2)",
-        'header_tag': "EARTH ANALOG 2",
+        'short_name': "McMurdo Dry Valleys",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (0, 210, 255),
         'highlight_bg': (0, 110, 150, 110),
         'highlight_border': (80, 230, 255, 255),
         'key_points': {
             'thermal': "-27.08 °C",
-            'astrobiology': "Beacon Sandstone (pH Pending)",
+            'astrobiology': "Beacon Sandstone Matrix",
             'dynamics': "6.81 m/s",
             'moisture': "77.13 %",
             'radiation': "10.71 MJ/m²/d"
@@ -151,8 +147,6 @@ SITES = {
                 ("Surface T (Skin / GTS) [TS]", "-25.58 °C", "Polar permafrost ground brightness temperature")
             ],
             'astrobiology': [
-                ("Soil Characteristics (pH) [SOIL_PH]", "[Placeholder: Pending Cryogenic Lab]", "Cryogenic soil sampling in progress (EMIT-2 orbital coverage excludes >60°S)"),
-                ("Granularity [SOIL_GRAIN]", "[Placeholder: Pending Sieve Analysis]", "Permafrost regolith particle size distribution analysis in progress"),
                 ("Mineral Composition & Rock Type", "Beacon Sandstone & Dry Permafrost", "Porous Beacon sandstone sheltering cryptoendolithic microbial communities"),
                 ("Chemical Composition (Organic Focus)", "Cryopreserved Endolithic Biomolecules", "Cryptoendolithic lichens and psychrophilic bacteria sheltered in rock pore spaces")
             ],
@@ -174,7 +168,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "McMurdo Dry Valleys provide Earth's closest cold-desert thermal match to Mars with a mean temperature of -27.08 °C and diurnal thermal swings of 45.68 °C.",
-            'astrobiology': "Beacon sandstone rock matrices shelter cryptoendolithic microorganisms, modeling subsurface cryogenic refugia for Martian life. Soil data collection is in progress.",
+            'astrobiology': "Beacon sandstone rock matrices shelter cryptoendolithic microorganisms, modeling subsurface cryogenic refugia for Martian life and biomarker preservation.",
             'dynamics': "Hurricane-force katabatic winds averaging 6.81 m/s strip snow cover and keep the valleys ice-free under an atmospheric pressure of 91.47 kPa.",
             'moisture': "Liquid precipitation is 0.00 mm/year. Air moisture is governed by ice sublimation and cold-temperature vapor limits, directly simulating Mars ground ice dynamics.",
             'radiation': "Polar solar insolation averages 10.71 MJ/m²/day with seasonal extremes. UVB flux averages 0.111 W/m², attenuated by solar zenith angle."
@@ -183,8 +177,8 @@ SITES = {
     'aralkum': {
         'id': 'aralkum',
         'name': "Aralkum Desert (Uzbekistan / Kazakhstan)",
-        'short_name': "Aralkum (Place 3)",
-        'header_tag': "EARTH ANALOG 3",
+        'short_name': "Aralkum Desert",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (50, 220, 100),
         'highlight_bg': (20, 110, 50, 110),
@@ -205,8 +199,6 @@ SITES = {
                 ("Surface T (Skin / GTS) [TS]", "12.95 °C", "Evaporite salt crust radiometric surface temperature")
             ],
             'astrobiology': [
-                ("Soil Characteristics (pH) [SOIL_PH]", "[Placeholder: Pending EMIT-2 / Lab]", "In-situ and EMIT-2 spectroscopy evaporite pH sampling in progress"),
-                ("Granularity [SOIL_GRAIN]", "[Placeholder: Pending Sieve Analysis]", "Saltation dust grain size and sieve analysis in progress"),
                 ("Mineral Composition & Rock Type", "Toxic Sulfate (Mirabilite) & Halite Crust", "Desiccated seabed crust rich in sulfate minerals mirroring Martian regolith"),
                 ("Chemical Composition (Organic Focus)", "Catastrophic Desiccation Biosignatures", "Evaporite crystal entrapment of catastrophic desiccation organic biosignatures")
             ],
@@ -228,7 +220,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "Exhibits continentality with mean temperature of 10.66 °C and annual thermal extremes ranging from -36 °C in winter to +36 °C in summer.",
-            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts that mirror Gale Crater's sulfate-bearing regolith. Soil data collection is in progress.",
+            'astrobiology': "Exsiccated Aral Sea bed features toxic sulfate and chloride evaporite crusts that mirror Gale Crater's sulfate-bearing Mount Sharp strata.",
             'dynamics': "High-velocity salt-dust storms (5.74 m/s mean wind) generate electrostatic triboelectric fields modeling Martian regional dust events.",
             'moisture': "Regional continental moisture averages 70.58% relative humidity with sparse arid precipitation of 0.37 mm/day.",
             'radiation': "Solar shortwave flux of 13.27 MJ/m²/day and UVB of 0.196 W/m² provide a near-exact match to Martian equatorial flux (14.76 MJ/m²/d and 0.200 W/m² UVB)."
@@ -237,15 +229,15 @@ SITES = {
     'uyuni': {
         'id': 'uyuni',
         'name': "Salar de Uyuni (Bolivia)",
-        'short_name': "Salar de Uyuni (Place 4)",
-        'header_tag': "EARTH ANALOG 4",
+        'short_name': "Salar de Uyuni",
+        'header_tag': "EARTH ANALOG",
         'is_mars': False,
         'color': (180, 120, 255),
         'highlight_bg': (90, 40, 160, 110),
         'highlight_border': (210, 160, 255, 255),
         'key_points': {
             'thermal': "7.99 °C",
-            'astrobiology': "Halite Playa Crust (pH Pending)",
+            'astrobiology': "Lithium-Halite Playa Crust",
             'dynamics': "2.90 m/s",
             'moisture': "42.23 %",
             'radiation': "20.42 MJ/m²/d"
@@ -259,8 +251,6 @@ SITES = {
                 ("Surface T (Skin / GTS) [TS]", "8.81 °C", "High-albedo salt crust radiometric brightness temperature")
             ],
             'astrobiology': [
-                ("Soil Characteristics (pH) [SOIL_PH]", "[Placeholder: Pending EMIT-2 / Lab]", "In-situ brine and EMIT-2 spectroscopy pH analysis in progress"),
-                ("Granularity [SOIL_GRAIN]", "[Placeholder: Pending Sieve Analysis]", "Halite evaporite crystal granularity analysis in progress"),
                 ("Mineral Composition & Rock Type", "Lithium-Enriched Halite & Gypsum Crust", "10,000 km² expanse of pure lithium-halite evaporite playa modeling paleolakes"),
                 ("Chemical Composition (Organic Focus)", "Halite Fluid Inclusion Organics", "Preservation of polyextremophile cellular organics in halite crystal fluid inclusions")
             ],
@@ -282,7 +272,7 @@ SITES = {
         },
         'summaries': {
             'thermal': "High-altitude Altiplano cold steppe (3,656 m) with a mean temperature of 7.99 °C and rapid nocturnal radiative cooling plunging to freezes.",
-            'astrobiology': "10,000 km² expanse of pure lithium-halite evaporites modeling Martian paleolake deposits. Halophiles survive in crystal fluid inclusions. Soil data collection is in progress.",
+            'astrobiology': "10,000 km² expanse of pure lithium-halite evaporites modeling Martian paleolake deposits where halophiles survive in crystal fluid inclusions.",
             'dynamics': "Atmospheric surface pressure of only 65.47 kPa provides Earth's premier subaerial hypobaric testing environment for Mars aerodynamics.",
             'moisture': "Semi-arid plateau with 42.23% relative humidity and seasonal ephemeral brines modeling Martian deliquescing perchlorate salts.",
             'radiation': "Thin atmosphere and high altitude produce intense unshielded UVB radiation (0.463 W/m²) and 20.42 MJ/m²/day solar irradiance."
@@ -351,21 +341,6 @@ def generate_location_overview_card(active_site_key):
     sub_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) vs Curiosity REMS Baseline"
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
-
-    # Prominent Close Button at top right
-    close_btn_w = 125
-    close_btn_x = WIDTH - 35 - close_btn_w
-    draw.rounded_rectangle([close_btn_x, 42, close_btn_x + close_btn_w, 94], radius=8,
-                           fill=(220, 38, 38, 255), outline=(255, 120, 120, 255), width=2)
-    draw.text((close_btn_x + 18, 54), "Close ✕", font=FONT_BADGE, fill=(255, 255, 255, 255))
-
-    # Active Location Badge to left of close button
-    badge_w = 230
-    badge_x = close_btn_x - 15 - badge_w
-    draw.rounded_rectangle([badge_x, 42, badge_x + badge_w, 94], radius=8,
-                           fill=accent + (55,), outline=accent + (230,), width=2)
-    badge_label = f"FOCUS: {site_info['short_name'][:13]}"
-    draw.text((badge_x + 16, 56), badge_label, font=FONT_BADGE, fill=accent + (255,))
 
     # 2. Table Layout Coordinates (6 Columns)
     col_bounds = [
@@ -501,19 +476,6 @@ def generate_category_overview_card(cat_key, site_key):
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
 
-    # Prominent Close Button at top right
-    close_btn_w = 125
-    close_btn_x = WIDTH - 35 - close_btn_w
-    draw.rounded_rectangle([close_btn_x, 42, close_btn_x + close_btn_w, 94], radius=8,
-                           fill=(220, 38, 38, 255), outline=(255, 120, 120, 255), width=2)
-    draw.text((close_btn_x + 18, 54), "Close ✕", font=FONT_BADGE, fill=(255, 255, 255, 255))
-
-    badge_w = 230
-    badge_x = close_btn_x - 15 - badge_w
-    draw.rounded_rectangle([badge_x, 42, badge_x + badge_w, 94], radius=8,
-                           fill=cat_color + (55,), outline=cat_color + (230,), width=2)
-    draw.text((badge_x + 16, 56), site_info['short_name'][:14], font=FONT_BADGE, fill=cat_color + (255,))
-
     # 2. Parameter rows for ONLY THIS LOCATION (solid opaque backgrounds)
     param_items = site_info['category_data'][cat_key]
     y_start = 145
@@ -536,8 +498,6 @@ def generate_category_overview_card(cat_key, site_key):
         val_w = draw.textlength(p_num, font=FONT_PARAM_VAL) if hasattr(draw, 'textlength') else 200
         val_x = WIDTH - 75 - val_w
         num_color = (255, 255, 255)
-        if "[Placeholder" in p_num:
-            num_color = (210, 160, 255)
         draw.text((val_x, item_y + 24), p_num, font=FONT_PARAM_VAL, fill=num_color + (255,))
 
     # 3. Gemini API Summary Box at bottom (solid opaque)

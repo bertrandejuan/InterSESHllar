@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InterSESHllar: Mars vs Earth Planetary Analogs</title>
+  <title>TerraMatch: Mars vs Earth Planetary Analogs</title>
   <link rel="stylesheet" href="css/style.css?v=8.0.0">
 </head>
 <body>
@@ -12,9 +12,9 @@
   <header class="glass-panel header-bar">
     <div class="header-brand">
       <h1 class="header-title">
-        <span class="mars-accent">Mars vs Earth</span>
+        <span class="mars-accent">TerraMatch</span>
       </h1>
-      <span class="header-subtitle">Planetary Analogs & In-Situ Climatology</span>
+      <span class="header-subtitle">Mars vs Earth Analogs & In-Situ Climatology</span>
     </div>
 
     <div class="header-actions">
@@ -219,6 +219,10 @@
         <option value="2.0">Speed: 2.0x</option>
       </select>
     </div>
+    <div id="tour-status-bar" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 4px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2);">
+      <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Tour Phase:</span>
+      <span id="tour-status-text" style="font-size: 0.76rem; color: var(--accent-cyan); font-weight: 600;">Ready to start</span>
+    </div>
   </div>
 
   <!-- Modal: View All Data (Wider Telemetry Drawer / Dialog) -->
@@ -282,7 +286,7 @@
       </div>
       <div class="modal-footer">
         <span class="modal-footnote">
-          Data derived from NASA POWER MERRA-2 / CERES SYN1deg 10-Year In-Situ Records (2015–2025) & MSL Curiosity REMS.
+          Empirical Data: NASA POWER (MERRA-2 & CERES 10-Yr CSVs), NASA earthaccess / ICESat-2 (ATL06 out.tif DEM), NASA EMIT & MSL Curiosity REMS/CheMin.
         </span>
         <button id="btn-footer-close-all-data" class="btn btn-secondary">Close table</button>
       </div>
