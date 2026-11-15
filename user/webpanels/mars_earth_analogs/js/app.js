@@ -576,9 +576,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const isStatsOpen = state.openStatsCatKey === cat.key;
       const btnStats = document.createElement("button");
-      btnStats.className = `btn-vp-action${isStatsOpen ? " active" : ""}`;
+      btnStats.className = `btn-vp-action btn-category-stats${isStatsOpen ? " active" : ""}`;
       btnStats.setAttribute("aria-pressed", isStatsOpen ? "true" : "false");
-      btnStats.innerText = isStatsOpen ? "Hide stats" : "Show stats";
+      btnStats.setAttribute("aria-expanded", isStatsOpen ? "true" : "false");
+      btnStats.innerText = isStatsOpen ? "Hide info on stats" : "More info on stats";
       btnStats.title = "Toggle detailed statistics and measurements for this category";
       btnStats.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -600,31 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
         body.appendChild(noteElem);
       }
 
-      // --------------------------------------------------
-      // Opt-in Statistics Disclosure ("More info on stats")
-      // --------------------------------------------------
-      const disclosureBox = document.createElement("div");
-      disclosureBox.className = "stats-disclosure-box";
-
-      const btnDisclosure = document.createElement("button");
-      btnDisclosure.className = `btn-stats-disclosure${isStatsOpen ? " active" : ""}`;
-      btnDisclosure.setAttribute("aria-expanded", isStatsOpen ? "true" : "false");
-      btnDisclosure.innerHTML = `
-        <span class="disclosure-main">
-          <span class="disclosure-arrow">${isStatsOpen ? "▾" : "▸"}</span>
-          <span>More info on stats</span>
-        </span>
-        <span class="disclosure-action-badge">${isStatsOpen ? "Hide stats" : "Show stats"}</span>
-      `;
-      btnDisclosure.addEventListener("click", (e) => {
-        e.stopPropagation();
-        state.openStatsCatKey = isStatsOpen ? null : cat.key;
-        renderScienceAccordion();
-      });
-      disclosureBox.appendChild(btnDisclosure);
-      body.appendChild(disclosureBox);
-
-      // Render compact statistics table ONLY when disclosure is explicitly opened
+      // Render compact statistics table ONLY when stats are explicitly toggled on
       if (isStatsOpen) {
         const statsContainer = document.createElement("div");
         statsContainer.className = "compact-stats-container";
