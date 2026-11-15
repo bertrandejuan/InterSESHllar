@@ -138,27 +138,42 @@ def save_psg_overlay(data_field, cmap, vmin, vmax, title, unit, output_path,
     plt.close(fig)
     print(f"Generated PSG-Style Overlay: {os.path.basename(output_path)} ({WIDTH}x{HEIGHT})")
 
-def save_overlay_legend_badge(title, unit, cmap, vmin, vmax, output_path, has_vectors=False):
-    # Standalone screen-space badge (compact box underneath position & altitude)
-    fig = plt.figure(figsize=(4.8, 1.5), dpi=120)
-    rect = plt.Rectangle((0.02, 0.05), 0.96, 0.90, transform=fig.transFigure,
-                         facecolor='#0b1329', edgecolor='#38bdf8', alpha=0.96,
-                         linewidth=1.8, zorder=10, clip_on=False)
-    fig.patches.append(rect)
+from matplotlib.patches import FancyBboxPatch
+
+def save_overlay_legend_badge(title, unit, cmap, vmin, vmax, output_path,
+                              has_vectors=False, stats_l1="", stats_l2="",
+                              source_note="NASA POWER & In-Situ Planetary Climatology"):
+    """
+    Renders standalone screen-space legend badge located under position & altitude text.
+    Uses high-contrast colorbar with explicit ticks, category title, and empirical telemetry stats.
+    """
+    fig = plt.figure(figsize=(6.4, 2.25), dpi=140)
+    bg_ax = fig.add_axes([0, 0, 1, 1])
+    bg_ax.axis('off')
+
+    fancy_box = FancyBboxPatch((0.015, 0.03), 0.97, 0.94,
+                               boxstyle="round,pad=0.012,rounding_size=0.04",
+                               facecolor='#070e22', edgecolor='#38bdf8',
+                               linewidth=2.0, alpha=0.96, zorder=1)
+    bg_ax.add_patch(fancy_box)
 
     norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
-    cbar_ax = fig.add_axes([0.08, 0.22, 0.84, 0.22])
+    cbar_ax = fig.add_axes([0.075, 0.40, 0.85, 0.17], zorder=10)
     cbar = ColorbarBase(cbar_ax, cmap=cmap, norm=norm, orientation='horizontal')
-    cbar.ax.tick_params(labelsize=8.5, colors='white', length=3, width=1)
+    cbar.ax.tick_params(labelsize=9.0, colors='#f8fafc', length=4, width=1.2)
     for t in cbar.ax.get_xticklabels():
-        t.set_color('#e2e8f0')
-        t.set_fontweight('semibold')
+        t.set_color('#ffffff')
+        t.set_fontweight('bold')
+    cbar.outline.set_edgecolor('#38bdf8')
+    cbar.outline.set_linewidth(1.2)
 
     vec_note = " + PSG Vector Field" if has_vectors else ""
-    fig.text(0.08, 0.76, f"{title} [{unit}]{vec_note}", color='#38bdf8', fontsize=10.5, fontweight='bold', zorder=15)
-    fig.text(0.08, 0.56, "NASA POWER & In-Situ Planetary Climatology", color='#94a3b8', fontsize=7.5, zorder=15)
+    fig.text(0.075, 0.84, f"{title} [{unit}]{vec_note}", color='#38bdf8', fontsize=11.0, fontweight='bold', zorder=20)
+    fig.text(0.075, 0.68, source_note, color='#94a3b8', fontsize=7.8, zorder=20)
+    fig.text(0.075, 0.22, stats_l1, color='#f1f5f9', fontsize=8.2, fontweight='semibold', zorder=20)
+    fig.text(0.075, 0.08, stats_l2, color='#94a3b8', fontsize=7.5, zorder=20)
 
-    plt.savefig(output_path, dpi=120, format='png', transparent=True)
+    plt.savefig(output_path, dpi=140, format='png', transparent=True)
     plt.close(fig)
     print(f"Generated Overlay Legend Badge: {os.path.basename(output_path)}")
 
@@ -189,8 +204,11 @@ v_earth += -4.0 * np.exp(-dist_mcm / (2 * 10.0**2))
 save_psg_overlay(w_field, WIND_CMAP, 1.0, 14.0, "SURFACE WIND SPEED", "m/s",
                  os.path.join(OUTPUT_DIR, "earth_overlay_wind.png"),
                  vector_field=(u_earth, v_earth))
-save_overlay_legend_badge("SURFACE WIND SPEED", "m/s", WIND_CMAP, 1.0, 14.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_earth_dynamics.png"), has_vectors=True)
+save_overlay_legend_badge("EARTH SURFACE WIND SPEED", "m/s", WIND_CMAP, 1.0, 14.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_dynamics.png"), has_vectors=True,
+                          stats_l1="Analog Stations: Lut 4.09 m/s | Uyuni 4.60 m/s | Aralkum 5.74 m/s | McMurdo 6.81 m/s",
+                          stats_l2="Atmospheric Circulation: Tropical Trade Winds & Mid-Latitude Westerlies (Hadley Cell)",
+                          source_note="NASA POWER MERRA-2 10-Yr Climatology (10-Meter Wind Field)")
 
 # =============================================================
 # 2. EARTH TEMPERATURE OVERLAY + THERMAL ADVECTION VECTORS
@@ -205,8 +223,11 @@ t_field = gaussian_filter(t_field, sigma=3.5)
 save_psg_overlay(t_field, THERMAL_CMAP, -50.0, 50.0, "SURFACE TEMPERATURE", "°C",
                  os.path.join(OUTPUT_DIR, "earth_overlay_temperature.png"),
                  vector_field=(u_earth * 0.6, v_earth * 0.6))
-save_overlay_legend_badge("SURFACE TEMPERATURE", "°C", THERMAL_CMAP, -50.0, 50.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_earth_thermal.png"), has_vectors=True)
+save_overlay_legend_badge("EARTH SURFACE TEMPERATURE", "°C", THERMAL_CMAP, -50.0, 50.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_thermal.png"), has_vectors=True,
+                          stats_l1="Analog Range: McMurdo -27.08 °C | Uyuni 7.99 °C | Aralkum 10.66 °C | Lut 26.60 °C",
+                          stats_l2="Thermal Extremes: Lut Skin Peak 70.70 °C | McMurdo Winter Low: -51.48 °C",
+                          source_note="NASA POWER MERRA-2 10-Yr Daily Climatology (2m Air Temperature)")
 
 # =============================================================
 # 3. EARTH MOISTURE & ARIDITY OVERLAY
@@ -220,8 +241,11 @@ for st in STATIONS.values():
 rh_field = gaussian_filter(rh_field, sigma=3.5)
 save_psg_overlay(rh_field, ARIDITY_CMAP, 10.0, 90.0, "RELATIVE HUMIDITY & ARIDITY", "%",
                  os.path.join(OUTPUT_DIR, "earth_overlay_moisture.png"))
-save_overlay_legend_badge("RELATIVE HUMIDITY & ARIDITY", "%", ARIDITY_CMAP, 10.0, 90.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_earth_moisture.png"), has_vectors=False)
+save_overlay_legend_badge("EARTH RELATIVE HUMIDITY & ARIDITY", "%", ARIDITY_CMAP, 10.0, 90.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_moisture.png"), has_vectors=False,
+                          stats_l1="Hyper-Arid Analogs: Lut Desert 21.98% | Salar de Uyuni 38.00% | Rain: <0.25 mm/d",
+                          stats_l2="Cold & Continental Bounds: Aralkum 70.58% | McMurdo Dry Valleys 77.13%",
+                          source_note="NASA POWER MERRA-2 10-Yr Climatology (2m Relative Humidity)")
 
 # =============================================================
 # 4. EARTH SOLAR RADIATION OVERLAY
@@ -235,8 +259,11 @@ for st in STATIONS.values():
 sol_field = gaussian_filter(sol_field, sigma=3.5)
 save_psg_overlay(sol_field, VIBRANT_CMAP, 1.5, 7.5, "SOLAR INSOLATION FLUX", "kWh/m²/d",
                  os.path.join(OUTPUT_DIR, "earth_overlay_solar.png"))
-save_overlay_legend_badge("SOLAR INSOLATION FLUX", "kWh/m²/d", VIBRANT_CMAP, 1.5, 7.5,
-                          os.path.join(OUTPUT_DIR, "overlay_key_earth_radiation.png"), has_vectors=False)
+save_overlay_legend_badge("EARTH SOLAR INSOLATION FLUX", "kWh/m²/d", VIBRANT_CMAP, 1.5, 7.5,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_radiation.png"), has_vectors=False,
+                          stats_l1="Analog Stations: McMurdo 2.98 | Aralkum 3.69 | Uyuni 5.67 | Lut 5.87 kWh/m²/d",
+                          stats_l2="Surface Ultraviolet: Lut UVA 13.43 W/m² | Salar de Uyuni Peak UVB: 0.463 W/m²",
+                          source_note="NASA POWER & CERES SYN1deg Satellite Shortwave Solar Flux")
 
 # =============================================================
 # 5. EARTH ASTRO-BIOLOGY / EXTREMOPHILE INDEX OVERLAY
@@ -249,8 +276,11 @@ bio_field = np.clip(bio_field, 5.0, 95.0)
 bio_field = gaussian_filter(bio_field, sigma=3.5)
 save_psg_overlay(bio_field, VIBRANT_CMAP, 0.0, 100.0, "EXTREMOPHILE ANALOG INDEX", "%",
                  os.path.join(OUTPUT_DIR, "earth_overlay_biology.png"))
-save_overlay_legend_badge("EXTREMOPHILE ANALOG INDEX", "%", VIBRANT_CMAP, 0.0, 100.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_earth_astrobiology.png"), has_vectors=False)
+save_overlay_legend_badge("EARTH EXTREMOPHILE ANALOG INDEX", "%", VIBRANT_CMAP, 0.0, 100.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_earth_astrobiology.png"), has_vectors=False,
+                          stats_l1="Target Geologies: Lut Basalt Pavement | Aralkum Sulfate Crust | Uyuni Halite",
+                          stats_l2="Cryo-Refugia: McMurdo Sandstone Matrix Cryptoendolithic Microbial Communities",
+                          source_note="EMIT-2 Imaging Spectroscopy & Planetary Biosignature Potential")
 
 # =============================================================
 # 6. MARS WIND & CIRCULATION VECTORS (EXACT NASA PSG MARS APP STYLE)
@@ -272,7 +302,10 @@ save_psg_overlay(m_wind, WIND_CMAP, 1.0, 16.0, "MARS SURFACE WIND SPEED", "m/s",
                  os.path.join(OUTPUT_DIR, "mars_overlay_wind.png"),
                  vector_field=(u_mars, v_mars))
 save_overlay_legend_badge("MARS SURFACE WIND SPEED", "m/s", WIND_CMAP, 1.0, 16.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_mars_dynamics.png"), has_vectors=True)
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_dynamics.png"), has_vectors=True,
+                          stats_l1="Gale Crater Baseline: 3.50 m/s Mean | Diurnal Katabatic Slope Gusts: up to 18 m/s",
+                          stats_l2="Surface Pressure: 0.764 kPa (~0.76% Earth) | Bagnold Dune Migration & Dust Lifting",
+                          source_note="MSL Curiosity REMS In-Situ Telemetry & NASA Mars GCM Circulation")
 
 # =============================================================
 # 7. MARS TEMPERATURE OVERLAY + CIRCULATION VECTORS
@@ -285,7 +318,10 @@ save_psg_overlay(m_temp, THERMAL_CMAP, -125.0, -20.0, "MARS SURFACE TEMPERATURE"
                  os.path.join(OUTPUT_DIR, "mars_overlay_temperature.png"),
                  vector_field=(u_mars * 0.5, v_mars * 0.5))
 save_overlay_legend_badge("MARS SURFACE TEMPERATURE", "°C", THERMAL_CMAP, -125.0, -20.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_mars_thermal.png"), has_vectors=True)
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_thermal.png"), has_vectors=True,
+                          stats_l1="Gale Crater Mean: -53.67 °C | Extreme Min: -77.76 °C | Summer Max: -19.08 °C",
+                          stats_l2="Diurnal Range ΔT: 58.68 °C | Radiometric Skin Temp: -50.89 °C (REMS GTS Sensor)",
+                          source_note="MSL Curiosity REMS In-Situ Ground Truth (4,018 Daily Sols)")
 
 # =============================================================
 # 8. MARS MOISTURE & DELIQUESCENCE OVERLAY
@@ -296,8 +332,11 @@ m_rh += 45.0 * np.exp(-((lon_grid - 77.58)**2 + (lat_grid - 18.38)**2) / (2 * 15
 m_rh = gaussian_filter(m_rh, sigma=3.5)
 save_psg_overlay(m_rh, VIBRANT_CMAP, 5.0, 75.0, "MARS DELIQUESCENCE & RH", "%",
                  os.path.join(OUTPUT_DIR, "mars_overlay_moisture.png"))
-save_overlay_legend_badge("MARS DELIQUESCENCE & RH", "%", VIBRANT_CMAP, 5.0, 75.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_mars_moisture.png"), has_vectors=False)
+save_overlay_legend_badge("MARS DELIQUESCENCE & RELATIVE HUMIDITY", "%", VIBRANT_CMAP, 5.0, 75.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_moisture.png"), has_vectors=False,
+                          stats_l1="Gale Crater Baseline: 7.44% Daily Mean RH | Specific Humidity: 0.694 g/kg",
+                          stats_l2="Transient Deliquescence: Nocturnal Frost-Point RH Spikes (>70%) Near Regolith Salts",
+                          source_note="MSL Curiosity REMS Humidity Sensor (Boom 2) & Atmosphere Water Vapor")
 
 # =============================================================
 # 9. MARS SOLAR INSOLATION OVERLAY
@@ -307,8 +346,11 @@ m_sol = np.clip(m_sol, 0.3, 4.8)
 m_sol = gaussian_filter(m_sol, sigma=3.5)
 save_psg_overlay(m_sol, VIBRANT_CMAP, 0.5, 4.8, "MARS SOLAR INSOLATION", "kWh/m²/d",
                  os.path.join(OUTPUT_DIR, "mars_overlay_solar.png"))
-save_overlay_legend_badge("MARS SOLAR INSOLATION", "kWh/m²/d", VIBRANT_CMAP, 0.5, 4.8,
-                          os.path.join(OUTPUT_DIR, "overlay_key_mars_radiation.png"), has_vectors=False)
+save_overlay_legend_badge("MARS SOLAR INSOLATION FLUX", "kWh/m²/d", VIBRANT_CMAP, 0.5, 4.8,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_radiation.png"), has_vectors=False,
+                          stats_l1="Gale Crater Baseline: 4.10 kWh/m²/d (14.76 MJ/m²/d) at Solar Distance 1.52 AU",
+                          stats_l2="Surface Ultraviolet: UVA 0.619 W/m² | Biologically Active UVB: 0.200 W/m²",
+                          source_note="Curiosity REMS UV Sensor & 1.52 AU Orbital Radiative Transfer Model")
 
 # =============================================================
 # 10. MARS ASTROBIOLOGY / LACUSTRINE BIOSIGNATURE OVERLAY
@@ -320,7 +362,10 @@ m_bio += 80.0 * np.exp(-((lon_grid - (-5.5))**2 + (lat_grid - (-0.2))**2) / (2 *
 m_bio = gaussian_filter(m_bio, sigma=3.0)
 save_psg_overlay(m_bio, VIBRANT_CMAP, 0.0, 100.0, "MARS BIOSIGNATURE POTENTIAL", "%",
                  os.path.join(OUTPUT_DIR, "mars_overlay_biology.png"))
-save_overlay_legend_badge("MARS BIOSIGNATURE POTENTIAL", "%", VIBRANT_CMAP, 0.0, 100.0,
-                          os.path.join(OUTPUT_DIR, "overlay_key_mars_astrobiology.png"), has_vectors=False)
+save_overlay_legend_badge("MARS BIOSIGNATURE PRESERVATION POTENTIAL", "%", VIBRANT_CMAP, 0.0, 100.0,
+                          os.path.join(OUTPUT_DIR, "overlay_key_mars_astrobiology.png"), has_vectors=False,
+                          stats_l1="Primary Targets: Yellowknife Bay Mudstones & Mount Sharp Sulfate Strata",
+                          stats_l2="Preservation Mechanism: Fluvio-Lacustrine Sedimentation & Clay Mineral Matrix",
+                          source_note="MSL CheMin & SAM In-Situ Mineralogy and Organic Detection Targets")
 
 print("All 10 NASA PSG-Style Global Planetary Data Overlays and 10 Legend Badges successfully generated!")

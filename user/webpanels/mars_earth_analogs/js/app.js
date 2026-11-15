@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
     isGeminiLoading: false,
     activeHUD: null,        // Starts with HUD closed so 3D viewport is dominant
     activeOverlay: null,
-    isOrientSideways: false,
     tourActive: false,
     tourIndex: 0,
     tourSpeed: 1.0,
@@ -37,13 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const openSpace = new OpenSpaceAPI();
   const geminiService = new GeminiService(window.CONFIG);
 
-  // Surface altitudes for low-altitude oblique horizon perspective ("Orient Sideways" / "Side view")
-  const SITE_SURFACE_ALTITUDES = {
-    mars_gale: 4500.0,
-    lut: 2100.0,
-    mcmurdo: 2600.0,
-    aralkum: 1800.0,
-    uyuni: 5600.0
+  // Camera focus targets centered in the left viewport area (offset by the right-hand webpanel)
+  // At altitude ~240-260 km, full geographic feature (e.g. 154-km Gale Crater) is recognizable and complete
+  const SITE_CAMERA_TARGETS = {
+    mars_gale: { lat: -5.4801, lon: 138.4162, alt: 240000.0 },
+    lut: { lat: 30.01, lon: 59.42, alt: 250000.0 },
+    mcmurdo: { lat: -78.00, lon: 164.48, alt: 250000.0 },
+    aralkum: { lat: 44.29, lon: 60.59, alt: 260000.0 },
+    uyuni: { lat: -20.63, lon: -67.05, alt: 240000.0 }
   };
 
   // DOM Elements - Header & Tools
@@ -134,8 +134,8 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.setPropertyValue(`Scene.EarthLabel${s}.Renderable.Enabled`, false);
     });
 
-    // Initial camera flight to Gale Crater on Mars
-    openSpace.flyToGeo("Mars", -4.5895, 137.4417, 35000.0, 2.5);
+    // Initial camera flight to Gale Crater on Mars centered in left viewport region (~240 km altitude)
+    openSpace.flyToGeo("Mars", -5.4801, 138.4162, 240000.0, 2.5);
   });
 
   openSpace.onDisconnect(() => {
@@ -574,20 +574,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      const btnSideView = document.createElement("button");
-      btnSideView.className = `btn-vp-action${state.isOrientSideways ? " active" : ""}`;
-      btnSideView.setAttribute("aria-pressed", state.isOrientSideways ? "true" : "false");
-      btnSideView.innerText = "Side view";
-      btnSideView.title = "Tilt camera sideways across surface topography for ground-level horizon perspective";
-      btnSideView.addEventListener("click", (e) => {
+      const isStatsOpen = state.openStatsCatKey === cat.key;
+      const btnStats = document.createElement("button");
+      btnStats.className = `btn-vp-action${isStatsOpen ? " active" : ""}`;
+      btnStats.setAttribute("aria-pressed", isStatsOpen ? "true" : "false");
+      btnStats.innerText = isStatsOpen ? "Hide stats" : "Show stats";
+      btnStats.title = "Toggle detailed statistics and measurements for this category";
+      btnStats.addEventListener("click", (e) => {
         e.stopPropagation();
-        toggleSideView();
+        state.openStatsCatKey = isStatsOpen ? null : cat.key;
+        renderScienceAccordion();
       });
 
       vpStrip.appendChild(btnFocus);
       vpStrip.appendChild(btnOverview);
       vpStrip.appendChild(btnOverlay);
-      vpStrip.appendChild(btnSideView);
+      vpStrip.appendChild(btnStats);
       body.appendChild(vpStrip);
 
       // Availability note if continuous overlay is not supported
@@ -601,7 +603,6 @@ document.addEventListener("DOMContentLoaded", () => {
       // --------------------------------------------------
       // Opt-in Statistics Disclosure ("More info on stats")
       // --------------------------------------------------
-      const isStatsOpen = state.openStatsCatKey === cat.key;
       const disclosureBox = document.createElement("div");
       disclosureBox.className = "stats-disclosure-box";
 
@@ -730,9 +731,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function focusOnSurface() {
     const site = getActiveSiteData();
     const globe = site.globe || "Earth";
-    const lat = site.coordinates.lat;
-    const lon = site.coordinates.lon;
-    const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2500.0;
+    const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
 
     // When focusing down to ground terrain level, fade out Mars_Texture so surface is 100% crisp, unblotched CTX imagery
     if (globe === "Mars") {
@@ -740,7 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
     }
 
-    openSpace.flyToGeo(globe, lat, lon, groundAlt, 2.5);
+    openSpace.flyToGeo(globe, target.lat, target.lon, target.alt, 2.5);
   }
 
   function toggleCategoryHUD(cat) {
@@ -884,10 +883,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
         if ${enable} then
           if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.CartesianPosition") then
-            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.CartesianPosition", { -0.65, 0.60, -2.0 })
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.CartesianPosition", { -0.68, 0.68, -2.0 })
           end
           if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Scale") then
-            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Scale", 0.28)
+            openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Scale", 0.44)
           end
           if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Rotation") then
             openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Rotation", { 0.0, 0.0, 0.0 })
@@ -905,6 +904,20 @@ document.addEventListener("DOMContentLoaded", () => {
         end
       end
     `);
+
+    // Camera zoom dynamics:
+    // When overlay toggled ON, zoom out to global planetary orbit to view data in full context
+    // When overlay toggled OFF, zoom back in to localized feature (~240 km)
+    if (enable) {
+      if (isMars) {
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 6500000.0, 2.5);
+      } else {
+        openSpace.flyToGeo("Earth", site.coordinates.lat, site.coordinates.lon, 9000000.0, 2.5);
+      }
+    } else {
+      const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
+      openSpace.flyToGeo(globeName, target.lat, target.lon, target.alt, 2.5);
+    }
 
     state.activeOverlay = enable ? layerName : null;
     renderScienceAccordion();
@@ -932,33 +945,10 @@ document.addEventListener("DOMContentLoaded", () => {
           openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
         end
       `);
+      const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: -5.4801, lon: 138.4162, alt: 240000.0 };
+      openSpace.flyToGeo(state.currentSiteKey === "mars_gale" ? "Mars" : "Earth", target.lat, target.lon, target.alt, 2.5);
       state.activeOverlay = null;
     }
-  }
-
-  function toggleSideView() {
-    state.isOrientSideways = !state.isOrientSideways;
-    const site = getActiveSiteData();
-    const globe = site.globe || "Earth";
-    const lat = site.coordinates.lat;
-    const lon = site.coordinates.lon;
-
-    if (state.isOrientSideways) {
-      if (globe === "Mars") {
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
-      }
-      const groundAlt = SITE_SURFACE_ALTITUDES[state.currentSiteKey] || 2500.0;
-      openSpace.flyToGeo(globe, lat, lon, groundAlt, 2.5);
-    } else {
-      if (globe === "Mars") {
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0);
-        openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0);
-      }
-      openSpace.flyToGeo(globe, lat, lon, 35000.0, 2.0);
-    }
-
-    renderScienceAccordion();
   }
 
   // ----------------------------------------------------
@@ -973,11 +963,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const SITE_ORBITAL_ALTITUDES = {
-    mars_gale: 550000.0,
-    lut: 850000.0,
-    mcmurdo: 650000.0,
-    aralkum: 850000.0,
-    uyuni: 650000.0
+    mars_gale: 240000.0,
+    lut: 250000.0,
+    mcmurdo: 250000.0,
+    aralkum: 260000.0,
+    uyuni: 240000.0
   };
 
   // ----------------------------------------------------
@@ -1052,9 +1042,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (flyCamera) {
       const globe = site.globe || "Earth";
-      const lat = site.coordinates.lat;
-      const lon = site.coordinates.lon;
-      const alt = SITE_ORBITAL_ALTITUDES[siteKey] || (isMars ? 550000.0 : 750000.0);
+      const target = SITE_CAMERA_TARGETS[siteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
       const actionName = SITE_ACTIONS[siteKey];
 
       const flightLua = `
@@ -1064,7 +1052,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if openspace.navigation and openspace.navigation.setFocus then
             openspace.navigation.setFocus('${globe}')
           end
-          openspace.navigation.flyToGeo('${globe}', ${lat}, ${lon}, ${alt}, 3.5)
+          openspace.navigation.flyToGeo('${globe}', ${target.lat}, ${target.lon}, ${target.alt}, 3.5)
         end
       `;
       openSpace.executeLuaScript(flightLua);

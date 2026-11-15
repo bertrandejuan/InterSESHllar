@@ -1,9 +1,9 @@
 local AnalogSites = {
-  MarsGale = { Globe = "Mars", Lat = -4.5895, Lon = 137.4417, Alt = 550000, Name = "Mars: Gale Crater" },
-  Aralkum = { Globe = "Earth", Lat = 44.80, Lon = 59.80, Alt = 850000, Name = "Earth: Aralkum Desert" },
-  McMurdo = { Globe = "Earth", Lat = -77.50, Lon = 162.00, Alt = 650000, Name = "Earth: McMurdo Dry Valleys" },
-  Lut = { Globe = "Earth", Lat = 30.50, Lon = 58.80, Alt = 850000, Name = "Earth: Lut Desert" },
-  Uyuni = { Globe = "Earth", Lat = -20.15, Lon = -67.60, Alt = 650000, Name = "Earth: Salar de Uyuni" }
+  MarsGale = { Globe = "Mars", Lat = -5.4801, Lon = 138.4162, Alt = 240000, Name = "Mars: Gale Crater" },
+  Aralkum = { Globe = "Earth", Lat = 44.29, Lon = 60.59, Alt = 260000, Name = "Earth: Aralkum Desert" },
+  McMurdo = { Globe = "Earth", Lat = -78.00, Lon = 164.48, Alt = 250000, Name = "Earth: McMurdo Dry Valleys" },
+  Lut = { Globe = "Earth", Lat = 30.01, Lon = 59.42, Alt = 250000, Name = "Earth: Lut Desert" },
+  Uyuni = { Globe = "Earth", Lat = -20.63, Lon = -67.05, Alt = 240000, Name = "Earth: Salar de Uyuni" }
 }
 
 local Actions = {
@@ -54,7 +54,7 @@ local Actions = {
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('Mars')
       end
-      openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 550000, 4.0)
+      openspace.navigation.flyToGeo('Mars', -5.4801, 138.4162, 240000, 3.5)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", true)
       end
@@ -81,7 +81,7 @@ local Actions = {
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('Earth')
       end
-      openspace.navigation.flyToGeo('Earth', 44.80, 59.80, 850000, 4.0)
+      openspace.navigation.flyToGeo('Earth', 44.29, 60.59, 260000, 3.5)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
       end
@@ -106,7 +106,7 @@ local Actions = {
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('Earth')
       end
-      openspace.navigation.flyToGeo('Earth', -77.50, 162.00, 650000, 4.0)
+      openspace.navigation.flyToGeo('Earth', -78.00, 164.48, 250000, 3.5)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
       end
@@ -131,7 +131,7 @@ local Actions = {
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('Earth')
       end
-      openspace.navigation.flyToGeo('Earth', 30.50, 58.80, 850000, 4.0)
+      openspace.navigation.flyToGeo('Earth', 30.01, 59.42, 250000, 3.5)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
       end
@@ -156,7 +156,7 @@ local Actions = {
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('Earth')
       end
-      openspace.navigation.flyToGeo('Earth', -20.15, -67.60, 650000, 4.0)
+      openspace.navigation.flyToGeo('Earth', -20.63, -67.05, 240000, 3.5)
       if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
         openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
       end
@@ -187,28 +187,6 @@ local Actions = {
     ]],
     Documentation = "Return to wide-angle global planetary orbit",
     GuiPath = "/Planetary Analogs/Navigation",
-    IsLocal = false
-  },
-  {
-    Identifier = "mars_earth.OrientSideways",
-    Name = "Orient Sideways (Ground Topography View)",
-    Command = [[
-      local lat, lon, alt = table.unpack(openspace.globebrowsing.geoPositionForCamera())
-      local lon_rad = math.rad(lon)
-      local upx = -math.sin(lon_rad)
-      local upy = math.cos(lon_rad)
-      local currentNavState = openspace.navigation.getNavigationState()
-      local newNavState = {
-        Pitch = math.pi * 0.92,
-        Anchor = currentNavState["Anchor"],
-        Yaw = currentNavState["Yaw"] or 0.0,
-        Position = currentNavState["Position"],
-        Up = { upx, upy, 0.0 }
-      }
-      openspace.navigation.setNavigationState(newNavState)
-    ]],
-    Documentation = "Tilts camera to view 3D topography and relief along the horizon from ground level",
-    GuiPath = "/Planetary Analogs/Camera Orientation",
     IsLocal = false
   },
   {
