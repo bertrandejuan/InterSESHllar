@@ -1,140 +1,74 @@
 /**
- * OpenSpace Planetary Analog Dashboard: Mars Gale Crater & Earth Desert Analogs
- * Implements Storyboard & Viewport Pop-up Requirements:
- * - On opening: Global illumination for Earth and Mars (no dark side shadows)
- * - Disable unnecessary astral bodies (only Earth, Mars, and background stars)
- * - Top location selector: Mars Gale Crater & 4 Earth Analogs
- * - Semi-translucent screen-wide pop-up box for Overview in viewport area (blue rectangle)
- * - Semi-translucent screen-wide pop-up slide for Comparison to Mars
- * - Global planetary surface data visualization overlay (covers entire planet on zoom-out)
- * - Orient sideways topography tilt
- * - Automated tour preserved at bottom
+ * InterSESHllar: Planetary Analogs Dashboard Application Controller
+ * Connects OpenSpace WebSocket API, In-Situ Climatology Data, NASA POWER, and Google Gemini AI.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
   // Application State
   const state = {
     currentSiteKey: "lut",
-    activeDataPointId: null,
-    activeOverlayCategory: null,
-    isOrientSideways: false,
-    isMarsComparisonOpen: false,
-    isOverviewPopupOpen: false,
+    currentPinId: "lut_gandom",
+    activeCategoryFilter: "all",
+    isGeminiLoading: false,
     tourActive: false,
     tourIndex: 0,
     tourSpeed: 1.0,
     tourTimer: null
   };
 
-  // Geographic Target Coordinates
-  const SITES = {
-    mars_gale: {
-      id: "mars_gale",
-      name: "Mars: Gale Crater",
-      region: "Aeolis Palus / Mount Sharp (Curiosity REMS Station)",
-      globe: "Mars",
-      orbitAlt: 1200000,
-      patchLat: -4.5895,
-      patchLon: 137.4417,
-      patchAlt: 24000,
-      tagProperty: "Scene.MarsTagGaleCrater.Renderable.Enabled"
-    },
-    lut: {
-      id: "lut",
-      name: "Lut Desert (Dasht-e Lut)",
-      region: "Kerman / Sistan, Iran",
-      globe: "Earth",
-      orbitAlt: 850000,
-      patchLat: 30.50,
-      patchLon: 58.80,
-      patchAlt: 24000,
-      tagProperty: "Scene.EarthTagLut.Renderable.Enabled"
-    },
-    mcmurdo: {
-      id: "mcmurdo",
-      name: "McMurdo Dry Valleys",
-      region: "Victoria Land, Antarctica",
-      globe: "Earth",
-      orbitAlt: 650000,
-      patchLat: -77.50,
-      patchLon: 162.00,
-      patchAlt: 18000,
-      tagProperty: "Scene.EarthTagMcMurdo.Renderable.Enabled"
-    },
-    aralkum: {
-      id: "aralkum",
-      name: "Aralkum Desert",
-      region: "Karakalpakstan, Uzbekistan",
-      globe: "Earth",
-      orbitAlt: 850000,
-      patchLat: 44.80,
-      patchLon: 59.80,
-      patchAlt: 25000,
-      tagProperty: "Scene.EarthTagAralkum.Renderable.Enabled"
-    },
-    uyuni: {
-      id: "uyuni",
-      name: "Salar de Uyuni",
-      globe: "Earth",
-      region: "Potosí / Oruro, Bolivia",
-      orbitAlt: 650000,
-      patchLat: -20.15,
-      patchLon: -67.60,
-      patchAlt: 20000,
-      tagProperty: "Scene.EarthTagUyuni.Renderable.Enabled"
-    }
-  };
-
-  // Overlay Layers mapping (OpenSpace ColorLayers on Earth and Mars)
-  const OVERLAY_LAYERS = {
-    Earth: {
-      temperature: "Scene.Earth.Renderable.Layers.ColorLayers.TeamData_Earth_Temperature.Enabled",
-      wind: "Scene.Earth.Renderable.Layers.ColorLayers.TeamData_Earth_Wind.Enabled",
-      moisture: "Scene.Earth.Renderable.Layers.ColorLayers.TeamData_Earth_Moisture.Enabled",
-      solar: "Scene.Earth.Renderable.Layers.ColorLayers.TeamData_Earth_Solar.Enabled",
-      biology: "Scene.Earth.Renderable.Layers.ColorLayers.TeamData_Earth_Biology.Enabled"
-    },
-    Mars: {
-      temperature: "Scene.Mars.Renderable.Layers.ColorLayers.TeamData_Mars_Temperature.Enabled",
-      wind: "Scene.Mars.Renderable.Layers.ColorLayers.TeamData_Mars_Wind.Enabled",
-      moisture: "Scene.Mars.Renderable.Layers.ColorLayers.TeamData_Mars_Moisture.Enabled",
-      solar: "Scene.Mars.Renderable.Layers.ColorLayers.TeamData_Mars_Solar.Enabled",
-      biology: "Scene.Mars.Renderable.Layers.ColorLayers.TeamData_Mars_Biology.Enabled"
-    }
-  };
+  // Services
+  const geminiService = new GeminiService(window.CONFIG);
+  const openSpace = new OpenSpaceAPI();
 
   // DOM Elements
   const statusOpenSpace = document.getElementById("status-openspace");
   const dotOpenSpace = document.getElementById("dot-openspace");
   const btnOrbitReturn = document.getElementById("btn-orbit-return");
+  const btnSettingsGemini = document.getElementById("btn-settings-gemini");
+  const modalGeminiSettings = document.getElementById("modal-gemini-settings");
+  const btnCloseGeminiModal = document.getElementById("btn-close-gemini-modal");
+  const inputGeminiKey = document.getElementById("input-gemini-key");
+  const btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
+  const btnClearGeminiKey = document.getElementById("btn-clear-gemini-key");
+
+  // Location Selector
   const siteBtns = document.querySelectorAll(".site-btn");
   const activeSiteTitle = document.getElementById("active-site-title");
   const activeSiteSubtitle = document.getElementById("active-site-subtitle");
-  const btnToggleMarsComp = document.getElementById("btn-toggle-mars-comparison");
-  const compTitleText = document.getElementById("comp-title-text");
-  const compArrow = document.getElementById("comp-arrow");
-  const categoriesContainer = document.getElementById("categories-container");
+  const siteBlurbText = document.getElementById("site-blurb-text");
+  const blurbSourceTag = document.getElementById("blurb-source-tag");
+  const btnRegenGemini = document.getElementById("btn-regen-gemini");
+  const pinsButtonGrid = document.getElementById("pins-button-grid");
 
-  // Floating Viewport Overview Pop-Up Elements
-  const viewportOverviewBackdrop = document.getElementById("viewport-overview-backdrop");
-  const popupMetricIcon = document.getElementById("popup-metric-icon");
-  const popupMetricTitle = document.getElementById("popup-metric-title");
-  const popupMetricSubtitle = document.getElementById("popup-metric-subtitle");
-  const popupStatLabel = document.getElementById("popup-stat-label");
-  const popupStatValue = document.getElementById("popup-stat-value");
-  const popupStatContext = document.getElementById("popup-stat-context");
-  const popupMetricDesc = document.getElementById("popup-metric-desc");
-  const btnCloseOverviewPopup = document.getElementById("btn-close-overview-popup");
-  const btnPopupToggleOverlay = document.getElementById("btn-popup-toggle-overlay");
-  const popupOverlayStatus = document.getElementById("popup-overlay-status");
+  // Active Pin Card Elements
+  const pinCodeBadge = document.getElementById("pin-code-badge");
+  const activePinName = document.getElementById("active-pin-name");
+  const pinCoordsText = document.getElementById("pin-coords-text");
+  const pinDescriptionText = document.getElementById("pin-description-text");
+  const overallScoreNum = document.getElementById("overall-score-num");
+  const overallScoreRank = document.getElementById("overall-score-rank");
 
-  // Comparison Modal Elements
-  const modalMarsBackdrop = document.getElementById("modal-mars-backdrop");
-  const compSiteName = document.getElementById("comp-site-name");
-  const thSiteLabel = document.getElementById("th-site-label");
-  const compTableBody = document.getElementById("comp-table-body");
-  const btnCloseComp = document.getElementById("btn-close-comp");
-  const btnCloseCompBottom = document.getElementById("btn-close-comp-bottom");
+  // Category Ranking Bars
+  const scoreThermalVal = document.getElementById("score-thermal-val");
+  const fillThermal = document.getElementById("fill-thermal");
+
+  const scoreDynamicsVal = document.getElementById("score-dynamics-val");
+  const fillDynamics = document.getElementById("fill-dynamics");
+
+  const scoreMoistureVal = document.getElementById("score-moisture-val");
+  const fillMoisture = document.getElementById("fill-moisture");
+
+  const scoreRadiationVal = document.getElementById("score-radiation-val");
+  const fillRadiation = document.getElementById("fill-radiation");
+
+  const rankingBarCards = document.querySelectorAll(".ranking-bar-card");
+
+  // Table Elements
+  const metricTableBody = document.getElementById("metric-table-body");
+  const thSelectedSiteCol = document.getElementById("th-selected-site-col");
+  const tableFilterTitle = document.getElementById("table-filter-title");
+  const pillBtns = document.querySelectorAll(".pill-btn");
+  const detailsTableSection = document.getElementById("details-table-section");
 
   // Tour Elements
   const btnTourPlay = document.getElementById("btn-tour-play");
@@ -143,23 +77,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnTourNext = document.getElementById("btn-tour-next");
   const selTourSpeed = document.getElementById("sel-tour-speed");
 
-  // OpenSpace API Connection
-  const OpenSpaceClass = window.OpenSpaceClient || window.OpenSpaceAPI;
-  const openSpace = OpenSpaceClass ? new OpenSpaceClass() : {
-    onConnect: () => {},
-    onDisconnect: () => {},
-    connect: () => {},
-    setPropertyValue: () => {},
-    flyToGeo: () => {},
-    sendLua: () => {},
-    executeLuaScript: () => {}
-  };
-
+  // ----------------------------------------------------
+  // 1. OpenSpace Connection & Initial Scene Configuration
+  // ----------------------------------------------------
   openSpace.onConnect(() => {
-    statusOpenSpace.innerText = "Connected";
+    statusOpenSpace.innerText = "OpenSpace: Connected";
     dotOpenSpace.className = "indicator-dot online";
 
-    // Set Global Illumination for Earth and Mars (no shadow occlusion)
+    // Set global illumination on Earth and Mars (no dark side shadows)
     openSpace.setPropertyValue("Scene.Earth.Renderable.PerformShading", false);
     openSpace.setPropertyValue("Scene.Mars.Renderable.PerformShading", false);
     openSpace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", true);
@@ -167,905 +92,450 @@ document.addEventListener("DOMContentLoaded", () => {
     openSpace.setPropertyValue("Scene.Earth.Renderable.Layers.HeightLayers.Terrain_Tileset.Enabled", true);
     openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended.Enabled", true);
 
-    // Boost LOD so terrain resolves crisp
+    // Boost LOD for crisp terrain resolution
     openSpace.setPropertyValue("Scene.Earth.Renderable.LodScaleFactor", 15.0);
     openSpace.setPropertyValue("Scene.Mars.Renderable.LodScaleFactor", 15.0);
-
-    // Disable unnecessary celestial bodies (only Earth, Mars, and background stars remain)
-    openSpace.sendLua(`
-      local bodies = {
-        'Mercury', 'Venus', 'Moon', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto',
-        'SunGlare', 'Ceres', 'Vesta', 'Bennu', 'Ryugu', 'Io', 'Europa', 'Ganymede',
-        'Callisto', 'Titan', 'Enceladus', 'Mimas', 'Rhea', 'Iapetus', 'Dione', 'Tethys',
-        'Phobos', 'Deimos', 'LocalDwarfGalaxies', 'Galaxies', 'Tully', 'SloanDigitalSkySurvey',
-        'ConstellationBounds', 'Constellations'
-      }
-      for _, b in ipairs(bodies) do
-        if openspace.hasProperty('Scene.' .. b .. '.Renderable.Enabled') then
-          openspace.setPropertyValueSingle('Scene.' .. b .. '.Renderable.Enabled', false)
-        end
-        if openspace.hasProperty('Scene.' .. b .. 'Trail.Renderable.Enabled') then
-          openspace.setPropertyValueSingle('Scene.' .. b .. 'Trail.Renderable.Enabled', false)
-        end
-        if openspace.hasProperty('Scene.' .. b .. '.Enabled') then
-          openspace.setPropertyValueSingle('Scene.' .. b .. '.Enabled', false)
-        end
-      end
-      local trails = { 'MercuryTrail', 'VenusTrail', 'EarthTrail', 'MarsTrail', 'MoonTrail', 'JupiterTrail', 'SaturnTrail', 'UranusTrail', 'NeptuneTrail', 'PlutoTrail' }
-      for _, t in ipairs(trails) do
-        if openspace.hasProperty('Scene.' .. t .. '.Renderable.Enabled') then
-          openspace.setPropertyValueSingle('Scene.' .. t .. '.Renderable.Enabled', false)
-        end
-      end
-    `);
   });
 
   openSpace.onDisconnect(() => {
-    statusOpenSpace.innerText = "Offline (4682)";
+    statusOpenSpace.innerText = "OpenSpace: Offline (Port 4682)";
     dotOpenSpace.className = "indicator-dot offline";
   });
 
   openSpace.connect();
 
-  function calculateSimilarity(valEarth, valMars, scale) {
-    const delta = Math.abs(valEarth - valMars);
-    const score = 100 * Math.exp(-delta / scale);
-    return Math.min(100, Math.max(0, score)).toFixed(1);
+  // ----------------------------------------------------
+  // 2. Data Helpers & Mathematical Scoring
+  // ----------------------------------------------------
+  function getActiveSiteData() {
+    return window.TEAM_DATA[state.currentSiteKey] || window.TEAM_DATA["lut"];
   }
 
-  function getScoreColor(val) {
-    if (val >= 60) return "var(--score-high)";
-    if (val >= 35) return "var(--score-mid)";
-    return "var(--score-low)";
+  function getActivePinData() {
+    const site = getActiveSiteData();
+    const pin = site.pins.find(p => p.id === state.currentPinId);
+    return pin || site.pins[0];
   }
 
-  /**
-   * Turns ON/OFF the Global Planetary Surface Data Overlay in OpenSpace
-   * When zoomed in: shows the data visualization across the site terrain.
-   * When zoomed out: covers the entire planet!
-   */
-  function setPlanetarySurfaceOverlay(globe, category, enable) {
-    const globeLayers = OVERLAY_LAYERS[globe];
-    if (!globeLayers) return;
-
-    // First disable any active overlay on this globe
-    Object.keys(globeLayers).forEach(cat => {
-      openSpace.setPropertyValue(globeLayers[cat], false);
-    });
-
-    if (enable && globeLayers[category]) {
-      openSpace.setPropertyValue(globeLayers[category], true);
-      state.activeOverlayCategory = category;
-    } else {
-      state.activeOverlayCategory = null;
-    }
-    updateOverlayUIStatus();
+  function formatNumber(val, decimals = 2) {
+    if (val === null || val === undefined || isNaN(val)) return "N/A";
+    return Number(val).toFixed(decimals);
   }
 
-  function updateOverlayUIStatus() {
-    const isOverlayOn = !!state.activeOverlayCategory;
-    if (popupOverlayStatus) {
-      if (isOverlayOn) {
-        popupOverlayStatus.innerText = `● Active: Global Planetary Surface Map (${state.activeOverlayCategory.toUpperCase()})`;
-        popupOverlayStatus.className = "overlay-status-pill active";
-        btnPopupToggleOverlay.classList.add("btn-primary");
-      } else {
-        popupOverlayStatus.innerText = "Surface Overlay: Inactive";
-        popupOverlayStatus.className = "overlay-status-pill";
-        btnPopupToggleOverlay.classList.remove("btn-primary");
-      }
-    }
-
-    // Update buttons in categories
-    document.querySelectorAll(".btn-overlay").forEach(btn => {
-      const catKey = btn.dataset.category;
-      if (isOverlayOn && state.activeOverlayCategory === catKey) {
-        btn.classList.add("overlay-active");
-        btn.innerText = "● Map Active";
-      } else {
-        btn.classList.remove("overlay-active");
-        btn.innerText = "○ Overlay";
-      }
-    });
-  }
-
-  /**
-   * Builds Categories & Data Points strictly using the CSV metrics
-   */
-  function getCategoriesForSite(siteKey) {
-    const siteData = window.TEAM_DATA ? window.TEAM_DATA[siteKey] : null;
-    if (!siteData) return [];
-
-    const m = siteData.metrics || {};
-    const isMars = siteKey === "mars_gale";
-
-    if (isMars) {
-      return [
-        {
-          id: "mars_astrobiology",
-          categoryKey: "biology",
-          name: "Astro-Biology (Martian Astrobiological Potential)",
-          icon: "🧬",
-          points: [
-            {
-              id: "mars_preservation",
-              categoryKey: "biology",
-              label: "Lacustrine Biosignature Preservation",
-              valText: "Mount Sharp / Yellowknife Mudstones",
-              overview: {
-                title: "Ancient Habitability & Mineral Preservation",
-                statLabel: "Target Regolith",
-                statVal: "Phyllosilicates & Sulfates",
-                subStat: "Neutral pH, low salinity paleolakes",
-                desc: "Curiosity confirmed ancient Gale Crater harbored neutral, benign lake waters for millions of years with carbon, hydrogen, oxygen, nitrogen, and phosphorus. Clay and sulfate strata act as high-potential preservation matrices for ancient organic biosignatures."
-              }
-            },
-            {
-              id: "mars_radiation",
-              categoryKey: "biology",
-              label: "Cosmic Ray & UV Surface Degradation",
-              valText: "High Surface Flux (No Ozone Layer)",
-              overview: {
-                title: "Surface Radiation Exposure",
-                statLabel: "Solar Insolation",
-                statVal: "4.10 kWh/m²/day",
-                subStat: "Unattenuated Solar UV-C",
-                desc: "With a hyper-thin atmosphere (8.4 hPa) and zero stratospheric ozone, solar ultraviolet radiation and galactic cosmic rays penetrate directly to the Martian surface, sterilizing the top centimeters of regolith. Subsurface sampling (>1m) is required to access unaltered organics."
-              }
-            }
-          ]
-        },
-        {
-          id: "mars_temperature",
-          categoryKey: "temperature",
-          name: "Temperature (REMS In-Situ Sensor)",
-          icon: "🌡️",
-          points: [
-            {
-              id: "mars_mean_temp",
-              categoryKey: "temperature",
-              label: "Mean Annual Surface Temperature",
-              valText: "-63.0 °C",
-              overview: {
-                title: "Mean Annual Temperature",
-                statLabel: "10-Year Mean",
-                statVal: "-63.0 °C",
-                subStat: "REMS Ground Telemetry",
-                desc: "Curiosity REMS ground and air temperature sensors measure an equatorial annual mean of -63.0°C, reflecting Mars' greater solar distance (1.52 AU) and thin CO2 atmosphere."
-              }
-            },
-            {
-              id: "mars_diurnal",
-              categoryKey: "temperature",
-              label: "Diurnal Thermal Swing (ΔT)",
-              valText: "96.0 °C Sol Swing",
-              overview: {
-                title: "Diurnal Thermal Swing (ΔT)",
-                statLabel: "Daily Diurnal Range",
-                statVal: "96.0 °C",
-                subStat: "Peak Single Sol: 105.0 °C",
-                desc: "Low atmospheric thermal inertia results in an extreme diurnal swing of ~96°C every sol. This thermal cycle represents the premier environmental stress test for rover mechanisms and extraterrestrial biology."
-              }
-            }
-          ]
-        },
-        {
-          id: "mars_wind",
-          categoryKey: "wind",
-          name: "Wind & Atmosphere (REMS Sensors)",
-          icon: "💨",
-          points: [
-            {
-              id: "mars_wind_speed",
-              categoryKey: "wind",
-              label: "Surface Wind Velocity",
-              valText: "Mean: 3.5 m/s (Gusts ~20 m/s)",
-              overview: {
-                title: "Surface Wind Velocity",
-                statLabel: "Mean Wind Speed",
-                statVal: "3.5 m/s",
-                subStat: "Downslope Gusts: ~20 m/s",
-                desc: "Curiosity REMS wind booms record prevailing diurnal katabatic winds descending Mount Sharp, driving active migration of the Bagnold Dune field."
-              }
-            },
-            {
-              id: "mars_pressure",
-              categoryKey: "wind",
-              label: "Atmospheric Surface Pressure",
-              valText: "8.4 hPa (0.84 kPa)",
-              overview: {
-                title: "Atmospheric Surface Pressure",
-                statLabel: "Mean Surface Pressure",
-                statVal: "8.4 hPa",
-                subStat: "Seasonal Range: 7.0 to 9.5 hPa",
-                desc: "Gale Crater atmospheric pressure averages 8.4 hPa (~0.8% of Earth sea-level). The pressure oscillates seasonally as polar ice caps freeze out and sublime up to 25% of the total atmospheric mass."
-              }
-            }
-          ]
-        },
-        {
-          id: "mars_moisture",
-          categoryKey: "moisture",
-          name: "Moisture & Relative Humidity",
-          icon: "💧",
-          points: [
-            {
-              id: "mars_rh",
-              categoryKey: "moisture",
-              label: "Relative Humidity (RH)",
-              valText: "12.0 % (Night Frost Peaks)",
-              overview: {
-                title: "Relative Humidity (RH)",
-                statLabel: "Mean Relative Humidity",
-                statVal: "12.0 %",
-                subStat: "Liquid Precipitation: 0.0 mm",
-                desc: "While mean relative humidity is ~12%, cold nighttime air temperatures can briefly push local relative humidity to 70%+ near the ground, allowing transient perchlorate brine deliquescence and frost formation before rapid morning sublimation."
-              }
-            }
-          ]
-        },
-        {
-          id: "mars_solar",
-          categoryKey: "solar",
-          name: "Solar Radiation (REMS Sensor)",
-          icon: "☀️",
-          points: [
-            {
-              id: "mars_solar_flux",
-              categoryKey: "solar",
-              label: "Solar Insolation (ALLSKY_SFC_SW_DWN)",
-              valText: "4.10 kWh/m²/day (14.76 MJ/m²/day)",
-              overview: {
-                title: "Solar Insolation",
-                statLabel: "Mean Solar Insolation",
-                statVal: "4.10 kWh/m²/day",
-                subStat: "14.76 MJ/m²/day Total Flux",
-                desc: "Direct solar shortwave downward irradiance measured at Gale Crater. This provides the primary energy baseline for comparing terrestrial solar desert analogs."
-              }
-            }
-          ]
-        }
-      ];
-    }
-
-    // Earth Desert Analog Categories (Derived Strictly from Team CSV Records)
-    return [
-      {
-        id: "cat_biology",
-        categoryKey: "biology",
-        name: "Biology (Analog Extremophile Habitability)",
-        icon: "🧬",
-        points: [
-          {
-            id: "bio_desiccation",
-            categoryKey: "biology",
-            label: "Extreme Aridity & Desiccation Resistance",
-            valText: `${m.mean_relative_humidity_pct}% RH | ${m.mean_annual_precip_mm} mm/yr Rain`,
-            overview: {
-              title: "Aridity & Microbial Desiccation",
-              statLabel: "Mean Relative Humidity",
-              statVal: `${m.mean_relative_humidity_pct} %`,
-              subStat: `Annual Rainfall: ${m.mean_annual_precip_mm} mm/year`,
-              desc: `Extremely low moisture levels (${m.mean_relative_humidity_pct}% RH, ${m.mean_annual_precip_mm} mm rain/yr) test the absolute physiological desiccation limits of cyanobacteria, Actinomycetota, and cryptoendoliths under conditions resembling Martian xerophilic stress.`
-            }
-          },
-          {
-            id: "bio_radiation",
-            categoryKey: "biology",
-            label: "Solar UV & Downwelling Shortwave Flux",
-            valText: `${m.mean_solar_insolation_kwh} kWh/m²/day (${m.mean_solar_insolation_mj} MJ/m²/day)`,
-            overview: {
-              title: "Solar Downwelling Radiation Stress",
-              statLabel: "Mean Solar Irradiance",
-              statVal: `${m.mean_solar_insolation_kwh} kWh/m²/day`,
-              subStat: `${m.mean_solar_insolation_mj} MJ/m²/day Total Energy`,
-              desc: `High solar irradiance induces severe nucleic acid photolesions. Endolithic communities at ${siteData.name} seek shelter beneath mineral crystal crusts, modeling how potential Martian microbes could persist in subsurface evaporite micro-niches.`
-            }
-          }
-        ]
-      },
-      {
-        id: "cat_temperature",
-        categoryKey: "temperature",
-        name: "Temperature (10-Year In-Situ Daily Archive)",
-        icon: "🌡️",
-        points: [
-          {
-            id: "temp_mean",
-            categoryKey: "temperature",
-            label: "Mean Annual Temperature (T2M)",
-            valText: `${m.mean_temperature_c} °C`,
-            overview: {
-              title: "Mean Annual Temperature (T2M)",
-              statLabel: "10-Year Mean",
-              statVal: `${m.mean_temperature_c} °C`,
-              subStat: "4,018 Daily Observations",
-              desc: `Calculated from 11 consecutive years (2015–2025) of continuous daily observations at ${siteData.name}.`
-            }
-          },
-          {
-            id: "temp_max",
-            categoryKey: "temperature",
-            label: "Daily Maximum Temperature (T2M_MAX)",
-            valText: `Avg: ${m.avg_daily_max_c} °C, Record: ${m.absolute_record_max_c} °C`,
-            overview: {
-              title: "Maximum Temperature (T2M_MAX)",
-              statLabel: "All-Time Record Peak",
-              statVal: `${m.absolute_record_max_c} °C`,
-              subStat: `Daily Average Max: ${m.avg_daily_max_c} °C`,
-              desc: `The highest daily peak recorded across the entire 10-year dataset at ${siteData.name}.`
-            }
-          },
-          {
-            id: "temp_min",
-            categoryKey: "temperature",
-            label: "Daily Minimum Temperature (T2M_MIN)",
-            valText: `Avg: ${m.avg_daily_min_c} °C, Record: ${m.absolute_record_min_c} °C`,
-            overview: {
-              title: "Minimum Temperature (T2M_MIN)",
-              statLabel: "All-Time Record Trough",
-              statVal: `${m.absolute_record_min_c} °C`,
-              subStat: `Daily Average Min: ${m.avg_daily_min_c} °C`,
-              desc: `The lowest daily nighttime temperature recorded in the 10-year dataset at ${siteData.name}.`
-            }
-          },
-          {
-            id: "temp_diurnal",
-            categoryKey: "temperature",
-            label: "Diurnal Thermal Swing (ΔT = Tmax - Tmin)",
-            valText: `Mean: ${m.mean_diurnal_thermal_swing_c} °C, Peak: ${m.max_diurnal_thermal_swing_c} °C`,
-            overview: {
-              title: "Daily Diurnal Temperature Range (ΔT)",
-              statLabel: "Mean Daily Swing",
-              statVal: `${m.mean_diurnal_thermal_swing_c} °C`,
-              subStat: `Single-Day Peak Swing: ${m.max_diurnal_thermal_swing_c} °C`,
-              desc: `The daily temperature range (Tmax - Tmin) captures the extreme daytime-to-nighttime thermal swing, closely paralleling Martian sol variations.`
-            }
-          }
-        ]
-      },
-      {
-        id: "cat_wind",
-        categoryKey: "wind",
-        name: "Wind & Atmosphere (MERRA-2 In-Situ)",
-        icon: "💨",
-        points: [
-          {
-            id: "wind_speed",
-            categoryKey: "wind",
-            label: "Surface Wind Velocity (WS10M)",
-            valText: `Mean: ${m.mean_wind_speed_ms} m/s, Max Gust: ${m.peak_wind_gust_ms} m/s`,
-            overview: {
-              title: "Surface Wind Speed (10 Meters)",
-              statLabel: "Mean Wind Speed",
-              statVal: `${m.mean_wind_speed_ms} m/s`,
-              subStat: `Peak Recorded Wind Gust: ${m.peak_wind_gust_ms} m/s`,
-              desc: `MERRA-2 10-meter wind velocity series across 4,018 daily observations, tracking active saltation and aeolian sand transport.`
-            }
-          },
-          {
-            id: "atm_pressure",
-            categoryKey: "wind",
-            label: "Atmospheric Surface Pressure",
-            valText: `${m.atmospheric_surface_pressure_hpa} hPa`,
-            overview: {
-              title: "Atmospheric Surface Pressure",
-              statLabel: "Surface Pressure",
-              statVal: `${m.atmospheric_surface_pressure_hpa} hPa`,
-              subStat: `Elevation: ${siteData.coordinates.elevation_m}m AMSL`,
-              desc: `Station level atmospheric pressure derived from elevation and surface barometric telemetry.`
-            }
-          }
-        ]
-      },
-      {
-        id: "cat_moisture",
-        categoryKey: "moisture",
-        name: "Moisture & Precipitation (NASA POWER)",
-        icon: "💧",
-        points: [
-          {
-            id: "moist_rh",
-            categoryKey: "moisture",
-            label: "Relative Humidity (RH2M)",
-            valText: `Mean: ${m.mean_relative_humidity_pct} %, Min: ${m.min_relative_humidity_pct} %`,
-            overview: {
-              title: "Relative Humidity at 2 Meters (RH2M)",
-              statLabel: "Mean Humidity",
-              statVal: `${m.mean_relative_humidity_pct} %`,
-              subStat: `Absolute Minimum RH: ${m.min_relative_humidity_pct} %`,
-              desc: `Relative humidity time series indicating atmospheric dryness.`
-            }
-          },
-          {
-            id: "moist_precip",
-            categoryKey: "moisture",
-            label: "Precipitation (PRECTOTCORR)",
-            valText: `Daily: ${m.mean_daily_precip_mm} mm/d, Annual: ${m.mean_annual_precip_mm} mm/yr`,
-            overview: {
-              title: "Precipitation (PRECTOTCORR)",
-              statLabel: "Annual Precipitation",
-              statVal: `${m.mean_annual_precip_mm} mm/year`,
-              subStat: `Mean Daily Rainfall: ${m.mean_daily_precip_mm} mm/day`,
-              desc: `Precipitation corrected time series, confirming hyper-arid terrestrial classification.`
-            }
-          }
-        ]
-      },
-      {
-        id: "cat_solar",
-        categoryKey: "solar",
-        name: "Solar Radiation (CERES SYN1deg In-Situ)",
-        icon: "☀️",
-        points: [
-          {
-            id: "solar_flux",
-            categoryKey: "solar",
-            label: "Solar Insolation (ALLSKY_SFC_SW_DWN)",
-            valText: `${m.mean_solar_insolation_kwh} kWh/m²/day (${m.mean_solar_insolation_mj} MJ/m²/day)`,
-            overview: {
-              title: "Solar Insolation (Downwelling Shortwave)",
-              statLabel: "Daily Solar Energy",
-              statVal: `${m.mean_solar_insolation_kwh} kWh/m²/day`,
-              subStat: `${m.mean_solar_insolation_mj} MJ/m²/day Mean`,
-              desc: `CERES SYN1deg all-sky surface downward shortwave flux, tracking total incident solar radiation reaching the ground.`
-            }
-          }
-        ]
-      }
-    ];
-  }
-
-  /**
-   * Renders the Active Site View and Categories
-   */
-  function renderActiveSite(siteKey) {
+  // ----------------------------------------------------
+  // 3. UI Update: Location Selection & Blurb
+  // ----------------------------------------------------
+  async function selectLocation(siteKey, flyCamera = true) {
     state.currentSiteKey = siteKey;
-    state.activeDataPointId = null;
-    state.isOrientSideways = false;
+    const site = getActiveSiteData();
 
-    // Reset surface overlays on site change
-    const siteConfig = SITES[siteKey];
-    const siteData = window.TEAM_DATA ? window.TEAM_DATA[siteKey] : null;
+    // Default to the first pin of this site
+    if (site.pins && site.pins.length > 0) {
+      state.currentPinId = site.pins[0].id;
+    }
 
+    // Update Top Buttons Active State
     siteBtns.forEach(btn => {
       btn.classList.toggle("btn-active", btn.dataset.site === siteKey);
     });
 
-    if (!siteConfig || !siteData) return;
+    // Update Header Text
+    activeSiteTitle.innerText = `${site.name} (${site.country})`;
+    activeSiteSubtitle.innerText = `${site.region} — In-Situ Observation Archive & Curiosity Baseline`;
 
-    activeSiteTitle.innerText = siteConfig.name;
-    activeSiteSubtitle.innerText = `${siteConfig.region} — ${siteData.record_period || "Continuous Telemetry"} (${siteData.total_observations.toLocaleString()} Observations)`;
+    // Render Pin Buttons for this location
+    renderPinButtons(site);
 
-    if (compTitleText) {
-      compTitleText.innerText = siteKey === "mars_gale"
-        ? "Mars Curiosity REMS Telemetry Baseline"
-        : `Comparison to Mars (${siteConfig.name})`;
+    // Render Active Pin Card & Ranking Bars
+    updateActivePinCard();
+
+    // Render Climatology Table
+    renderMetricTable();
+
+    // Fly OpenSpace Camera if requested
+    if (flyCamera && openSpace.isConnected) {
+      const pin = getActivePinData();
+      const orbitAlt = site.globe === "Mars" ? 550000 : 750000;
+      openSpace.flyToGeo(site.globe, pin.lat, pin.lon, orbitAlt, 3.5);
     }
 
-    // Populate Categories
-    const categories = getCategoriesForSite(siteKey);
-    categoriesContainer.innerHTML = categories.map((cat, idx) => `
-      <div class="category-card ${idx === 0 ? 'open' : ''}" id="cat-${cat.id}">
-        <div class="category-header" data-cat-id="${cat.id}">
-          <div class="category-title">
-            <span>${cat.icon}</span>
-            <span>${cat.name}</span>
-          </div>
-          <span class="category-toggle-icon">▶</span>
-        </div>
-        <div class="category-content">
-          ${cat.points.map(pt => `
-            <div class="datapoint-item" id="item-${pt.id}" data-point-id="${pt.id}">
-              <div class="datapoint-row">
-                <div class="datapoint-label-area">
-                  <span class="datapoint-label">${pt.label}</span>
-                  <span class="datapoint-val">${pt.valText}</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" class="toggle-datapoint" data-point-id="${pt.id}">
-                  <span class="slider-switch"></span>
-                </label>
-              </div>
-
-              <!-- Subcontrols: Overview / Overlay (Planetary Surface Map) / Orient Sideways -->
-              <div class="datapoint-subcontrols" id="subcontrols-${pt.id}">
-                <div class="subcontrols-row">
-                  <div class="sub-btn-group">
-                    <button class="btn btn-sub btn-overview" data-point-id="${pt.id}">◉ Overview</button>
-                    <button class="btn btn-sub btn-overlay" data-point-id="${pt.id}" data-category="${pt.categoryKey}">○ Overlay</button>
-                  </div>
-                  <label class="orient-sideways-toggle">
-                    <input type="checkbox" class="chk-sideways" data-point-id="${pt.id}">
-                    <span>Orient Sideways</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      </div>
-    `).join("");
-
-    attachCategoryEventListeners(categories);
+    // Load or generate comparative blurb
+    await loadComparisonBlurb();
   }
 
-  /**
-   * Category & Data Point Event Listeners
-   */
-  function attachCategoryEventListeners(categories) {
-    // Accordion Toggle Handlers
-    document.querySelectorAll(".category-header").forEach(header => {
-      header.addEventListener("click", () => {
-        const card = header.closest(".category-card");
-        card.classList.toggle("open");
-      });
-    });
+  // ----------------------------------------------------
+  // 4. Gemini Comparative Blurb Generation
+  // ----------------------------------------------------
+  async function loadComparisonBlurb(forceRegenerate = false) {
+    const site = getActiveSiteData();
+    const pin = getActivePinData();
 
-    // Data Point Toggle Handlers
-    // In-place toggle without jarring camera flight
-    document.querySelectorAll(".toggle-datapoint").forEach(chk => {
-      chk.addEventListener("change", (e) => {
-        const pointId = e.target.dataset.pointId;
-        const itemCard = document.getElementById(`item-${pointId}`);
+    if (forceRegenerate) {
+      siteBlurbText.innerText = "Querying Google Gemini AI for planetary analog synthesis...";
+      blurbSourceTag.innerText = "Gemini AI: Processing...";
+    } else {
+      siteBlurbText.innerText = site.blurb;
+      blurbSourceTag.innerText = "Verified In-Situ Climatology & Team Research Archive";
+    }
 
-        if (e.target.checked) {
-          // Turn off any previously toggled point
-          document.querySelectorAll(".toggle-datapoint").forEach(otherChk => {
-            if (otherChk !== e.target && otherChk.checked) {
-              otherChk.checked = false;
-              const otherId = otherChk.dataset.pointId;
-              const otherItem = document.getElementById(`item-${otherId}`);
-              otherItem?.classList.remove("toggled-on");
-            }
-          });
+    if (forceRegenerate && geminiService.hasApiKey()) {
+      state.isGeminiLoading = true;
+      btnRegenGemini.disabled = true;
+      btnRegenGemini.innerText = "⏳ Generating...";
 
-          itemCard?.classList.add("toggled-on");
-          state.activeDataPointId = pointId;
-
-          // Open the floating Overview pop-up in the viewport area automatically
-          const pt = findPointById(categories, pointId);
-          if (pt) showOverviewPopup(pt);
-        } else {
-          itemCard?.classList.remove("toggled-on");
-          hideOverviewPopup();
-          state.activeDataPointId = null;
-
-          if (state.isOrientSideways) {
-            resetCameraOrientation();
-          }
-        }
-      });
-    });
-
-    // Sub-mode: Overview button -> opens the floating screen-wide pop-up box
-    document.querySelectorAll(".btn-overview").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const pointId = btn.dataset.pointId;
-        const pt = findPointById(categories, pointId);
-        if (pt) showOverviewPopup(pt);
-      });
-    });
-
-    // Sub-mode: Overlay button -> toggles the planetary surface data visualization
-    document.querySelectorAll(".btn-overlay").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const pointId = btn.dataset.pointId;
-        const pt = findPointById(categories, pointId);
-        if (!pt) return;
-
-        const siteConfig = SITES[state.currentSiteKey];
-        const globe = siteConfig ? siteConfig.globe : "Earth";
-        const catKey = pt.categoryKey;
-
-        // Toggle state
-        const isCurrentActive = state.activeOverlayCategory === catKey;
-        setPlanetarySurfaceOverlay(globe, catKey, !isCurrentActive);
-      });
-    });
-
-    // Sub-mode: Orient Sideways ("automatically orient to view topography from ground")
-    document.querySelectorAll(".chk-sideways").forEach(chk => {
-      chk.addEventListener("change", (e) => {
-        state.isOrientSideways = e.target.checked;
-        if (e.target.checked) {
-          openSpace.sendLua(`
-            local lat, lon, alt = table.unpack(openspace.globebrowsing.geoPositionForCamera())
-            local lon_rad = math.rad(lon)
-            local upx = -math.sin(lon_rad)
-            local upy = math.cos(lon_rad)
-            local currentNavState = openspace.navigation.getNavigationState()
-            local newNavState = {
-              Pitch = math.pi * 0.92,
-              Anchor = currentNavState["Anchor"],
-              Yaw = currentNavState["Yaw"] or 0.0,
-              Position = currentNavState["Position"],
-              Up = { upx, upy, 0.0 }
-            }
-            openspace.navigation.setNavigationState(newNavState)
-          `);
-        } else {
-          resetCameraOrientation();
-        }
-      });
-    });
-  }
-
-  function findPointById(categories, pointId) {
-    for (const cat of categories) {
-      for (const pt of cat.points) {
-        if (pt.id === pointId) return pt;
+      try {
+        const result = await geminiService.generateComparativeBlurb(
+          site.name,
+          site.country,
+          pin,
+          site.metrics,
+          site.category_scores,
+          site.blurb
+        );
+        siteBlurbText.innerText = result.text;
+        blurbSourceTag.innerText = result.source;
+      } catch (err) {
+        console.error("Gemini Generation Error:", err);
+        siteBlurbText.innerText = site.blurb;
+        blurbSourceTag.innerText = "Fallback In-Situ Planetary Archive";
+      } finally {
+        state.isGeminiLoading = false;
+        btnRegenGemini.disabled = false;
+        btnRegenGemini.innerText = "✨ Regenerate Blurb via Gemini AI";
       }
     }
-    return null;
   }
 
-  function resetCameraOrientation() {
-    state.isOrientSideways = false;
-    const siteConfig = SITES[state.currentSiteKey];
-    if (siteConfig) {
-      openSpace.flyToGeo(siteConfig.globe, siteConfig.patchLat, siteConfig.patchLon, siteConfig.patchAlt, 1.2);
-    }
-  }
+  // ----------------------------------------------------
+  // 5. Render Regional Station / Pin Chips
+  // ----------------------------------------------------
+  function renderPinButtons(site) {
+    pinsButtonGrid.innerHTML = "";
 
-  /**
-   * Displays the Screen-Wide Semi-Translucent Overview Pop-up Box
-   * Positioned over the 3D viewport area (blue rectangle drawn by user)
-   */
-  let currentActivePoint = null;
+    site.pins.forEach(pin => {
+      const btn = document.createElement("button");
+      btn.className = `pin-chip-btn ${pin.id === state.currentPinId ? "active" : ""}`;
+      btn.dataset.pinId = pin.id;
 
-  function showOverviewPopup(pt) {
-    currentActivePoint = pt;
-    const siteConfig = SITES[state.currentSiteKey];
-    const o = pt.overview || {};
-
-    popupMetricIcon.innerText = "📊";
-    popupMetricTitle.innerText = `${siteConfig.name}: ${o.title || pt.label}`;
-    popupMetricSubtitle.innerText = `${siteConfig.region} — 10-Year In-Situ NASA POWER Archive vs Mars Gale REMS Baseline`;
-    popupStatLabel.innerText = o.statLabel || "Metric Mean";
-    popupStatValue.innerText = o.statVal || pt.valText;
-    popupStatContext.innerText = o.subStat || "In-Situ Continuous Telemetry (4,018 Daily Records)";
-    popupMetricDesc.innerText = o.desc || "";
-
-    viewportOverviewBackdrop.style.display = "flex";
-    state.isOverviewPopupOpen = true;
-
-    updateOverlayUIStatus();
-  }
-
-  function hideOverviewPopup() {
-    viewportOverviewBackdrop.style.display = "none";
-    state.isOverviewPopupOpen = false;
-  }
-
-  btnCloseOverviewPopup.addEventListener("click", hideOverviewPopup);
-
-  viewportOverviewBackdrop.addEventListener("click", (e) => {
-    if (e.target === viewportOverviewBackdrop) {
-      hideOverviewPopup();
-    }
-  });
-
-  // Toggle Overlay from inside the Pop-up Box
-  btnPopupToggleOverlay.addEventListener("click", () => {
-    if (!currentActivePoint) return;
-    const siteConfig = SITES[state.currentSiteKey];
-    const globe = siteConfig ? siteConfig.globe : "Earth";
-    const catKey = currentActivePoint.categoryKey;
-    const isCurrentActive = state.activeOverlayCategory === catKey;
-    setPlanetarySurfaceOverlay(globe, catKey, !isCurrentActive);
-  });
-
-  /**
-   * Overall Comparison to Mars Slide Modal (User Request)
-   * Screen-wide semi-translucent overlay covering the viewport area
-   */
-  function showMarsComparisonModal() {
-    const siteKey = state.currentSiteKey;
-    const siteData = window.TEAM_DATA ? window.TEAM_DATA[siteKey] : null;
-    const marsData = window.TEAM_DATA ? window.TEAM_DATA["mars_gale"] : null;
-
-    if (!siteData || !marsData) return;
-
-    compSiteName.innerText = siteData.name;
-    thSiteLabel.innerText = siteKey === "mars_gale" ? "Gale Crater Baseline" : siteData.name;
-
-    const mEarth = siteData.metrics || {};
-    const mMars = marsData.metrics || {};
-
-    const rows = [
-      {
-        cat: "Temperature",
-        name: "Mean Annual Temperature (T2M)",
-        earth: `${mEarth.mean_temperature_c} °C`,
-        mars: `${mMars.mean_temperature_c} °C`,
-        diff: `${Math.abs(mEarth.mean_temperature_c - mMars.mean_temperature_c).toFixed(1)} °C`,
-        score: calculateSimilarity(mEarth.mean_temperature_c, mMars.mean_temperature_c, 30.0)
-      },
-      {
-        cat: "Temperature",
-        name: "Diurnal Thermal Swing (ΔT)",
-        earth: `${mEarth.mean_diurnal_thermal_swing_c} °C`,
-        mars: `${mMars.mean_diurnal_thermal_swing_c} °C`,
-        diff: `${Math.abs(mEarth.mean_diurnal_thermal_swing_c - mMars.mean_diurnal_thermal_swing_c).toFixed(1)} °C`,
-        score: calculateSimilarity(mEarth.mean_diurnal_thermal_swing_c, mMars.mean_diurnal_thermal_swing_c, 40.0)
-      },
-      {
-        cat: "Atmosphere",
-        name: "Surface Wind Velocity (WS10M)",
-        earth: `${mEarth.mean_wind_speed_ms} m/s`,
-        mars: `${mMars.mean_wind_speed_ms} m/s`,
-        diff: `${Math.abs(mEarth.mean_wind_speed_ms - mMars.mean_wind_speed_ms).toFixed(1)} m/s`,
-        score: calculateSimilarity(mEarth.mean_wind_speed_ms, mMars.mean_wind_speed_ms, 5.0)
-      },
-      {
-        cat: "Atmosphere",
-        name: "Atmospheric Surface Pressure",
-        earth: `${mEarth.atmospheric_surface_pressure_hpa} hPa`,
-        mars: `${mMars.atmospheric_surface_pressure_hpa} hPa`,
-        diff: `${(mEarth.atmospheric_surface_pressure_hpa - mMars.atmospheric_surface_pressure_hpa).toFixed(1)} hPa`,
-        score: calculateSimilarity(mEarth.atmospheric_surface_pressure_hpa, mMars.atmospheric_surface_pressure_hpa, 250.0)
-      },
-      {
-        cat: "Moisture",
-        name: "Relative Humidity (RH2M)",
-        earth: `${mEarth.mean_relative_humidity_pct} %`,
-        mars: `${mMars.mean_relative_humidity_pct} %`,
-        diff: `${Math.abs(mEarth.mean_relative_humidity_pct - mMars.mean_relative_humidity_pct).toFixed(1)} %`,
-        score: calculateSimilarity(mEarth.mean_relative_humidity_pct, mMars.mean_relative_humidity_pct, 20.0)
-      },
-      {
-        cat: "Moisture",
-        name: "Annual Precipitation",
-        earth: `${mEarth.mean_annual_precip_mm} mm/yr`,
-        mars: "0.0 mm/yr",
-        diff: `${mEarth.mean_annual_precip_mm} mm`,
-        score: calculateSimilarity(mEarth.mean_annual_precip_mm, 0, 50.0)
-      },
-      {
-        cat: "Radiation",
-        name: "Solar Insolation (ALLSKY_SFC_SW_DWN)",
-        earth: `${mEarth.mean_solar_insolation_kwh} kWh/m²/d`,
-        mars: `${mMars.mean_solar_insolation_kwh} kWh/m²/d`,
-        diff: `${Math.abs(mEarth.mean_solar_insolation_kwh - mMars.mean_solar_insolation_kwh).toFixed(2)} kWh`,
-        score: calculateSimilarity(mEarth.mean_solar_insolation_kwh, mMars.mean_solar_insolation_kwh, 3.0)
-      }
-    ];
-
-    compTableBody.innerHTML = rows.map(r => {
-      const color = getScoreColor(parseFloat(r.score));
-      return `
-        <tr>
-          <td><strong>${r.cat}:</strong> ${r.name}</td>
-          <td>${r.earth}</td>
-          <td>${r.mars}</td>
-          <td>${r.diff}</td>
-          <td><strong style="color: ${color}">${r.score}%</strong></td>
-        </tr>
+      btn.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-weight: 700; color: #fff;">${pin.name}</span>
+          <span style="font-size: 0.66rem; color: #94a3b8;">${pin.lat.toFixed(2)}°, ${pin.lon.toFixed(2)}°</span>
+        </div>
+        <span class="pin-chip-code">${pin.code}</span>
       `;
-    }).join("");
 
-    modalMarsBackdrop.style.display = "flex";
-    state.isMarsComparisonOpen = true;
-    compArrow.innerText = "▼";
+      btn.addEventListener("click", () => {
+        selectPin(pin.id, true);
+      });
+
+      pinsButtonGrid.appendChild(btn);
+    });
   }
 
-  function hideMarsComparisonModal() {
-    modalMarsBackdrop.style.display = "none";
-    state.isMarsComparisonOpen = false;
-    compArrow.innerText = "▶";
+  // ----------------------------------------------------
+  // 6. Select Pin & Fly Camera Closer
+  // ----------------------------------------------------
+  function selectPin(pinId, flyCamera = true) {
+    state.currentPinId = pinId;
+    const site = getActiveSiteData();
+    const pin = getActivePinData();
+
+    // Update active pin chip styling
+    const pinChips = pinsButtonGrid.querySelectorAll(".pin-chip-btn");
+    pinChips.forEach(chip => {
+      chip.classList.toggle("active", chip.dataset.pinId === pinId);
+    });
+
+    // Update Pin Card details
+    updateActivePinCard();
+
+    // Update Metric Table
+    renderMetricTable();
+
+    // Fly camera close to station pin
+    if (flyCamera && openSpace.isConnected) {
+      openSpace.flyToGeo(site.globe, pin.lat, pin.lon, pin.alt || 20000, 3.0);
+    }
   }
 
-  btnToggleMarsComp.addEventListener("click", () => {
-    if (state.isMarsComparisonOpen) {
-      hideMarsComparisonModal();
-    } else {
-      showMarsComparisonModal();
+  // ----------------------------------------------------
+  // 7. Update Active Pin Card & Ranking Bars
+  // ----------------------------------------------------
+  function updateActivePinCard() {
+    const site = getActiveSiteData();
+    const pin = getActivePinData();
+    const scores = site.category_scores || { thermal: 50, atmospheric_dynamics: 50, atmospheric_moisture: 50, radiation: 50, overall: 50 };
+
+    pinCodeBadge.innerText = pin.code;
+    activePinName.innerText = pin.name;
+    pinCoordsText.innerText = `Lat: ${pin.lat.toFixed(2)}° | Lon: ${pin.lon.toFixed(2)}° | Globe: ${site.globe}`;
+    pinDescriptionText.innerText = pin.desc;
+
+    // Overall Score
+    overallScoreNum.innerText = scores.overall.toFixed(1);
+    overallScoreRank.innerText = site.globe === "Mars" ? "Curiosity Reference Baseline" : `${site.name} Planetary Analog`;
+
+    // 1. Thermal Environment Bar
+    scoreThermalVal.innerText = `${scores.thermal.toFixed(1)}%`;
+    fillThermal.style.width = `${scores.thermal}%`;
+
+    // 2. Atmospheric Dynamics Bar
+    scoreDynamicsVal.innerText = `${scores.atmospheric_dynamics.toFixed(1)}%`;
+    fillDynamics.style.width = `${scores.atmospheric_dynamics}%`;
+
+    // 3. Atmospheric Moisture Bar
+    scoreMoistureVal.innerText = `${scores.atmospheric_moisture.toFixed(1)}%`;
+    fillMoisture.style.width = `${scores.atmospheric_moisture}%`;
+
+    // 4. Radiation Environment Bar
+    scoreRadiationVal.innerText = `${scores.radiation.toFixed(1)}%`;
+    fillRadiation.style.width = `${scores.radiation}%`;
+
+    // Subtitle on Table
+    thSelectedSiteCol.innerText = `${site.name} [${pin.code}]`;
+  }
+
+  // ----------------------------------------------------
+  // 8. Render Climatology Metric Table
+  // ----------------------------------------------------
+  function renderMetricTable() {
+    const site = getActiveSiteData();
+    const metrics = site.metrics || {};
+    const mars = window.TEAM_DATA["mars_gale"].metrics || {};
+    const defs = window.PARAMETER_DEFINITIONS || [];
+
+    metricTableBody.innerHTML = "";
+
+    const filteredDefs = defs.filter(def => {
+      if (state.activeCategoryFilter === "all") return true;
+      return def.category === state.activeCategoryFilter;
+    });
+
+    filteredDefs.forEach(def => {
+      const earthVal = metrics[def.key];
+      const marsVal = mars[def.key];
+
+      const earthValFormatted = earthVal !== null && earthVal !== undefined ? `${formatNumber(earthVal, 2)} ${def.unit}` : "N/A";
+      const marsValFormatted = marsVal !== null && marsVal !== undefined ? `${formatNumber(marsVal, 2)} ${def.unit}` : "N/A";
+
+      // Delta calculation
+      let deltaStr = "—";
+      let matchBadge = `<span class="match-badge badge-mid">Moderate</span>`;
+
+      if (earthVal !== null && marsVal !== null && !isNaN(earthVal) && !isNaN(marsVal)) {
+        const delta = earthVal - marsVal;
+        const sign = delta > 0 ? "+" : "";
+        deltaStr = `${sign}${formatNumber(delta, 2)} ${def.unit}`;
+
+        const absDelta = Math.abs(delta);
+        const simScore = 100 * Math.exp(-absDelta / def.scale);
+
+        if (simScore >= 65) {
+          matchBadge = `<span class="match-badge badge-high">${simScore.toFixed(0)}% High</span>`;
+        } else if (simScore >= 35) {
+          matchBadge = `<span class="match-badge badge-mid">${simScore.toFixed(0)}% Mid</span>`;
+        } else {
+          matchBadge = `<span class="match-badge badge-low">${simScore.toFixed(0)}% Divergent</span>`;
+        }
+      } else if (site.globe === "Mars") {
+        deltaStr = "0.00 (Baseline)";
+        matchBadge = `<span class="match-badge badge-high">100% Match</span>`;
+      }
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="font-weight: 600;">${def.label}</td>
+        <td><span class="category-tag tag-${def.category}">${def.categoryLabel}</span></td>
+        <td style="font-weight: 700; color: #fff;">${earthValFormatted}</td>
+        <td style="color: #cbd5e1;">${marsValFormatted}</td>
+        <td style="font-family: monospace; color: #94a3b8;">${deltaStr}</td>
+        <td>${matchBadge}</td>
+      `;
+
+      metricTableBody.appendChild(tr);
+    });
+  }
+
+  // ----------------------------------------------------
+  // 9. Planetary Surface Data Overlays & Ranking Bar Clicks
+  // ----------------------------------------------------
+  function setPlanetarySurfaceOverlay(globe, categoryKey, enabled) {
+    if (!openSpace || !openSpace.isConnected) return;
+    const catMap = {
+      thermal: "Temperature",
+      atmospheric_dynamics: "Wind",
+      atmospheric_moisture: "Moisture",
+      radiation: "Solar"
+    };
+    const overlayName = catMap[categoryKey];
+    if (!overlayName) return;
+
+    // Reset previous layers
+    ["Temperature", "Wind", "Moisture", "Solar", "Biology"].forEach(name => {
+      const p = `Scene.${globe}.Renderable.Layers.ColorLayers.TeamData_${globe}_${name}.Enabled`;
+      openSpace.setPropertyValue(p, false);
+    });
+
+    if (enabled) {
+      const targetP = `Scene.${globe}.Renderable.Layers.ColorLayers.TeamData_${globe}_${overlayName}.Enabled`;
+      openSpace.setPropertyValue(targetP, true);
     }
-  });
+  }
 
-  btnCloseComp.addEventListener("click", hideMarsComparisonModal);
-  btnCloseCompBottom.addEventListener("click", hideMarsComparisonModal);
+  rankingBarCards.forEach(card => {
+    card.addEventListener("click", () => {
+      const category = card.dataset.category;
+      const site = getActiveSiteData();
 
-  modalMarsBackdrop.addEventListener("click", (e) => {
-    if (e.target === modalMarsBackdrop) {
-      hideMarsComparisonModal();
-    }
-  });
+      // Update active styling on ranking bars
+      rankingBarCards.forEach(c => c.classList.remove("active"));
+      card.classList.add("active");
 
-  // Top Location Button Click Handlers
-  siteBtns.forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      const site = btn.dataset.site;
-      const target = SITES[site];
-      if (!target) return;
+      // Activate corresponding surface data overlay on the globe
+      setPlanetarySurfaceOverlay(site.globe, category, true);
 
-      openSpace.flyToGeo(target.globe, target.patchLat, target.patchLon, target.orbitAlt, 3.5);
-      renderActiveSite(site);
+      // Update active filter pill
+      state.activeCategoryFilter = category;
+      pillBtns.forEach(p => {
+        p.classList.toggle("active", p.dataset.filter === category);
+      });
+
+      // Update Table Title
+      const catLabel = card.querySelector(".bar-title").innerText;
+      tableFilterTitle.innerText = `${catLabel} Parameters (Metric System)`;
+
+      // Re-render table
+      renderMetricTable();
+
+      // Smooth scroll table into view
+      detailsTableSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
   });
 
-  // Orbit Return Button
-  btnOrbitReturn.addEventListener("click", () => {
-    const site = SITES[state.currentSiteKey];
-    if (site.globe === "Mars") {
-      openSpace.flyToGeo("Mars", 0, 137.4, 5000000, 3.0);
-    } else {
-      openSpace.flyToGeo("Earth", 20, 60, 8000000, 3.0);
-    }
-    hideMarsComparisonModal();
-    hideOverviewPopup();
+  // ----------------------------------------------------
+  // 10. Table Filter Pills
+  // ----------------------------------------------------
+  pillBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.activeCategoryFilter = btn.dataset.filter;
+
+      pillBtns.forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Sync active ranking bar styling
+      rankingBarCards.forEach(card => {
+        card.classList.toggle("active", card.dataset.category === state.activeCategoryFilter);
+      });
+
+      if (state.activeCategoryFilter === "all") {
+        tableFilterTitle.innerText = "All Climatology Parameters (Metric System)";
+      } else {
+        tableFilterTitle.innerText = `${btn.innerText} Parameters (Metric System)`;
+      }
+
+      renderMetricTable();
+    });
   });
 
-  // Automated Camera Tour
+  // ----------------------------------------------------
+  // 11. Event Listeners: Sites, Gemini, Orbit, Tour
+  // ----------------------------------------------------
+  siteBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectLocation(btn.dataset.site, true);
+    });
+  });
+
+  btnRegenGemini.addEventListener("click", () => {
+    loadComparisonBlurb(true);
+  });
+
+  btnOrbitReturn.addEventListener("click", () => {
+    const site = getActiveSiteData();
+    const highOrbitAlt = site.globe === "Mars" ? 3000000 : 2500000;
+    openSpace.flyToGeo(site.globe, 0.0, 0.0, highOrbitAlt, 4.0);
+  });
+
+  // Gemini Settings Modal
+  btnSettingsGemini.addEventListener("click", () => {
+    inputGeminiKey.value = geminiService.getApiKey();
+    modalGeminiSettings.style.display = "flex";
+  });
+
+  btnCloseGeminiModal.addEventListener("click", () => {
+    modalGeminiSettings.style.display = "none";
+  });
+
+  btnSaveGeminiKey.addEventListener("click", () => {
+    const key = inputGeminiKey.value.trim();
+    geminiService.setApiKey(key);
+    modalGeminiSettings.style.display = "none";
+    loadComparisonBlurb(true);
+  });
+
+  btnClearGeminiKey.addEventListener("click", () => {
+    geminiService.setApiKey("");
+    inputGeminiKey.value = "";
+    modalGeminiSettings.style.display = "none";
+    loadComparisonBlurb(false);
+  });
+
+  // Automated Tour Sequence
   const tourSequence = [
-    { globe: "Mars", lat: -4.5895, lon: 137.4417, alt: 550000, target: "mars_gale" },
-    { globe: "Earth", lat: 30.50, lon: 58.80, alt: 850000, target: "lut" },
-    { globe: "Earth", lat: -77.50, lon: 162.00, alt: 650000, target: "mcmurdo" },
-    { globe: "Earth", lat: 44.80, lon: 59.80, alt: 850000, target: "aralkum" },
-    { globe: "Earth", lat: -20.15, lon: -67.60, alt: 650000, target: "uyuni" }
+    { site: "mars_gale", pin: "gale_bradbury" },
+    { site: "lut", pin: "lut_gandom" },
+    { site: "mcmurdo", pin: "mcmurdo_taylor" },
+    { site: "aralkum", pin: "aralkum_central" },
+    { site: "uyuni", pin: "uyuni_crust" }
   ];
-
-  function startTour() {
-    state.tourActive = true;
-    btnTourPlay.classList.add("btn-active");
-    btnTourPause.classList.remove("btn-active");
-
-    const step = tourSequence[state.tourIndex];
-    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, 4.0);
-    renderActiveSite(step.target);
-
-    const dwellMs = 9000 / state.tourSpeed;
-    state.tourTimer = setTimeout(() => {
-      state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
-      runTourStep();
-    }, dwellMs);
-  }
-
-  function pauseTour() {
-    state.tourActive = false;
-    btnTourPlay.classList.remove("btn-active");
-    btnTourPause.classList.add("btn-active");
-    if (state.tourTimer) {
-      clearTimeout(state.tourTimer);
-      state.tourTimer = null;
-    }
-  }
 
   function runTourStep() {
     if (!state.tourActive) return;
-    const step = tourSequence[state.tourIndex];
-    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, 4.0 / state.tourSpeed);
-    renderActiveSite(step.target);
 
-    const dwellMs = 9000 / state.tourSpeed;
-    state.tourTimer = setTimeout(() => {
-      state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
-      runTourStep();
-    }, dwellMs);
+    const currentTarget = tourSequence[state.tourIndex];
+    selectLocation(currentTarget.site, false);
+    selectPin(currentTarget.pin, true);
+
+    state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
+
+    const baseDelayMs = 9000;
+    const actualDelay = baseDelayMs / state.tourSpeed;
+    state.tourTimer = setTimeout(runTourStep, actualDelay);
   }
 
-  btnTourPlay.addEventListener("click", startTour);
-  btnTourPause.addEventListener("click", pauseTour);
+  btnTourPlay.addEventListener("click", () => {
+    state.tourActive = true;
+    btnTourPlay.classList.add("btn-active");
+    runTourStep();
+  });
+
+  btnTourPause.addEventListener("click", () => {
+    state.tourActive = false;
+    btnTourPlay.classList.remove("btn-active");
+    if (state.tourTimer) clearTimeout(state.tourTimer);
+  });
+
   btnTourNext.addEventListener("click", () => {
-    pauseTour();
+    if (state.tourTimer) clearTimeout(state.tourTimer);
     state.tourIndex = (state.tourIndex + 1) % tourSequence.length;
-    const step = tourSequence[state.tourIndex];
-    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, 3.5);
-    renderActiveSite(step.target);
+    const target = tourSequence[state.tourIndex];
+    selectLocation(target.site, false);
+    selectPin(target.pin, true);
   });
+
   btnTourPrev.addEventListener("click", () => {
-    pauseTour();
+    if (state.tourTimer) clearTimeout(state.tourTimer);
     state.tourIndex = (state.tourIndex - 1 + tourSequence.length) % tourSequence.length;
-    const step = tourSequence[state.tourIndex];
-    openSpace.flyToGeo(step.globe, step.lat, step.lon, step.alt, 3.5);
-    renderActiveSite(step.target);
+    const target = tourSequence[state.tourIndex];
+    selectLocation(target.site, false);
+    selectPin(target.pin, true);
   });
+
   selTourSpeed.addEventListener("change", (e) => {
     state.tourSpeed = parseFloat(e.target.value) || 1.0;
   });
 
-  // Initial Render (Defaults to Lut Desert as shown in Storyboard)
-  renderActiveSite("lut");
+  // Initial startup: Select Lut Desert
+  selectLocation("lut", false);
 });

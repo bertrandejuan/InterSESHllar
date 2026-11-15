@@ -1,5 +1,6 @@
 /**
- * Gemini AI Service: Generates Astrobiology & Planetary Analog Synthesis
+ * Gemini AI Service: Generates Astrobiology & Planetary Analog Comparative Blurbs
+ * Uses Google Gemini 2.5 Flash API with instant fallback to verified in-situ climatology blurbs.
  */
 
 class GeminiService {
@@ -20,51 +21,54 @@ class GeminiService {
   }
 
   /**
-   * Request comparative planetology synthesis from Gemini API
+   * Generates a comparative planetary blurb comparing the selected analog location to Mars Gale Crater
    */
-  async generateAnalogAnalysis(siteName, region, coords, climatology, scores) {
+  async generateComparativeBlurb(siteName, country, pin, metrics, scores, defaultBlurb) {
     const apiKey = this.getApiKey();
 
     if (!apiKey) {
-      console.log("No Gemini API key supplied. Using scientific rule-based synthesis.");
-      return this.generateOfflineAnalysis(siteName, region, coords, climatology, scores);
+      console.log("No Gemini API key supplied. Displaying verified peer-reviewed scientific blurb.");
+      return {
+        source: "In-Situ Climatology & Team Research Archive",
+        text: defaultBlurb || `At ${siteName} (${country}), this planetary analog station demonstrates an overall Mars similarity rating of ${scores.overall}%. Its extreme environmental conditions offer critical insights into Martian surface processes.`
+      };
     }
 
-    const mars = this.config.marsBaseline;
-    const url = `${this.config.gemini.endpoint}/${this.config.gemini.model}:generateContent?key=${apiKey}`;
+    const mars = {
+      name: "Mars Gale Crater (Curiosity REMS)",
+      avgTemp: "-53.67°C",
+      dailyRange: "58.68°C",
+      rh: "7.44%",
+      pressure: "0.764 kPa",
+      precip: "0.0 mm/day",
+      uvIrradiance: "0.0871 MJ/m²/day (avg UV irradiance: 1.008 W/m²)"
+    };
 
     const promptText = `
-You are a senior NASA astrobiologist and planetary scientist specializing in Mars terrestrial analogs.
-Analyze the following terrestrial desert location and compare it to Mars Curiosity Rover REMS baseline in Gale Crater.
+You are a senior NASA astrobiologist and planetary scientist writing for an interactive planetary dome visualization at OpenSpace.
+Generate a concise, captivating, and scientifically rigorous 3 to 4-sentence comparative blurb comparing this terrestrial desert analog location to Mars Gale Crater (Curiosity Rover REMS baseline).
 
-TARGET SITE:
-- Name: ${siteName} (${region})
-- Coordinates: Latitude ${coords.lat}°, Longitude ${coords.lon}°, Elevation ${coords.elevation_m} m
+SITE: ${siteName} (${country})
+STATION PIN: ${pin.name} (Lat: ${pin.lat}°, Lon: ${pin.lon}°)
+PIN DESCRIPTION: ${pin.desc}
 
-CLIMATOLOGY COMPARISON (Earth Site vs Mars Gale Crater Baseline):
-- Mean Temp: Earth ${climatology.T2M} °C vs Mars ${mars.T2M} °C (Match: ${scores.temperature}%)
-- Diurnal Thermal Amplitude: Earth ${climatology.DELTA_T} °C vs Mars ${mars.DELTA_T} °C (Match: ${scores.diurnal_range}%)
-- Relative Humidity: Earth ${climatology.RH2M} % vs Mars ${mars.RH2M} % (Match: ${scores.relative_humidity}%)
-- Mean Wind Speed: Earth ${climatology.WS2M} m/s vs Mars ${mars.WS2M} m/s (Match: ${scores.wind_speed}%)
-- Solar Insolation: Earth ${climatology.ALLSKY_SFC_SW_DWN} kWh/m²/day vs Mars ${mars.ALLSKY_SFC_SW_DWN} kWh/m²/day (Match: ${scores.solar_insolation}%)
-- Surface Pressure: Earth ${climatology.PRESSURE} hPa vs Mars ${mars.PRESSURE} hPa (Match: ${scores.surface_pressure}%)
-- Composite Similarity Index: ${scores.overall_composite}%
+IN-SITU METRIC DATA COMPARISON (Earth Site vs Mars Gale Crater Baseline):
+- Average 2m Air Temperature: Earth ${metrics.avg_2m_air_temp_c}°C vs Mars ${mars.avgTemp} (Thermal Match: ${scores.thermal}%)
+- Daily Temperature Range (ΔT): Earth ${metrics.mean_daily_temp_range_c}°C vs Mars ${mars.dailyRange}
+- Atmospheric Surface Pressure: Earth ${metrics.surface_pressure_kpa} kPa vs Mars ${mars.pressure} (Dynamics Match: ${scores.atmospheric_dynamics}%)
+- Average Relative Humidity: Earth ${metrics.avg_relative_humidity_pct}% vs Mars ${mars.rh} (Moisture Match: ${scores.atmospheric_moisture}%)
+- Average Precipitation: Earth ${metrics.avg_precipitation_mm_day} mm/day vs Mars ${mars.precip}
+- Solar/UV Radiation: Earth ${metrics.solar_radiation_mj_m2_day} MJ/m²/day (UVA: ${metrics.uva_irradiance_w_m2} W/m², UVB: ${metrics.uvb_irradiance_w_m2} W/m²) vs Mars UV ${mars.uvIrradiance} (Radiation Match: ${scores.radiation}%)
+- Overall Mars Analog Match: ${scores.overall}%
 
-Respond ONLY with a valid JSON object matching this schema:
-{
-  "summary": "2-3 concise, high-impact scientific sentences explaining why this specific coordinate behaves as a Mars analog and where it ranks.",
-  "key_analog_features": [
-    "Specific physical, geomorphological, or climatic analog feature 1",
-    "Specific physical, geomorphological, or climatic analog feature 2",
-    "Specific physical, geomorphological, or climatic analog feature 3"
-  ],
-  "divergences": [
-    "Primary physical or atmospheric difference from Gale Crater 1",
-    "Primary physical or atmospheric difference from Gale Crater 2"
-  ],
-  "research_recommendation": "One sentence suggesting a specific planetary instrument or astrobiology test for this location."
-}
+INSTRUCTIONS:
+1. Explain specifically WHY this location is an analog to Gale Crater (e.g. extremophile habitability, thermal swings, evaporite minerals, hyper-aridity, yardangs, or UV/hypobaric stress).
+2. Explicitly reference key metric numbers (such as temperature, moisture, or pressure).
+3. Conclude with why testing rover instruments or biological endurance here prepares humanity for Mars exploration.
+4. Keep it exactly 3 to 4 sentences, punchy, high-impact, and easy to read on a planetarium screen. Do not output markdown code blocks.
 `;
+
+    const url = `${this.config.gemini.endpoint}/${this.config.gemini.model}:generateContent?key=${apiKey}`;
 
     try {
       const resp = await fetch(url, {
@@ -73,8 +77,8 @@ Respond ONLY with a valid JSON object matching this schema:
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
           generationConfig: {
-            temperature: 0.2,
-            responseMimeType: "application/json"
+            temperature: 0.3,
+            maxOutputTokens: 250
           }
         })
       });
@@ -84,52 +88,21 @@ Respond ONLY with a valid JSON object matching this schema:
       }
 
       const data = await resp.json();
-      const rawJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (rawJson) {
-        const parsed = JSON.parse(rawJson);
-        parsed.source = "Gemini 2.5 Flash (Live AI)";
-        return parsed;
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (rawText && rawText.trim().length > 0) {
+        return {
+          source: "Live Gemini 2.5 Flash Planetary Synthesis",
+          text: rawText.trim()
+        };
       }
-      throw new Error("Empty candidate in Gemini response");
+      throw new Error("Empty candidate received from Gemini");
     } catch (err) {
-      console.warn("Gemini API call failed or rate-limited. Falling back to local scientific engine:", err);
-      const fallback = this.generateOfflineAnalysis(siteName, region, coords, climatology, scores);
-      fallback.source = `Rule-based Scientific Synthesis (Gemini Error: ${err.message})`;
-      return fallback;
+      console.warn("Gemini API call failed, using verified fallback blurb:", err);
+      return {
+        source: `In-Situ Climatology & Team Research Archive (Gemini: ${err.message})`,
+        text: defaultBlurb
+      };
     }
-  }
-
-  /**
-   * Deterministic scientific analog generator for offline mode or fallback
-   */
-  generateOfflineAnalysis(siteName, region, coords, climatology, scores) {
-    const strongestParam = Object.entries(scores)
-      .filter(([k]) => k !== "overall_composite")
-      .sort((a, b) => b[1] - a[1])[0];
-
-    const paramLabels = {
-      temperature: "Thermal Regime",
-      diurnal_range: "Diurnal Thermal Swings",
-      relative_humidity: "Hyper-Aridity",
-      wind_speed: "Aeolian Wind Shear",
-      solar_insolation: "Solar Insolation",
-      surface_pressure: "Rarefied Pressure"
-    };
-
-    return {
-      source: "NASA Analog Astrobiology Model (Offline)",
-      summary: `At coordinates [${coords.lat.toFixed(2)}°, ${coords.lon.toFixed(2)}°], ${siteName} demonstrates an overall Mars similarity of ${scores.overall_composite}%. Its strongest planetary analog parameter is ${paramLabels[strongestParam[0]] || strongestParam[0]} with a ${strongestParam[1]}% match to Gale Crater.`,
-      key_analog_features: [
-        `High correlation in ${paramLabels[strongestParam[0]]} matching Curiosity rover surface telemetry`,
-        `Desert regolith weathering and desiccation morphology typical of hyper-arid basaltic basins`,
-        `Low biological density creating an exceptional testbed for lifedetection rover payloads`
-      ],
-      divergences: [
-        `Atmospheric pressure at ${climatology.PRESSURE} hPa is significantly higher than Mars surface pressure (8.4 hPa)`,
-        `Atmospheric composition is nitrogen/oxygen dominated rather than CO2 dominated`
-      ],
-      research_recommendation: `Deploy Raman and XRD spectrometer instrumentation to evaluate biosignature preservation thresholds under high diurnal temperature swings.`
-    };
   }
 }
 

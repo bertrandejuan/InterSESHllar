@@ -5,65 +5,217 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "aralkum",
-        "Name": "Aralkum Desert Station",
+        "id": "aralkum_central",
+        "siteKey": "aralkum",
+        "code": "ARK-01",
+        "Name": "Aralkum Central Evaporite Station",
         "Region": "Karakalpakstan, Uzbekistan",
-        "Color": [1.0, 0.75, 0.20],
+        "Color": [0.20, 0.90, 0.45],
+        "PointSize": 24.0,
+        "Altitude": 1500.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [59.80, 44.80]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "aralkum_north",
+        "siteKey": "aralkum",
+        "code": "ARK-02",
+        "Name": "North Aral Dust Storm Corridor",
+        "Region": "Karakalpakstan, Uzbekistan",
+        "Color": [0.20, 0.90, 0.45],
         "PointSize": 22.0,
         "Altitude": 1500.0,
         "Extrude": true
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [58.5, 44.5]
+        "coordinates": [59.20, 45.30]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "mcmurdo",
-        "Name": "McMurdo Dry Valleys Station",
-        "Region": "Victoria Land, Antarctica",
-        "Color": [0.35, 0.85, 1.00],
+        "id": "aralkum_south",
+        "siteKey": "aralkum",
+        "code": "ARK-03",
+        "Name": "South Sarygamysh Plain",
+        "Region": "Karakalpakstan, Uzbekistan",
+        "Color": [0.20, 0.90, 0.45],
         "PointSize": 22.0,
-        "Altitude": 2000.0,
+        "Altitude": 1500.0,
         "Extrude": true
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [162.0, -77.5]
+        "coordinates": [60.30, 44.10]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "lut",
-        "Name": "Lut Desert Thermal Core",
-        "Region": "Kerman / Sistan, Iran",
-        "Color": [1.00, 0.35, 0.20],
+        "id": "mcmurdo_taylor",
+        "siteKey": "mcmurdo",
+        "code": "MCM-01",
+        "Name": "Taylor Valley / Blood Falls Station",
+        "Region": "Victoria Land, Antarctica",
+        "Color": [0.15, 0.80, 1.00],
+        "PointSize": 24.0,
+        "Altitude": 1800.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [162.25, -77.72]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mcmurdo_wright",
+        "siteKey": "mcmurdo",
+        "code": "MCM-02",
+        "Name": "Wright Valley / Lake Vanda",
+        "Region": "Victoria Land, Antarctica",
+        "Color": [0.15, 0.80, 1.00],
         "PointSize": 22.0,
         "Altitude": 1800.0,
         "Extrude": true
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [58.8, 30.5]
+        "coordinates": [161.68, -77.52]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "uyuni",
-        "Name": "Salar de Uyuni Altiplano",
-        "Region": "Potosi / Oruro, Bolivia",
-        "Color": [0.80, 0.50, 1.00],
+        "id": "mcmurdo_victoria",
+        "siteKey": "mcmurdo",
+        "code": "MCM-03",
+        "Name": "Upper Victoria Valley Permafrost",
+        "Region": "Victoria Land, Antarctica",
+        "Color": [0.15, 0.80, 1.00],
         "PointSize": 22.0,
-        "Altitude": 3800.0,
+        "Altitude": 1800.0,
         "Extrude": true
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-67.6, -20.15]
+        "coordinates": [161.90, -77.35]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lut_gandom",
+        "siteKey": "lut",
+        "code": "LUT-01",
+        "Name": "Gandom Beryan Thermal Ridge",
+        "Region": "Kerman / Sistan, Iran",
+        "Color": [1.00, 0.65, 0.10],
+        "PointSize": 24.0,
+        "Altitude": 1600.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [58.55, 30.85]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lut_yardang",
+        "siteKey": "lut",
+        "code": "LUT-02",
+        "Name": "Kalut Mega-Yardang Corridor",
+        "Region": "Kerman / Sistan, Iran",
+        "Color": [1.00, 0.65, 0.10],
+        "PointSize": 22.0,
+        "Altitude": 1600.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [58.80, 30.50]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lut_south",
+        "siteKey": "lut",
+        "code": "LUT-03",
+        "Name": "Rig-e Yalan Mega-Erg",
+        "Region": "Kerman / Sistan, Iran",
+        "Color": [1.00, 0.65, 0.10],
+        "PointSize": 22.0,
+        "Altitude": 1600.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [59.35, 29.95]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "uyuni_crust",
+        "siteKey": "uyuni",
+        "code": "UYU-01",
+        "Name": "Salar de Uyuni Central Crust Field",
+        "Region": "Potosí / Oruro, Bolivia",
+        "Color": [0.85, 0.45, 1.00],
+        "PointSize": 24.0,
+        "Altitude": 3700.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-67.60, -20.15]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "uyuni_isla",
+        "siteKey": "uyuni",
+        "code": "UYU-02",
+        "Name": "Isla Incahuasi Fossil Coral Outcrop",
+        "Region": "Potosí / Oruro, Bolivia",
+        "Color": [0.85, 0.45, 1.00],
+        "PointSize": 22.0,
+        "Altitude": 3700.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-67.62, -20.24]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "uyuni_tunupa",
+        "siteKey": "uyuni",
+        "code": "UYU-03",
+        "Name": "Tunupa Volcano Northern Flank",
+        "Region": "Potosí / Oruro, Bolivia",
+        "Color": [0.85, 0.45, 1.00],
+        "PointSize": 22.0,
+        "Altitude": 3700.0,
+        "Extrude": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-67.50, -19.85]
       }
     }
   ]
