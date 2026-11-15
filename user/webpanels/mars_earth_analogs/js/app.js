@@ -1396,6 +1396,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function stopTour() {
+    state.tourActive = false;
+    tourCancellation = true;
+    if (state.tourTimer) {
+      clearTimeout(state.tourTimer);
+      state.tourTimer = null;
+    }
+    setIdleMotion(false);
+    clearTourOverlayQuietly();
+    dismissHUD();
+    state.tourIndex = 0;
+    if (btnTourPlay) {
+      btnTourPlay.innerText = "▶ Start Tour";
+      btnTourPlay.classList.remove("btn-tour-end");
+      btnTourPlay.classList.add("btn-primary");
+    }
+    if (btnTourPause) {
+      btnTourPause.innerText = "⏸ Pause";
+      btnTourPause.classList.remove("btn-tour-resume");
+    }
+    updateTourStatus("Tour Stopped");
+  }
+
   function pauseTour() {
     state.tourActive = false;
     tourCancellation = true;
@@ -1406,8 +1429,34 @@ document.addEventListener("DOMContentLoaded", () => {
     setIdleMotion(false);
     clearTourOverlayQuietly();
     dismissHUD();
-    if (btnTourPlay) btnTourPlay.innerText = "▶ Start Tour";
+    if (btnTourPlay) {
+      btnTourPlay.innerText = "⏹ End Tour";
+      btnTourPlay.classList.add("btn-tour-end");
+      btnTourPlay.classList.remove("btn-primary");
+    }
+    if (btnTourPause) {
+      btnTourPause.innerText = "▶ Play";
+      btnTourPause.classList.add("btn-tour-resume");
+    }
     updateTourStatus("Tour Paused");
+  }
+
+  function startOrResumeTour(startIndex = null) {
+    state.tourActive = true;
+    tourCancellation = false;
+    if (startIndex !== null) {
+      state.tourIndex = startIndex;
+    }
+    if (btnTourPlay) {
+      btnTourPlay.innerText = "⏹ End Tour";
+      btnTourPlay.classList.add("btn-tour-end");
+      btnTourPlay.classList.remove("btn-primary");
+    }
+    if (btnTourPause) {
+      btnTourPause.innerText = "⏸ Pause";
+      btnTourPause.classList.remove("btn-tour-resume");
+    }
+    runTourSequence(state.tourIndex || 0);
   }
 
   async function runTourSequence(startSiteIndex = 0) {
@@ -1648,53 +1697,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (state.tourActive && !tourCancellation) {
         updateTourStatus("Tour Completed Successfully");
-        state.tourActive = false;
-        if (btnTourPlay) btnTourPlay.innerText = "▶ Start Tour";
-        state.tourIndex = 0;
+        stopTour();
       }
     } catch (err) {
       console.error("Tour sequence error:", err);
-      pauseTour();
+      stopTour();
     }
   }
 
   if (btnTourPlay) {
     btnTourPlay.addEventListener("click", () => {
-      if (state.tourActive) {
-        pauseTour();
+      // If clicked while tour is active or started (showing "End Tour"), immediately stop the tour!
+      if (state.tourActive || (btnTourPlay.innerText && btnTourPlay.innerText.includes("End Tour"))) {
+        stopTour();
       } else {
-        state.tourActive = true;
-        btnTourPlay.innerText = "⏸ Running (Click to Pause)";
-        runTourSequence(state.tourIndex || 0);
+        startOrResumeTour(0);
       }
     });
   }
 
   if (btnTourPause) {
     btnTourPause.addEventListener("click", () => {
-      pauseTour();
+      if (state.tourActive) {
+        pauseTour();
+      } else {
+        startOrResumeTour(state.tourIndex || 0);
+      }
     });
   }
 
   if (btnTourNext) {
     btnTourNext.addEventListener("click", () => {
-      pauseTour();
       const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
-      state.tourIndex = (state.tourIndex + 1) % siteKeys.length;
-      state.tourActive = true;
-      if (btnTourPlay) btnTourPlay.innerText = "⏸ Running (Click to Pause)";
-      runTourSequence(state.tourIndex);
+      const nextIdx = (state.tourIndex + 1) % siteKeys.length;
+      startOrResumeTour(nextIdx);
     });
   }
 
   if (btnTourPrev) {
     btnTourPrev.addEventListener("click", () => {
-      pauseTour();
       const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
-      state.tourIndex = (state.tourIndex - 1 + siteKeys.length) % siteKeys.length;
-      state.tourActive = true;
-      if (btnTourPlay) btnTourPlay.innerText = "⏸ Running (Click to Pause)";
-      runTourSequence(state.tourIndex);
+      const prevIdx = (state.tourIndex - 1 + siteKeys.length) % siteKeys.length;
+      startOrResumeTour(prevIdx);
     });
   }
 
