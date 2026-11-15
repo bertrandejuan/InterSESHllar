@@ -1,8 +1,7 @@
 -- OpenSpace ScreenSpace Overview & Comparison HUD Asset
--- Projects semi-translucent overview cards directly into the 3D viewport (empty space of screen)
--- Flat screen-facing orientation (FaceCamera = true, Rotation = {0,0,0})
--- Scale = 0.72 and CartesianPosition = {-0.22, 0.02, -2.0} ensures HUD fits clearly and legibly in the middle viewport
--- Enabled = true ensures the General Location Overview is visible immediately on load
+-- Large, flat, screen-aligned overlay filling most of available viewport (Screenshot 3 reference)
+-- Scale = 0.82 and CartesianPosition = {-0.24, 0.03, -2.0} with Opacity = 1.0 (fully opaque against terrain)
+-- FaceCamera = true, Rotation = {0,0,0} keeps edges horizontal and text upright during pans, tilts, and orbits
 
 local defaultTexture = asset.resource("./textures/hud_overview_location_mars_gale.png")
 
@@ -11,11 +10,11 @@ local OverviewHUD = {
   Identifier = "OverviewHUD",
   Name = "Overview Comparison HUD",
   TexturePath = defaultTexture,
-  Enabled = true,
-  Opacity = 0.94,
+  Enabled = false,
+  Opacity = 1.0,
   Placement = {
-    CartesianPosition = { -0.22, 0.02, -2.0 },
-    Scale = 0.72,
+    CartesianPosition = { -0.24, 0.03, -2.0 },
+    Scale = 0.82,
     FaceCamera = true,
     Rotation = { 0.0, 0.0, 0.0 }
   }

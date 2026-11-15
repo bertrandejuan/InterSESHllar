@@ -125,7 +125,7 @@
     </div>
 
     <!-- Overall Match Score Banner (Shown for Earth analogs; omitted on Gale Crater) -->
-    <div class="overall-score-panel" id="overall-score-panel" style="display: none;" title="Click to toggle 3D Viewport General Location Overview HUD">
+    <div class="overall-score-panel" id="overall-score-panel" style="display: none;">
       <div class="score-meta">
         <span class="score-label">Overall match to Gale Crater</span>
         <span class="score-site-rank" id="overall-score-rank">Lut Desert Planetary Analog</span>
@@ -136,23 +136,20 @@
       </div>
     </div>
 
-    <!-- Mars Reference Baseline Banner (Shown only on Gale Crater) -->
-    <div class="mars-reference-panel" id="mars-reference-panel" title="Click to toggle 3D Viewport General Location Overview HUD">
-      <span class="ref-icon">🔴</span>
-      <div class="ref-text">
-        <strong>Mars Reference Baseline</strong>
-        <span>Curiosity REMS in-situ meteorology (4,018 daily records)</span>
-      </div>
-    </div>
+    <!-- Overview Action for Earth Site -->
+    <button id="btn-location-overview-hud" class="btn btn-action-plain btn-site-overview" aria-pressed="false" style="display: none;">Show overview</button>
 
-    <!-- General Location Overview 3D HUD Toggle Button (Image 2 Storyboard Requirement) -->
-    <button id="btn-location-overview-hud" class="btn-location-overview-hud active" title="Toggle 3D Viewport General Location Overview HUD">
-      <span class="btn-hud-content">
-        <span class="btn-hud-icon">🪐</span>
-        <span id="btn-location-hud-text">General Location Overview Active</span>
-      </span>
-      <span class="hud-badge">3D HUD</span>
-    </button>
+    <!-- Mars Reference Baseline Banner (Shown only on Gale Crater) -->
+    <div class="mars-reference-panel" id="mars-reference-panel">
+      <div class="ref-meta">
+        <span class="ref-icon">🔴</span>
+        <div class="ref-text">
+          <strong>Mars Reference Baseline</strong>
+          <span>Curiosity in-situ meteorology</span>
+        </div>
+      </div>
+      <button id="btn-mars-ref-overview" class="btn btn-action-plain" aria-pressed="false">Show overview</button>
+    </div>
   </section>
 
   <!-- One Accordion for the Science (All categories collapsed initially) -->
@@ -179,7 +176,7 @@
     <!-- Primary secondary action: Opens wide filterable modal table -->
     <button id="btn-open-all-data" class="btn btn-primary btn-view-all-data">
       <span class="btn-icon">📊</span>
-      <span>View All Data</span>
+      <span>View all data</span>
     </button>
 
     <div class="secondary-subgroup">
@@ -239,59 +236,64 @@
       <div class="modal-header">
         <div class="modal-title-group">
           <span class="modal-icon">📊</span>
-          <h3 id="modal-all-data-title">Complete Planetary Telemetry & Comparison Table</h3>
+          <h3 id="modal-all-data-title">Complete Planetary Telemetry</h3>
         </div>
         <div class="modal-header-actions">
-          <!-- Toggle Viewport Comparison HUD button inside modal -->
-          <button id="btn-modal-comparison-hud" class="btn btn-hud-toggle" title="Project Semi-Translucent Overview Card into 3D Viewport">
-            🪐 Viewport Comparison HUD
-          </button>
-          <button id="btn-close-all-data" class="modal-close-btn" aria-label="Close Modal">&times;</button>
+          <button id="btn-modal-comparison-hud" class="btn btn-action-plain" aria-pressed="false">Show overview</button>
+          <button id="btn-close-all-data" class="btn btn-action-plain" aria-label="Close table">Close table</button>
         </div>
       </div>
 
       <div class="modal-body">
-        <!-- Filter pills -->
-        <div class="table-filter-bar">
-          <span class="filter-bar-label">Filter Category:</span>
-          <div class="filter-pill-group">
-            <button class="pill-btn active" data-filter="all">All Parameters</button>
-            <button class="pill-btn" data-filter="thermal">Thermal Conditions</button>
-            <button class="pill-btn" data-filter="astrobiology">Astrobiology / Makeup</button>
-            <button class="pill-btn" data-filter="atmospheric_dynamics">Atmospheric Dynamics</button>
-            <button class="pill-btn" data-filter="atmospheric_moisture">Atmospheric Moisture</button>
-            <button class="pill-btn" data-filter="radiation">Radiation</button>
-          </div>
+        <!-- Notice shown when viewport HUD is active (hiding competing table) -->
+        <div id="modal-hud-notice" class="hud-active-modal-notice" style="display: none;">
+          <p class="hud-notice-text">Telemetry comparison is currently active in the viewport.</p>
+          <button id="btn-hide-hud-view-table" class="btn btn-secondary">Close overview & view table</button>
         </div>
 
-        <!-- Table wrapper -->
-        <div class="table-scroll-container">
-          <table class="telemetry-table">
-            <thead>
-              <tr>
-                <th style="width: 25%;">Parameter</th>
-                <th style="width: 15%;">Category</th>
-                <th style="width: 20%;" id="th-selected-site-col">
-                  Earth Analog Value <span class="col-sublabel" id="th-site-provenance">[Regional Aggregate]</span>
-                </th>
-                <th style="width: 18%;">
-                  Mars Gale Baseline <span class="col-sublabel">[MSL REMS]</span>
-                </th>
-                <th style="width: 12%;">Delta (Δ)</th>
-                <th style="width: 10%;">Match</th>
-              </tr>
-            </thead>
-            <tbody id="telemetry-table-body">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
+        <div id="modal-table-content" class="modal-table-content">
+          <!-- Filter pills -->
+          <div class="table-filter-bar">
+            <span class="filter-bar-label">Category:</span>
+            <div class="filter-pill-group">
+              <button class="pill-btn active" data-filter="all">All Parameters</button>
+              <button class="pill-btn" data-filter="thermal">Thermal Conditions</button>
+              <button class="pill-btn" data-filter="astrobiology">Astrobiology</button>
+              <button class="pill-btn" data-filter="atmospheric_dynamics">Atmospheric Dynamics</button>
+              <button class="pill-btn" data-filter="atmospheric_moisture">Atmospheric Moisture</button>
+              <button class="pill-btn" data-filter="radiation">Radiation</button>
+            </div>
+          </div>
+
+          <!-- Table wrapper -->
+          <div class="table-scroll-container">
+            <table class="telemetry-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Parameter</th>
+                  <th style="width: 15%;">Category</th>
+                  <th style="width: 20%;" id="th-selected-site-col">
+                    Earth Analog Value <span class="col-sublabel" id="th-site-provenance">[Regional Aggregate]</span>
+                  </th>
+                  <th style="width: 18%;">
+                    Mars Gale Baseline <span class="col-sublabel">[MSL REMS]</span>
+                  </th>
+                  <th style="width: 12%;">Delta (Δ)</th>
+                  <th style="width: 10%;">Match</th>
+                </tr>
+              </thead>
+              <tbody id="telemetry-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
         <span class="modal-footnote">
           Data derived from NASA POWER MERRA-2 / CERES SYN1deg 10-Year In-Situ Records (2015–2025) & MSL Curiosity REMS.
         </span>
-        <button id="btn-footer-close-all-data" class="btn btn-secondary">Close Table</button>
+        <button id="btn-footer-close-all-data" class="btn btn-secondary">Close table</button>
       </div>
     </div>
   </div>

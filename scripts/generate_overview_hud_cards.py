@@ -331,7 +331,7 @@ FONT_FOOTER = get_font(17, bold=False)
 # --------------------------------------------------------------------
 # PART 1: General Location Overview Card (Image 2 Reference)
 # 6 Columns: Category + Mars (distinct) + 4 Earth Analogs.
-# Highlights the active location column. NO bottom analysis box.
+# Highlights active location column. Solid dark opaque background. Close button.
 # --------------------------------------------------------------------
 def generate_location_overview_card(active_site_key):
     img = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
@@ -340,32 +340,34 @@ def generate_location_overview_card(active_site_key):
     site_info = SITES[active_site_key]
     accent = site_info['color']
 
-    # 1. Base card container
+    # 1. Base card container - Solid opaque background to prevent terrain bleed-through
     draw.rounded_rectangle([20, 20, WIDTH - 20, HEIGHT - 20], radius=16,
-                           fill=(10, 16, 32, 238), outline=(70, 85, 115, 235), width=3)
+                           fill=(8, 14, 28, 255), outline=(75, 95, 130, 255), width=3)
     # Header bar
-    draw.rectangle([20, 20, WIDTH - 20, 115], fill=(16, 26, 48, 250))
-    draw.line([20, 115, WIDTH - 20, 115], fill=accent + (230,), width=3)
+    draw.rectangle([20, 20, WIDTH - 20, 115], fill=(14, 22, 42, 255))
+    draw.line([20, 115, WIDTH - 20, 115], fill=accent + (255,), width=3)
 
     title_text = f"{site_info['name']} — Planetary Climatology Overview"
     sub_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) vs Curiosity REMS Baseline"
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
 
-    badge_w = 260
-    badge_x = WIDTH - 45 - badge_w
-    draw.rounded_rectangle([badge_x, 40, badge_x + badge_w, 92], radius=8,
-                           fill=accent + (45,), outline=accent + (220,), width=2)
-    badge_label = f"FOCUS: {site_info['short_name'][:14]}"
-    draw.text((badge_x + 18, 54), badge_label, font=FONT_BADGE, fill=accent + (255,))
+    # Prominent Close Button at top right
+    close_btn_w = 125
+    close_btn_x = WIDTH - 35 - close_btn_w
+    draw.rounded_rectangle([close_btn_x, 42, close_btn_x + close_btn_w, 94], radius=8,
+                           fill=(220, 38, 38, 255), outline=(255, 120, 120, 255), width=2)
+    draw.text((close_btn_x + 18, 54), "Close ✕", font=FONT_BADGE, fill=(255, 255, 255, 255))
+
+    # Active Location Badge to left of close button
+    badge_w = 230
+    badge_x = close_btn_x - 15 - badge_w
+    draw.rounded_rectangle([badge_x, 42, badge_x + badge_w, 94], radius=8,
+                           fill=accent + (55,), outline=accent + (230,), width=2)
+    badge_label = f"FOCUS: {site_info['short_name'][:13]}"
+    draw.text((badge_x + 16, 56), badge_label, font=FONT_BADGE, fill=accent + (255,))
 
     # 2. Table Layout Coordinates (6 Columns)
-    # Col 0: Category & Key Metric (x: 40 to 330, w: 290)
-    # Col 1: Mars: Gale Crater (x: 340 to 570, w: 230) [Always visually distinct]
-    # Col 2: Lut Desert (x: 580 to 810, w: 230)
-    # Col 3: McMurdo (x: 820 to 1050, w: 230)
-    # Col 4: Aralkum (x: 1060 to 1290, w: 230)
-    # Col 5: Uyuni (x: 1300 to 1560, w: 260)
     col_bounds = [
         (40, 330, "Categories"),
         (340, 570, "mars_gale"),
@@ -379,28 +381,28 @@ def generate_location_overview_card(active_site_key):
     header_h = 75
     table_bottom_y = HEIGHT - 75
 
-    # Draw Column Background Highlights for the active site
+    # Draw Column Background Highlights for active site (solid opaque fill)
     for i, col in enumerate(col_bounds[1:], start=1):
         site_k = col[2]
         x1, x2 = col[0], col[1]
         is_active = (site_k == active_site_key)
 
         if is_active:
-            # Active Column Glowing Highlight (Image 2 hatching / highlight)
-            highlight_col = SITES[site_k]['highlight_bg']
+            # Active Column Solid Highlight (no terrain bleed-through)
+            highlight_col = (45, 22, 12, 255) if SITES[site_k]['is_mars'] else (16, 38, 52, 255)
             border_col = SITES[site_k]['highlight_border']
             draw.rectangle([x1, header_y, x2, table_bottom_y], fill=highlight_col)
             draw.rectangle([x1, header_y, x2, table_bottom_y], outline=border_col, width=3)
         elif site_k == 'mars_gale':
-            # Mars Gale Crater is always distinct with subtle red/orange frame
-            draw.rectangle([x1, header_y, x2, table_bottom_y], fill=(234, 88, 12, 28))
-            draw.rectangle([x1, header_y, x2, table_bottom_y], outline=(249, 115, 22, 120), width=1)
+            # Mars Gale Crater is always distinct with solid subtle rust frame
+            draw.rectangle([x1, header_y, x2, table_bottom_y], fill=(26, 18, 16, 255))
+            draw.rectangle([x1, header_y, x2, table_bottom_y], outline=(249, 115, 22, 140), width=1)
 
     # Draw Column Headers
     # Col 0 Header:
-    draw.rectangle([col_bounds[0][0], header_y, col_bounds[0][1], header_y + header_h], fill=(22, 34, 60, 240))
-    draw.text((col_bounds[0][0] + 12, header_y + 14), "CATEGORIES", font=FONT_COL_HEADER, fill=(180, 210, 245, 255))
-    draw.text((col_bounds[0][0] + 12, header_y + 42), "Key Metric Point", font=FONT_COL_SUB, fill=(130, 155, 190, 255))
+    draw.rectangle([col_bounds[0][0], header_y, col_bounds[0][1], header_y + header_h], fill=(20, 30, 56, 255))
+    draw.text((col_bounds[0][0] + 12, header_y + 14), "CATEGORIES", font=FONT_COL_HEADER, fill=(190, 218, 250, 255))
+    draw.text((col_bounds[0][0] + 12, header_y + 42), "Key Metric Point", font=FONT_COL_SUB, fill=(140, 165, 200, 255))
 
     # Site Column Headers:
     for col in col_bounds[1:]:
@@ -409,18 +411,18 @@ def generate_location_overview_card(active_site_key):
         is_active = (site_k == active_site_key)
         site_data = SITES[site_k]
 
-        header_bg = (35, 22, 18, 250) if site_data['is_mars'] else (20, 32, 56, 240)
+        header_bg = (38, 20, 16, 255) if site_data['is_mars'] else (20, 32, 56, 255)
         if is_active:
-            header_bg = (site_data['color'][0]//3, site_data['color'][1]//3, site_data['color'][2]//3, 255)
+            header_bg = (site_data['color'][0]//2, site_data['color'][1]//2, site_data['color'][2]//2, 255)
 
         draw.rectangle([x1, header_y, x2, header_y + header_h], fill=header_bg)
-        draw.line([x1, header_y + header_h, x2, header_y + header_h], fill=(70, 95, 135, 220), width=2)
+        draw.line([x1, header_y + header_h, x2, header_y + header_h], fill=(80, 105, 145, 255), width=2)
 
         # Site header title
-        head_color = (255, 130, 60) if site_data['is_mars'] else site_data['color']
+        head_color = (255, 140, 70) if site_data['is_mars'] else site_data['color']
         draw.text((x1 + 10, header_y + 14), site_data['short_name'], font=FONT_COL_HEADER, fill=head_color + (255,))
         sub_tag = "[ACTIVE FOCUS]" if is_active else site_data['header_tag']
-        sub_tag_col = (255, 255, 255) if is_active else (140, 160, 190)
+        sub_tag_col = (255, 255, 255) if is_active else (150, 170, 200)
         draw.text((x1 + 10, header_y + 44), sub_tag, font=FONT_COL_SUB, fill=sub_tag_col + (255,))
 
     # Draw Category Rows (5 rows)
@@ -429,13 +431,13 @@ def generate_location_overview_card(active_site_key):
 
     for row_idx, (cat_key, cat_title, metric_name, cat_color) in enumerate(CATEGORIES_META):
         current_y = row_y + row_idx * row_h
-        bg_row = (14, 22, 40, 180) if row_idx % 2 == 0 else (18, 28, 50, 190)
+        bg_row = (12, 18, 34, 255) if row_idx % 2 == 0 else (16, 24, 44, 255)
 
         # Col 0: Category title & metric
         draw.rectangle([col_bounds[0][0], current_y, col_bounds[0][1], current_y + row_h], fill=bg_row)
         draw.text((col_bounds[0][0] + 12, current_y + 18), cat_title, font=FONT_ROW_LABEL, fill=cat_color + (255,))
-        draw.text((col_bounds[0][0] + 12, current_y + 52), f"Point: {metric_name}", font=FONT_ROW_METRIC, fill=(160, 180, 210, 255))
-        draw.line([40, current_y + row_h, WIDTH - 40, current_y + row_h], fill=(50, 65, 95, 160), width=1)
+        draw.text((col_bounds[0][0] + 12, current_y + 52), f"Point: {metric_name}", font=FONT_ROW_METRIC, fill=(170, 190, 220, 255))
+        draw.line([40, current_y + row_h, WIDTH - 40, current_y + row_h], fill=(60, 75, 105, 255), width=1)
 
         # Values for each site column
         for col in col_bounds[1:]:
@@ -449,11 +451,10 @@ def generate_location_overview_card(active_site_key):
             if is_active:
                 text_col = (255, 255, 255)
             elif SITES[site_k]['is_mars']:
-                text_col = (255, 195, 160)
+                text_col = (255, 205, 175)
 
             # Draw cell text with automatic multi-line wrapping for long text like soil
             if len(val_str) > 22:
-                # Wrap into 2 lines
                 words = val_str.split(" ")
                 mid = len(words) // 2
                 line1 = " ".join(words[:mid])
@@ -465,7 +466,7 @@ def generate_location_overview_card(active_site_key):
 
     # Footer note (NO analysis on this slide as requested in Image 2)
     footer_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL Curiosity Rover REMS Ground Truth | Zero Hallucinated Numbers"
-    draw.text((45, HEIGHT - 52), footer_text, font=FONT_FOOTER, fill=(130, 145, 175, 240))
+    draw.text((45, HEIGHT - 52), footer_text, font=FONT_FOOTER, fill=(150, 165, 195, 255))
 
     out_file = f"hud_overview_location_{active_site_key}.png"
     out_path = os.path.join(OUTPUT_DIR, out_file)
@@ -476,6 +477,7 @@ def generate_location_overview_card(active_site_key):
 # --------------------------------------------------------------------
 # PART 2: Category Overview Card for Each Location (Image 3 Reference)
 # Shows ONLY data from current location + Gemini API summary box
+# Solid dark opaque background. Close button.
 # --------------------------------------------------------------------
 def generate_category_overview_card(cat_key, site_key):
     img = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
@@ -486,26 +488,33 @@ def generate_category_overview_card(cat_key, site_key):
     cat_title = cat_meta[1]
     cat_color = cat_meta[3]
 
-    # 1. Base card container
+    # 1. Base card container - Solid opaque background
     draw.rounded_rectangle([20, 20, WIDTH - 20, HEIGHT - 20], radius=16,
-                           fill=(10, 16, 32, 238), outline=(70, 85, 115, 235), width=3)
+                           fill=(8, 14, 28, 255), outline=(75, 95, 130, 255), width=3)
     # Header bar
-    draw.rectangle([20, 20, WIDTH - 20, 115], fill=(16, 26, 48, 250))
-    draw.line([20, 115, WIDTH - 20, 115], fill=cat_color + (230,), width=3)
+    draw.rectangle([20, 20, WIDTH - 20, 115], fill=(14, 22, 42, 255))
+    draw.line([20, 115, WIDTH - 20, 115], fill=cat_color + (255,), width=3)
 
-    # Title: e.g. "1) Thermal Conditions (T2M, Delta-T) — Lut Desert"
+    # Title: e.g. "1) Thermal Conditions — Lut Desert"
     title_text = f"{cat_title} — {site_info['name']}"
     sub_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) / Empirical Meteorological Telemetry"
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
 
-    badge_w = 260
-    badge_x = WIDTH - 45 - badge_w
-    draw.rounded_rectangle([badge_x, 40, badge_x + badge_w, 92], radius=8,
-                           fill=cat_color + (45,), outline=cat_color + (220,), width=2)
-    draw.text((badge_x + 18, 54), site_info['short_name'][:15], font=FONT_BADGE, fill=cat_color + (255,))
+    # Prominent Close Button at top right
+    close_btn_w = 125
+    close_btn_x = WIDTH - 35 - close_btn_w
+    draw.rounded_rectangle([close_btn_x, 42, close_btn_x + close_btn_w, 94], radius=8,
+                           fill=(220, 38, 38, 255), outline=(255, 120, 120, 255), width=2)
+    draw.text((close_btn_x + 18, 54), "Close ✕", font=FONT_BADGE, fill=(255, 255, 255, 255))
 
-    # 2. Parameter rows for ONLY THIS LOCATION (Image 3 blue handwriting items)
+    badge_w = 230
+    badge_x = close_btn_x - 15 - badge_w
+    draw.rounded_rectangle([badge_x, 42, badge_x + badge_w, 94], radius=8,
+                           fill=cat_color + (55,), outline=cat_color + (230,), width=2)
+    draw.text((badge_x + 16, 56), site_info['short_name'][:14], font=FONT_BADGE, fill=cat_color + (255,))
+
+    # 2. Parameter rows for ONLY THIS LOCATION (solid opaque backgrounds)
     param_items = site_info['category_data'][cat_key]
     y_start = 145
     summary_box_h = 175
@@ -514,14 +523,14 @@ def generate_category_overview_card(cat_key, site_key):
 
     for i, (p_title, p_num, p_desc) in enumerate(param_items):
         item_y = y_start + i * item_h
-        bg_col = (16, 26, 48, 225) if i % 2 == 0 else (20, 32, 58, 235)
+        bg_col = (14, 22, 40, 255) if i % 2 == 0 else (18, 28, 50, 255)
 
         draw.rounded_rectangle([45, item_y, WIDTH - 45, item_y + item_h - 10], radius=10,
-                               fill=bg_col, outline=(60, 80, 115, 200), width=2)
+                               fill=bg_col, outline=(65, 85, 120, 255), width=2)
 
         # Title on left
         draw.text((68, item_y + 14), p_title, font=FONT_PARAM_NAME, fill=cat_color + (255,))
-        draw.text((68, item_y + 50), p_desc, font=FONT_PARAM_DESC, fill=(160, 180, 210, 255))
+        draw.text((68, item_y + 50), p_desc, font=FONT_PARAM_DESC, fill=(170, 190, 220, 255))
 
         # Number on right
         val_w = draw.textlength(p_num, font=FONT_PARAM_VAL) if hasattr(draw, 'textlength') else 200
@@ -531,16 +540,15 @@ def generate_category_overview_card(cat_key, site_key):
             num_color = (210, 160, 255)
         draw.text((val_x, item_y + 24), p_num, font=FONT_PARAM_VAL, fill=num_color + (255,))
 
-    # 3. Gemini API Summary Box at bottom (as circled in Image 3)
+    # 3. Gemini API Summary Box at bottom (solid opaque)
     box_y = HEIGHT - summary_box_h - 55
     draw.rounded_rectangle([45, box_y, WIDTH - 45, box_y + summary_box_h], radius=12,
-                           fill=(18, 28, 54, 250), outline=(85, 110, 160, 230), width=2)
+                           fill=(16, 26, 48, 255), outline=(90, 115, 165, 255), width=2)
 
     # Circled Gemini API Summary title
     draw.text((68, box_y + 16), "GEMINI API COMPARATIVE SUMMARY:", font=FONT_SUMMARY_HEAD, fill=cat_color + (255,))
     summary_text = site_info['summaries'][cat_key]
 
-    # Simple text wrapping for summary box
     words = summary_text.split(" ")
     lines = []
     current_line = []
@@ -553,11 +561,11 @@ def generate_category_overview_card(cat_key, site_key):
         lines.append(" ".join(current_line))
 
     for line_idx, line_str in enumerate(lines[:3]):
-        draw.text((68, box_y + 54 + line_idx * 30), line_str, font=FONT_SUMMARY_TEXT, fill=(230, 238, 252, 255))
+        draw.text((68, box_y + 54 + line_idx * 30), line_str, font=FONT_SUMMARY_TEXT, fill=(240, 245, 255, 255))
 
     # Footer
     footer_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL Curiosity REMS Telemetry | Mathematical Synthesis"
-    draw.text((50, HEIGHT - 46), footer_text, font=FONT_FOOTER, fill=(130, 145, 175, 240))
+    draw.text((50, HEIGHT - 46), footer_text, font=FONT_FOOTER, fill=(150, 165, 195, 255))
 
     out_file = f"hud_cat_{cat_key}_{site_key}.png"
     out_path = os.path.join(OUTPUT_DIR, out_file)

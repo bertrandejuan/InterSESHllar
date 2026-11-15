@@ -23,8 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
     currentStationId: "msl_01",
     activeCategoryFilter: "all",
     openAccordionKey: null, // All categories collapsed initially
+    openStatsCatKey: null,  // Stats disclosure collapsed initially
     isGeminiLoading: false,
-    activeHUD: "hud_overview_location_mars_gale.png",
+    activeHUD: null,        // Starts with HUD closed so 3D viewport is dominant
     activeOverlay: null,
     isOrientSideways: false,
     tourActive: false,
@@ -70,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const overallScoreNum = document.getElementById("overall-score-num");
   const marsReferencePanel = document.getElementById("mars-reference-panel");
   const btnLocationOverviewHUD = document.getElementById("btn-location-overview-hud");
+  const btnMarsRefOverview = document.getElementById("btn-mars-ref-overview");
   const btnLocationHUDText = document.getElementById("btn-location-hud-text");
 
   // DOM Elements - One Accordion Container
@@ -96,6 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCloseAllData = document.getElementById("btn-close-all-data");
   const btnFooterCloseAllData = document.getElementById("btn-footer-close-all-data");
   const btnModalComparisonHUD = document.getElementById("btn-modal-comparison-hud");
+  const btnHideHudViewTable = document.getElementById("btn-hide-hud-view-table");
+  const modalHudNotice = document.getElementById("modal-hud-notice");
+  const modalTableContent = document.getElementById("modal-table-content");
   const telemetryTableBody = document.getElementById("telemetry-table-body");
   const thSelectedSiteCol = document.getElementById("th-selected-site-col");
   const pillBtns = document.querySelectorAll(".pill-btn");
@@ -511,6 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           state.openAccordionKey = cat.key;
         }
+        state.openStatsCatKey = null; // Reset stats disclosure to closed when switching categories
         renderScienceAccordion();
       });
 
@@ -528,7 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const btnFocus = document.createElement("button");
       btnFocus.className = "btn-vp-action";
-      btnFocus.innerHTML = `<span>🎯 Focus on surface</span>`;
+      btnFocus.innerText = "Focus on surface";
       btnFocus.title = "Fly camera directly to surface terrain patch";
       btnFocus.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -539,16 +545,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const isCatHUDActive = state.activeHUD === currentCatHUD;
       const btnOverview = document.createElement("button");
       btnOverview.className = `btn-vp-action btn-overview-hud${isCatHUDActive ? " active" : ""}`;
-      btnOverview.innerHTML = `<span>◉ Overview HUD</span>`;
-      btnOverview.title = "Toggle semi-translucent 3D viewport card for this category";
+      btnOverview.setAttribute("aria-pressed", isCatHUDActive ? "true" : "false");
+      btnOverview.innerText = isCatHUDActive ? "Hide overview" : "Show overview";
+      btnOverview.title = "Toggle flat viewport card for this category";
       btnOverview.addEventListener("click", (e) => {
         e.stopPropagation();
         toggleCategoryHUD(cat);
       });
 
+      const isOverlayActive = state.activeOverlay === (isMars ? cat.overlayLayerMars : cat.overlayLayerEarth);
       const btnOverlay = document.createElement("button");
-      btnOverlay.className = `btn-vp-action btn-surface-overlay${state.activeOverlay === (isMars ? cat.overlayLayerMars : cat.overlayLayerEarth) ? " active" : ""}`;
-      btnOverlay.innerHTML = `<span>🌐 Surface overlay</span>`;
+      btnOverlay.className = `btn-vp-action btn-surface-overlay${isOverlayActive ? " active" : ""}`;
+      btnOverlay.setAttribute("aria-pressed", isOverlayActive ? "true" : "false");
+      btnOverlay.innerText = isOverlayActive ? "Hide overlay" : "Show overlay";
       btnOverlay.title = "Toggle continuous spatial vector data on the planetary terrain";
 
       if (!cat.hasOverlay) {
@@ -563,7 +572,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const btnSideView = document.createElement("button");
       btnSideView.className = `btn-vp-action${state.isOrientSideways ? " active" : ""}`;
-      btnSideView.innerHTML = `<span>📐 Side view</span>`;
+      btnSideView.setAttribute("aria-pressed", state.isOrientSideways ? "true" : "false");
+      btnSideView.innerText = "Side view";
       btnSideView.title = "Tilt camera sideways across surface topography for ground-level horizon perspective";
       btnSideView.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -584,134 +594,127 @@ document.addEventListener("DOMContentLoaded", () => {
         body.appendChild(noteElem);
       }
 
-      // Parameters List
-      const paramList = document.createElement("div");
-      paramList.className = "parameters-list";
+      // --------------------------------------------------
+      // Opt-in Statistics Disclosure ("More info on stats")
+      // --------------------------------------------------
+      const isStatsOpen = state.openStatsCatKey === cat.key;
+      const disclosureBox = document.createElement("div");
+      disclosureBox.className = "stats-disclosure-box";
 
-      cat.parameters.forEach((param) => {
-        const pCard = document.createElement("div");
-        pCard.className = "parameter-card";
+      const btnDisclosure = document.createElement("button");
+      btnDisclosure.className = `btn-stats-disclosure${isStatsOpen ? " active" : ""}`;
+      btnDisclosure.setAttribute("aria-expanded", isStatsOpen ? "true" : "false");
+      btnDisclosure.innerHTML = `
+        <span class="disclosure-main">
+          <span class="disclosure-arrow">${isStatsOpen ? "▾" : "▸"}</span>
+          <span>More info on stats</span>
+        </span>
+        <span class="disclosure-action-badge">${isStatsOpen ? "Hide stats" : "Show stats"}</span>
+      `;
+      btnDisclosure.addEventListener("click", (e) => {
+        e.stopPropagation();
+        state.openStatsCatKey = isStatsOpen ? null : cat.key;
+        renderScienceAccordion();
+      });
+      disclosureBox.appendChild(btnDisclosure);
+      body.appendChild(disclosureBox);
 
-        const earthValStr = param.getVal(metrics);
-        const marsValStr = param.getMarsVal();
+      // Render compact statistics table ONLY when disclosure is explicitly opened
+      if (isStatsOpen) {
+        const statsContainer = document.createElement("div");
+        statsContainer.className = "compact-stats-container";
 
-        // Exact mathematical similarity score
-        let matchBadgeHtml = "";
-        if (!isMars && param.scale && metrics[param.key] !== null && metrics[param.key] !== undefined) {
-          const earthVal = metrics[param.key];
-          const marsRef = marsMetrics[param.key];
-          const s = calcSimScore(earthVal, marsRef, param.scale);
-          if (s !== null) {
-            const badgeClass = s >= 60 ? "match-high" : s >= 35 ? "match-mid" : "match-low";
-            matchBadgeHtml = `<span class="param-match-badge ${badgeClass}">${s.toFixed(0)}% Math Match</span>`;
-          }
-        } else if (isMars) {
-          matchBadgeHtml = `<span class="param-match-badge match-high">Reference (100%)</span>`;
-        } else if (param.isPlaceholder) {
-          matchBadgeHtml = `<span class="param-match-badge" style="background: rgba(168,85,247,0.25); color: #c084fc; border: 1px solid rgba(168,85,247,0.5);">Data Pending</span>`;
-        }
-
-        if (param.isPlaceholder) {
-          // Placeholder layout for Soil Characteristics & Granularity
-          pCard.innerHTML = `
-            <div class="param-title-row">
-              <div class="param-name-block">
-                <span class="param-label">${param.label} [${param.code}]</span>
-                <span class="param-desc">${param.desc}</span>
-              </div>
-            </div>
-            <div class="param-qualitative-box" style="border-color: rgba(168,85,247,0.4); background: rgba(88,28,135,0.15);">
-              <div class="qualitative-row">
-                <span class="qualitative-label" style="color: #d8b4fe;">Telemetry:</span>
-                <span class="qualitative-val" style="color: #e9d5ff; font-style: italic;">${earthValStr}</span>
-              </div>
-              <div class="qualitative-row">
-                <span class="qualitative-label" style="color: #fdba74;">Mars Ref:</span>
-                <span class="qualitative-val" style="color: #fed7aa; font-style: italic;">${marsValStr}</span>
-              </div>
-            </div>
-            <div class="param-meta-row">
-              <button class="btn-data-notes" data-param="${param.code}">ℹ Source Notes</button>
-              ${matchBadgeHtml}
-            </div>
-            <div class="param-notes-drawer" id="notes-${param.code}">
-              <strong>Source:</strong> ${param.source}<br>
-              <strong>Status:</strong> Active laboratory and spectroscopy data acquisition in progress. Zero synthetic numbers applied.
-            </div>
-          `;
-        } else if (param.isQualitative) {
-          // Qualitative Layout for Mineralogy and Organics
-          pCard.innerHTML = `
-            <div class="param-title-row">
-              <div class="param-name-block">
-                <span class="param-label">${param.label} [${param.code}]</span>
-                <span class="param-desc">${param.desc}</span>
-              </div>
-            </div>
-            <div class="param-qualitative-box">
-              <div class="qualitative-row">
-                <span class="qualitative-label">${isMars ? "Target:" : "Analog:"}</span>
-                <span class="qualitative-val">${earthValStr}</span>
-              </div>
-              <div class="qualitative-row">
-                <span class="qualitative-label">Mars Ref:</span>
-                <span class="qualitative-val">${marsValStr}</span>
-              </div>
-            </div>
-            <div class="param-meta-row">
-              <button class="btn-data-notes" data-param="${param.code}">ℹ Source Notes</button>
-              <span class="param-match-badge match-high">Geological Analog</span>
-            </div>
-            <div class="param-notes-drawer" id="notes-${param.code}">
-              <strong>Source:</strong> ${param.source}<br>
-              <strong>Method:</strong> In-situ field survey, EMIT-2 spectroscopy, and MSL CheMin/SAM target comparison.
-            </div>
+        const headerRow = document.createElement("div");
+        headerRow.className = `compact-stats-header${isMars ? " mars-mode" : ""}`;
+        if (isMars) {
+          headerRow.innerHTML = `
+            <span>Parameter</span>
+            <span style="text-align: right;">Gale Crater Reference</span>
           `;
         } else {
-          // Quantitative side-by-side telemetry row
-          pCard.innerHTML = `
-            <div class="param-title-row">
-              <div class="param-name-block">
-                <span class="param-label">${param.label} [${param.code}]</span>
-                <span class="param-desc">${param.desc}</span>
-              </div>
-            </div>
-            <div class="param-values-row">
-              <div class="param-val-earth">
-                <span class="val-tag">${isMars ? "Mars Gale In-Situ" : "Selected Earth Analog"}</span>
-                <span class="val-text-primary">${earthValStr}</span>
-              </div>
-              <div class="param-val-mars">
-                <span class="val-tag">Mars REMS Baseline</span>
-                <span class="val-text-mars">${marsValStr}</span>
-              </div>
-            </div>
-            <div class="param-meta-row">
-              <button class="btn-data-notes" data-param="${param.code}">ℹ Source Notes</button>
-              ${matchBadgeHtml}
-            </div>
-            <div class="param-notes-drawer" id="notes-${param.code}">
-              <strong>Source:</strong> ${param.source}<br>
-              <strong>Date Range:</strong> 2015-01-01 through 2025-12-31 (4,018 continuous daily observations)<br>
-              <strong>Mathematical Formula:</strong> Similarity S = 100 * exp(-|Δ| / ${param.scale})
-            </div>
+          headerRow.innerHTML = `
+            <span>Parameter</span>
+            <span style="text-align: right;">${site.name}</span>
+            <span style="text-align: right;">Gale Crater</span>
+            <span style="text-align: right;">Match</span>
           `;
         }
+        statsContainer.appendChild(headerRow);
 
-        // Data notes drawer toggle
-        const btnNotes = pCard.querySelector(".btn-data-notes");
-        const drawerNotes = pCard.querySelector(".param-notes-drawer");
-        if (btnNotes && drawerNotes) {
-          btnNotes.addEventListener("click", (e) => {
+        cat.parameters.forEach((param) => {
+          const rowGroup = document.createElement("div");
+          rowGroup.className = "compact-stats-row-group";
+
+          const earthValStr = param.getVal(metrics);
+          const marsValStr = param.getMarsVal();
+
+          if (isMars) {
+            const row = document.createElement("div");
+            row.className = "compact-stats-row mars-mode";
+            row.innerHTML = `
+              <div class="cstat-td param-col">
+                <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
+                <span class="cstat-param-name">${param.label}</span>
+              </div>
+              <div class="cstat-td mars-col" style="text-align: right;">${marsValStr}</div>
+            `;
+            rowGroup.appendChild(row);
+          } else {
+            let matchBadgeHtml = "—";
+            if (param.isPlaceholder) {
+              matchBadgeHtml = `<span class="cstat-match-badge match-pending">Pending</span>`;
+            } else if (param.isQualitative) {
+              matchBadgeHtml = `<span class="cstat-match-badge match-high">Analog</span>`;
+            } else if (param.scale && metrics[param.key] !== null && metrics[param.key] !== undefined && marsMetrics[param.key] !== null && marsMetrics[param.key] !== undefined) {
+              const earthVal = metrics[param.key];
+              const marsRef = marsMetrics[param.key];
+              const s = calcSimScore(earthVal, marsRef, param.scale);
+              if (s !== null) {
+                const badgeClass = s >= 60 ? "match-high" : s >= 35 ? "match-mid" : "match-low";
+                matchBadgeHtml = `<span class="cstat-match-badge ${badgeClass}">${s.toFixed(0)}%</span>`;
+              }
+            }
+
+            const row = document.createElement("div");
+            row.className = "compact-stats-row";
+            row.innerHTML = `
+              <div class="cstat-td param-col">
+                <button class="btn-param-detail-toggle" data-param="${param.code}" title="Toggle details" aria-label="Toggle details for ${param.label}">ℹ</button>
+                <span class="cstat-param-name">${param.label}</span>
+              </div>
+              <div class="cstat-td earth-col" style="text-align: right;">${earthValStr}</div>
+              <div class="cstat-td mars-col" style="text-align: right;">${marsValStr}</div>
+              <div class="cstat-td" style="text-align: right;">${matchBadgeHtml}</div>
+            `;
+            rowGroup.appendChild(row);
+          }
+
+          // On-demand detail drawer
+          const detailDrawer = document.createElement("div");
+          detailDrawer.className = "cstat-detail-drawer";
+          detailDrawer.style.display = "none";
+          detailDrawer.innerHTML = `
+            <div class="cstat-detail-item"><strong>Code:</strong> [${param.code}] &nbsp;|&nbsp; <strong>Units:</strong> ${param.unit || "N/A"}</div>
+            <div class="cstat-detail-item"><strong>Definition:</strong> ${param.desc}</div>
+            <div class="cstat-detail-item"><strong>Source:</strong> ${param.source}</div>
+            ${param.scale ? `<div class="cstat-detail-item"><strong>Formula:</strong> S = 100 · exp(-|Δ| / ${param.scale})</div>` : ""}
+          `;
+          rowGroup.appendChild(detailDrawer);
+
+          const btnToggle = rowGroup.querySelector(".btn-param-detail-toggle");
+          btnToggle.addEventListener("click", (e) => {
             e.stopPropagation();
-            drawerNotes.classList.toggle("open");
+            const isHidden = detailDrawer.style.display === "none";
+            detailDrawer.style.display = isHidden ? "block" : "none";
+            btnToggle.classList.toggle("active", isHidden);
           });
-        }
 
-        paramList.appendChild(pCard);
-      });
+          statsContainer.appendChild(rowGroup);
+        });
 
-      body.appendChild(paramList);
+        body.appendChild(statsContainer);
+      }
+
       item.appendChild(body);
       scienceAccordion.appendChild(item);
     });
@@ -748,15 +751,51 @@ document.addEventListener("DOMContentLoaded", () => {
     showHUDTexture(hudTexture);
   }
 
+  function updateHUDButtonStates() {
+    const isMars = state.currentSiteKey === "mars_gale";
+    const isOverviewActive = Boolean(state.activeHUD);
+
+    if (btnLocationOverviewHUD) {
+      btnLocationOverviewHUD.style.display = isMars ? "none" : "block";
+      const isSiteHUD = state.activeHUD === `hud_overview_location_${state.currentSiteKey}.png`;
+      btnLocationOverviewHUD.innerText = isSiteHUD ? "Hide overview" : "Show overview";
+      btnLocationOverviewHUD.classList.toggle("active", Boolean(isSiteHUD));
+      btnLocationOverviewHUD.setAttribute("aria-pressed", isSiteHUD ? "true" : "false");
+    }
+
+    if (btnMarsRefOverview) {
+      const isMarsHUD = state.activeHUD === "hud_overview_location_mars_gale.png";
+      btnMarsRefOverview.innerText = isMarsHUD ? "Hide overview" : "Show overview";
+      btnMarsRefOverview.classList.toggle("active", Boolean(isMarsHUD));
+      btnMarsRefOverview.setAttribute("aria-pressed", isMarsHUD ? "true" : "false");
+    }
+
+    if (btnModalComparisonHUD) {
+      btnModalComparisonHUD.innerText = isOverviewActive ? "Hide overview" : "Show overview";
+      btnModalComparisonHUD.classList.toggle("active", isOverviewActive);
+      btnModalComparisonHUD.setAttribute("aria-pressed", isOverviewActive ? "true" : "false");
+    }
+
+    if (modalHudNotice && modalTableContent) {
+      if (isOverviewActive && modalAllData && modalAllData.style.display === "flex") {
+        modalHudNotice.style.display = "flex";
+        modalTableContent.style.display = "none";
+      } else {
+        modalHudNotice.style.display = "none";
+        modalTableContent.style.display = "block";
+      }
+    }
+  }
+
   function showHUDTexture(textureFilename) {
-    // Calibrated Scale = 0.72 and position = {-0.22, 0.02, -2.0} ensures flat, legible, screen-facing HUD
+    // Calibrated Scale = 0.82 and CartesianPosition = {-0.24, 0.03, -2.0} ensures flat, screen-facing HUD filling available viewport
     openSpace.executeLuaScript(`
       if openspace.hasProperty("ScreenSpace.OverviewHUD.Enabled") then
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Scale") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 0.72)
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Scale", 0.82)
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.CartesianPosition") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.22, 0.02, -2.0 })
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.CartesianPosition", { -0.24, 0.03, -2.0 })
         end
         if openspace.hasProperty("ScreenSpace.OverviewHUD.Rotation") then
           openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Rotation", { 0.0, 0.0, 0.0 })
@@ -764,37 +803,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if openspace.hasProperty("ScreenSpace.OverviewHUD.FaceCamera") then
           openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.FaceCamera", true)
         end
+        if openspace.hasProperty("ScreenSpace.OverviewHUD.Opacity") then
+          openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Opacity", 1.0)
+        end
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.TexturePath", openspace.absPath("\${ASSETS}/mars_earth_analogs/textures/${textureFilename}"))
         openspace.setPropertyValueSingle("ScreenSpace.OverviewHUD.Enabled", true)
       end
     `);
 
     state.activeHUD = textureFilename;
-
-    if (btnLocationOverviewHUD) {
-      if (textureFilename.startsWith("hud_overview_location_")) {
-        btnLocationOverviewHUD.classList.add("active");
-        if (btnLocationHUDText) {
-          btnLocationHUDText.innerText = "General Location Overview Active";
-        }
-      } else {
-        btnLocationOverviewHUD.classList.remove("active");
-        if (btnLocationHUDText) {
-          btnLocationHUDText.innerText = "General Location Overview (3D HUD)";
-        }
-      }
-    }
-
-    if (btnModalComparisonHUD) {
-      if (textureFilename.startsWith("hud_overview_location_")) {
-        btnModalComparisonHUD.classList.add("active");
-        btnModalComparisonHUD.innerText = "🪐 HUD Active (Click to Close)";
-      } else {
-        btnModalComparisonHUD.classList.remove("active");
-        btnModalComparisonHUD.innerText = "🪐 Viewport Comparison HUD";
-      }
-    }
-
+    updateHUDButtonStates();
     renderScienceAccordion();
   }
 
@@ -806,19 +824,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `);
 
     state.activeHUD = null;
-
-    if (btnLocationOverviewHUD) {
-      btnLocationOverviewHUD.classList.remove("active");
-      if (btnLocationHUDText) {
-        btnLocationHUDText.innerText = "General Location Overview (3D HUD)";
-      }
-    }
-
-    if (btnModalComparisonHUD) {
-      btnModalComparisonHUD.classList.remove("active");
-      btnModalComparisonHUD.innerText = "🪐 Viewport Comparison HUD";
-    }
-
+    updateHUDButtonStates();
     renderScienceAccordion();
   }
 
@@ -958,6 +964,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearActiveOverlays();
 
     state.currentSiteKey = siteKey;
+    state.openStatsCatKey = null; // Reset stats disclosure to closed when switching sites
     const site = getActiveSiteData();
     const isMars = site.globe === "Mars";
     const marsBaseline = getMarsBaselineData();
@@ -1020,6 +1027,8 @@ document.addEventListener("DOMContentLoaded", () => {
           showHUDTexture(`hud_cat_${catKey}_${siteKey}.png`);
         }
       }
+    } else {
+      updateHUDButtonStates();
     }
   }
 
@@ -1109,50 +1118,97 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.add("active");
       state.activeCategoryFilter = btn.dataset.filter;
       renderTelemetryTable();
+
+      // Synchronize with viewport HUD while it is open
+      if (state.activeHUD) {
+        if (state.activeCategoryFilter === "all") {
+          showHUDTexture(`hud_overview_location_${state.currentSiteKey}.png`);
+        } else {
+          showHUDTexture(`hud_cat_${state.activeCategoryFilter}_${state.currentSiteKey}.png`);
+        }
+      }
     });
   });
 
   // Modal Handlers: View All Data
   if (btnOpenAllData) {
     btnOpenAllData.addEventListener("click", () => {
+      // If opened from an active category, start on that category!
+      if (state.openAccordionKey) {
+        state.activeCategoryFilter = state.openAccordionKey;
+      } else if (!state.activeCategoryFilter) {
+        state.activeCategoryFilter = "all";
+      }
+
+      pillBtns.forEach((p) => {
+        p.classList.toggle("active", p.dataset.filter === state.activeCategoryFilter);
+      });
+
       renderTelemetryTable();
       modalAllData.style.display = "flex";
+      updateHUDButtonStates();
     });
   }
 
   if (btnCloseAllData) {
     btnCloseAllData.addEventListener("click", () => {
       modalAllData.style.display = "none";
+      updateHUDButtonStates();
     });
   }
 
   if (btnFooterCloseAllData) {
     btnFooterCloseAllData.addEventListener("click", () => {
       modalAllData.style.display = "none";
+      updateHUDButtonStates();
     });
   }
 
   if (btnModalComparisonHUD) {
     btnModalComparisonHUD.addEventListener("click", () => {
-      toggleComparisonHUD(state.currentSiteKey);
+      if (state.activeHUD) {
+        dismissHUD();
+      } else {
+        if (state.activeCategoryFilter && state.activeCategoryFilter !== "all") {
+          showHUDTexture(`hud_cat_${state.activeCategoryFilter}_${state.currentSiteKey}.png`);
+        } else {
+          showHUDTexture(`hud_overview_location_${state.currentSiteKey}.png`);
+        }
+      }
+    });
+  }
+
+  if (btnHideHudViewTable) {
+    btnHideHudViewTable.addEventListener("click", () => {
+      dismissHUD();
     });
   }
 
   if (btnLocationOverviewHUD) {
-    btnLocationOverviewHUD.addEventListener("click", () => {
+    btnLocationOverviewHUD.addEventListener("click", (e) => {
+      e.stopPropagation();
       toggleComparisonHUD(state.currentSiteKey);
     });
   }
 
+  if (btnMarsRefOverview) {
+    btnMarsRefOverview.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleComparisonHUD("mars_gale");
+    });
+  }
+
   if (overallScorePanel) {
-    overallScorePanel.addEventListener("click", () => {
+    overallScorePanel.addEventListener("click", (e) => {
+      if (e.target && e.target.closest("button")) return;
       toggleComparisonHUD(state.currentSiteKey);
     });
   }
 
   if (marsReferencePanel) {
-    marsReferencePanel.addEventListener("click", () => {
-      toggleComparisonHUD(state.currentSiteKey);
+    marsReferencePanel.addEventListener("click", (e) => {
+      if (e.target && e.target.closest("button")) return;
+      toggleComparisonHUD("mars_gale");
     });
   }
 
