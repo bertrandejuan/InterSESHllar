@@ -141,6 +141,37 @@
       </div>
       <button id="btn-mars-ref-overview" class="btn btn-action-plain" aria-pressed="false">Show overview</button>
     </div>
+
+    <!-- Results: Earth to Mars Comparison Button -->
+    <button id="btn-results-comparison" class="btn btn-action-plain btn-results-comparison" aria-expanded="false" title="View overall and category percentage comparison for all Earth locations vs Mars">
+      <span class="btn-icon">📊</span>
+      <span>Results: Earth to Mars Comparison</span>
+    </button>
+  </section>
+
+  <!-- Drawer: Results: Earth to Mars Comparison -->
+  <section class="glass-panel drawer-panel results-comparison-drawer" id="drawer-results-comparison" style="display: none;" aria-label="Results: Earth to Mars Comparison">
+    <div class="drawer-header">
+      <div class="drawer-header-title">
+        <span class="drawer-header-icon">📊</span>
+        <div class="drawer-header-text">
+          <h4>Results: Earth to Mars Comparison</h4>
+          <span class="drawer-header-subtitle">Overall & Category Match Percentages (All Analogs vs Mars Baseline)</span>
+        </div>
+      </div>
+      <button id="btn-close-results-drawer" class="btn btn-action-plain btn-close-drawer" aria-label="Close Comparison Results">✕ Close</button>
+    </div>
+
+    <div class="results-hud-action-row">
+      <button id="btn-results-show-hud" class="btn btn-action-plain btn-results-hud-btn" title="Render planetary climatology comparison HUD in OpenSpace viewport">
+        <span>🪐</span>
+        <span>Show Overview HUD in 3D Viewport</span>
+      </button>
+    </div>
+
+    <div id="results-comparison-content" class="results-comparison-content">
+      <!-- Rendered dynamically by app.js -->
+    </div>
   </section>
 
   <!-- One Accordion for the Science (All categories collapsed initially) -->
