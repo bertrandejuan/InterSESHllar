@@ -78,17 +78,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnLocationOverviewHUD = document.getElementById("btn-location-overview-hud");
   const btnMarsRefOverview = document.getElementById("btn-mars-ref-overview");
   const btnLocationHUDText = document.getElementById("btn-location-hud-text");
-  const btnComparisonMatrixHUD = document.getElementById("btn-comparison-matrix-hud");
-  const btnComparisonMatrixText = document.getElementById("btn-comparison-matrix-text");
-  const btnOpenDecisionMatrix = document.getElementById("btn-open-decision-matrix");
-  const modalDecisionMatrix = document.getElementById("modal-decision-matrix");
-  const btnCloseDecisionMatrix = document.getElementById("btn-close-decision-matrix");
-  const btnCloseDecisionMatrixFooter = document.getElementById("btn-close-decision-matrix-footer");
-  const btnResetWeights = document.getElementById("btn-reset-weights");
-  const weightSliders = document.querySelectorAll(".weight-slider");
-  const matrixPresetBtns = document.querySelectorAll(".btn-matrix-preset");
+  const btnToggleComparisonMatrix = document.getElementById("btn-toggle-comparison-matrix");
+  const drawerComparisonMatrix = document.getElementById("drawer-comparison-matrix");
+  const btnToggleMatrixHUD = document.getElementById("btn-toggle-matrix-hud");
+  const matrixBalanceBadge = document.getElementById("matrix-balance-badge");
+  const matrixBalanceText = document.getElementById("matrix-balance-text");
+  const matrixBalanceStatus = document.getElementById("matrix-balance-status");
+  const inputMissionGoal = document.getElementById("input-mission-goal");
+  const btnRunOptimizer = document.getElementById("btn-run-optimizer");
+  const optimizerRationaleBox = document.getElementById("optimizer-rationale-box");
   const decisionMatrixTbody = document.getElementById("decision-matrix-tbody");
   const matrixLeaderboardGrid = document.getElementById("matrix-leaderboard-grid");
+  const mcdmFormulaLive = document.getElementById("mcdm-formula-live");
 
   // DOM Elements - One Accordion Container
   const scienceAccordion = document.getElementById("science-accordion");
@@ -1383,16 +1384,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // Comparison Matrix Viewport HUD Toggle
+  // Comparison Matrix Dropdown & Viewport HUD Toggle
   // ----------------------------------------------------
-  if (btnComparisonMatrixHUD) {
-    btnComparisonMatrixHUD.addEventListener("click", (e) => {
+  if (btnToggleComparisonMatrix) {
+    btnToggleComparisonMatrix.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = drawerComparisonMatrix && drawerComparisonMatrix.style.display === "flex";
+      if (drawerComparisonMatrix) {
+        drawerComparisonMatrix.style.display = isOpen ? "none" : "flex";
+      }
+      btnToggleComparisonMatrix.classList.toggle("active", !isOpen);
+      btnToggleComparisonMatrix.setAttribute("aria-expanded", !isOpen ? "true" : "false");
+      const arrow = btnToggleComparisonMatrix.querySelector(".matrix-dropdown-arrow");
+      if (arrow) arrow.textContent = !isOpen ? "▴" : "▾";
+
+      if (!isOpen) {
+        renderDecisionMatrix();
+        const matrixTexture = "hud_comparison_matrix.png";
+        if (state.activeHUD !== matrixTexture) {
+          showHUDTexture(matrixTexture);
+          if (btnToggleMatrixHUD) btnToggleMatrixHUD.classList.add("active");
+        }
+      }
+    });
+  }
+
+  if (btnToggleMatrixHUD) {
+    btnToggleMatrixHUD.addEventListener("click", (e) => {
       e.stopPropagation();
       const matrixTexture = "hud_comparison_matrix.png";
       if (state.activeHUD === matrixTexture) {
         dismissHUD();
+        btnToggleMatrixHUD.classList.remove("active");
       } else {
         showHUDTexture(matrixTexture);
+        btnToggleMatrixHUD.classList.add("active");
       }
     });
   }
@@ -2391,34 +2417,242 @@ document.addEventListener("DOMContentLoaded", () => {
     return siteScores;
   }
 
+  // ----------------------------------------------------
+  // Decision Matrix Weights & Auto-Rebalancing Logic
+  // ----------------------------------------------------
+  let lastEditedCatKey = "thermal";
+  let rebalanceTimerId = null;
+  let rebalanceCountdownIntervalId = null;
+  let rebalanceSecondsLeft = 10;
+
+  function rebalanceWeightsAroundStationary(stationaryCatKey) {
+    const cats = SCIENCE_CATEGORIES.map(c => c.key);
+    const stationaryVal = Math.max(0, Math.min(100, Math.round(state.categoryWeights[stationaryCatKey] || 0)));
+    state.categoryWeights[stationaryCatKey] = stationaryVal;
+
+    const otherCats = cats.filter(k => k !== stationaryCatKey);
+    const targetOtherSum = 100 - stationaryVal;
+
+    if (targetOtherSum <= 0) {
+      otherCats.forEach(k => { state.categoryWeights[k] = 0; });
+      state.categoryWeights[stationaryCatKey] = 100;
+      return;
+    }
+
+    let currentOtherSum = otherCats.reduce((acc, k) => acc + (state.categoryWeights[k] || 0), 0);
+    let diff = targetOtherSum - currentOtherSum;
+
+    let deltaEach = diff / otherCats.length;
+    let newWeights = {};
+    otherCats.forEach(k => {
+      newWeights[k] = Math.max(0, Math.min(100, (state.categoryWeights[k] || 0) + deltaEach));
+    });
+
+    let roundedSum = 0;
+    otherCats.forEach(k => {
+      newWeights[k] = Math.round(newWeights[k]);
+      roundedSum += newWeights[k];
+    });
+
+    let roundingError = targetOtherSum - roundedSum;
+    if (roundingError !== 0) {
+      const sortedFlex = [...otherCats].sort((a, b) => newWeights[b] - newWeights[a]);
+      for (const k of sortedFlex) {
+        if (newWeights[k] + roundingError >= 0 && newWeights[k] + roundingError <= 100) {
+          newWeights[k] += roundingError;
+          roundingError = 0;
+          break;
+        }
+      }
+    }
+
+    otherCats.forEach(k => {
+      state.categoryWeights[k] = newWeights[k];
+    });
+  }
+
+  function handleWeightChange(catKey, newVal, sourceInput) {
+    lastEditedCatKey = catKey;
+    const clampedVal = Math.max(0, Math.min(100, Math.round(newVal)));
+    state.categoryWeights[catKey] = clampedVal;
+
+    // Sync counterpart input for this category
+    const slider = document.querySelector(`.weight-slider[data-cat="${catKey}"]`);
+    const numInput = document.querySelector(`.weight-number-input[data-cat="${catKey}"]`);
+    if (slider && slider !== sourceInput) slider.value = clampedVal;
+    if (numInput && numInput !== sourceInput) numInput.value = clampedVal;
+
+    // Recalculate immediately in real time
+    renderDecisionMatrix();
+    updateActiveSiteScoreDisplay();
+
+    // Check sum
+    const totalSum = Object.values(state.categoryWeights).reduce((a, b) => a + b, 0);
+
+    // Clear active timers
+    if (rebalanceTimerId) clearTimeout(rebalanceTimerId);
+    if (rebalanceCountdownIntervalId) clearInterval(rebalanceCountdownIntervalId);
+
+    if (totalSum === 100) {
+      if (matrixBalanceStatus) {
+        matrixBalanceStatus.className = "status-balanced";
+        matrixBalanceStatus.textContent = "✓ Balanced";
+      }
+      if (matrixBalanceBadge) matrixBalanceBadge.className = "matrix-balance-badge is-balanced";
+      return;
+    }
+
+    // Unbalanced: start 10s timer
+    rebalanceSecondsLeft = 10;
+    if (matrixBalanceStatus) {
+      matrixBalanceStatus.className = "status-unbalanced";
+      matrixBalanceStatus.textContent = `Auto-balancing in ${rebalanceSecondsLeft}s...`;
+    }
+    if (matrixBalanceBadge) matrixBalanceBadge.className = "matrix-balance-badge is-unbalanced";
+
+    rebalanceCountdownIntervalId = setInterval(() => {
+      rebalanceSecondsLeft--;
+      if (rebalanceSecondsLeft > 0) {
+        if (matrixBalanceStatus) {
+          matrixBalanceStatus.textContent = `Auto-balancing in ${rebalanceSecondsLeft}s...`;
+        }
+      } else {
+        clearInterval(rebalanceCountdownIntervalId);
+      }
+    }, 1000);
+
+    rebalanceTimerId = setTimeout(() => {
+      clearInterval(rebalanceCountdownIntervalId);
+      rebalanceWeightsAroundStationary(lastEditedCatKey);
+      renderDecisionMatrix();
+      updateActiveSiteScoreDisplay();
+      if (matrixBalanceStatus) {
+        matrixBalanceStatus.className = "status-balanced";
+        matrixBalanceStatus.textContent = "✓ Auto-balanced to 100%";
+      }
+      if (matrixBalanceBadge) matrixBalanceBadge.className = "matrix-balance-badge is-balanced";
+    }, 10000);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function runMissionOptimizer(promptText) {
+    if (!promptText || !promptText.trim()) return;
+    const query = promptText.trim().toLowerCase();
+
+    // Mission keyword score accumulators
+    const scores = {
+      thermal: 20,
+      astrobiology: 20,
+      dynamics: 20,
+      moisture: 20,
+      radiation: 20
+    };
+
+    if (/bio|life|fossil|organ|microb|regolith|soil|clay|sam|chemin|strata|sediment|habitab/.test(query)) {
+      scores.astrobiology += 55;
+      scores.moisture += 15;
+    }
+    if (/rover|travers|drive|wheel|dust|storm|wind|dune|yardang|edl|landing|gust|pressure|aero/.test(query)) {
+      scores.dynamics += 50;
+      scores.thermal += 15;
+    }
+    if (/drone|helicopter|aerial|flight|rotor|solar|photovolt|sun|insolation|uv|sky|energy/.test(query)) {
+      scores.dynamics += 30;
+      scores.radiation += 45;
+    }
+    if (/cryo|ice|cold|polar|frost|freez|drill|glacier|permafrost|winter|subsurface/.test(query)) {
+      scores.thermal += 45;
+      scores.moisture += 25;
+    }
+    if (/water|isru|vapor|humid|rain|brine|salt|halite|evaporite|extract|hydrate/.test(query)) {
+      scores.moisture += 50;
+      scores.astrobiology += 20;
+    }
+
+    // Normalize to exact integers summing to 100
+    const rawSum = Object.values(scores).reduce((a, b) => a + b, 0);
+    const newWeights = {};
+    let intSum = 0;
+    SCIENCE_CATEGORIES.forEach(cat => {
+      const w = Math.round((scores[cat.key] / rawSum) * 100);
+      newWeights[cat.key] = w;
+      intSum += w;
+    });
+
+    let diff = 100 - intSum;
+    if (diff !== 0) {
+      newWeights.astrobiology += diff;
+    }
+
+    state.categoryWeights = { ...newWeights };
+
+    if (rebalanceTimerId) clearTimeout(rebalanceTimerId);
+    if (rebalanceCountdownIntervalId) clearInterval(rebalanceCountdownIntervalId);
+
+    renderDecisionMatrix();
+    updateActiveSiteScoreDisplay();
+
+    const sortedCats = Object.entries(newWeights).sort((a, b) => b[1] - a[1]);
+    const topCatObj = SCIENCE_CATEGORIES.find(c => c.key === sortedCats[0][0]);
+    const secondCatObj = SCIENCE_CATEGORIES.find(c => c.key === sortedCats[1][0]);
+
+    if (optimizerRationaleBox) {
+      optimizerRationaleBox.style.display = "block";
+      optimizerRationaleBox.innerHTML = `
+        <div class="opt-rationale-card">
+          <div class="opt-rationale-header">
+            <span>🎯 Mission Optimized: <strong>${escapeHtml(promptText)}</strong></span>
+            <span class="opt-rationale-badge">100% Normalized</span>
+          </div>
+          <p class="opt-rationale-text">
+            Weights tuned to prioritize <strong>${topCatObj ? topCatObj.title : sortedCats[0][0]} (${sortedCats[0][1]}%)</strong> and <strong>${secondCatObj ? secondCatObj.title : sortedCats[1][0]} (${sortedCats[1][1]}%)</strong> based on your exploration objective.
+          </p>
+        </div>
+      `;
+    }
+  }
+
   function renderDecisionMatrix() {
     if (!decisionMatrixTbody) return;
 
     const normWeights = getNormalizedCategoryWeights();
     const siteCatScores = computeAllSiteCategoryScores();
+    const totalWeight = Object.values(state.categoryWeights).reduce((a, b) => a + b, 0);
 
-    // 1. Update sliders & percentage badges in config panel
+    // 1. Update sliders & number inputs
     SCIENCE_CATEGORIES.forEach((cat) => {
       const rawVal = state.categoryWeights[cat.key] !== undefined ? state.categoryWeights[cat.key] : 20;
-      const pct = (normWeights[cat.key] * 100).toFixed(0);
 
       const slider = document.querySelector(`.weight-slider[data-cat="${cat.key}"]`);
       if (slider && document.activeElement !== slider) {
         slider.value = rawVal;
       }
-      const pctBadge = document.getElementById(`weight-pct-${cat.key}`);
-      if (pctBadge) pctBadge.innerText = `${pct}%`;
-      const rawBadge = document.getElementById(`weight-raw-${cat.key}`);
-      if (rawBadge) rawBadge.innerText = `raw: ${rawVal}`;
+      const numInput = document.querySelector(`.weight-number-input[data-cat="${cat.key}"]`);
+      if (numInput && document.activeElement !== numInput) {
+        numInput.value = rawVal;
+      }
     });
 
-    // 2. Build Category Rows
+    // 2. Update Total Weight Badge
+    if (matrixBalanceText) {
+      matrixBalanceText.innerHTML = `Total: <strong>${totalWeight}%</strong>`;
+    }
+
+    // 3. Build Category Rows
     let rowsHtml = "";
 
     SCIENCE_CATEGORIES.forEach((cat) => {
       const weightPct = (normWeights[cat.key] * 100).toFixed(0);
 
-      // Find leader for this category
       let highestScore = -1;
       let leaderKey = null;
       DECISION_MATRIX_SITES.forEach((s) => {
@@ -2432,7 +2666,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rowsHtml += `
         <tr class="tr-cat-row">
           <td class="td-cat-title">
-            <span style="font-size: 1rem; margin-right: 5px;">${cat.icon}</span>
+            <span style="font-size: 0.95rem; margin-right: 4px;">${cat.icon}</span>
             <span>${cat.title}</span>
           </td>
           <td class="td-weight-cell">${weightPct}%</td>
@@ -2458,7 +2692,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rowsHtml += `</tr>`;
     });
 
-    // 3. Calculate Weighted Overall for each site
+    // 4. Calculate Weighted Overall for each site
     const siteWeightedOverall = {};
     DECISION_MATRIX_SITES.forEach((s) => {
       let sum = 0;
@@ -2470,25 +2704,24 @@ document.addEventListener("DOMContentLoaded", () => {
       siteWeightedOverall[s.key] = Number(sum.toFixed(1));
     });
 
-    // Determine ranking
     const sortedSites = [...DECISION_MATRIX_SITES].sort((a, b) => {
       return siteWeightedOverall[b.key] - siteWeightedOverall[a.key];
     });
 
     const rankMap = {};
     sortedSites.forEach((s, idx) => {
-      rankMap[s.key] = idx + 1; // 1, 2, 3, 4
+      rankMap[s.key] = idx + 1;
     });
 
     const overallWinnerKey = sortedSites[0].key;
 
-    // 4. Weighted Overall Match Row
+    // 5. Weighted Overall Match Row
     rowsHtml += `
       <tr class="tr-weighted-overall">
         <td class="overall-row-label">
           <span>🎯 Weighted Overall Match</span>
         </td>
-        <td class="td-weight-cell" style="color: #fff; font-size: 0.82rem;">100%</td>
+        <td class="td-weight-cell" style="color: #fff; font-size: 0.80rem;">100%</td>
     `;
 
     DECISION_MATRIX_SITES.forEach((s) => {
@@ -2507,10 +2740,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     rowsHtml += `</tr>`;
 
-    // 5. Rank Row
+    // 6. Rank Row
     rowsHtml += `
       <tr class="tr-rank-row">
-        <td style="font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 0.68rem;">
+        <td style="font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 0.66rem;">
           <span>🏆 Mission Rank</span>
         </td>
         <td class="td-weight-cell" style="color: #64748b;">—</td>
@@ -2519,7 +2752,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DECISION_MATRIX_SITES.forEach((s) => {
       const rank = rankMap[s.key];
       let rankClass = `rank-${rank}${rank === 1 ? 'st' : rank === 2 ? 'nd' : rank === 3 ? 'rd' : 'th'}`;
-      let rankLabel = rank === 1 ? "🥇 1ST RANK" : rank === 2 ? "🥈 2ND RANK" : rank === 3 ? "🥉 3RD RANK" : "4TH RANK";
+      let rankLabel = rank === 1 ? "🥇 1ST" : rank === 2 ? "🥈 2ND" : rank === 3 ? "🥉 3RD" : "4TH";
 
       rowsHtml += `
         <td>
@@ -2532,7 +2765,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     decisionMatrixTbody.innerHTML = rowsHtml;
 
-    // 6. Build Leaderboard Grid Cards
+    // 7. Build Leaderboard Grid Cards
     if (matrixLeaderboardGrid) {
       let lbHtml = "";
       sortedSites.forEach((s, idx) => {
@@ -2544,76 +2777,98 @@ document.addEventListener("DOMContentLoaded", () => {
         lbHtml += `
           <div class="leaderboard-card ${isWinner ? 'winner' : ''}">
             <div class="lb-top-row">
-              <span style="font-size: 0.72rem; font-weight: 800; color: ${isWinner ? '#fef08a' : '#94a3b8'};">${trophy} ${rank === 1 ? '1ST PLACE' : rank === 2 ? '2ND PLACE' : rank === 3 ? '3RD PLACE' : '4TH PLACE'}</span>
+              <span style="font-size: 0.68rem; font-weight: 800; color: ${isWinner ? '#fef08a' : '#94a3b8'};">${trophy} ${rank === 1 ? '1ST PLACE' : rank === 2 ? '2ND PLACE' : rank === 3 ? '3RD PLACE' : '4TH PLACE'}</span>
               <span class="lb-score">${score.toFixed(1)}%</span>
             </div>
             <span class="lb-site-name">${s.icon} ${s.name}</span>
-            <span style="font-size: 0.64rem; color: var(--text-muted);">${s.country}</span>
           </div>
         `;
       });
       matrixLeaderboardGrid.innerHTML = lbHtml;
     }
+
+    // 8. Real-Time MCDM Formula Substitution
+    if (mcdmFormulaLive) {
+      const activeSite = getActiveSiteData();
+      const siteKey = (activeSite && state.currentSiteKey !== "mars_gale") ? state.currentSiteKey : "mcmurdo";
+      const siteScores = siteCatScores[siteKey] || {};
+      const siteName = (activeSite && state.currentSiteKey !== "mars_gale") ? activeSite.name : "McMurdo Dry Valleys";
+      const finalScore = siteWeightedOverall[siteKey] || 0;
+
+      mcdmFormulaLive.innerHTML = `
+        <div class="mcdm-formula-breakdown">
+          <span class="mcdm-site-tag">Active Site: <strong>${siteName}</strong></span>
+          <div class="mcdm-terms-list">
+            <span class="mcdm-term">🌡️ (${(normWeights.thermal * 100).toFixed(0)}% × ${(siteScores.thermal || 0).toFixed(1)}%)</span>
+            <span class="mcdm-plus">+</span>
+            <span class="mcdm-term">🧬 (${(normWeights.astrobiology * 100).toFixed(0)}% × ${(siteScores.astrobiology || 0).toFixed(1)}%)</span>
+            <span class="mcdm-plus">+</span>
+            <span class="mcdm-term">💨 (${(normWeights.dynamics * 100).toFixed(0)}% × ${(siteScores.dynamics || 0).toFixed(1)}%)</span>
+            <span class="mcdm-plus">+</span>
+            <span class="mcdm-term">💧 (${(normWeights.moisture * 100).toFixed(0)}% × ${(siteScores.moisture || 0).toFixed(1)}%)</span>
+            <span class="mcdm-plus">+</span>
+            <span class="mcdm-term">☀️ (${(normWeights.radiation * 100).toFixed(0)}% × ${(siteScores.radiation || 0).toFixed(1)}%)</span>
+            <span class="mcdm-equals">=</span>
+            <span class="mcdm-final-val">${finalScore.toFixed(1)}% Match</span>
+          </div>
+        </div>
+      `;
+    }
   }
 
-  // Event Listeners for Decision Matrix Modal
-  if (btnOpenDecisionMatrix) {
-    btnOpenDecisionMatrix.addEventListener("click", () => {
-      if (modalDecisionMatrix) {
-        modalDecisionMatrix.style.display = "flex";
-        renderDecisionMatrix();
-      }
-    });
-  }
-
-  if (btnCloseDecisionMatrix) {
-    btnCloseDecisionMatrix.addEventListener("click", () => {
-      if (modalDecisionMatrix) modalDecisionMatrix.style.display = "none";
-    });
-  }
-
-  if (btnCloseDecisionMatrixFooter) {
-    btnCloseDecisionMatrixFooter.addEventListener("click", () => {
-      if (modalDecisionMatrix) modalDecisionMatrix.style.display = "none";
-    });
-  }
-
-  // Weight Sliders
-  weightSliders.forEach((slider) => {
+  // Event Listeners for Manual Weight Sliders & Number Inputs
+  document.querySelectorAll(".weight-slider").forEach((slider) => {
     slider.addEventListener("input", () => {
       const cat = slider.getAttribute("data-cat");
       if (cat) {
-        state.categoryWeights[cat] = parseFloat(slider.value) || 0;
-        matrixPresetBtns.forEach(btn => btn.classList.remove("active"));
-        renderDecisionMatrix();
-        updateActiveSiteScoreDisplay();
+        handleWeightChange(cat, parseFloat(slider.value) || 0, slider);
       }
     });
   });
 
-  // Preset Buttons
-  matrixPresetBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const presetKey = btn.getAttribute("data-preset");
-      const preset = MISSION_PRESETS[presetKey];
-      if (preset) {
-        state.categoryWeights = { ...preset };
-        matrixPresetBtns.forEach(b => b.classList.toggle("active", b === btn));
-        renderDecisionMatrix();
-        updateActiveSiteScoreDisplay();
+  document.querySelectorAll(".weight-number-input").forEach((input) => {
+    input.addEventListener("input", () => {
+      const cat = input.getAttribute("data-cat");
+      if (cat) {
+        handleWeightChange(cat, parseFloat(input.value) || 0, input);
       }
     });
   });
 
-  // Reset Weights Button
-  if (btnResetWeights) {
-    btnResetWeights.addEventListener("click", () => {
-      state.categoryWeights = { thermal: 20, astrobiology: 20, dynamics: 20, moisture: 20, radiation: 20 };
-      matrixPresetBtns.forEach(b => b.classList.toggle("active", b.getAttribute("data-preset") === "balanced"));
-      renderDecisionMatrix();
-      updateActiveSiteScoreDisplay();
+  // Mission Optimizer Handlers
+  if (btnRunOptimizer && inputMissionGoal) {
+    btnRunOptimizer.addEventListener("click", () => {
+      runMissionOptimizer(inputMissionGoal.value);
+    });
+
+    inputMissionGoal.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        runMissionOptimizer(inputMissionGoal.value);
+      }
     });
   }
+
+  document.querySelectorAll(".opt-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const goalKey = chip.getAttribute("data-goal");
+      document.querySelectorAll(".opt-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+
+      const goalMap = {
+        biosignature: "biosignature search in ancient mudstones and organic carbon",
+        traverse: "rover surface traverse through sand dunes and high gusts",
+        drone: "solar drone aerial survey and flight in thin air",
+        cryo: "polar cryogenic permafrost ice core drilling",
+        isru: "atmospheric water vapor and evaporite salt extraction",
+        balanced: "balanced equal weighting across all disciplines"
+      };
+
+      const promptText = goalMap[goalKey] || chip.textContent.trim();
+      if (inputMissionGoal) inputMissionGoal.value = promptText;
+      runMissionOptimizer(promptText);
+    });
+  });
 
   // ----------------------------------------------------
   // Ensure Single Scrollbar in OpenSpace CEF / WebGui Tab

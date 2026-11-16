@@ -139,17 +139,217 @@
       <button id="btn-mars-ref-overview" class="btn btn-action-plain" aria-pressed="false">Show overview</button>
     </div>
 
-    <!-- Comparison Actions Group: Viewport Comparison Matrix & Customizable Decision Matrix -->
-    <div class="matrix-actions-group">
-      <button id="btn-comparison-matrix-hud" class="btn btn-action-plain btn-site-overview btn-comparison-matrix" aria-pressed="false" title="Show Earth to Mars Comparison Matrix in 3D viewport">
+    <!-- Comparison Matrix Dropdown Toggle Button -->
+    <button id="btn-toggle-comparison-matrix" class="btn btn-action-plain btn-comparison-matrix-toggle" aria-expanded="false" title="Open Comparison Matrix and Customizable Decision Weights">
+      <div class="btn-comparison-matrix-left">
         <span class="btn-icon">📊</span>
         <span id="btn-comparison-matrix-text">Comparison Matrix</span>
-      </button>
+      </div>
+      <span class="matrix-dropdown-arrow">▾</span>
+    </button>
 
-      <button id="btn-open-decision-matrix" class="btn btn-action-plain btn-site-overview btn-decision-matrix" aria-pressed="false" title="Customize category weights and evaluate analog decision matrix">
-        <span class="btn-icon">⚖️</span>
-        <span id="btn-decision-matrix-text">Decision Matrix (Weights)</span>
-      </button>
+    <!-- Dropdown Panel: Comparison Matrix & Customizable Decision Weights -->
+    <div id="drawer-comparison-matrix" class="glass-panel drawer-panel comparison-matrix-drawer" style="display: none;">
+      <!-- Header Bar with 3D HUD Sync Toggle -->
+      <div class="matrix-drawer-header">
+        <div class="matrix-drawer-title-group">
+          <span class="matrix-drawer-icon">📊</span>
+          <div>
+            <h4>Earth to Mars Comparison Matrix</h4>
+            <span class="matrix-drawer-sub">Customizable Multi-Criteria Decision Weights & Telemetry</span>
+          </div>
+        </div>
+        <button type="button" id="btn-toggle-matrix-hud" class="btn btn-secondary btn-hud-toggle" title="Toggle 3D Viewport HUD">
+          <span>🪟 Viewport HUD</span>
+        </button>
+      </div>
+
+      <!-- Section 1: Manual Weights -->
+      <div class="matrix-section-wrap">
+        <div class="matrix-section-header">
+          <div class="matrix-section-title-wrap">
+            <span class="matrix-title-icon">⚙️</span>
+            <h5 class="matrix-section-heading">Manual Weights</h5>
+          </div>
+          <div class="matrix-balance-badge" id="matrix-balance-badge">
+            <span id="matrix-balance-text">Total: <strong>100%</strong></span>
+            <span id="matrix-balance-status" class="status-balanced">✓ Balanced</span>
+          </div>
+        </div>
+        <p class="matrix-section-desc">Adjust sliding bars or type percentages directly into the input boxes. Points update all matrix calculations in real time.</p>
+
+        <!-- 5 Category Weight Rows (Wrap-friendly, no clipping!) -->
+        <div class="matrix-weights-config">
+          <!-- 1. Thermal -->
+          <div class="weight-control-row cat-thermal-accent" data-cat="thermal">
+            <div class="weight-row-top">
+              <span class="weight-icon">🌡️</span>
+              <span class="weight-name">1) Thermal Conditions</span>
+              <span class="weight-sub">(Air Temp, Diurnal ΔT, Min Temp)</span>
+            </div>
+            <div class="weight-row-controls">
+              <input type="range" class="weight-slider" data-cat="thermal" min="0" max="100" value="20" step="1" />
+              <div class="weight-input-wrap">
+                <input type="number" class="weight-number-input" data-cat="thermal" min="0" max="100" step="1" value="20" />
+                <span class="weight-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Astrobiology -->
+          <div class="weight-control-row cat-astro-accent" data-cat="astrobiology">
+            <div class="weight-row-top">
+              <span class="weight-icon">🧬</span>
+              <span class="weight-name">2) Astrobiology & Mineralogy</span>
+              <span class="weight-sub">(Regolith pH, Organic Carbon, Bulk Density)</span>
+            </div>
+            <div class="weight-row-controls">
+              <input type="range" class="weight-slider" data-cat="astrobiology" min="0" max="100" value="20" step="1" />
+              <div class="weight-input-wrap">
+                <input type="number" class="weight-number-input" data-cat="astrobiology" min="0" max="100" step="1" value="20" />
+                <span class="weight-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Atmospheric Dynamics -->
+          <div class="weight-control-row cat-dynamics-accent" data-cat="dynamics">
+            <div class="weight-row-top">
+              <span class="weight-icon">💨</span>
+              <span class="weight-name">3) Atmospheric Dynamics</span>
+              <span class="weight-sub">(Mean Wind, Peak Gusts, Surface Pressure)</span>
+            </div>
+            <div class="weight-row-controls">
+              <input type="range" class="weight-slider" data-cat="dynamics" min="0" max="100" value="20" step="1" />
+              <div class="weight-input-wrap">
+                <input type="number" class="weight-number-input" data-cat="dynamics" min="0" max="100" step="1" value="20" />
+                <span class="weight-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Atmospheric Moisture -->
+          <div class="weight-control-row cat-moisture-accent" data-cat="moisture">
+            <div class="weight-row-top">
+              <span class="weight-icon">💧</span>
+              <span class="weight-name">4) Atmospheric Moisture</span>
+              <span class="weight-sub">(Relative Humidity, Water Vapor, Precip)</span>
+            </div>
+            <div class="weight-row-controls">
+              <input type="range" class="weight-slider" data-cat="moisture" min="0" max="100" value="20" step="1" />
+              <div class="weight-input-wrap">
+                <input type="number" class="weight-number-input" data-cat="moisture" min="0" max="100" step="1" value="20" />
+                <span class="weight-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Solar & UV Radiation -->
+          <div class="weight-control-row cat-radiation-accent" data-cat="radiation">
+            <div class="weight-row-top">
+              <span class="weight-icon">☀️</span>
+              <span class="weight-name">5) Solar & UV Radiation</span>
+              <span class="weight-sub">(All-Sky Insolation, UVA, Biologically Active UVB)</span>
+            </div>
+            <div class="weight-row-controls">
+              <input type="range" class="weight-slider" data-cat="radiation" min="0" max="100" value="20" step="1" />
+              <div class="weight-input-wrap">
+                <input type="number" class="weight-number-input" data-cat="radiation" min="0" max="100" step="1" value="20" />
+                <span class="weight-unit">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: What would you like to optimize your data for? -->
+      <div class="mission-optimizer-section">
+        <div class="optimizer-title-row">
+          <span class="optimizer-icon">🎯</span>
+          <h5 class="optimizer-heading">What would you like to optimize your data for?</h5>
+        </div>
+        <p class="optimizer-subtext">Enter your mission objective or exploration focus to automatically generate tailored weights:</p>
+
+        <div class="optimizer-input-row">
+          <input type="text" id="input-mission-goal" class="optimizer-input" placeholder="e.g. biosignature search, rover traverse, solar drone, polar ice..." />
+          <button type="button" id="btn-run-optimizer" class="btn btn-primary btn-optimizer-go">
+            <span>⚡ Optimize</span>
+          </button>
+        </div>
+
+        <!-- Quick suggestion chips -->
+        <div class="optimizer-chips-row">
+          <button type="button" class="opt-chip" data-goal="biosignature">🧬 Biosignature Search</button>
+          <button type="button" class="opt-chip" data-goal="traverse">🌪️ Rover Traverse & Dust</button>
+          <button type="button" class="opt-chip" data-goal="drone">🚁 Solar Aerial Flight</button>
+          <button type="button" class="opt-chip" data-goal="cryo">❄️ Polar Ice Core</button>
+          <button type="button" class="opt-chip" data-goal="isru">💧 Water & Evaporite ISRU</button>
+          <button type="button" class="opt-chip" data-goal="balanced">⚖️ Equal (20% Each)</button>
+        </div>
+
+        <!-- Dynamic AI Rationale Card -->
+        <div id="optimizer-rationale-box" class="optimizer-rationale-box" style="display: none;"></div>
+      </div>
+
+      <!-- Section 3: Live Decision Matrix Table -->
+      <div class="decision-matrix-table-wrap">
+        <table class="decision-matrix-table" id="decision-matrix-table">
+          <thead>
+            <tr>
+              <th class="th-cat-col">Evaluation Criterion</th>
+              <th class="th-weight-col">Weight</th>
+              <th class="th-site-col" data-site="mcmurdo">
+                <div class="matrix-site-th">
+                  <span class="m-site-name">❄️ McMurdo</span>
+                  <span class="m-site-sub">Antarctica</span>
+                </div>
+              </th>
+              <th class="th-site-col" data-site="lut">
+                <div class="matrix-site-th">
+                  <span class="m-site-name">🔥 Lut</span>
+                  <span class="m-site-sub">Iran</span>
+                </div>
+              </th>
+              <th class="th-site-col" data-site="aralkum">
+                <div class="matrix-site-th">
+                  <span class="m-site-name">🏜️ Aralkum</span>
+                  <span class="m-site-sub">Uzbekistan</span>
+                </div>
+              </th>
+              <th class="th-site-col" data-site="uyuni">
+                <div class="matrix-site-th">
+                  <span class="m-site-name">🧂 Uyuni</span>
+                  <span class="m-site-sub">Bolivia</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="decision-matrix-tbody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 4: Real-Time MCDM Decision Formula Card -->
+      <div class="mcdm-formula-card">
+        <div class="mcdm-formula-header">
+          <span style="font-weight: 700; color: #38bdf8;">📐 Mathematical MCDM Formula (Real-Time Inputs):</span>
+        </div>
+        <div class="mcdm-formula-math">
+          Overall Match = (w<sub>therm</sub>·S<sub>therm</sub> + w<sub>astro</sub>·S<sub>astro</sub> + w<sub>dyn</sub>·S<sub>dyn</sub> + w<sub>moist</sub>·S<sub>moist</sub> + w<sub>rad</sub>·S<sub>rad</sub>) / ∑w
+        </div>
+        <div class="mcdm-formula-live" id="mcdm-formula-live">
+          <!-- Dynamically populated with active site substitution in real time -->
+        </div>
+      </div>
+
+      <!-- Section 5: Dynamic Ranked Mission Leaderboard -->
+      <div class="matrix-leaderboard-section">
+        <span class="matrix-section-title">Weighted Mission Suitability Ranking:</span>
+        <div class="matrix-leaderboard-grid" id="matrix-leaderboard-grid">
+          <!-- Dynamically populated 1st to 4th rank cards -->
+        </div>
+      </div>
     </div>
   </section>
 
@@ -390,180 +590,7 @@
     </div>
   </div>
 
-  <!-- Modal: Customizable Multi-Criteria Decision Matrix & Category Weighting -->
-  <div id="modal-decision-matrix" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="decision-matrix-title">
-    <div class="modal-window modal-wide decision-matrix-window">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <span class="modal-icon">⚖️</span>
-          <div>
-            <h3 id="decision-matrix-title">Multi-Criteria Decision Matrix</h3>
-            <span class="modal-subtitle">Customize Category Weights to Evaluate Analog Suitability for Specific Mission Profiles</span>
-          </div>
-        </div>
-        <div class="modal-header-actions">
-          <button id="btn-reset-weights" class="btn btn-action-plain" title="Reset all categories to equal 20% weights">Reset to Equal (20%)</button>
-          <button id="btn-close-decision-matrix" class="btn btn-action-plain" aria-label="Close matrix">✕ Close</button>
-        </div>
-      </div>
 
-      <div class="modal-body decision-matrix-body">
-        <!-- Mission Weighting Presets -->
-        <div class="matrix-presets-bar">
-          <span class="matrix-section-title">Mission Weighting Presets:</span>
-          <div class="matrix-preset-buttons">
-            <button type="button" class="btn-matrix-preset active" data-preset="balanced">⚖️ Balanced (20% Each)</button>
-            <button type="button" class="btn-matrix-preset" data-preset="astrobiology">🧬 Astrobiology & Habitability</button>
-            <button type="button" class="btn-matrix-preset" data-preset="dynamics">🌪️ Dynamics & Rover EDL</button>
-            <button type="button" class="btn-matrix-preset" data-preset="radiation">☀️ Surface UV & Solar</button>
-            <button type="button" class="btn-matrix-preset" data-preset="cryo">❄️ Cryogenic Polar Analogs</button>
-          </div>
-        </div>
-
-        <!-- Category Weight Sliders -->
-        <div class="matrix-weights-config">
-          <div class="weight-control-row cat-thermal-accent" data-cat="thermal">
-            <div class="weight-label-col">
-              <span class="weight-icon">🌡️</span>
-              <div class="weight-text-group">
-                <span class="weight-name">1) Thermal Conditions</span>
-                <span class="weight-sub">Air Temp, Nocturnal Minimum, Diurnal ΔT</span>
-              </div>
-            </div>
-            <div class="weight-slider-col">
-              <input type="range" class="weight-slider" data-cat="thermal" min="0" max="100" value="20" step="5" />
-            </div>
-            <div class="weight-val-col">
-              <span class="weight-pct-badge" id="weight-pct-thermal">20%</span>
-              <span class="weight-raw" id="weight-raw-thermal">raw: 20</span>
-            </div>
-          </div>
-
-          <div class="weight-control-row cat-astro-accent" data-cat="astrobiology">
-            <div class="weight-label-col">
-              <span class="weight-icon">🧬</span>
-              <div class="weight-text-group">
-                <span class="weight-name">2) Astrobiology & Mineralogy</span>
-                <span class="weight-sub">Regolith pH, Organic Carbon (SOC), Bulk Density, Clays</span>
-              </div>
-            </div>
-            <div class="weight-slider-col">
-              <input type="range" class="weight-slider" data-cat="astrobiology" min="0" max="100" value="20" step="5" />
-            </div>
-            <div class="weight-val-col">
-              <span class="weight-pct-badge" id="weight-pct-astrobiology">20%</span>
-              <span class="weight-raw" id="weight-raw-astrobiology">raw: 20</span>
-            </div>
-          </div>
-
-          <div class="weight-control-row cat-dynamics-accent" data-cat="dynamics">
-            <div class="weight-label-col">
-              <span class="weight-icon">💨</span>
-              <div class="weight-text-group">
-                <span class="weight-name">3) Atmospheric Dynamics</span>
-                <span class="weight-sub">Surface Wind Speed, Peak Gusts, Surface Air Pressure</span>
-              </div>
-            </div>
-            <div class="weight-slider-col">
-              <input type="range" class="weight-slider" data-cat="dynamics" min="0" max="100" value="20" step="5" />
-            </div>
-            <div class="weight-val-col">
-              <span class="weight-pct-badge" id="weight-pct-dynamics">20%</span>
-              <span class="weight-raw" id="weight-raw-dynamics">raw: 20</span>
-            </div>
-          </div>
-
-          <div class="weight-control-row cat-moisture-accent" data-cat="moisture">
-            <div class="weight-label-col">
-              <span class="weight-icon">💧</span>
-              <div class="weight-text-group">
-                <span class="weight-name">4) Atmospheric Moisture</span>
-                <span class="weight-sub">Relative Humidity, Water Vapor Mixing, Daily Precipitation</span>
-              </div>
-            </div>
-            <div class="weight-slider-col">
-              <input type="range" class="weight-slider" data-cat="moisture" min="0" max="100" value="20" step="5" />
-            </div>
-            <div class="weight-val-col">
-              <span class="weight-pct-badge" id="weight-pct-moisture">20%</span>
-              <span class="weight-raw" id="weight-raw-moisture">raw: 20</span>
-            </div>
-          </div>
-
-          <div class="weight-control-row cat-radiation-accent" data-cat="radiation">
-            <div class="weight-label-col">
-              <span class="weight-icon">☀️</span>
-              <div class="weight-text-group">
-                <span class="weight-name">5) Solar & UV Radiation</span>
-                <span class="weight-sub">All-Sky Insolation, UVA Irradiance, Biologically Active UVB</span>
-              </div>
-            </div>
-            <div class="weight-slider-col">
-              <input type="range" class="weight-slider" data-cat="radiation" min="0" max="100" value="20" step="5" />
-            </div>
-            <div class="weight-val-col">
-              <span class="weight-pct-badge" id="weight-pct-radiation">20%</span>
-              <span class="weight-raw" id="weight-raw-radiation">raw: 20</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Live Decision Matrix Table Container -->
-        <div class="decision-matrix-table-wrap">
-          <table class="decision-matrix-table" id="decision-matrix-table">
-            <thead>
-              <tr>
-                <th class="th-cat-col">Evaluation Criterion</th>
-                <th class="th-weight-col">Weight</th>
-                <th class="th-site-col" data-site="mcmurdo">
-                  <div class="matrix-site-th">
-                    <span class="m-site-name">❄️ McMurdo Dry Valleys</span>
-                    <span class="m-site-sub">Antarctica</span>
-                  </div>
-                </th>
-                <th class="th-site-col" data-site="lut">
-                  <div class="matrix-site-th">
-                    <span class="m-site-name">🔥 Lut Desert</span>
-                    <span class="m-site-sub">Iran</span>
-                  </div>
-                </th>
-                <th class="th-site-col" data-site="aralkum">
-                  <div class="matrix-site-th">
-                    <span class="m-site-name">🏜️ Aralkum Desert</span>
-                    <span class="m-site-sub">Uzbekistan</span>
-                  </div>
-                </th>
-                <th class="th-site-col" data-site="uyuni">
-                  <div class="matrix-site-th">
-                    <span class="m-site-name">🧂 Salar de Uyuni</span>
-                    <span class="m-site-sub">Bolivia</span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="decision-matrix-tbody">
-              <!-- Dynamically populated rows for 5 categories + weighted overall row + rank row -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Dynamic Ranked Mission Leaderboard -->
-        <div class="matrix-leaderboard-section">
-          <span class="matrix-section-title">Weighted Mission Suitability Ranking:</span>
-          <div class="matrix-leaderboard-grid" id="matrix-leaderboard-grid">
-            <!-- Dynamically populated 1st to 4th rank cards -->
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer matrix-footer">
-        <span class="modal-footnote">
-          Mathematical MCDM: $\text{Overall Score} = \sum_{i=1}^5 (w_i \cdot S_i) / \sum w_i$. Weights dynamically synchronize across all webpanel HUD displays.
-        </span>
-        <button id="btn-close-decision-matrix-footer" class="btn btn-secondary">Close Matrix</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Scripts -->
   <script src="js/config.js?v=8.0.0"></script>
