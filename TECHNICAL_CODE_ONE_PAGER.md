@@ -259,11 +259,11 @@ Replaces ad-hoc linear heuristics with the cognitive metric learning similarity 
 ### G. Synthetic Intelligence (SI) Generation & Metadata Attribution
 - **Submission Requirement Fulfillment**: *"Must acknowledge SI generation in descriptive text and metadata."*
 - **Front-End Descriptive UI Attributions**:
-  * Climatology modal drawer: `#about-si-attribution`
-  * Planetary flythrough tour card: `.tour-si-attribution-tag`
-  * SoilGrids habitability synthesis: `.astro-si-attribution-tag`
-  * MCDM mission optimizer: `.optimizer-si-attribution-tag`
-- **Programmatic Metadata**: `window.TEAM_METADATA.si_generation_acknowledgement` and `window.FALLBACK_METADATA.si_generation_acknowledgement` in `team-data.js` and `fallback-data.js`.
+  * Climatology modal drawer: `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
+  * SoilGrids habitability synthesis: `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
+  * MCDM mission optimizer: `Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
+  * Decision Matrix Credits Bar: Directly cites [InterSESHllar Research Doc](https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0) and [GitHub Repository](https://github.com/bertrandejuan/InterSESHllar).
+- **Programmatic Metadata**: `window.TEAM_METADATA` and `window.FALLBACK_METADATA` in `team-data.js` and `fallback-data.js` explicitly contain `team_research_document`, `github_repository`, and `standard_attribution`.
 - **Zero Hallucinations Guarantee**: All telemetry inputs and tolerance scalings remain anchored exclusively to NASA POWER, MERRA-2, ISRIC SoilGrids v2.0, and MSL Curiosity REMS/CheMin in-situ ground truth.
 
 ---

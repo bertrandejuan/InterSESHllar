@@ -2103,10 +2103,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <div class="astro-source-tag">
-        ${isOffline ? 'Calibrated ISRIC SoilGrids v2.0 & NASA EMIT Baseline' : 'Live ISRIC SoilGrids v2.0 Global Regolith Grid (0–5 cm depth)'} | MSL Curiosity Ground Truth
-      </div>
-      <div class="astro-si-attribution-tag">
-        Synthetic Intelligence (SI) Attribution: Habitability assessment narrative and descriptive synthesis generated via Google Gemini API & algorithmic inference.
+        NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.
       </div>
     `;
   }
@@ -2325,7 +2322,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const site = getActiveSiteData();
     if (!siteBlurbText) return;
     siteBlurbText.innerText = site.blurb || "Verified 10-year NASA POWER climatology records.";
-    if (blurbSourceTag) blurbSourceTag.innerText = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL REMS";
+    if (blurbSourceTag) blurbSourceTag.innerText = "NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.";
   }
 
   // ----------------------------------------------------
@@ -3096,7 +3093,12 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <div class="optimizer-si-attribution-tag">
-              Synthetic Intelligence (SI) Attribution: Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.
+              <p style="margin: 0 0 3px 0; color: #a78bfa;"><strong>Attribution:</strong> Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API &amp; planetary mission architectures.</p>
+              <div style="font-size: 0.65rem; color: #94a3b8; line-height: 1.4;">
+                <span>📐 <strong>Methodology &amp; Math:</strong> 5-step distance-based similarity framework (<a href="https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">InterSESHllar Research Doc</a>)</span> &bull; 
+                <span>💻 <strong>Code:</strong> <a href="https://github.com/bertrandejuan/InterSESHllar" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">GitHub</a></span><br/>
+                <span>📊 <strong>Data:</strong> NASA POWER (2015–2025) &amp; MSL Curiosity in-situ records; synthesis: Gemini API.</span>
+              </div>
             </div>
             ${!result.isGeminiLive ? `
               <div style="margin-top: 4px; text-align: right;">

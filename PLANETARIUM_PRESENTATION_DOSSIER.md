@@ -173,13 +173,13 @@ The automated tour system provides an unattended, synchronized multi-planetary s
 The **InterSESHllar** system acknowledges the integration of **Synthetic Intelligence (SI)** via the **Google Gemini API** (`gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-1.5-flash`) to enrich the interactive planetarium experience:
 
 1. **Descriptive UI Text Attribution**:
-   - **Analog Climatology Blurbs** (`#drawer-about`): Acknowledges Gemini API synthesis of 10-year NASA POWER records.
-   - **Automated Flythrough Tour Narratives**: Acknowledges generative multi-stop cinematic scripting.
-   - **Astrobiology & Habitability Synthesis** (`#astro-query-results`): Acknowledges AI interpretation of ISRIC SoilGrids 0–5 cm regolith properties.
-   - **Decision Matrix Mission Optimizer** (`#optimizer-rationale-box`): Acknowledges AI deduction of category weights and scientific reasoning.
+   - **Analog Climatology Blurbs** (`#drawer-about`): `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
+   - **Astrobiology & Habitability Synthesis** (`#astro-query-results`): `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
+   - **Decision Matrix Mission Optimizer** (`#optimizer-rationale-box`): `Attribution: Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
+   - **Methodology & Team Credits**: Cites the [InterSESHllar Research Doc](https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0) and [GitHub Repository](https://github.com/bertrandejuan/InterSESHllar).
 
 2. **Programmatic Metadata**:
-   - Exposed in `window.TEAM_METADATA.si_generation_acknowledgement` and `window.FALLBACK_METADATA.si_generation_acknowledgement`.
+   - Exposed in `window.TEAM_METADATA` and `window.FALLBACK_METADATA` including `team_research_document`, `github_repository`, and `standard_attribution`.
 
 3. **Zero-Hallucination Empirical Guarantee**:
    - All physical parameters, tolerances ($T_j$), and baseline ground-truth telemetry are anchored strictly in verified NASA and ISRIC scientific archives.

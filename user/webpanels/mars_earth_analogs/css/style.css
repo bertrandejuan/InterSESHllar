@@ -1482,7 +1482,38 @@ body {
   color: #a78bfa;
   margin-top: 6px;
   border-top: 1px dashed rgba(167, 139, 250, 0.25);
-  padding-top: 4px;
+  padding-top: 5px;
+}
+
+.matrix-credits-bar {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matrix-credits-item {
+  font-size: 0.64rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.matrix-credits-item strong {
+  color: #e2e8f0;
+}
+
+.matrix-credits-item a {
+  color: #38bdf8;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.matrix-credits-item a:hover {
+  color: #7dd3fc;
 }
 
 .tour-si-attribution-tag {
