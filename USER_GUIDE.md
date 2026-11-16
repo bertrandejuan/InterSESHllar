@@ -30,29 +30,30 @@ Inside each of the 5 planetary comparison categories (Thermal, Astrobiology, Dyn
 └───────────────────────────────────────────────────┘
 ```
 
-### A. Side View (`Side view`) & Surface Walking
+### A. Side View (`Side view`) & Topographic Surface Walking Engine
 The **Side view** button executes an eye-level, low-altitude flyover oriented horizontally across the landscape:
-1. **Close-Up Surface Altitude**:
+1. **Close-Up Surface Altitude & Heading Calibration**:
    - Flies the camera close to the surface where 3D elevation relief and high-resolution textures are at maximum fidelity:
-     * **Mars: Gale Crater**: Drops to 3,800 m altitude on the northern floor of Aeolis Palus, maintaining full CTX mosaic texture crispness across the central crater floor.
-     * **McMurdo Dry Valleys**: Drops to 2,400 m altitude over New Harbour at the mouth of Taylor Valley.
-     * **Lut Desert**: Drops to 1,800 m altitude over the southern margin of the giant yardang field.
-     * **Aralkum Desert**: Drops to 2,000 m altitude over the desiccated seabed and plateau cliffs.
-     * **Salar de Uyuni**: Drops to 5,600 m altitude (~1,940 m ground clearance above the 3,656 m elevation salt flat).
+     * **Mars: Gale Crater**: Drops to 3,800 m altitude on the northern floor of Aeolis Palus, maintaining full CTX mosaic texture crispness across the central crater floor, facing **Mount Sharp** (Aeolis Mons) along heading 150°.
+     * **McMurdo Dry Valleys**: Drops to 2,400 m altitude over New Harbour at the mouth of Taylor Valley, looking along the glacier-carved valley floor along heading 260°.
+     * **Lut Desert**: Drops to 1,800 m altitude over the southern margin of the giant yardang field, looking down the wind corridors along heading 340°.
+     * **Aralkum Desert**: Drops to 2,000 m altitude over the desiccated seabed facing west toward the Ustyurt Plateau cliffs along heading 270°.
+     * **Salar de Uyuni**: Drops to 5,600 m altitude (~1,940 m ground clearance above the 3,656 m elevation salt flat) looking toward Volcán Tunupa along heading 350°.
      * **Custom Earth Locations**: Automatically calculates safe ground clearance based on queried elevation.
 2. **Rightside-Up & Level Horizon Guarantee**:
    - Uses OpenSpace Lua (`openspace.navigation.setNavigationState`) to tilt camera pitch tangent to the planetary curvature (`Pitch = 1.38 – 1.40 rad` / ~79°–80°).
-   - Locks planetary roll via `NavigationHandler.OrbitalNavigator.DisableRoll = true`, guaranteeing a level horizon with ground at the bottom and sky at the top for all sites (eliminates diagonal tilt and upside-down roll inversion).
-3. **Anti-Nadir Jump Protection (Idempotent Clicking)**:
-   - Clicking **Side view** while already on the surface smoothly re-levels the horizon without resetting the camera straight down to nadir map view.
-   - Automatically halts path dampening upon arrival to prevent camera snapback.
-4. **🚶 WASD Surface Walking Keyboard Controls**:
-   - When in Side view (or anywhere near the terrain), walk and turn across the planet using your keyboard:
-     * **`W` / `ArrowUp`**: Walk forward along the line of sight across the surface (`addTruckMovement(25.0)`).
-     * **`S` / `ArrowDown`**: Walk backward / step back (`addTruckMovement(-25.0)`).
-     * **`A` / `ArrowLeft`**: Turn / pan camera left (`addLocalRotation(-1.5, 0.0)`).
-     * **`D` / `ArrowRight`**: Turn / pan camera right (`addLocalRotation(1.5, 0.0)`).
-     * **`Shift + W` / `Shift + S`**: Hold Shift to sprint forward or backward at 3x speed (`addTruckMovement(75.0)`).
+   - Locks planetary roll during Side View via `NavigationHandler.OrbitalNavigator.DisableRoll = true`, guaranteeing a level horizon with ground at the bottom and sky at the top for all sites (eliminates diagonal tilt and upside-down roll inversion).
+   - **Preserved Orbital Rolling**: In orbit mode, focus mode, and site selection, full orbital rolling capabilities (`DisableRoll = false`) remain active, giving presenters unrestricted freedom to rotate and inspect planetary bodies from any angle.
+3. **Current-View Dynamic Reorientation on Subsequent Clicks**:
+   - Clicking **Side view** while already exploring on the surface dynamically queries the user's *current* coordinates (`geoPositionForCamera()`), re-anchors the camera, and smoothly re-levels the horizon tangent to the ground right where you are looking.
+   - Eliminates jumping back to the initial spawn point or teleporting into space, allowing continuous horizon stabilization after walking.
+4. **🚶 Topographic Elevation Curve Walking Engine (WASD)**:
+   - Walk and turn across the planet using your keyboard, with true latitude/longitude surface advance and dynamic topography following:
+     * **`W` / `ArrowUp`**: Advance forward across latitude and longitude (150 m step). As you walk toward mountains (e.g., Mount Sharp's central peak, Gale Crater rim walls, Taylor Valley mountain sides, Kalut yardangs, or Volcán Tunupa), the engine dynamically evaluates the elevation curve $E(\text{lat}, \text{lon})$ so you climb smoothly up and over ridges rather than clipping into polygons.
+     * **`S` / `ArrowDown`**: Step backward across latitude and longitude (-150 m step).
+     * **`A` / `ArrowLeft`**: Turn / pan camera heading left by 3.0° (`addLocalRotation(-1.5, 0.0)`).
+     * **`D` / `ArrowRight`**: Turn / pan camera heading right by 3.0° (`addLocalRotation(1.5, 0.0)`).
+     * **`Shift + W` / `Shift + S`**: Hold Shift to sprint forward or backward across the terrain at 3x speed (450 m step).
    - **Dual-Input Synchronization**: Controls are active both via native OpenSpace engine keybindings (`openspace.bindKey`) and via webpanel DOM keyboard listeners.
    - **HUD Indicator Toast**: A sleek glassmorphic badge appears at the bottom of the screen (`.surface-walk-pill`) confirming active walking keys and shortcuts.
 5. **Immediate Mouse Controls**:

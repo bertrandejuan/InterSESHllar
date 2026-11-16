@@ -63,41 +63,47 @@ document.addEventListener("DOMContentLoaded", () => {
   // Zooms camera close to the surface where imagery and 3D terrain are clear,
   // oriented at an angle tangent to the planet surface (~1.38-1.40 rad / ~79°-80° pitch),
   // with yaw = 0.0 and DisableRoll = true ensuring rightside up, level horizon across all sites.
+  // Each site includes an initial heading facing principal topographic landmarks.
   const SIDE_VIEW_CONFIGS = {
     mars_gale: {
       camLat: -4.3800,
       camLon: 137.4417,
       camAlt: 3800.0,    // 3.8 km above datum in Aeolis Palus; surface CTX crisp
       pitch: 1.40,       // Tangent to planetary surface looking across landscape
-      yaw: 0.0           // Rightside up, level horizon
+      yaw: 0.0,          // Rightside up, level horizon
+      heading: 150.0     // Facing Mount Sharp (Aeolis Mons)
     },
     mcmurdo: {
       camLat: -77.6200,
       camLon: 163.5000,
       camAlt: 2400.0,    // 2.4 km over Taylor Valley mouth
       pitch: 1.38,       // Tangent to surface looking along valley floor
-      yaw: 0.0           // Level horizon, zero roll
+      yaw: 0.0,          // Level horizon, zero roll
+      heading: 260.0     // Facing along Taylor Valley
     },
     lut: {
       camLat: 29.9500,
       camLon: 58.8000,
       camAlt: 1800.0,    // 1.8 km over southern Lut Desert
       pitch: 1.40,       // Tangent to surface looking across yardang corridors
-      yaw: 0.0           // Level desert horizon
+      yaw: 0.0,          // Level desert horizon
+      heading: 340.0     // Facing along Kalut yardangs
     },
     aralkum: {
       camLat: 44.6500,
       camLon: 59.8000,
       camAlt: 2000.0,    // 2.0 km over Aralkum basin
       pitch: 1.40,       // Tangent to surface
-      yaw: 0.0           // Level horizon, zero roll
+      yaw: 0.0,          // Level horizon, zero roll
+      heading: 270.0     // Facing west toward Ustyurt Plateau
     },
     uyuni: {
       camLat: -20.4500,
       camLon: -67.5000,
       camAlt: 5600.0,    // 5.6 km (surface elevation is 3,656 m; ~1,940 m ground clearance)
       pitch: 1.40,       // Tangent to surface looking across salt crust
-      yaw: 0.0           // Level horizon
+      yaw: 0.0,          // Level horizon
+      heading: 350.0     // Facing north toward Volcán Tunupa
     }
   };
 
@@ -216,39 +222,145 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.setPropertyValue(`Scene.EarthLabel${s}.Renderable.Enabled`, false);
     });
 
-    // Ensure planetary horizon roll is strictly locked level and rotates with planet
+    // Allow standard orbital rolling during general navigation; DisableRoll is only enabled in Side View
     openSpace.executeLuaScript(`
       if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
         openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
       end
       if openspace.hasProperty("NavigationHandler.OrbitalNavigator.DisableRoll") then
-        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableRoll", true)
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableRoll", false)
       end
     `);
 
-    // Register OpenSpace Lua keybindings for WASD surface walking & exploration
+    // Register OpenSpace Lua Topographic Curve Walking Engine & WASD keybindings
     const wasdRegisterLua = `
-      local actions = {
-        { id = "mars_earth.walkForward", name = "Walk Forward", cmd = "openspace.navigation.addTruckMovement(25.0)", key = "W" },
-        { id = "mars_earth.walkBackward", name = "Walk Backward", cmd = "openspace.navigation.addTruckMovement(-25.0)", key = "S" },
-        { id = "mars_earth.turnLeft", name = "Turn Left", cmd = "openspace.navigation.addLocalRotation(-1.5, 0.0)", key = "A" },
-        { id = "mars_earth.turnRight", name = "Turn Right", cmd = "openspace.navigation.addLocalRotation(1.5, 0.0)", key = "D" },
-        { id = "mars_earth.walkFastForward", name = "Sprint Forward", cmd = "openspace.navigation.addTruckMovement(75.0)", key = "Shift+W" },
-        { id = "mars_earth.walkFastBackward", name = "Sprint Backward", cmd = "openspace.navigation.addTruckMovement(-75.0)", key = "Shift+S" }
-      }
-      for _, a in ipairs(actions) do
-        pcall(function()
-          openspace.action.registerAction({
-            Identifier = a.id,
-            Name = a.name,
-            Command = a.cmd,
-            Documentation = a.name,
-            GuiPath = "/Analog Surface Walk",
-            IsLocal = true
-          })
-          openspace.bindKey(a.key, a.id)
-        end)
-      end
+      pcall(function()
+        local me = rawget(_G, "mars_earth")
+        if not me then
+          me = {}
+          rawset(_G, "mars_earth", me)
+        end
+
+        me.heading = 150.0 -- default facing Mount Sharp
+
+        -- Topographic Elevation Function E(globe, lat, lon)
+        -- Linear perspective & depth model following mountain/crater curves
+        me.getTopographicAlt = function(globe, lat, lon)
+          if globe == "Mars" then
+            local baseAlt = 3800.0 -- Gale Crater floor base elevation clearance
+            
+            -- Mount Sharp (Aeolis Mons) peak at -5.08°N, 137.85°E, radius ~36 km, rising +5000 m
+            local sharpLat = -5.08
+            local sharpLon = 137.85
+            local dLat = (lat - sharpLat) * 59.16
+            local dLon = (lon - sharpLon) * 59.16 * math.cos(lat * math.pi / 180.0)
+            local distFromSharp = math.sqrt(dLat * dLat + dLon * dLon)
+            
+            local mountainLift = 0.0
+            if distFromSharp < 36.0 then
+              local frac = 1.0 - (distFromSharp / 36.0)
+              mountainLift = 5000.0 * (math.sin(frac * math.pi / 2.0))^1.5
+            end
+            
+            -- Gale Crater Rim walls: center -5.41°N, 137.19°E, radius 68-85 km, rising +3500 m
+            local cLat = -5.41
+            local cLon = 137.19
+            local cDLat = (lat - cLat) * 59.16
+            local cDLon = (lon - cLon) * 59.16 * math.cos(lat * math.pi / 180.0)
+            local distFromCenter = math.sqrt(cDLat * cDLat + cDLon * cDLon)
+            if distFromCenter > 68.0 and distFromCenter < 85.0 then
+              local rimFrac = (distFromCenter - 68.0) / 17.0
+              mountainLift = mountainLift + 3500.0 * math.sin(rimFrac * math.pi / 2.0)
+            end
+            
+            return baseAlt + mountainLift
+          else
+            -- Earth Analogs Topography Models
+            if lat < -70.0 then
+              -- McMurdo Dry Valleys: Taylor Valley floor base 2400 m, rising up to +3200 m along mountain walls
+              local valleyCenterLat = -77.60
+              local dValley = math.abs(lat - valleyCenterLat) * 111.0
+              local lift = (dValley > 7.0) and math.min(3200.0, (dValley - 7.0) * 160.0) or 0.0
+              return 2400.0 + lift
+            elseif lat > 25.0 and lat < 35.0 and lon > 50.0 and lon < 65.0 then
+              -- Lut Desert: Kalut Yardang corridors with periodic ridge relief (+250 m)
+              return 1800.0 + 250.0 * (math.sin(lon * 80.0))^2
+            elseif lat < -15.0 and lat > -25.0 and lon < -60.0 and lon > -75.0 then
+              -- Salar de Uyuni: Flat salt crust base 5600 m, Volcán Tunupa peak to north (-19.83°N, -67.65°E) rising +3200 m
+              local vLat = -19.83
+              local vLon = -67.65
+              local dLat = (lat - vLat) * 111.0
+              local dLon = (lon - vLon) * 111.0 * math.cos(lat * math.pi / 180.0)
+              local dV = math.sqrt(dLat * dLat + dLon * dLon)
+              local vLift = (dV < 25.0) and (3200.0 * (1.0 - dV / 25.0)^1.5) or 0.0
+              return 5600.0 + vLift
+            else
+              -- Aralkum Desert: Dried seabed base 2000 m, Ustyurt Plateau escarpment to west rising +1800 m
+              local base = 2000.0
+              if lon < 58.8 and lon > 55.0 then
+                base = base + math.min(1800.0, (58.8 - lon) * 800.0)
+              end
+              return base
+            end
+          end
+        end
+
+        -- True Geographic Walking Step:
+        -- Moves camera across latitude/longitude in facing direction and follows topographic elevation curves
+        me.walkStep = function(stepMeters, turnDeg)
+          if turnDeg and turnDeg ~= 0 then
+            me.heading = (me.heading + turnDeg) % 360.0
+            openspace.navigation.addLocalRotation(turnDeg > 0 and 1.5 or -1.5, 0.0)
+          end
+
+          if stepMeters and stepMeters ~= 0 then
+            local geo = openspace.globebrowsing.geoPositionForCamera()
+            local lat = geo[1]
+            local lon = geo[2]
+            local anchor = "Mars"
+            pcall(function()
+              local st = openspace.navigation.getNavigationState()
+              if st and st.Anchor then anchor = st.Anchor end
+            end)
+            
+            local r = (anchor == "Mars") and 3389500.0 or 6371000.0
+            local radH = me.heading * math.pi / 180.0
+            
+            local dLat = (stepMeters * math.cos(radH) / r) * (180.0 / math.pi)
+            local cosLat = math.cos(lat * math.pi / 180.0)
+            if math.abs(cosLat) < 0.01 then cosLat = 0.01 end
+            local dLon = (stepMeters * math.sin(radH) / (r * cosLat)) * (180.0 / math.pi)
+            
+            local targetLat = lat + dLat
+            local targetLon = lon + dLon
+            local targetAlt = me.getTopographicAlt(anchor, targetLat, targetLon)
+            
+            openspace.navigation.flyToGeo(anchor, targetLat, targetLon, targetAlt, 0.2)
+          end
+        end
+
+        local actions = {
+          { id = "mars_earth.walkForward", name = "Walk Forward", cmd = "local me = rawget(_G, 'mars_earth'); if me then me.walkStep(150.0, 0.0) end", key = "W" },
+          { id = "mars_earth.walkBackward", name = "Walk Backward", cmd = "local me = rawget(_G, 'mars_earth'); if me then me.walkStep(-150.0, 0.0) end", key = "S" },
+          { id = "mars_earth.turnLeft", name = "Turn Left", cmd = "local me = rawget(_G, 'mars_earth'); if me then me.walkStep(0.0, -3.0) end", key = "A" },
+          { id = "mars_earth.turnRight", name = "Turn Right", cmd = "local me = rawget(_G, 'mars_earth'); if me then me.walkStep(0.0, 3.0) end", key = "D" },
+          { id = "mars_earth.walkFastForward", name = "Sprint Forward", cmd = "local me = rawget(_G, 'mars_earth'); if me then me.walkStep(450.0, 0.0) end", key = "Shift+W" },
+          { id = "mars_earth.walkFastBackward", name = "Sprint Backward", cmd = "local me = rawget(_G, 'mars_earth'); if me then me.walkStep(-450.0, 0.0) end", key = "Shift+S" }
+        }
+        for _, a in ipairs(actions) do
+          pcall(function()
+            openspace.action.registerAction({
+              Identifier = a.id,
+              Name = a.name,
+              Command = a.cmd,
+              Documentation = a.name,
+              GuiPath = "/Analog Surface Walk",
+              IsLocal = true
+            })
+            openspace.bindKey(a.key, a.id)
+          end)
+        end
+      end)
     `;
     openSpace.executeLuaScript(wasdRegisterLua);
 
@@ -971,6 +1083,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const pill = document.getElementById("surface-walk-pill");
     if (pill) pill.classList.remove("visible");
 
+    // Re-enable orbital rolling when leaving Side View mode
+    openSpace.setPropertyValue("NavigationHandler.OrbitalNavigator.DisableRoll", false);
+
     const site = getActiveSiteData();
     const globe = site.globe || "Earth";
     const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
@@ -1011,7 +1126,8 @@ document.addEventListener("DOMContentLoaded", () => {
       camLon: (site && site.coordinates ? site.coordinates.lon : 0),
       camAlt: Math.max(2500.0, ((site && site.elevation_m) || 200.0) + 1800.0),
       pitch: 1.40,
-      yaw: 0.0
+      yaw: 0.0,
+      heading: 0.0
     };
 
     if (state.sideViewTimer) {
@@ -1025,7 +1141,7 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0);
     }
 
-    // 2. Lock roll and follow planetary rotation so horizon stays permanently level
+    // 2. Lock roll and follow planetary rotation so horizon stays permanently level during side view
     const initScript = `
       if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
         openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
@@ -1036,29 +1152,43 @@ document.addEventListener("DOMContentLoaded", () => {
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('${globe}')
       end
+      local me = rawget(_G, "mars_earth")
+      if me then me.heading = ${cfg.heading || 0.0} end
     `;
     openSpace.executeLuaScript(initScript);
 
-    // 3. If already in side view at this site, re-level horizon immediately without re-calling flyToGeo
-    // (re-calling flyToGeo would reset camera pitch to nadir top-down)
+    // 3. If already in side view (subsequent clicks), reorient smoothly based on user's CURRENT position/view
+    // Queries current camera lat/lon/alt, re-anchors to avoid coordinate jumps, and re-levels tangent horizon
     if (state.isSideViewActive && state.sideViewSiteKey === state.currentSiteKey) {
-      const tangentScript = `
-        if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
-          if openspace.pathnavigation and openspace.pathnavigation.stopPath then
-            openspace.pathnavigation.stopPath()
-          end
-        end
-        local cur = openspace.navigation.getNavigationState()
-        local nav = {
-          Pitch = ${cfg.pitch},
-          Anchor = "${globe}",
-          Yaw = 0.0,
-          Position = cur.Position,
-          Up = cur.Up
-        }
-        openspace.navigation.setNavigationState(nav)
+      const reorientScript = `
+        local geo = openspace.globebrowsing.geoPositionForCamera()
+        local curLat = geo[1]
+        local curLon = geo[2]
+        local curAlt = geo[3]
+        local me = rawget(_G, "mars_earth")
+        local targetAlt = (me and me.getTopographicAlt) and me.getTopographicAlt("${globe}", curLat, curLon) or curAlt
+        openspace.navigation.flyToGeo("${globe}", curLat, curLon, targetAlt, 0.3)
       `;
-      openSpace.executeLuaScript(tangentScript);
+      openSpace.executeLuaScript(reorientScript);
+      setTimeout(() => {
+        const tangentScript = `
+          if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
+            if openspace.pathnavigation and openspace.pathnavigation.stopPath then
+              openspace.pathnavigation.stopPath()
+            end
+          end
+          local cur = openspace.navigation.getNavigationState()
+          local nav = {
+            Pitch = ${cfg.pitch},
+            Anchor = "${globe}",
+            Yaw = 0.0,
+            Position = cur.Position,
+            Up = cur.Up
+          }
+          openspace.navigation.setNavigationState(nav)
+        `;
+        openSpace.executeLuaScript(tangentScript);
+      }, 350);
       showWalkHintToast();
       return;
     }
@@ -1405,6 +1535,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const pill = document.getElementById("surface-walk-pill");
     if (pill) pill.classList.remove("visible");
+
+    // Maintain orbital roll enabled during general site navigation
+    openSpace.setPropertyValue("NavigationHandler.OrbitalNavigator.DisableRoll", false);
+
     const site = getActiveSiteData();
     const isMars = site.globe === "Mars";
     const marsBaseline = getMarsBaselineData();
@@ -2930,6 +3064,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const pill = document.getElementById("surface-walk-pill");
       if (pill) pill.classList.remove("visible");
 
+      // Re-enable orbital roll for full spherical rotation
+      openSpace.setPropertyValue("NavigationHandler.OrbitalNavigator.DisableRoll", false);
+
       const site = getActiveSiteData();
       const globe = site.globe || "Earth";
       if (globe === "Mars") {
@@ -3495,21 +3632,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const key = e.key.toLowerCase();
-    const speed = e.shiftKey ? 75.0 : 25.0;
-    const rotSpeed = 1.5;
+    const stepDist = e.shiftKey ? 450.0 : 150.0;
+    const turnAng = 3.0;
 
     let handled = false;
     if (key === "w" || e.key === "ArrowUp") {
-      openSpace.executeLuaScript(`openspace.navigation.addTruckMovement(${speed})`);
+      openSpace.executeLuaScript(`local me = rawget(_G, 'mars_earth'); if me then me.walkStep(${stepDist}, 0.0) end`);
       handled = true;
     } else if (key === "s" || e.key === "ArrowDown") {
-      openSpace.executeLuaScript(`openspace.navigation.addTruckMovement(-${speed})`);
+      openSpace.executeLuaScript(`local me = rawget(_G, 'mars_earth'); if me then me.walkStep(-${stepDist}, 0.0) end`);
       handled = true;
     } else if (key === "a" || e.key === "ArrowLeft") {
-      openSpace.executeLuaScript(`openspace.navigation.addLocalRotation(-${rotSpeed}, 0.0)`);
+      openSpace.executeLuaScript(`local me = rawget(_G, 'mars_earth'); if me then me.walkStep(0.0, -${turnAng}) end`);
       handled = true;
     } else if (key === "d" || e.key === "ArrowRight") {
-      openSpace.executeLuaScript(`openspace.navigation.addLocalRotation(${rotSpeed}, 0.0)`);
+      openSpace.executeLuaScript(`local me = rawget(_G, 'mars_earth'); if me then me.walkStep(0.0, ${turnAng}) end`);
       handled = true;
     }
 

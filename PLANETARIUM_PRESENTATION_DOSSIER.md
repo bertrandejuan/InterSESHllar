@@ -105,11 +105,12 @@ All parameters below are derived strictly from the 10-year in-situ daily archive
 
 Designed for a live presenter operating OpenSpace in front of dome patrons or reviewers:
 
-### Act I: The Martian Baseline (Gale Crater) & Side View Surface Walking
-1. **Visual**: Camera starts focused on Mars. GeoJSON boundary highlights the 154 km crater rim; 3D label identifies Bradbury Landing (`MSL-01`).
-2. **Interaction**: Click **`Side view`** in the category actions strip. Camera smoothly descends to 3,800 m in northern Aeolis Palus, tilts tangent to the horizon (`Pitch = 1.40 rad`, `Yaw = 0.0 rad`), rightside up with a perfectly level horizon, facing Mount Sharp rising 5.5 km above the crater floor. Use **W, A, S, D** keys to walk forward, step back, and turn across the terrain.
-3. **Presenter Script**:
-   > *"Welcome to Gale Crater, Mars—our planetary benchmark. For over 4,000 sols, NASA's Curiosity rover has recorded in-situ weather using its REMS instrument. Look at Mount Sharp towering before us on the dome. The baseline is extreme: an annual mean air temperature of -54°C, day-to-night swings exceeding 58°C, and an atmospheric pressure of only 0.76 kPa—less than 1% of Earth's sea level. Notice that our Side View is calibrated rightside up with zero roll, and you can freely walk across the Martian surface using the W, A, S, D keys as if you were on an astronaut EVA traverse."*
+### Act I: The Martian Baseline (Gale Crater), Preserved Rolling & Topographic Surface Walking
+1. **Visual**: Camera starts focused on Mars. GeoJSON boundary highlights the 154 km crater rim; 3D label identifies Bradbury Landing (`MSL-01`). In orbital mode, presenters enjoy full free-rolling capabilities (`DisableRoll = false`) to display the Martian globe from any angle.
+2. **Interaction**: Click **`Side view`** in the category actions strip. Camera smoothly descends to 3,800 m in northern Aeolis Palus, tilts tangent to the horizon (`Pitch = 1.40 rad`, `Yaw = 0.0 rad`), rightside up with a level horizon, facing Mount Sharp (Aeolis Mons) along heading 150°.
+3. **Topographic Walking**: Use **W, A, S, D** or Arrow keys to walk across the Martian surface. The walking engine advances camera latitude and longitude along the facing heading while dynamically climbing and descending the topographic relief model, allowing smooth traverses over the crater floor and up Mount Sharp's slopes without clipping. Subsequent clicks on `Side view` smoothly reorient based on the presenter's *current* coordinates and viewpoint.
+4. **Presenter Script**:
+   > *"Welcome to Gale Crater, Mars—our planetary benchmark. For over 4,000 sols, NASA's Curiosity rover has recorded in-situ weather using its REMS instrument. Look at Mount Sharp towering before us on the dome. The baseline is extreme: an annual mean air temperature of -54°C, day-to-night swings exceeding 58°C, and an atmospheric pressure of only 0.76 kPa—less than 1% of Earth's sea level. Notice that our Side View is calibrated rightside up with a level horizon, and with our topographic walking engine, you can freely walk using W, A, S, D across the Martian terrain, climbing natural slopes just like an astronaut on an EVA traverse."*
 
 ### Act II: Interactive Decision Matrix (MCDM) & Mission Optimization
 1. **Interaction**: Click **`Comparison Matrix ▾`** in the sidebar. The dropdown slides open.

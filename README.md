@@ -73,29 +73,34 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 
 ## 🎯 Key Capabilities
 
-### 1. Calibrated Viewport, Tangent "Side View" & WASD Surface Walking
+### 1. Calibrated Viewport, Tangent "Side View" & Topographic Surface Walking Engine
 - **Tangent Side View (`Side view`)**:
   - Positioned directly adjacent to `Focus on surface` in the category viewport actions strip.
   - Automatically zooms camera close to the planetary surface where 3D elevation and high-resolution textures are crystal clear:
-    * **Mars (Gale Crater)**: Zooms to 3,800 m altitude in northern Aeolis Palus, maintaining full high-resolution CTX mosaic clarity, looking across the crater floor toward **Mount Sharp** (Aeolis Mons).
-    * **McMurdo Dry Valleys**: Zooms to 2,400 m over the mouth of Taylor Valley, looking along the ice-free glacial floor framed by the Transantarctic Mountains.
-    * **Lut Desert**: Zooms to 1,800 m, looking down the giant **Kalut yardang** wind-carved corridors.
-    * **Aralkum Desert**: Zooms to 2,000 m, looking across the white salt-crust seabed toward the Ustyurt Plateau escarpment.
-    * **Salar de Uyuni**: Zooms to 5,600 m (~1,940 m ground clearance above the 3,656 m salt flat), looking across the white lithium playa toward **Volcán Tunupa**.
+    * **Mars (Gale Crater)**: Zooms to 3,800 m altitude in northern Aeolis Palus, maintaining full high-resolution CTX mosaic clarity, looking across the crater floor toward **Mount Sharp** (Aeolis Mons) along heading 150°.
+    * **McMurdo Dry Valleys**: Zooms to 2,400 m over the mouth of Taylor Valley, looking along the ice-free glacial floor framed by the Transantarctic Mountains along heading 260°.
+    * **Lut Desert**: Zooms to 1,800 m, looking down the giant **Kalut yardang** wind-carved corridors along heading 340°.
+    * **Aralkum Desert**: Zooms to 2,000 m, looking across the white salt-crust seabed toward the Ustyurt Plateau escarpment along heading 270°.
+    * **Salar de Uyuni**: Zooms to 5,600 m (~1,940 m ground clearance above the 3,656 m salt flat), looking across the white lithium playa toward **Volcán Tunupa** along heading 350°.
   - **Rightside-Up & Level Horizon Guarantee**:
     * Specifically calibrated with `Pitch = 1.38 – 1.40 rad` (~79°–80° tangent to planetary curvature) and `Yaw = 0.0 rad`.
-    * Enforces `NavigationHandler.OrbitalNavigator.DisableRoll = true` and `FollowAnchorNodeRotation = true` to strictly eliminate diagonal tilt and roll inversion. Sky is always on top, terrain is on the bottom.
-    * **Idempotent / Anti-Nadir Protection**: If clicked repeatedly while at the site, it smoothly re-levels the horizon without resetting the camera straight down to nadir. Automatically stops path dampening upon arrival to prevent snapback.
-- **WASD Surface Walking Navigation**:
-  - **`W` / `ArrowUp`**: Walk forward along the line of sight across the planetary surface (`addTruckMovement(25.0)`).
-  - **`S` / `ArrowDown`**: Walk backward / step back (`addTruckMovement(-25.0)`).
-  - **`A` / `ArrowLeft`**: Turn / pan camera left (`addLocalRotation(-1.5, 0.0)`).
-  - **`D` / `ArrowRight`**: Turn / pan camera right (`addLocalRotation(1.5, 0.0)`).
-  - **`Shift + W` / `Shift + S`**: Sprint forward or backward at 3x traverse speed (`addTruckMovement(75.0)`).
+    * Enforces `NavigationHandler.OrbitalNavigator.DisableRoll = true` and `FollowAnchorNodeRotation = true` during Side View to strictly eliminate diagonal tilt and roll inversion. Sky is always on top, terrain is on the bottom.
+    * **Preserved Orbital Rolling**: General rolling capabilities (`DisableRoll = false`) remain fully active during orbital navigation, focus mode, and site selection, allowing complete freedom for sphere inspection. Roll is only locked upright when Side View is engaged.
+    * **Current-View Dynamic Reorientation on Subsequent Clicks**: If clicked repeatedly while exploring on the surface, Side View dynamically queries the user's *current* camera coordinates (`geoPositionForCamera()`), re-anchors smoothly, and re-levels the horizon tangent to the ground right where the user is looking—without jumping back to the initial spawn or teleporting to space.
+- **Topographic Elevation Curve Walking Engine (WASD)**:
+  - **True Geographic Surface Motion**: Unlike standard radial truck movement which incorrectly modifies altitude, `W` and `S` compute true spherical surface displacements across latitude and longitude along the camera's current facing heading $\theta$:
+    $$\Delta \text{lat} = \frac{\Delta s \cdot \cos(\theta)}{R} \cdot \frac{180^\circ}{\pi}, \quad \Delta \text{lon} = \frac{\Delta s \cdot \sin(\theta)}{R \cdot \cos(\text{lat})} \cdot \frac{180^\circ}{\pi}$$
+  - **Dynamic Topographic Curve Climbing**: Camera altitude continuously evaluates the topographic relief model $E(\text{globe}, \text{lat}, \text{lon})$, allowing the user to walk across valleys, climb up and over mountain rises (e.g., Mount Sharp's +5,000 m central mound, Gale Crater rim walls, Taylor Valley lateral slopes, Kalut yardang ridges, and Volcán Tunupa) following linear depth contours without clipping or floating.
+  - **Controls**:
+    * **`W` / `ArrowUp`**: Step forward across surface terrain (150 m step; follows topographic curves).
+    * **`S` / `ArrowDown`**: Step backward across surface terrain (-150 m step).
+    * **`A` / `ArrowLeft`**: Turn heading left by 3.0° (`addLocalRotation(-1.5, 0.0)`).
+    * **`D` / `ArrowRight`**: Turn heading right by 3.0° (`addLocalRotation(1.5, 0.0)`).
+    * **`Shift + W` / `Shift + S`**: Sprint forward or backward at 3x speed (450 m step).
   - **Dual-Input Synchronization**: Registered natively in the OpenSpace engine (`openspace.bindKey`) and via webpanel DOM keyboard listeners, allowing seamless surface walking regardless of which window pane has focus.
   - **HUD Surface Walking Indicator**: Displays a sleek, glassmorphic toast notification (`.surface-walk-pill`) confirming active controls and shortcuts.
 - **Focus on Surface (`Focus on surface`)**:
-  - Glides camera to a centered overhead nadir view (~240 km altitude) optimized for category inspection.
+  - Glides camera to a centered overhead nadir view (~240 km altitude) optimized for category inspection, automatically re-enabling standard orbital roll.
 
 ### 2. Customizable Multi-Criteria Decision Matrix (MCDM) & Mission Optimizer
 - **Interactive Matrix Dropdown**:

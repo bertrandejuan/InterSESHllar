@@ -69,8 +69,8 @@ flowchart TD
 
 ## 3. Deep Dive: Key Code Mechanisms
 
-### A. Tangent Planetary Horizon "Side View" & WASD Surface Walking (`app.js:868–965`)
-To provide an eye-level panoramic ground perspective facing key geological landmarks, rightside up, with a perfectly level horizon and keyboard-driven surface walking:
+### A. Tangent Planetary Horizon "Side View" & Topographic Walking Engine (`app.js`)
+To provide an eye-level panoramic ground perspective facing key geological landmarks, rightside up, with a level horizon, full orbital rolling preservation, and true topographic curve-following surface walking:
 ```javascript
 function sideView() {
   const site = getActiveSiteData();
@@ -82,7 +82,7 @@ function sideView() {
     state.sideViewTimer = null;
   }
 
-  // 1. Lock roll and follow planetary rotation so horizon stays permanently level
+  // 1. Lock roll and follow planetary rotation so horizon stays permanently level during side view
   const initScript = `
     if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
@@ -93,20 +93,32 @@ function sideView() {
     if openspace.navigation and openspace.navigation.setFocus then
       openspace.navigation.setFocus('${globe}')
     end
+    local me = rawget(_G, "mars_earth")
+    if me then me.heading = ${cfg.heading || 0.0} end
   `;
   openSpace.executeLuaScript(initScript);
 
-  // 2. Anti-Nadir Protection: If already in side view, smoothly re-level without calling flyToGeo
+  // 2. Dynamic Current-View Reorientation on Subsequent Clicks:
+  // Reads user's current camera coordinates, re-anchors smoothly, and re-levels tangent horizon
   if (state.isSideViewActive && state.sideViewSiteKey === state.currentSiteKey) {
-    const tangentScript = `
-      if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
-        if openspace.pathnavigation and openspace.pathnavigation.stopPath then openspace.pathnavigation.stopPath() end
-      end
-      local cur = openspace.navigation.getNavigationState()
-      local nav = { Pitch = ${cfg.pitch}, Anchor = "${globe}", Yaw = 0.0, Position = cur.Position, Up = cur.Up }
-      openspace.navigation.setNavigationState(nav)
+    const reorientScript = `
+      local geo = openspace.globebrowsing.geoPositionForCamera()
+      local curLat = geo[1]
+      local curLon = geo[2]
+      local curAlt = geo[3]
+      local me = rawget(_G, "mars_earth")
+      local targetAlt = (me and me.getTopographicAlt) and me.getTopographicAlt("${globe}", curLat, curLon) or curAlt
+      openspace.navigation.flyToGeo("${globe}", curLat, curLon, targetAlt, 0.3)
     `;
-    openSpace.executeLuaScript(tangentScript);
+    openSpace.executeLuaScript(reorientScript);
+    setTimeout(() => {
+      const tangentScript = `
+        local cur = openspace.navigation.getNavigationState()
+        local nav = { Pitch = ${cfg.pitch}, Anchor = "${globe}", Yaw = 0.0, Position = cur.Position, Up = cur.Up }
+        openspace.navigation.setNavigationState(nav)
+      `;
+      openSpace.executeLuaScript(tangentScript);
+    }, 350);
     showWalkHintToast();
     return;
   }
@@ -117,7 +129,7 @@ function sideView() {
   // 3. Approach flight to calibrated close-up coordinates
   openSpace.executeLuaScript(`openspace.navigation.flyToGeo('${globe}', ${cfg.camLat}, ${cfg.camLon}, ${cfg.camAlt}, 2.0)`);
 
-  // 4. Upon arrival, stop path dampening and set Pitch = 1.38-1.40 rad, Yaw = 0.0 rad
+  // 4. Upon arrival, orient tangent to planetary surface (rightside up, level horizon)
   state.sideViewTimer = setTimeout(() => {
     const tangentScript = `
       if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
@@ -134,21 +146,27 @@ function sideView() {
 }
 ```
 
+#### Topographic Elevation Curve Walking Engine (`mars_earth` Lua Table)
+Unlike standard radial truck movements which incorrectly modify camera altitude, the walking engine calculates true spherical surface displacements $(\Delta \text{lat}, \Delta \text{lon})$ along the camera facing heading $\theta$, and samples the topographic relief model $E(\text{globe}, \text{lat}, \text{lon})$:
+$$\Delta \text{lat} = \frac{\Delta s \cdot \cos(\theta)}{R} \cdot \frac{180^\circ}{\pi}, \quad \Delta \text{lon} = \frac{\Delta s \cdot \sin(\theta)}{R \cdot \cos(\text{lat})} \cdot \frac{180^\circ}{\pi}$$
+$$\text{Altitude} = E(\text{globe}, \text{lat} + \Delta\text{lat}, \text{lon} + \Delta\text{lon})$$
+
 #### Side View Configuration Table:
-| Site Key | Globe | Camera Altitude | Pitch (rad) | Yaw (rad) | Target Landmark | Horizon Alignment |
-|---|---|---|---|---|---|---|
-| `mars_gale` | Mars | 3,800 m | 1.40 (~80.2°) | 0.0 | Mount Sharp (Aeolis Mons) & Yellowknife Bay | Rightside up, level horizon |
-| `mcmurdo` | Earth | 2,400 m | 1.38 (~79.1°) | 0.0 | Taylor Valley trough framed by mountains | Zero roll, level horizon |
-| `lut` | Earth | 1,800 m | 1.40 (~80.2°) | 0.0 | Kalut mega-yardang wind corridors | Level desert horizon |
-| `aralkum` | Earth | 2,000 m | 1.40 (~80.2°) | 0.0 | Desiccated seabed salt flats & Ustyurt cliffs | Zero roll, level horizon |
-| `uyuni` | Earth | 5,600 m | 1.40 (~80.2°) | 0.0 | Salar plain toward Volcán Tunupa (5,321 m) | Level horizon |
+| Site Key | Globe | Camera Altitude | Pitch (rad) | Yaw (rad) | Initial Heading | Target Landmark | Horizon Alignment |
+|---|---|---|---|---|---|---|---|
+| `mars_gale` | Mars | 3,800 m | 1.40 (~80.2°) | 0.0 | 150.0° (SSE) | Mount Sharp (Aeolis Mons; +5,000m mound) | Rightside up, level horizon |
+| `mcmurdo` | Earth | 2,400 m | 1.38 (~79.1°) | 0.0 | 260.0° (W) | Taylor Valley glacial corridor & mountain walls | Zero roll, level horizon |
+| `lut` | Earth | 1,800 m | 1.40 (~80.2°) | 0.0 | 340.0° (NNW) | Kalut mega-yardang aerodynamic corridors | Level desert horizon |
+| `aralkum` | Earth | 2,000 m | 1.40 (~80.2°) | 0.0 | 270.0° (W) | Desiccated seabed salt flats & Ustyurt Plateau cliffs | Zero roll, level horizon |
+| `uyuni` | Earth | 5,600 m | 1.40 (~80.2°) | 0.0 | 350.0° (N) | Salar lithium plain toward Volcán Tunupa (+3,200m peak) | Level horizon |
 
 #### WASD Surface Walking Keyboard Bindings:
-- **`W` / `ArrowUp`**: Walk forward along line of sight (`openspace.navigation.addTruckMovement(25.0)`).
-- **`S` / `ArrowDown`**: Walk backward / step back (`openspace.navigation.addTruckMovement(-25.0)`).
-- **`A` / `ArrowLeft`**: Turn / pan camera left (`openspace.navigation.addLocalRotation(-1.5, 0.0)`).
-- **`D` / `ArrowRight`**: Turn / pan camera right (`openspace.navigation.addLocalRotation(1.5, 0.0)`).
-- **`Shift + W / S`**: Sprint forward or backward at 3x speed (`addTruckMovement(75.0)`).
+- **`W` / `ArrowUp`**: Advance forward across latitude and longitude (150 m step; follows topographic curves).
+- **`S` / `ArrowDown`**: Step backward across latitude and longitude (-150 m step).
+- **`A` / `ArrowLeft`**: Turn heading left by 3.0° (`addLocalRotation(-1.5, 0.0)`).
+- **`D` / `ArrowRight`**: Turn heading right by 3.0° (`addLocalRotation(1.5, 0.0)`).
+- **`Shift + W / S`**: Sprint forward or backward at 3x speed across the terrain (450 m step).
+- **Preserved Orbital Rolling**: General rolling capabilities (`DisableRoll = false`) remain fully active during orbital navigation, focus mode, and site selection, and are only locked to `true` in Side View.
 - **Dual-Mode Registration**: Binds natively in OpenSpace engine via `openspace.bindKey` and in webpanel DOM via `window.addEventListener("keydown")`.
 
 ### B. Multi-Criteria Decision Matrix (MCDM) & Silent Balancing (`app.js:2410–2530`)

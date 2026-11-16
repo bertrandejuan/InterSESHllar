@@ -143,13 +143,14 @@ All code must be:
 
 Subsequent iterative enhancements have expanded the system well beyond the initial brief:
 
-1. **Tangent Planetary Horizon "Side View" Navigation & WASD Surface Walking (`Side view`)**:
+1. **Tangent Planetary Horizon "Side View", Preserved Roll & Topographic Surface Walking Engine (`Side view`)**:
    - Added directly adjacent to `Focus on surface` in the science category viewport action strip.
    - Zooms camera to clear ground level (3,800 m on Mars Gale Crater, 2,400 m at McMurdo, 1,800 m at Lut, 2,000 m at Aralkum, 5,600 m at Uyuni).
-   - **Rightside-Up & Level Horizon Calibration**: Specifically calibrated with `Pitch = 1.38 – 1.40 rad`, `Yaw = 0.0 rad`, and `NavigationHandler.OrbitalNavigator.DisableRoll = true`. Sky is locked on top, terrain on bottom, strictly eliminating diagonal roll tilt and inverted pitch across all 5 analog sites.
-   - **Anti-Nadir Jump Protection**: Repeated clicks on `Side view` smoothly re-level the camera along the horizon instead of resetting straight down to nadir map view. Automatically stops path navigation dampening upon arrival to prevent camera snapback.
-   - **WASD Surface Walking Controls**: Allows walking forward (`W`), backward (`S`), and turning left/right (`A`/`D`) directly across the planetary terrain (with `Shift` sprint), registered both via native OpenSpace engine keybindings (`openspace.bindKey`) and webpanel DOM keyboard listeners.
-   - Faces key target exploration features: Mount Sharp (South), Taylor Valley, Kalut yardangs, Aral seabed cliffs, and Volcán Tunupa.
+   - **Rightside-Up & Level Horizon Calibration**: Specifically calibrated with `Pitch = 1.38 – 1.40 rad`, `Yaw = 0.0 rad`, and `NavigationHandler.OrbitalNavigator.DisableRoll = true` strictly while in Side View. Sky is locked on top, terrain on bottom, eliminating diagonal roll tilt and inverted pitch across all 5 analog sites.
+   - **Preserved Orbital Rolling**: General rolling capabilities (`DisableRoll = false`) remain fully active during orbit navigation, focus mode, and site selection, ensuring presenters can freely tilt and roll planetary bodies.
+   - **Current-View Dynamic Reorientation on Subsequent Clicks**: Repeated clicks on `Side view` dynamically read current camera coordinates (`geoPositionForCamera()`) and re-anchor without resetting to nadir or jumping into space.
+   - **Topographic Elevation Curve Walking Engine (WASD)**: Computes true latitude/longitude displacement vectors along the camera facing heading $\theta$ and dynamically follows the site's topographic relief profile $E(\text{globe}, \text{lat}, \text{lon})$, allowing users to climb and descend mountains (e.g. Mount Sharp, crater rims, yardang ridges, and volcanic peaks) rather than altering altitude or clipping into polygons. Supported with `Shift` sprint and synchronized between native OpenSpace keybindings and webpanel keyboard listeners.
+   - Faces key target exploration features: Mount Sharp (heading 150°), Taylor Valley (heading 260°), Kalut yardangs (heading 340°), Aral seabed cliffs (heading 270°), and Volcán Tunupa (heading 350°).
    - Enables `FollowAnchorNodeRotation` and leaves `OrbitalNavigator` active so users retain 100% mouse freedom to orbit, zoom, and pan around the landscape.
 
 2. **Customizable Multi-Criteria Decision Matrix (MCDM) & Mission Optimizer**:
