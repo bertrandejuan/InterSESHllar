@@ -54,6 +54,48 @@ document.addEventListener("DOMContentLoaded", () => {
     uyuni: { lat: -20.63, lon: -67.05, alt: 240000.0 }
   };
 
+  // Side View Configurations:
+  // Zooms camera close to the surface where imagery and 3D terrain are clear,
+  // oriented at an angle tangent to the planet surface (~1.40-1.42 rad / ~80°-82° pitch),
+  // facing the desired target landmark (yaw in radians).
+  const SIDE_VIEW_CONFIGS = {
+    mars_gale: {
+      camLat: -4.3800,
+      camLon: 137.4417,
+      camAlt: 3800.0,    // 3.8 km above datum in Aeolis Palus; surface CTX crisp
+      pitch: 1.42,       // Tangent to planetary surface looking across landscape
+      yaw: 3.14159       // Facing South directly toward Mount Sharp (Aeolis Mons)
+    },
+    mcmurdo: {
+      camLat: -77.5800,
+      camLon: 164.2000,
+      camAlt: 2800.0,    // 2.8 km over New Harbour / mouth of Taylor Valley
+      pitch: 1.40,       // Tangent to surface looking along valley floor
+      yaw: 4.71239       // Facing West-Southwest up Taylor Valley toward Lake Hoare
+    },
+    lut: {
+      camLat: 30.0000,
+      camLon: 58.8000,
+      camAlt: 1800.0,    // 1.8 km over southern Lut Desert
+      pitch: 1.42,       // Tangent to surface looking across yardang corridors
+      yaw: 0.0           // Facing North directly down giant Kalut yardang corridors
+    },
+    aralkum: {
+      camLat: 44.2500,
+      camLon: 59.8500,
+      camAlt: 1900.0,    // 1.9 km over southwestern Aralkum basin
+      pitch: 1.40,       // Tangent to surface
+      yaw: 0.65          // Facing Northeast across dried seabed and plateau cliffs
+    },
+    uyuni: {
+      camLat: -20.6500,
+      camLon: -67.5000,
+      camAlt: 5600.0,    // 5.6 km (surface elevation is 3,656 m; ~1,940 m ground clearance)
+      pitch: 1.42,       // Tangent to surface looking across salt crust
+      yaw: 0.0           // Facing North toward Volcan Tunupa
+    }
+  };
+
   // DOM Elements - Header & Tools
   const statusOpenSpace = document.getElementById("status-openspace");
   const dotOpenSpace = document.getElementById("dot-openspace");
@@ -608,6 +650,17 @@ document.addEventListener("DOMContentLoaded", () => {
         focusOnSurface();
       });
 
+      const btnSideView = document.createElement("button");
+      btnSideView.className = "btn-vp-action btn-side-view";
+      btnSideView.innerText = "Side view";
+      btnSideView.title = "Fly camera close to surface at an angle tangent to the planet facing the terrain";
+      btnSideView.addEventListener("click", (e) => {
+        e.stopPropagation();
+        btnSideView.classList.add("active");
+        setTimeout(() => btnSideView.classList.remove("active"), 2500);
+        sideView();
+      });
+
       const currentCatHUD = `hud_cat_${cat.key}_${state.currentSiteKey}.png`;
       const isCatHUDActive = state.activeHUD === currentCatHUD;
       const btnOverview = document.createElement("button");
@@ -651,6 +704,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       vpStrip.appendChild(btnFocus);
+      vpStrip.appendChild(btnSideView);
       vpStrip.appendChild(btnOverview);
       vpStrip.appendChild(btnOverlay);
       vpStrip.appendChild(btnStats);
@@ -784,6 +838,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     openSpace.flyToGeo(globe, target.lat, target.lon, target.alt, 2.5);
+  }
+
+  function sideView() {
+    const site = getActiveSiteData();
+    const globe = (site && site.globe) ? site.globe : "Earth";
+    const cfg = SIDE_VIEW_CONFIGS[state.currentSiteKey] || {
+      camLat: (site && site.coordinates ? site.coordinates.lat - 0.12 : 0),
+      camLon: (site && site.coordinates ? site.coordinates.lon : 0),
+      camAlt: Math.max(2500.0, ((site && site.elevation_m) || 200.0) + 1800.0),
+      pitch: 1.42,
+      yaw: 0.0
+    };
+
+    // 1. When zooming close to surface on Mars, fade out low-res global texture so CTX 6m imagery is crisp
+    if (globe === "Mars") {
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
+    }
+
+    // 2. Fly camera close to surface where high-res satellite imagery and 3D terrain are clear,
+    // and ensure FollowAnchorNodeRotation is active so the camera rotates with the planet.
+    const flightScript = `
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
+      end
+      if openspace.navigation and openspace.navigation.setFocus then
+        openspace.navigation.setFocus('${globe}')
+      end
+      openspace.navigation.flyToGeo('${globe}', ${cfg.camLat}, ${cfg.camLon}, ${cfg.camAlt}, 2.0)
+    `;
+    openSpace.executeLuaScript(flightScript);
+
+    // 3. Upon arrival (2.0s), set camera pitch tangent to planetary surface (~1.40-1.42 rad / ~80°-82°)
+    // and yaw facing the landmark/exploration target. OrbitalNavigator remains active, allowing
+    // user to immediately orbit, zoom, and explore.
+    setTimeout(() => {
+      const tangentScript = `
+        local currentNavState = openspace.navigation.getNavigationState()
+        local newNavState = {
+          Pitch = ${cfg.pitch},
+          Anchor = "${globe}",
+          Yaw = ${cfg.yaw},
+          Position = currentNavState["Position"],
+          Up = currentNavState["Up"]
+        }
+        openspace.navigation.setNavigationState(newNavState)
+      `;
+      openSpace.executeLuaScript(tangentScript);
+    }, 2050);
   }
 
   function toggleCategoryHUD(cat) {

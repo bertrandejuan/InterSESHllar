@@ -724,6 +724,16 @@ body {
   box-sizing: border-box;
 }
 
+.btn-category-stats {
+  grid-column: 1 / -1;
+}
+
+.btn-side-view:hover:not(:disabled) {
+  border-color: var(--accent-cyan, #38bdf8);
+  color: #fff;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.35);
+}
+
 .btn-vp-action {
   background: rgba(30, 41, 59, 0.8);
   border: 1px solid rgba(71, 85, 105, 0.5);
