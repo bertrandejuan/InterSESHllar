@@ -130,11 +130,29 @@ Designed for a live presenter operating OpenSpace in front of dome patrons or re
 2. **Presenter Script**:
    > *"Atop the Bolivian Altiplano at 3,656 meters elevation, Salar de Uyuni provides Earth's thinnest atmospheric pressure column and highest solar UV radiation flux. Looking across the endless white salt plain toward Volcán Tunupa with a level horizon, autonomous navigation systems are tested without landmarks, preparing humanity for the blinding glare of the Moon and Mars."*
 
-### Act VI: Global Astrobiology Query (Audience Participation)
-1. **Interaction**: Click **`🧬 Find Astrobiology Data for Any Earth Location`**.
-2. **Interaction**: Select the **`🏜️ Atacama`** preset chip (or have an audience member shout out coordinates) and click **`Query Astrobiology Data`**.
-3. **Presenter Script**:
+### Act VI: Global Astrobiology Query (Audience Participation & Camera Sync)
+1. **Interaction**: Click **`🌱 Find Astrobiology Data for Any Earth Location`**.
+2. **Interaction**: Click **`📍 Active Site`** to read the exact geographic coordinates where the camera is positioned in OpenSpace (`Position: <lat>, <lon>`), or select a preset chip like **`🏜️ Atacama`** or **`🌋 Rio Tinto`**.
+3. **Interaction**: Click **`🔬 Query SoilGrids Telemetry`**. The camera automatically flies to the queried Earth coordinates while fetching live 250m-resolution regolith telemetry.
+4. **Presenter Script**:
    > *"Our platform isn't limited to fixed locations. Connecting to the global SoilGrids REST API, we can query regolith telemetry for any coordinate on Earth. In Chile's hyper-arid Atacama Desert, we see an organic carbon level of only 0.20 g/kg and a regolith pH of 8.1—closely matching Martian habitability limits."*
+
+---
+
+## ⏱️ Automated Planetarium Demo Presets (30s, 1m, 5m)
+
+For planetarium jury submissions, auditorium demos, and dome shows, the automated tour system provides three dedicated profiles with persistent visual highlighting and synchronized telemetry:
+
+| Preset Profile | Total Time | Stop Count & Pacing | Purpose & Scope Captured |
+| :--- | :---: | :---: | :--- |
+| **⏱️ 30s Demo** | **30 sec** | **5 stops × 6.0s** | **Planetarium Submission Demo**: Rapid, high-impact demonstration capturing the complete scope of the asset in exactly 30 seconds (Mars REMS Baseline -> MCDM Decision Matrix -> McMurdo Cryosphere -> Lut Side View -> Global SoilGrids Astrobiology Query). |
+| **⏱️ 1m Standard** | **60 sec** | **6 stops × 10.0s** | **Standard Auditorium Tour**: Default playback option when clicking `▶ Start Tour`. Covers Mars, Decision Matrix, McMurdo, Lut, Aralkum/Uyuni, and Global Astrobiology Query with balanced scientific narration. |
+| **⏱️ 5m Comprehensive** | **300 sec** | **6 stops × 50.0s** | **Full Planetarium Dome Presentation**: Deep scientific exploration with detailed geological stratigraphy, REMS diurnal cycles, MCDM weighting mechanics, katabatic wind geomorphology, and real-time habitability metrics. |
+
+### Tour Playback Choreography & Persistent Highlighting:
+1. **Default Tour**: Clicking `▶ Start Tour` without selecting a button defaults to `⏱️ 1m Standard` and highlights it automatically.
+2. **Persistent Highlight**: The selected preset button (`30s Demo`, `1m Standard`, or `5m Comprehensive`) remains highlighted with an active glowing border until the end of the tour while running.
+3. **Integrated Stop Navigation**: Standard controls (`▶ Start Tour` / `⏹ End Tour`, `⏸ Pause` / `▶ Play`, `⏮ Prev`, `⏭ Next`) operate seamlessly across all preset configurations.
 
 ---
 

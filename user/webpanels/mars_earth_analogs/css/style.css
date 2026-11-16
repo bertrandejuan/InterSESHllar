@@ -1255,10 +1255,12 @@ body {
 .astro-actions-row {
   display: flex;
   gap: 6px;
+  width: 100%;
 }
 
 .btn-astro-fetch {
-  flex: 2;
+  flex: 1;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1268,7 +1270,7 @@ body {
   color: #fff;
   font-weight: 700;
   font-size: 0.78rem;
-  padding: 7px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1277,28 +1279,6 @@ body {
 .btn-astro-fetch:hover {
   background: linear-gradient(90deg, #047857, #0369a1);
   box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
-}
-
-.btn-astro-fly {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  background: rgba(30, 41, 59, 0.85);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  font-size: 0.74rem;
-  padding: 7px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-astro-fly:hover {
-  background: rgba(51, 65, 85, 0.95);
-  border-color: var(--accent-cyan);
-  color: #fff;
 }
 
 /* Astrobiology Results Section */
@@ -1528,13 +1508,14 @@ body {
 }
 
 .tour-controls-row .btn {
-  padding: 4px 8px;
+  padding: 5px 9px;
   font-size: 0.74rem;
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid var(--border-color);
   color: #fff;
   border-radius: 5px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .tour-controls-row .btn:hover {
@@ -1570,6 +1551,191 @@ body {
 .tour-controls-row .btn-tour-resume:hover {
   background: rgba(14, 116, 144, 0.9);
   color: #fff;
+}
+
+/* Tour Presets Group */
+.tour-presets-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.tour-presets-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.tour-presets-btn-group {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.btn-tour-preset {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-tour-preset:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.12);
+  color: #fff;
+}
+
+.btn-tour-preset.active {
+  background: linear-gradient(135deg, rgba(14, 116, 144, 0.5) 0%, rgba(2, 132, 199, 0.5) 100%);
+  border: 1px solid #38bdf8;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
+.btn-tour-preset.active.running {
+  animation: tourPresetPulse 2s infinite ease-in-out;
+}
+
+@keyframes tourPresetPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    border-color: #38bdf8;
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.65), 0 0 6px #34d399;
+    border-color: #34d399;
+  }
+}
+
+/* Tour Status & Progress Bar */
+.tour-status-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.tour-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tour-status-tag {
+  font-size: 0.70rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tour-status-text {
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.tour-progress-bar-bg {
+  width: 100%;
+  height: 3px;
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tour-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #34d399);
+  transition: width 0.3s ease;
+}
+
+/* Live Tour Narration & Scientific Dossier Card */
+.tour-narration-card {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.25s ease;
+}
+
+.tour-narration-header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.tour-narration-stop {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.tour-narration-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.25;
+}
+
+.tour-narration-metrics {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tour-metric-pill {
+  flex: 1;
+  min-width: 65px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.tour-metric-pill-val {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.tour-metric-pill-lbl {
+  font-size: 0.60rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.tour-narration-body {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin: 0;
 }
 
 /* ----------------------------------------------------

@@ -148,18 +148,17 @@ Click the **`🧬 Find Astrobiology Data for Any Earth Location`** button locate
 
 ### A. Preset Coordinate Chips
 - Click any preset chip to automatically populate calibrated coordinates for famous extreme environments:
-  * 🏜️ **Atacama Desert** (-24.50°, -69.25°) — Yungay hyper-arid Mars soil analog.
+  * 🏜️ **Atacama Desert** (-24.08°, -69.87°) — Yungay hyper-arid Mars soil analog.
   * 🔥 **Death Valley** (36.53°, -116.93°) — Extreme summer thermal evaporite basin.
   * ☀️ **Sahara Desert** (24.00°, 15.00°) — Vast trans-continental sand saltation.
-  * 🐪 **Australian Outback** (-25.34°, 131.03°) — Ancient oxidized red regolith.
-  * 🌋 **Lut Desert** (30.55°, 58.80°) — Earth's highest land surface skin temperature core.
-  * 🧂 **Salar de Uyuni** (-20.13°, -67.49°) — High-altitude hypobaric halite crust.
-  * 📍 **Active Site** — Dynamically preloads the coordinates of whichever analog is currently selected.
+  * 🦘 **Pilbara Outback** (-21.28°, 119.75°) — Ancient oxidized red regolith and stromatolites.
+  * 🌋 **Rio Tinto** (37.69°, -6.56°) — Acidic iron/sulfate gossan matching Martian jarosite strata.
+  * 🧊 **Devon Island** (75.38°, -89.67°) — Haughton impact crater polar permafrost analog.
+  * 📍 **Active Site** — Dynamically queries the live camera position directly from OpenSpace (`Position: <lat>, <lon>`), allowing instantaneous regolith queries for any location you fly to across the Earth.
 
-### B. Querying & Automated Camera Flight
-- Enter any custom latitude (-90° to +90°) and longitude (-180° to +180°) and click **Query Astrobiology Data**.
-- OpenSpace automatically executes a camera flight (`openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5)`) to smoothly bring the queried geographic terrain into view.
-- The panel fetches real-time 250m-resolution regolith data from the ISRIC SoilGrids REST API, returning:
+### B. Querying & Integrated Camera Flight
+- Enter any custom latitude (-90° to +90°) and longitude (-180° to +180°) and click **Query SoilGrids Telemetry** (or press `Enter`).
+- The button **automatically flies the OpenSpace camera** (`openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5)`) to bring the queried geographic terrain into view while fetching live 250m-resolution regolith data from the ISRIC SoilGrids REST/WCS API:
   * **Soil / Regolith pH (`SOIL_PH`)**: Compared against Gale Crater's Yellowknife Bay alkaline mudstone (7.80 pH).
   * **Soil Organic Carbon (`SOC`)**: Total organic carbon (g/kg) compared to Curiosity SAM organic preservation limits.
   * **Bulk Density (`BDOD`)**: Packing density (kg/dm³) compared to Rocknest aeolian sand and drill cores.
@@ -223,7 +222,56 @@ Each analog site features a **high-visibility, luminous 4.5px perimeter border**
 
 ---
 
-## 🐙 8. GitHub Repository
+## 🎬 8. Automated Planetary Flythrough Tours & Planetarium Presets
+
+Open the tour drawer by clicking **`🎬 Tour`** in the bottom-right navigation dock. The tour controls feature three dedicated presets designed for demonstrations, audience presentations, and full planetarium dome shows:
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Automated Planetary Flythrough Tour                   │
+│  [ ▶ Start Tour ] [ ⏸ Pause ] [ ⏮ Prev ] [ ⏭ Next ]   │
+│                                                        │
+│  Tours:                                                │
+│  [ ⏱️ 30s Demo ]  [ ⏱️ 1m Standard ]  [ ⏱️ 5m Comprehensive ]│
+│                                                        │
+│  Tour Phase: Ready to start                            │
+│  [=====================                     ] 45%      │
+│                                                        │
+│  Stop 1/5 (30s Tour): Mars Gale Crater & REMS Baseline │
+│  [-54.2°C Temp]   [0.76 kPa Pressure]   [MSL REMS]     │
+│  MSL Curiosity REMS ground truth: -54.2°C mean...      │
+└────────────────────────────────────────────────────────┘
+```
+
+### A. Preset Profiles
+1. **⏱️ 30s Demo (Planetarium Submission Demo)**:
+   - **Total Duration**: Exactly 30 seconds (5 stops × 6.0 seconds each).
+   - Specifically curated to convey the full breadth and technological scope of the product in a 30-second submission:
+     * **Stop 1**: Mars Gale Crater & REMS in-situ ground truth baseline (-54.2°C, 0.76 kPa).
+     * **Stop 2**: Multi-Criteria Decision Matrix & Gemini AI Mission Archetype Optimizer.
+     * **Stop 3**: Interplanetary flight to McMurdo Dry Valleys, Antarctica (cryogenic hyper-arid proving ground).
+     * **Stop 4**: Lut Desert calibrated surface-tangent Side View at 1,800m altitude (Kalut yardang wind corridors, 70.7°C skin heat).
+     * **Stop 5**: Global Earth Astrobiology Query Engine (live 250m SoilGrids regolith telemetry & habitability scoring).
+2. **⏱️ 1m Standard (Balanced Presentation Overview)**:
+   - **Total Duration**: 60 seconds (6 stops × 10.0 seconds each).
+   - Default tour profile when clicking `▶ Start Tour` without a prior button selection.
+   - Balanced pacing across Mars Gale Crater, Decision Matrix mechanics, McMurdo Dry Valleys, Lut Desert tangent side view, Aralkum/Uyuni desiccation analogs, and global SoilGrids sampling.
+3. **⏱️ 5m Comprehensive (Full Planetarium Presentation)**:
+   - **Total Duration**: 300 seconds (6 stops × 50.0 seconds each).
+   - In-depth planetarium dome presentation with exhaustive scientific narration on geological stratigraphy, REMS diurnal cycles, MCDM weighting mechanics, katabatic wind geomorphology, evaporite salt mineralogy, and soil science astrobiology.
+
+### B. Controls & Persistent Highlighting
+- **Auto-Selection**: Clicking `▶ Start Tour` without selecting a button defaults to `⏱️ 1m Standard` and highlights it automatically.
+- **Persistent Highlighting**: Whichever tour preset is selected remains highlighted with an active glowing cyan/emerald border throughout tour execution until completion or manual cancellation.
+- **Playback Controls**:
+  * `▶ Start Tour` / `⏹ End Tour`: Toggles the tour sequence.
+  * `⏸ Pause` / `▶ Play`: Pauses the timer and camera movement without clearing the selected preset highlight.
+  * `⏮ Prev` / `⏭ Next`: Steps backward or forward between stops within the active tour preset.
+- **Live Dossier Card**: Displays live stop titles, key metrics pills, and scientific narration synchronized with OpenSpace camera flight.
+
+---
+
+## 🐙 9. GitHub Repository
 
 Tracked and synchronized at:  
 **`https://github.com/bertrandejuan/InterSESHllar.git` (`main` branch)**

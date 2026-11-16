@@ -136,9 +136,11 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 - Orbitally legible `RenderableLabel` billboard typography attached via `GlobeTranslation`.
 - Independent toggles for continuous spatial vector overlays across all 5 planetary science categories.
 
-### 5. Automated Cinematic Tour & Keyboard Hotkeys
-- Automated flight path sequentially touring Mars Gale Crater and all 4 Earth deserts.
-- Speed governor (`0.5x`, `1.0x`, `1.5x`, `2.0x`), pause/resume, and step controls.
+### 5. Automated Cinematic Tour Profiles & Planetarium Presets
+- **30-Second Planetarium Demo (`⏱️ 30s Demo`)**: Rapid, high-impact overview curated specifically for planetarium submissions, capturing the full product scope across 5 punchy 6-second stops (Mars REMS Baseline -> MCDM Decision Matrix & Gemini Optimizer -> McMurdo Cryosphere -> Lut Yardangs Side View -> Global SoilGrids Astrobiology Query).
+- **1-Minute Standard Overview (`⏱️ 1m Standard`)**: Default tour profile featuring 6 balanced 10-second stops covering Mars Gale Crater, MCDM weights, all 4 Earth desert analogs, and live SoilGrids regolith scoring.
+- **5-Minute Comprehensive Presentation (`⏱️ 5m Comprehensive`)**: Exhaustive 6-stop × 50-second planetarium presentation with deep scientific narration, geological stratigraphy, REMS diurnal cycles, katabatic wind geomorphology, and real-time habitability metrics.
+- **Persistent Selection & Playback Integration**: Clicking `▶ Start Tour` without prior selection defaults to the 1-Minute tour; chosen tour preset buttons remain highlighted throughout tour execution.
 - Global OpenSpace hotkeys:
   * `Ctrl+Alt+M`: Mars Gale Crater
   * `Ctrl+Alt+1`: Earth Aralkum Desert
@@ -147,7 +149,12 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
   * `Ctrl+Alt+4`: Earth Salar de Uyuni
   * `Ctrl+Alt+0`: Restore Orbital Overview
 
-### 6. Clean, Single-Scrollbar UI Architecture
+### 6. Global Earth Astrobiology Query & Live Camera Sync
+- Query 0–5 cm subaerial fine earth regolith telemetry (pH, SOC, bulk density) anywhere on Earth at 250m resolution via ISRIC SoilGrids v2.0 REST/WCS.
+- **Live Camera Position Sync (`📍 Active Site`)**: Clicking Active Site reads the exact camera geographic coordinates displayed in OpenSpace (`Position: <lat>, <lon>`), populating latitude and longitude inputs.
+- **Integrated Query & Flight**: Clicking `🔬 Query SoilGrids Telemetry` automatically flies OpenSpace to the target Earth coordinates while asynchronously fetching regolith metrics and habitability similarity to Gale Crater.
+
+### 7. Clean, Single-Scrollbar UI Architecture
 - Streamlined layout with a single, dedicated vertical scrollbar (eliminates duplicate dock scrollbars and overlapping headers).
 - Uncluttered presentation focusing strictly on empirical telemetry, mathematical scores, and interactive camera tools.
 
