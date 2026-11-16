@@ -30,7 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
     tourSpeed: 1.0,
     tourTimer: null,
     hasTourEverRun: false,
-    tourRestartNeeded: false
+    tourRestartNeeded: false,
+    categoryWeights: {
+      thermal: 20,
+      astrobiology: 20,
+      dynamics: 20,
+      moisture: 20,
+      radiation: 20
+    }
   };
 
   // OpenSpace API & Gemini Services
@@ -73,6 +80,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnLocationHUDText = document.getElementById("btn-location-hud-text");
   const btnComparisonMatrixHUD = document.getElementById("btn-comparison-matrix-hud");
   const btnComparisonMatrixText = document.getElementById("btn-comparison-matrix-text");
+  const btnOpenDecisionMatrix = document.getElementById("btn-open-decision-matrix");
+  const modalDecisionMatrix = document.getElementById("modal-decision-matrix");
+  const btnCloseDecisionMatrix = document.getElementById("btn-close-decision-matrix");
+  const btnCloseDecisionMatrixFooter = document.getElementById("btn-close-decision-matrix-footer");
+  const btnResetWeights = document.getElementById("btn-reset-weights");
+  const weightSliders = document.querySelectorAll(".weight-slider");
+  const matrixPresetBtns = document.querySelectorAll(".btn-matrix-preset");
+  const decisionMatrixTbody = document.getElementById("decision-matrix-tbody");
+  const matrixLeaderboardGrid = document.getElementById("matrix-leaderboard-grid");
 
   // DOM Elements - One Accordion Container
   const scienceAccordion = document.getElementById("science-accordion");
@@ -1013,13 +1029,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----------------------------------------------------
   // 7. Site Navigation & Mathematical Overall Score Calculation
-  // Overall score = arithmetic mean of active quantitative categories:
-  // (Thermal + Astrobiology/SoilGrids + Dynamics + Moisture + Radiation) / 5
+  // Overall score = multi-criteria decision weighted sum across 5 domains:
+  // (w_thermal*Thermal + w_astro*Astrobiology + w_dynamics*Dynamics + w_moisture*Moisture + w_radiation*Radiation) / sum(w)
   // ----------------------------------------------------
+  function getNormalizedCategoryWeights() {
+    const raw = state.categoryWeights || {
+      thermal: 20,
+      astrobiology: 20,
+      dynamics: 20,
+      moisture: 20,
+      radiation: 20
+    };
+    const total = Object.values(raw).reduce((a, b) => a + b, 0);
+    if (total <= 0) {
+      return { thermal: 0.2, astrobiology: 0.2, dynamics: 0.2, moisture: 0.2, radiation: 0.2 };
+    }
+    const norm = {};
+    for (const k of Object.keys(raw)) {
+      norm[k] = raw[k] / total;
+    }
+    return norm;
+  }
+
   function computeSiteOverallScore(siteMetrics, marsMetrics) {
-    let catScores = [];
+    const normWeights = getNormalizedCategoryWeights();
+    let weightedSum = 0;
+    let weightSumUsed = 0;
 
     SCIENCE_CATEGORIES.forEach((cat) => {
+      const w = normWeights[cat.key] !== undefined ? normWeights[cat.key] : 0.2;
       let sum = 0;
       let count = 0;
       cat.parameters.forEach((p) => {
@@ -1031,13 +1069,29 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       });
-      if (count > 0) {
-        catScores.push(sum / count);
+      if (count > 0 && w > 0) {
+        weightedSum += (sum / count) * w;
+        weightSumUsed += w;
       }
     });
 
-    if (catScores.length === 0) return null;
-    return catScores.reduce((a, b) => a + b, 0) / catScores.length;
+    if (weightSumUsed === 0) return null;
+    return weightedSum / weightSumUsed;
+  }
+
+  function updateActiveSiteScoreDisplay() {
+    const site = getActiveSiteData();
+    if (!site || site.globe === "Mars") return;
+    const marsBaseline = getMarsBaselineData();
+    const calculatedOverall = computeSiteOverallScore(site.metrics || {}, marsBaseline.metrics || {});
+    if (overallScoreNum) {
+      overallScoreNum.innerText = calculatedOverall !== null ? calculatedOverall.toFixed(1) : "N/A";
+    }
+    if (overallScoreRank) {
+      const norm = getNormalizedCategoryWeights();
+      const isCustom = Object.values(norm).some(v => Math.abs(v - 0.2) > 0.01);
+      overallScoreRank.innerText = isCustom ? `${site.name} Analog (Decision Matrix Weighted)` : `${site.name} Analog (Equal Weights)`;
+    }
   }
 
   function selectSite(siteKey, flyCamera = true) {
@@ -1067,13 +1121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (overallScorePanel) overallScorePanel.style.display = "flex";
       if (marsReferencePanel) marsReferencePanel.style.display = "none";
 
-      const calculatedOverall = computeSiteOverallScore(site.metrics || {}, marsBaseline.metrics || {});
-      if (overallScoreNum) {
-        overallScoreNum.innerText = calculatedOverall !== null ? calculatedOverall.toFixed(1) : "N/A";
-      }
-      if (overallScoreRank) {
-        overallScoreRank.innerText = `${site.name} Analog (Math Formula)`;
-      }
+      updateActiveSiteScoreDisplay();
     }
 
     renderScienceAccordion();
@@ -2231,6 +2279,278 @@ document.addEventListener("DOMContentLoaded", () => {
       if (inputGeminiKey) inputGeminiKey.value = "";
       modalGeminiSettings.style.display = "none";
       loadBlurb(false);
+    });
+  }
+
+  // ----------------------------------------------------
+  // 12. Customizable Multi-Criteria Decision Matrix Engine
+  // ----------------------------------------------------
+  const DECISION_MATRIX_SITES = [
+    { key: "mcmurdo", name: "McMurdo Dry Valleys", country: "Antarctica", icon: "❄️" },
+    { key: "lut", name: "Lut Desert", country: "Iran", icon: "🔥" },
+    { key: "aralkum", name: "Aralkum Desert", country: "Uzbekistan", icon: "🏜️" },
+    { key: "uyuni", name: "Salar de Uyuni", country: "Bolivia", icon: "🧂" }
+  ];
+
+  const MISSION_PRESETS = {
+    balanced: { thermal: 20, astrobiology: 20, dynamics: 20, moisture: 20, radiation: 20 },
+    astrobiology: { thermal: 15, astrobiology: 50, dynamics: 5, moisture: 20, radiation: 10 },
+    dynamics: { thermal: 25, astrobiology: 5, dynamics: 45, moisture: 15, radiation: 10 },
+    radiation: { thermal: 30, astrobiology: 5, dynamics: 5, moisture: 15, radiation: 45 },
+    cryo: { thermal: 45, astrobiology: 5, dynamics: 10, moisture: 30, radiation: 10 }
+  };
+
+  function computeAllSiteCategoryScores() {
+    const mars = getMarsBaselineData();
+    const siteScores = {};
+
+    DECISION_MATRIX_SITES.forEach((s) => {
+      const siteData = window.PLANETARY_ANALOGS ? window.PLANETARY_ANALOGS[s.key] : null;
+      if (!siteData) return;
+      const m = siteData.metrics || {};
+      const catScores = {};
+
+      SCIENCE_CATEGORIES.forEach((cat) => {
+        let sum = 0;
+        let count = 0;
+        cat.parameters.forEach((p) => {
+          if (p.scale && m[p.key] !== undefined && mars.metrics && mars.metrics[p.key] !== undefined && m[p.key] !== null) {
+            const sVal = calcSimScore(m[p.key], mars.metrics[p.key], p.scale);
+            if (sVal !== null) {
+              sum += sVal;
+              count++;
+            }
+          }
+        });
+        catScores[cat.key] = count > 0 ? (sum / count) : 0;
+      });
+      siteScores[s.key] = catScores;
+    });
+
+    return siteScores;
+  }
+
+  function renderDecisionMatrix() {
+    if (!decisionMatrixTbody) return;
+
+    const normWeights = getNormalizedCategoryWeights();
+    const siteCatScores = computeAllSiteCategoryScores();
+
+    // 1. Update sliders & percentage badges in config panel
+    SCIENCE_CATEGORIES.forEach((cat) => {
+      const rawVal = state.categoryWeights[cat.key] !== undefined ? state.categoryWeights[cat.key] : 20;
+      const pct = (normWeights[cat.key] * 100).toFixed(0);
+
+      const slider = document.querySelector(`.weight-slider[data-cat="${cat.key}"]`);
+      if (slider && document.activeElement !== slider) {
+        slider.value = rawVal;
+      }
+      const pctBadge = document.getElementById(`weight-pct-${cat.key}`);
+      if (pctBadge) pctBadge.innerText = `${pct}%`;
+      const rawBadge = document.getElementById(`weight-raw-${cat.key}`);
+      if (rawBadge) rawBadge.innerText = `raw: ${rawVal}`;
+    });
+
+    // 2. Build Category Rows
+    let rowsHtml = "";
+
+    SCIENCE_CATEGORIES.forEach((cat) => {
+      const weightPct = (normWeights[cat.key] * 100).toFixed(0);
+
+      // Find leader for this category
+      let highestScore = -1;
+      let leaderKey = null;
+      DECISION_MATRIX_SITES.forEach((s) => {
+        const score = siteCatScores[s.key] ? siteCatScores[s.key][cat.key] : 0;
+        if (score > highestScore) {
+          highestScore = score;
+          leaderKey = s.key;
+        }
+      });
+
+      rowsHtml += `
+        <tr class="tr-cat-row">
+          <td class="td-cat-title">
+            <span style="font-size: 1rem; margin-right: 5px;">${cat.icon}</span>
+            <span>${cat.title}</span>
+          </td>
+          <td class="td-weight-cell">${weightPct}%</td>
+      `;
+
+      DECISION_MATRIX_SITES.forEach((s) => {
+        const score = siteCatScores[s.key] ? siteCatScores[s.key][cat.key] : 0;
+        const isLeader = (s.key === leaderKey);
+        const scoreFormatted = `${score.toFixed(1)}%` + (isLeader ? " ★" : "");
+
+        rowsHtml += `
+          <td class="td-site-score ${isLeader ? 'is-leader-cell' : ''}">
+            <div class="matrix-cell-content">
+              <span class="matrix-pct ${isLeader ? 'is-leader' : ''}">${scoreFormatted}</span>
+              <div class="matrix-mini-bar">
+                <div class="matrix-mini-bar-fill" style="width: ${score.toFixed(1)}%; background: ${isLeader ? '#38bdf8' : 'rgba(148, 163, 184, 0.6)'};"></div>
+              </div>
+            </div>
+          </td>
+        `;
+      });
+
+      rowsHtml += `</tr>`;
+    });
+
+    // 3. Calculate Weighted Overall for each site
+    const siteWeightedOverall = {};
+    DECISION_MATRIX_SITES.forEach((s) => {
+      let sum = 0;
+      SCIENCE_CATEGORIES.forEach((cat) => {
+        const score = siteCatScores[s.key] ? siteCatScores[s.key][cat.key] : 0;
+        const w = normWeights[cat.key] !== undefined ? normWeights[cat.key] : 0.2;
+        sum += score * w;
+      });
+      siteWeightedOverall[s.key] = Number(sum.toFixed(1));
+    });
+
+    // Determine ranking
+    const sortedSites = [...DECISION_MATRIX_SITES].sort((a, b) => {
+      return siteWeightedOverall[b.key] - siteWeightedOverall[a.key];
+    });
+
+    const rankMap = {};
+    sortedSites.forEach((s, idx) => {
+      rankMap[s.key] = idx + 1; // 1, 2, 3, 4
+    });
+
+    const overallWinnerKey = sortedSites[0].key;
+
+    // 4. Weighted Overall Match Row
+    rowsHtml += `
+      <tr class="tr-weighted-overall">
+        <td class="overall-row-label">
+          <span>🎯 Weighted Overall Match</span>
+        </td>
+        <td class="td-weight-cell" style="color: #fff; font-size: 0.82rem;">100%</td>
+    `;
+
+    DECISION_MATRIX_SITES.forEach((s) => {
+      const overallVal = siteWeightedOverall[s.key];
+      const isWinner = (s.key === overallWinnerKey);
+      const valStr = `${overallVal.toFixed(1)}%` + (isWinner ? " ★" : "");
+
+      rowsHtml += `
+        <td class="td-site-score">
+          <div class="overall-score-cell">
+            <span class="overall-score-big ${isWinner ? 'is-winner' : ''}">${valStr}</span>
+          </div>
+        </td>
+      `;
+    });
+
+    rowsHtml += `</tr>`;
+
+    // 5. Rank Row
+    rowsHtml += `
+      <tr class="tr-rank-row">
+        <td style="font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 0.68rem;">
+          <span>🏆 Mission Rank</span>
+        </td>
+        <td class="td-weight-cell" style="color: #64748b;">—</td>
+    `;
+
+    DECISION_MATRIX_SITES.forEach((s) => {
+      const rank = rankMap[s.key];
+      let rankClass = `rank-${rank}${rank === 1 ? 'st' : rank === 2 ? 'nd' : rank === 3 ? 'rd' : 'th'}`;
+      let rankLabel = rank === 1 ? "🥇 1ST RANK" : rank === 2 ? "🥈 2ND RANK" : rank === 3 ? "🥉 3RD RANK" : "4TH RANK";
+
+      rowsHtml += `
+        <td>
+          <span class="rank-badge ${rankClass}">${rankLabel}</span>
+        </td>
+      `;
+    });
+
+    rowsHtml += `</tr>`;
+
+    decisionMatrixTbody.innerHTML = rowsHtml;
+
+    // 6. Build Leaderboard Grid Cards
+    if (matrixLeaderboardGrid) {
+      let lbHtml = "";
+      sortedSites.forEach((s, idx) => {
+        const rank = idx + 1;
+        const score = siteWeightedOverall[s.key];
+        const isWinner = (rank === 1);
+        const trophy = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "4️⃣";
+
+        lbHtml += `
+          <div class="leaderboard-card ${isWinner ? 'winner' : ''}">
+            <div class="lb-top-row">
+              <span style="font-size: 0.72rem; font-weight: 800; color: ${isWinner ? '#fef08a' : '#94a3b8'};">${trophy} ${rank === 1 ? '1ST PLACE' : rank === 2 ? '2ND PLACE' : rank === 3 ? '3RD PLACE' : '4TH PLACE'}</span>
+              <span class="lb-score">${score.toFixed(1)}%</span>
+            </div>
+            <span class="lb-site-name">${s.icon} ${s.name}</span>
+            <span style="font-size: 0.64rem; color: var(--text-muted);">${s.country}</span>
+          </div>
+        `;
+      });
+      matrixLeaderboardGrid.innerHTML = lbHtml;
+    }
+  }
+
+  // Event Listeners for Decision Matrix Modal
+  if (btnOpenDecisionMatrix) {
+    btnOpenDecisionMatrix.addEventListener("click", () => {
+      if (modalDecisionMatrix) {
+        modalDecisionMatrix.style.display = "flex";
+        renderDecisionMatrix();
+      }
+    });
+  }
+
+  if (btnCloseDecisionMatrix) {
+    btnCloseDecisionMatrix.addEventListener("click", () => {
+      if (modalDecisionMatrix) modalDecisionMatrix.style.display = "none";
+    });
+  }
+
+  if (btnCloseDecisionMatrixFooter) {
+    btnCloseDecisionMatrixFooter.addEventListener("click", () => {
+      if (modalDecisionMatrix) modalDecisionMatrix.style.display = "none";
+    });
+  }
+
+  // Weight Sliders
+  weightSliders.forEach((slider) => {
+    slider.addEventListener("input", () => {
+      const cat = slider.getAttribute("data-cat");
+      if (cat) {
+        state.categoryWeights[cat] = parseFloat(slider.value) || 0;
+        matrixPresetBtns.forEach(btn => btn.classList.remove("active"));
+        renderDecisionMatrix();
+        updateActiveSiteScoreDisplay();
+      }
+    });
+  });
+
+  // Preset Buttons
+  matrixPresetBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const presetKey = btn.getAttribute("data-preset");
+      const preset = MISSION_PRESETS[presetKey];
+      if (preset) {
+        state.categoryWeights = { ...preset };
+        matrixPresetBtns.forEach(b => b.classList.toggle("active", b === btn));
+        renderDecisionMatrix();
+        updateActiveSiteScoreDisplay();
+      }
+    });
+  });
+
+  // Reset Weights Button
+  if (btnResetWeights) {
+    btnResetWeights.addEventListener("click", () => {
+      state.categoryWeights = { thermal: 20, astrobiology: 20, dynamics: 20, moisture: 20, radiation: 20 };
+      matrixPresetBtns.forEach(b => b.classList.toggle("active", b.getAttribute("data-preset") === "balanced"));
+      renderDecisionMatrix();
+      updateActiveSiteScoreDisplay();
     });
   }
 

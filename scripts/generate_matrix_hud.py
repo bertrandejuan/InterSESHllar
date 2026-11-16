@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Generates the Earth to Mars Comparison Matrix HUD Card (1600 x 1020 PNG)
+Generates the Earth to Mars Comparison & Multi-Criteria Decision Matrix HUD Card (1600 x 1020 PNG)
 Strictly implementing the user specification:
 - 4 Earth Analogs (McMurdo, Lut, Aralkum, Uyuni) — NO Mars 100% column.
 - 5 Scientific Domains + Dedicated Overall Mars Match Row.
-- Big, prominent match percentages (with ★ for category leaders).
+- Supports customizable category weighting (Thermal, Astrobiology, Dynamics, Moisture, Radiation).
+- Big, prominent match percentages (with ★ for category leaders and overall winner).
 - Detailed empirical physical telemetry underneath each percentage in smaller text.
 - Clean glassmorphic styling matching OpenSpace viewport aesthetic.
 """
 
 import os
+import sys
+import argparse
 from PIL import Image, ImageDraw, ImageFont
 
 WIDTH = 1600
@@ -43,124 +46,177 @@ FONT_DETAIL_1 = get_font(13, bold=True)
 FONT_DETAIL_2 = get_font(12, bold=False)
 FONT_FOOTER = get_font(15, bold=False)
 
-# 4 Earth Analogs
-ANALOGS = [
+# Category base scores
+RAW_CAT_SCORES = {
+    'mcmurdo': {'thermal': 62.4, 'astrobiology': 94.4, 'dynamics': 41.9, 'moisture': 49.4, 'radiation': 67.9},
+    'lut':     {'thermal': 18.7, 'astrobiology': 77.6, 'dynamics': 61.8, 'moisture': 80.8, 'radiation': 54.9},
+    'aralkum': {'thermal': 26.5, 'astrobiology': 52.1, 'dynamics': 46.2, 'moisture': 44.9, 'radiation': 75.8},
+    'uyuni':   {'thermal': 28.7, 'astrobiology': 45.5, 'dynamics': 66.6, 'moisture': 45.4, 'radiation': 46.6}
+}
+
+DEFAULT_ANALOGS = [
     {
         'key': 'mcmurdo',
         'name': "McMurdo Dry Valleys",
         'short_name': "McMurdo Valleys",
         'region': "Antarctica (77.5° S)",
-        'color': (56, 189, 248),
-        'overall': "63.2% ★",
-        'rank': "1ST RANK"
+        'color': (56, 189, 248)
     },
     {
         'key': 'lut',
         'name': "Lut Desert (Dasht-e Lut)",
         'short_name': "Lut Desert",
         'region': "Iran (30.2° N)",
-        'color': (245, 158, 11),
-        'overall': "58.8%",
-        'rank': "2ND RANK"
+        'color': (245, 158, 11)
     },
     {
         'key': 'aralkum',
         'name': "Aralkum Desert",
         'short_name': "Aralkum Desert",
         'region': "Uzbekistan (44.5° N)",
-        'color': (74, 222, 128),
-        'overall': "49.1%",
-        'rank': "3RD RANK"
+        'color': (74, 222, 128)
     },
     {
         'key': 'uyuni',
         'name': "Salar de Uyuni",
         'short_name': "Salar de Uyuni",
         'region': "Bolivia (20.3° S)",
-        'color': (45, 212, 191),
-        'overall': "46.6%",
-        'rank': "4TH RANK"
+        'color': (45, 212, 191)
     }
 ]
 
-# Rows: 5 Categories + Overall
-ROWS_DATA = [
-    {
-        'title': "1. Thermal Conditions",
-        'icon': "🌡️",
-        'color': (249, 115, 22),
-        'mars_baseline': "Gale Baseline: -53.7 °C Mean Air | ΔT 58.7 °C",
-        'values': {
-            'mcmurdo': {'pct': "62.4% ★", 'lead': True,  'd1': "-50.70 °C Mean Air  |  TS: -25.58 °C", 'd2': "Diurnal ΔT: 45.68 °C  (-58 °C Winter Low)", 'bar': 62.4},
-            'lut':     {'pct': "18.7%",   'lead': False, 'd1': "26.60 °C Mean Air  |  TS: 70.70 °C",  'd2': "Diurnal ΔT: 15.64 °C  (+51 °C Summer High)", 'bar': 18.7},
-            'aralkum': {'pct': "26.5%",   'lead': False, 'd1': "10.66 °C Mean Air  |  TS: 12.95 °C",  'd2': "Diurnal ΔT: 4.36 °C  (-36 °C to +36 °C Range)", 'bar': 26.5},
-            'uyuni':   {'pct': "28.7%",   'lead': False, 'd1': "8.81 °C Mean Air   |  TS: 8.81 °C",   'd2': "Diurnal ΔT: 16.76 °C  (-18 °C Winter Low)", 'bar': 28.7}
+def build_rows_data(weights=None):
+    if weights is None:
+        weights = {'thermal': 20.0, 'astrobiology': 20.0, 'dynamics': 20.0, 'moisture': 20.0, 'radiation': 20.0}
+
+    total_w = sum(weights.values())
+    if total_w <= 0:
+        norm_w = {k: 0.2 for k in weights}
+    else:
+        norm_w = {k: weights[k] / total_w for k in weights}
+
+    # Calculate weighted overall for each site
+    site_overall = {}
+    for site, cats in RAW_CAT_SCORES.items():
+        w_score = sum(cats[cat_key] * norm_w[cat_key] for cat_key in ['thermal', 'astrobiology', 'dynamics', 'moisture', 'radiation'])
+        site_overall[site] = round(w_score, 1)
+
+    # Sort sites for overall ranking
+    sorted_sites = sorted(site_overall.items(), key=lambda x: x[1], reverse=True)
+    rank_map = {}
+    for rank_idx, (s_key, s_score) in enumerate(sorted_sites, start=1):
+        suffix = "TH"
+        if rank_idx == 1: suffix = "ST"
+        elif rank_idx == 2: suffix = "ND"
+        elif rank_idx == 3: suffix = "RD"
+        rank_map[s_key] = f"{rank_idx}{suffix} RANK"
+
+    # Category telemetry descriptions
+    rows = [
+        {
+            'cat_key': 'thermal',
+            'title': f"1. Thermal Conditions (w:{norm_w['thermal']*100:.0f}%)",
+            'icon': "🌡️",
+            'color': (249, 115, 22),
+            'mars_baseline': "Gale Baseline: -53.7 °C Mean Air | ΔT 58.7 °C",
+            'values': {
+                'mcmurdo': {'pct': "62.4% ★", 'lead': True,  'd1': "-50.70 °C Mean Air  |  TS: -25.58 °C", 'd2': "Diurnal ΔT: 45.68 °C  (-58 °C Winter Low)", 'bar': 62.4},
+                'lut':     {'pct': "18.7%",   'lead': False, 'd1': "26.60 °C Mean Air  |  TS: 70.70 °C",  'd2': "Diurnal ΔT: 15.64 °C  (+51 °C Summer High)", 'bar': 18.7},
+                'aralkum': {'pct': "26.5%",   'lead': False, 'd1': "10.66 °C Mean Air  |  TS: 12.95 °C",  'd2': "Diurnal ΔT: 4.36 °C  (-36 °C to +36 °C Range)", 'bar': 26.5},
+                'uyuni':   {'pct': "28.7%",   'lead': False, 'd1': "8.81 °C Mean Air   |  TS: 8.81 °C",   'd2': "Diurnal ΔT: 16.76 °C  (-18 °C Winter Low)", 'bar': 28.7}
+            }
+        },
+        {
+            'cat_key': 'astrobiology',
+            'title': f"2. Astrobiology / Makeup (w:{norm_w['astrobiology']*100:.0f}%)",
+            'icon': "🧬",
+            'color': (168, 85, 247),
+            'mars_baseline': "Gale: pH 7.80 | SOC 0.10 g/kg | BD 1.58 kg/dm³",
+            'values': {
+                'mcmurdo': {'pct': "94.4% ★", 'lead': True,  'd1': "pH: 7.80  |  SOC: 0.25 g/kg (97% Match)", 'd2': "Bulk Density: 1.52 kg/dm³ | Cryptoendolithic", 'bar': 94.4},
+                'lut':     {'pct': "77.6%",   'lead': False, 'd1': "pH: 7.94  |  SOC: 2.06 g/kg (68% Match)", 'd2': "Bulk Density: 1.46 kg/dm³ | Basalt Yardangs", 'bar': 77.6},
+                'aralkum': {'pct': "52.1%",   'lead': False, 'd1': "pH: 7.82  |  SOC: 54.45 g/kg (Seabed)",  'd2': "Bulk Density: 1.36 kg/dm³ | Sulfate Crust", 'bar': 52.1},
+                'uyuni':   {'pct': "45.5%",   'lead': False, 'd1': "pH: 7.78  |  SOC: 23.11 g/kg (Halite)",  'd2': "Bulk Density: 1.18 kg/dm³ | Porous Salt Crust", 'bar': 45.5}
+            }
+        },
+        {
+            'cat_key': 'dynamics',
+            'title': f"3. Atmospheric Dynamics (w:{norm_w['dynamics']*100:.0f}%)",
+            'icon': "💨",
+            'color': (59, 130, 246),
+            'mars_baseline': "Gale Baseline: 3.50 m/s Wind | 0.76 kPa Pressure",
+            'values': {
+                'mcmurdo': {'pct': "41.9%",   'lead': False, 'd1': "3.74 m/s Mean Wind  (Gust: 22.8 m/s)",   'd2': "94.59 kPa Pressure | Katabatic Airflows", 'bar': 41.9},
+                'lut':     {'pct': "61.8%",   'lead': False, 'd1': "4.09 m/s Mean Wind  (Gust: 24.2 m/s)",   'd2': "97.43 kPa Pressure | 120-Day Summer Gale", 'bar': 61.8},
+                'aralkum': {'pct': "46.2%",   'lead': False, 'd1': "5.74 m/s Mean Wind  (Gust: 17.4 m/s)",   'd2': "101.10 kPa Pressure | Salt-Dust Storms", 'bar': 46.2},
+                'uyuni':   {'pct': "66.6% ★", 'lead': True,  'd1': "4.39 m/s Mean Wind  (Gust: 21.4 m/s)",   'd2': "64.93 kPa Hypobaric Altiplano Pressure", 'bar': 66.6}
+            }
+        },
+        {
+            'cat_key': 'moisture',
+            'title': f"4. Atmospheric Moisture (w:{norm_w['moisture']*100:.0f}%)",
+            'icon': "💧",
+            'color': (6, 182, 212),
+            'mars_baseline': "Gale Baseline: 7.44% RH | 0.00 mm/d Liquid Rain",
+            'values': {
+                'mcmurdo': {'pct': "49.4%",   'lead': False, 'd1': "68.66% RH  |  QV: 0.80 g/kg Mixing",     'd2': "0.05 mm/d Precip (Hyper-Arid Polar Desert)", 'bar': 49.4},
+                'lut':     {'pct': "80.8% ★", 'lead': True,  'd1': "21.98% RH  |  QV: 3.87 g/kg Mixing",     'd2': "0.11 mm/d Sparse Rain (Hyper-Arid Core)", 'bar': 80.8},
+                'aralkum': {'pct': "44.9%",   'lead': False, 'd1': "70.58% RH  |  QV: 4.70 g/kg Mixing",     'd2': "0.37 mm/d Rain (Continental Arid Basin)", 'bar': 44.9},
+                'uyuni':   {'pct': "45.4%",   'lead': False, 'd1': "47.88% RH  |  QV: 3.39 g/kg Mixing",     'd2': "0.52 mm/d Rain (Arid High Altiplano)", 'bar': 45.4}
+            }
+        },
+        {
+            'cat_key': 'radiation',
+            'title': f"5. Solar & UV Radiation (w:{norm_w['radiation']*100:.0f}%)",
+            'icon': "☀️",
+            'color': (234, 179, 8),
+            'mars_baseline': "Gale Baseline: 14.76 MJ/m²/d | UVB: 0.200 W/m²",
+            'values': {
+                'mcmurdo': {'pct': "67.9%",   'lead': False, 'd1': "10.59 MJ/m²/d Downward Solar Flux",      'd2': "UVA: 8.65 W/m²  |  UVB: 0.12 W/m²", 'bar': 67.9},
+                'lut':     {'pct': "54.9%",   'lead': False, 'd1': "21.14 MJ/m²/d Solar Shortwave Flux",     'd2': "UVA: 14.86 W/m² |  UVB: 0.28 W/m²", 'bar': 54.9},
+                'aralkum': {'pct': "75.8% ★", 'lead': True,  'd1': "13.27 MJ/m²/d Solar Shortwave Flux",     'd2': "UVA: 10.26 W/m² |  UVB: 0.20 W/m² (Exact)", 'bar': 75.8},
+                'uyuni':   {'pct': "46.6%",   'lead': False, 'd1': "24.40 MJ/m²/d High Solar Irradiance",    'd2': "UVA: 16.50 W/m² |  UVB: 0.40 W/m² (High UV)", 'bar': 46.6}
+            }
         }
-    },
-    {
-        'title': "2. Astrobiology / Makeup",
-        'icon': "🧬",
-        'color': (168, 85, 247),
-        'mars_baseline': "Gale: pH 7.80 | SOC 0.10 g/kg | BD 1.58 kg/dm³",
-        'values': {
-            'mcmurdo': {'pct': "94.4% ★", 'lead': True,  'd1': "pH: 7.80  |  SOC: 0.25 g/kg (97% Match)", 'd2': "Bulk Density: 1.52 kg/dm³ | Cryptoendolithic", 'bar': 94.4},
-            'lut':     {'pct': "77.6%",   'lead': False, 'd1': "pH: 7.94  |  SOC: 2.06 g/kg (68% Match)", 'd2': "Bulk Density: 1.46 kg/dm³ | Basalt Yardangs", 'bar': 77.6},
-            'aralkum': {'pct': "52.1%",   'lead': False, 'd1': "pH: 7.82  |  SOC: 54.45 g/kg (Seabed)",  'd2': "Bulk Density: 1.36 kg/dm³ | Sulfate Crust", 'bar': 52.1},
-            'uyuni':   {'pct': "45.5%",   'lead': False, 'd1': "pH: 7.78  |  SOC: 23.11 g/kg (Halite)",  'd2': "Bulk Density: 1.18 kg/dm³ | Porous Salt Crust", 'bar': 45.5}
+    ]
+
+    # Overall Row
+    overall_values = {}
+    top_site = sorted_sites[0][0]
+    for site, score in site_overall.items():
+        is_winner = (site == top_site)
+        rank_label = rank_map[site]
+        overall_values[site] = {
+            'pct': f"{score:.1f}%" + (" ★" if is_winner else ""),
+            'lead': is_winner,
+            'd1': f"{rank_label} • Weighted Match",
+            'd2': f"Weighted MCDM Score across 5 Domains",
+            'bar': score
         }
-    },
-    {
-        'title': "3. Atmospheric Dynamics",
-        'icon': "💨",
-        'color': (59, 130, 246),
-        'mars_baseline': "Gale Baseline: 3.50 m/s Wind | 0.76 kPa Pressure",
-        'values': {
-            'mcmurdo': {'pct': "41.9%",   'lead': False, 'd1': "3.74 m/s Mean Wind  (Gust: 22.8 m/s)",   'd2': "94.59 kPa Pressure | Katabatic Airflows", 'bar': 41.9},
-            'lut':     {'pct': "61.8%",   'lead': False, 'd1': "4.09 m/s Mean Wind  (Gust: 24.2 m/s)",   'd2': "97.43 kPa Pressure | 120-Day Summer Gale", 'bar': 61.8},
-            'aralkum': {'pct': "46.2%",   'lead': False, 'd1': "5.74 m/s Mean Wind  (Gust: 17.4 m/s)",   'd2': "101.10 kPa Pressure | Salt-Dust Storms", 'bar': 46.2},
-            'uyuni':   {'pct': "66.6% ★", 'lead': True,  'd1': "4.39 m/s Mean Wind  (Gust: 21.4 m/s)",   'd2': "64.93 kPa Hypobaric Altiplano Pressure", 'bar': 66.6}
-        }
-    },
-    {
-        'title': "4. Atmospheric Moisture",
-        'icon': "💧",
-        'color': (6, 182, 212),
-        'mars_baseline': "Gale Baseline: 7.44% RH | 0.00 mm/d Liquid Rain",
-        'values': {
-            'mcmurdo': {'pct': "49.4%",   'lead': False, 'd1': "68.66% RH  |  QV: 0.80 g/kg Mixing",     'd2': "0.05 mm/d Precip (Hyper-Arid Polar Desert)", 'bar': 49.4},
-            'lut':     {'pct': "80.8% ★", 'lead': True,  'd1': "21.98% RH  |  QV: 3.87 g/kg Mixing",     'd2': "0.11 mm/d Sparse Rain (Hyper-Arid Core)", 'bar': 80.8},
-            'aralkum': {'pct': "44.9%",   'lead': False, 'd1': "70.58% RH  |  QV: 4.70 g/kg Mixing",     'd2': "0.37 mm/d Rain (Continental Arid Basin)", 'bar': 44.9},
-            'uyuni':   {'pct': "45.4%",   'lead': False, 'd1': "47.88% RH  |  QV: 3.39 g/kg Mixing",     'd2': "0.52 mm/d Rain (Arid High Altiplano)", 'bar': 45.4}
-        }
-    },
-    {
-        'title': "5. Solar & UV Radiation",
-        'icon': "☀️",
-        'color': (234, 179, 8),
-        'mars_baseline': "Gale Baseline: 14.76 MJ/m²/d | UVB: 0.200 W/m²",
-        'values': {
-            'mcmurdo': {'pct': "67.9%",   'lead': False, 'd1': "10.59 MJ/m²/d Downward Solar Flux",      'd2': "UVA: 8.65 W/m²  |  UVB: 0.12 W/m²", 'bar': 67.9},
-            'lut':     {'pct': "54.9%",   'lead': False, 'd1': "21.14 MJ/m²/d Solar Shortwave Flux",     'd2': "UVA: 14.86 W/m² |  UVB: 0.28 W/m²", 'bar': 54.9},
-            'aralkum': {'pct': "75.8% ★", 'lead': True,  'd1': "13.27 MJ/m²/d Solar Shortwave Flux",     'd2': "UVA: 10.26 W/m² |  UVB: 0.20 W/m² (Exact)", 'bar': 75.8},
-            'uyuni':   {'pct': "46.6%",   'lead': False, 'd1': "24.40 MJ/m²/d High Solar Irradiance",    'd2': "UVA: 16.50 W/m² |  UVB: 0.40 W/m² (High UV)", 'bar': 46.6}
-        }
-    },
-    {
-        'title': "OVERALL MARS MATCH",
+
+    rows.append({
+        'cat_key': 'overall',
+        'title': "WEIGHTED OVERALL MATCH",
         'icon': "🎯",
         'color': (56, 189, 248),
         'is_overall': True,
-        'mars_baseline': "Curiosity REMS, CheMin & SAM In-Situ Baseline (100.0%)",
-        'values': {
-            'mcmurdo': {'pct': "63.2% ★", 'lead': True,  'd1': "Rank #1 Analog Overall to Gale Crater", 'd2': "Top Thermal, Astrobiology & Cryo-regolith", 'bar': 63.2},
-            'lut':     {'pct': "58.8%",   'lead': False, 'd1': "Rank #2 Analog Overall to Gale Crater", 'd2': "Top Hyper-Arid Moisture & Yardang Model", 'bar': 58.8},
-            'aralkum': {'pct': "49.1%",   'lead': False, 'd1': "Rank #3 Analog Overall to Gale Crater", 'd2': "Top Radiation Match & Sulfate Seabed Model", 'bar': 49.1},
-            'uyuni':   {'pct': "46.6%",   'lead': False, 'd1': "Rank #4 Analog Overall to Gale Crater", 'd2': "Top Atmospheric Dynamics & Evaporite Model", 'bar': 46.6}
-        }
-    }
-]
+        'mars_baseline': f"Decision Matrix Weights: T:{norm_w['thermal']*100:.0f}% A:{norm_w['astrobiology']*100:.0f}% D:{norm_w['dynamics']*100:.0f}% M:{norm_w['moisture']*100:.0f}% R:{norm_w['radiation']*100:.0f}%",
+        'values': overall_values
+    })
 
-def generate_comparison_matrix_card():
+    # Build updated analogs with updated rank
+    analogs = []
+    for a in DEFAULT_ANALOGS:
+        a_copy = dict(a)
+        a_copy['rank'] = rank_map[a['key']]
+        a_copy['overall'] = f"{site_overall[a['key']]:.1f}%" + (" ★" if a['key'] == top_site else "")
+        analogs.append(a_copy)
+
+    return analogs, rows, norm_w, top_site
+
+def generate_comparison_matrix_card(weights=None):
+    analogs, rows_data, norm_w, top_site = build_rows_data(weights)
+
     img = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -172,8 +228,9 @@ def generate_comparison_matrix_card():
     draw.rectangle([20, 20, WIDTH - 20, 115], fill=(14, 22, 44, 255))
     draw.line([20, 115, WIDTH - 20, 115], fill=(56, 189, 248, 255), width=3)
 
-    title_text = "Earth to Mars Comparison Matrix"
-    sub_text = "Multi-Domain Empirical Climatology & Astrobiology Synthesis (Relative to Curiosity Gale Crater Baseline)"
+    is_custom = any(abs(v - 0.2) > 0.01 for v in norm_w.values())
+    title_text = "Customized Decision Matrix: Earth to Mars" if is_custom else "Earth to Mars Comparison Matrix"
+    sub_text = "Multi-Criteria Decision Evaluation (Relative to Curiosity Gale Crater Baseline)"
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 185, 220, 255))
 
@@ -184,8 +241,9 @@ def generate_comparison_matrix_card():
     badge_y = 28
     draw.rounded_rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], radius=12,
                            fill=(18, 32, 60, 255), outline=(56, 189, 248, 255), width=2)
-    draw.text((badge_x + 20, badge_y + 12), "PLANETARY ANALOG SYNTHESIS", font=FONT_BADGE_TITLE, fill=(140, 200, 255, 255))
-    draw.text((badge_x + 20, badge_y + 34), "4 TERRESTRIAL ANALOGS", font=FONT_BADGE_VAL, fill=(255, 255, 255, 255))
+    badge_title = "WEIGHTED DECISION MATRIX" if is_custom else "PLANETARY ANALOG SYNTHESIS"
+    draw.text((badge_x + 20, badge_y + 12), badge_title, font=FONT_BADGE_TITLE, fill=(140, 200, 255, 255))
+    draw.text((badge_x + 20, badge_y + 34), f"WINNER: {top_site.upper()}", font=FONT_BADGE_VAL, fill=(255, 255, 255, 255))
 
     # 2. Table Layout Coordinates (5 Columns: 1 Domain + 4 Earth Analogs; NO Mars 100% column)
     col_bounds = [
@@ -203,12 +261,12 @@ def generate_comparison_matrix_card():
     # Col 0 Header
     draw.rectangle([col_bounds[0][0], header_y, col_bounds[0][1], header_y + header_h], fill=(20, 32, 58, 255))
     draw.line([col_bounds[0][0], header_y + header_h, col_bounds[0][1], header_y + header_h], fill=(80, 110, 150, 255), width=2)
-    draw.text((col_bounds[0][0] + 12, header_y + 14), "SCIENTIFIC DOMAIN", font=FONT_COL_HEADER, fill=(190, 220, 255, 255))
-    draw.text((col_bounds[0][0] + 12, header_y + 42), "Gale Crater Baseline Context", font=FONT_COL_SUB, fill=(140, 170, 205, 255))
+    draw.text((col_bounds[0][0] + 12, header_y + 14), "CRITERION DOMAIN", font=FONT_COL_HEADER, fill=(190, 220, 255, 255))
+    draw.text((col_bounds[0][0] + 12, header_y + 42), "Category Weighting & Gale Baseline", font=FONT_COL_SUB, fill=(140, 170, 205, 255))
 
     # Earth Analogs Column Headers
     for i, col in enumerate(col_bounds[1:], start=0):
-        analog = ANALOGS[i]
+        analog = analogs[i]
         x1, x2 = col[0], col[1]
 
         header_bg = (18, 28, 52, 255)
@@ -222,9 +280,9 @@ def generate_comparison_matrix_card():
 
     # 3. Category Rows (6 rows total)
     row_y = header_y + header_h
-    row_h = (table_bottom_y - row_y) // len(ROWS_DATA)
+    row_h = (table_bottom_y - row_y) // len(rows_data)
 
-    for row_idx, r_data in enumerate(ROWS_DATA):
+    for row_idx, r_data in enumerate(rows_data):
         current_y = row_y + row_idx * row_h
         is_overall = r_data.get('is_overall', False)
 
@@ -245,7 +303,7 @@ def generate_comparison_matrix_card():
 
         # Analog Columns
         for i, col in enumerate(col_bounds[1:], start=0):
-            analog = ANALOGS[i]
+            analog = analogs[i]
             x1, x2 = col[0], col[1]
             c_val = r_data['values'][analog['key']]
 
@@ -296,4 +354,33 @@ def generate_comparison_matrix_card():
         print(f"Generated Comparison Matrix HUD: {out_path}")
 
 if __name__ == "__main__":
-    generate_comparison_matrix_card()
+    parser = argparse.ArgumentParser(description="Generate Earth to Mars Decision Matrix HUD")
+    parser.add_argument("--weights", type=str, default=None,
+                        help="Comma-separated weights (thermal,astrobiology,dynamics,moisture,radiation)")
+    parser.add_argument("--preset", type=str, default=None,
+                        choices=["balanced", "astrobiology", "dynamics", "radiation", "cryo"],
+                        help="Pre-configured mission weighting preset")
+    args = parser.parse_args()
+
+    weights = None
+    if args.preset:
+        presets = {
+            'balanced': {'thermal': 20.0, 'astrobiology': 20.0, 'dynamics': 20.0, 'moisture': 20.0, 'radiation': 20.0},
+            'astrobiology': {'thermal': 15.0, 'astrobiology': 50.0, 'dynamics': 5.0, 'moisture': 20.0, 'radiation': 10.0},
+            'dynamics': {'thermal': 25.0, 'astrobiology': 5.0, 'dynamics': 45.0, 'moisture': 15.0, 'radiation': 10.0},
+            'radiation': {'thermal': 30.0, 'astrobiology': 5.0, 'dynamics': 5.0, 'moisture': 15.0, 'radiation': 45.0},
+            'cryo': {'thermal': 45.0, 'astrobiology': 5.0, 'dynamics': 10.0, 'moisture': 30.0, 'radiation': 10.0}
+        }
+        weights = presets.get(args.preset)
+    elif args.weights:
+        parts = [float(x.strip()) for x in args.weights.split(",")]
+        if len(parts) == 5:
+            weights = {
+                'thermal': parts[0],
+                'astrobiology': parts[1],
+                'dynamics': parts[2],
+                'moisture': parts[3],
+                'radiation': parts[4]
+            }
+
+    generate_comparison_matrix_card(weights)
