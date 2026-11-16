@@ -251,7 +251,7 @@ While SI powers natural-language synthesis and interactive mission weighting, **
 ## 🚀 Quick Start & Installation
 
 1. **Prerequisite: Download OpenSpace First**:
-   - Download **OpenSpace v0.22+** from the official site: [openspaceproject.com/download](https://www.openspaceproject.com/download)
+   - Download **OpenSpace v0.22+** from the official site: [openspaceproject.com](https://www.openspaceproject.com/)
    - Extract to your preferred directory (e.g., C:\OpenSpace\OpenSpace-0.22.1).
 2. **Clone or Download the Repository**:
    `ash

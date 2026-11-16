@@ -6,7 +6,7 @@ Before installing or running this visualization package, **you have to download 
 
 1. **Download OpenSpace (v0.22+)**:
    - Download the latest stable version of OpenSpace from the official site:  
-     👉 **[openspaceproject.com/download](https://www.openspaceproject.com/download)**
+     👉 **[openspaceproject.com](https://www.openspaceproject.com/)**
    - Extract the downloaded .zip file to your preferred local folder (e.g., C:\OpenSpace\OpenSpace-0.22.1).
 
 2. **Obtain the Project Repository**:
