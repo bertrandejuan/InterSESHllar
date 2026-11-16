@@ -1516,6 +1516,11 @@ body {
   color: #7dd3fc;
 }
 
+.speed-opt:hover {
+  background: rgba(56, 189, 248, 0.25) !important;
+  color: #fff !important;
+}
+
 .tour-si-attribution-tag {
   color: #94a3b8;
   border-top: 1px dashed rgba(56, 189, 248, 0.2);

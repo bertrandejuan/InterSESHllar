@@ -2752,9 +2752,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (selTourSpeed) {
-    selTourSpeed.addEventListener("change", (e) => {
-      state.tourSpeed = parseFloat(e.target.value) || 1.0;
+  // Custom in-page Speed Dropdown (replaces native <select> to prevent CEF fullscreen popups)
+  const btnTourSpeed = document.getElementById("btn-tour-speed");
+  const labelTourSpeed = document.getElementById("label-tour-speed");
+  const dropdownTourSpeed = document.getElementById("dropdown-tour-speed");
+  const speedOpts = document.querySelectorAll(".speed-opt");
+
+  if (btnTourSpeed && dropdownTourSpeed) {
+    btnTourSpeed.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isVisible = dropdownTourSpeed.style.display === "block";
+      dropdownTourSpeed.style.display = isVisible ? "none" : "block";
+    });
+
+    document.addEventListener("click", () => {
+      if (dropdownTourSpeed) dropdownTourSpeed.style.display = "none";
+    });
+
+    speedOpts.forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const speedVal = parseFloat(opt.dataset.speed) || 1.0;
+        state.tourSpeed = speedVal;
+
+        if (labelTourSpeed) {
+          labelTourSpeed.innerText = `${speedVal.toFixed(1)}x`;
+        }
+
+        speedOpts.forEach((o) => {
+          o.classList.remove("selected");
+          o.style.color = "#cbd5e1";
+          o.style.fontWeight = "normal";
+          o.style.background = "transparent";
+        });
+        opt.classList.add("selected");
+        opt.style.color = "#38bdf8";
+        opt.style.fontWeight = "700";
+        opt.style.background = "rgba(56, 189, 248, 0.15)";
+
+        dropdownTourSpeed.style.display = "none";
+      });
     });
   }
 
