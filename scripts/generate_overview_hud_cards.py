@@ -11,8 +11,14 @@ Strictly implementing the exact user storyboard drawings:
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-OUTPUT_DIR = r"C:\Users\emily\.gemini\antigravity\scratch\openspace_mars_earth\data\assets\mars_earth_analogs\textures"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+OUTPUT_DIRS = [
+    r"C:\Users\emily\.gemini\antigravity\scratch\openspace_mars_earth\data\assets\mars_earth_analogs\textures",
+    r"C:\OpenSpace\OpenSpace-0.22.1\data\assets\mars_earth_analogs\textures",
+    r"C:\Users\emily\.gemini\antigravity\brain\490b6649-6a96-4ef9-90e8-83eb6af48acc"
+]
+for d in OUTPUT_DIRS:
+    os.makedirs(d, exist_ok=True)
+OUTPUT_DIR = OUTPUT_DIRS[0]
 
 # --------------------------------------------------------------------
 # 1. Site Metadata & 10-Year Empirical Values
@@ -517,8 +523,8 @@ def generate_location_overview_card(active_site_key):
     draw.text((45, HEIGHT - 52), footer_text, font=FONT_FOOTER, fill=(150, 165, 195, 255))
 
     out_file = f"hud_overview_location_{active_site_key}.png"
-    out_path = os.path.join(OUTPUT_DIR, out_file)
-    img.save(out_path, "PNG")
+    for d in OUTPUT_DIRS:
+        img.save(os.path.join(d, out_file), "PNG")
     print(f"Generated Location Overview HUD (Image 2 style): {out_file}")
 
 
@@ -549,66 +555,62 @@ def generate_category_overview_card(cat_key, site_key):
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 175, 200, 255))
 
-    # 2. Parameter rows for ONLY THIS LOCATION (solid opaque backgrounds)
+    # 2. Parameter rows for ONLY THIS LOCATION (solid opaque backgrounds, purely empirical data)
     param_items = site_info['category_data'][cat_key]
-    y_start = 145
-    summary_box_h = 175
-    available_h = (HEIGHT - summary_box_h - 70) - y_start
-    item_h = available_h // len(param_items)
+    y_start = 140
+    y_bottom = HEIGHT - 65
+    available_h = y_bottom - y_start
+    n_items = len(param_items)
+    item_h = min(145, available_h // n_items)
+    box_h = item_h - 12
 
     for i, (p_title, p_num, p_desc) in enumerate(param_items):
         item_y = y_start + i * item_h
         bg_col = (14, 22, 40, 255) if i % 2 == 0 else (18, 28, 50, 255)
 
-        draw.rounded_rectangle([45, item_y, WIDTH - 45, item_y + item_h - 10], radius=10,
+        draw.rounded_rectangle([45, item_y, WIDTH - 45, item_y + box_h], radius=10,
                                fill=bg_col, outline=(65, 85, 120, 255), width=2)
 
-        # Dynamic offsets for vertical centering depending on item count
-        y_title_offset = 10 if len(param_items) > 5 else 14
-        y_desc_offset = 44 if len(param_items) > 5 else 50
-        y_val_offset = 18 if len(param_items) > 5 else 24
+        if box_h >= 115:
+            f_title = get_font(22, bold=True)
+            f_desc = get_font(16, bold=False)
+            f_val = get_font(26, bold=True)
+            y_title_offset = 20
+            y_desc_offset = 62
+            y_val_offset = 32
+        elif box_h >= 95:
+            f_title = get_font(20, bold=True)
+            f_desc = get_font(15, bold=False)
+            f_val = get_font(24, bold=True)
+            y_title_offset = 16
+            y_desc_offset = 52
+            y_val_offset = 26
+        else:
+            f_title = get_font(18, bold=True)
+            f_desc = get_font(14, bold=False)
+            f_val = get_font(22, bold=True)
+            y_title_offset = 12
+            y_desc_offset = 44
+            y_val_offset = 20
 
         # Title on left
-        draw.text((68, item_y + y_title_offset), p_title, font=FONT_PARAM_NAME, fill=cat_color + (255,))
-        draw.text((68, item_y + y_desc_offset), p_desc, font=FONT_PARAM_DESC, fill=(170, 190, 220, 255))
+        draw.text((68, item_y + y_title_offset), p_title, font=f_title, fill=cat_color + (255,))
+        draw.text((68, item_y + y_desc_offset), p_desc, font=f_desc, fill=(170, 190, 220, 255))
 
         # Number on right
-        val_w = draw.textlength(p_num, font=FONT_PARAM_VAL) if hasattr(draw, 'textlength') else 200
+        val_w = draw.textlength(p_num, font=f_val) if hasattr(draw, 'textlength') else 200
         val_x = WIDTH - 75 - val_w
         num_color = (255, 255, 255)
-        draw.text((val_x, item_y + y_val_offset), p_num, font=FONT_PARAM_VAL, fill=num_color + (255,))
-
-    # 3. Gemini API Summary Box at bottom (solid opaque)
-    box_y = HEIGHT - summary_box_h - 55
-    draw.rounded_rectangle([45, box_y, WIDTH - 45, box_y + summary_box_h], radius=12,
-                           fill=(16, 26, 48, 255), outline=(90, 115, 165, 255), width=2)
-
-    # Circled Gemini API Summary title
-    draw.text((68, box_y + 16), "GEMINI API COMPARATIVE SUMMARY:", font=FONT_SUMMARY_HEAD, fill=cat_color + (255,))
-    summary_text = site_info['summaries'][cat_key]
-
-    words = summary_text.split(" ")
-    lines = []
-    current_line = []
-    for w in words:
-        current_line.append(w)
-        if len(" ".join(current_line)) > 110:
-            lines.append(" ".join(current_line))
-            current_line = []
-    if current_line:
-        lines.append(" ".join(current_line))
-
-    for line_idx, line_str in enumerate(lines[:3]):
-        draw.text((68, box_y + 54 + line_idx * 30), line_str, font=FONT_SUMMARY_TEXT, fill=(240, 245, 255, 255))
+        draw.text((val_x, item_y + y_val_offset), p_num, font=f_val, fill=num_color + (255,))
 
     # Footer
     footer_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL Curiosity REMS Telemetry | Mathematical Synthesis"
     draw.text((50, HEIGHT - 46), footer_text, font=FONT_FOOTER, fill=(150, 165, 195, 255))
 
     out_file = f"hud_cat_{cat_key}_{site_key}.png"
-    out_path = os.path.join(OUTPUT_DIR, out_file)
-    img.save(out_path, "PNG")
-    print(f"Generated Category Overview HUD (Image 3 style): {out_file}")
+    for d in OUTPUT_DIRS:
+        img.save(os.path.join(d, out_file), "PNG")
+    print(f"Generated Category Overview HUD: {out_file}")
 
 
 # --------------------------------------------------------------------

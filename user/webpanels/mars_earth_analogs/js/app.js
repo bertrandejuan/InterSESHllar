@@ -1331,7 +1331,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // 9. About This Site Drawer & Gemini Comparative Synthesis
+  // 9. About This Site Drawer: Grounded Climatology Overview
   // ----------------------------------------------------
   if (btnToggleAbout) {
     btnToggleAbout.addEventListener("click", () => {
@@ -1342,49 +1342,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function loadBlurb(forceRegen = false) {
+  function loadBlurb() {
     const site = getActiveSiteData();
     if (!siteBlurbText) return;
-
-    if (forceRegen && geminiService && geminiService.hasApiKey()) {
-      siteBlurbText.innerText = "Querying Google Gemini AI for planetary analog synthesis...";
-      if (blurbSourceTag) blurbSourceTag.innerText = "Gemini AI: Processing live analysis...";
-      if (btnRegenGemini) {
-        btnRegenGemini.disabled = true;
-        btnRegenGemini.innerText = "⏳ Generating...";
-      }
-
-      try {
-        const result = await geminiService.generateComparativeBlurb(
-          site.name,
-          site.country || site.region,
-          site.coordinates,
-          site.desc,
-          site.metrics,
-          site.category_scores,
-          site.blurb
-        );
-        siteBlurbText.innerText = result.text;
-        if (blurbSourceTag) blurbSourceTag.innerText = result.source;
-      } catch (err) {
-        siteBlurbText.innerText = site.blurb;
-        if (blurbSourceTag) blurbSourceTag.innerText = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025)";
-      } finally {
-        if (btnRegenGemini) {
-          btnRegenGemini.disabled = false;
-          btnRegenGemini.innerText = "✨ Regenerate via Gemini AI";
-        }
-      }
-    } else {
-      siteBlurbText.innerText = site.blurb || "Verified 10-year NASA POWER climatology records.";
-      if (blurbSourceTag) blurbSourceTag.innerText = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL REMS";
-    }
-  }
-
-  if (btnRegenGemini) {
-    btnRegenGemini.addEventListener("click", () => {
-      loadBlurb(true);
-    });
+    siteBlurbText.innerText = site.blurb || "Verified 10-year NASA POWER climatology records.";
+    if (blurbSourceTag) blurbSourceTag.innerText = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL REMS";
   }
 
   // ----------------------------------------------------
