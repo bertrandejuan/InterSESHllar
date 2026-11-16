@@ -105,12 +105,16 @@ Click the **`Comparison Matrix ▾`** button in the sidebar to open the customiz
 
 ### C. AI Mission Objective Optimizer ("What would you like to optimize your data for?")
 - Enter your mission profile in plain English into the prompt box (or click one of the quick preset chips):
-  * *"rover wheel mobility and wind corrasion"* → Prioritizes Dynamics (40%) and Thermal (25%).
-  * *"sample return and ancient biosignatures"* → Prioritizes Astrobiology (50%) and Moisture (25%).
-  * *"solar powered atmospheric drone scouting"* → Prioritizes Solar/UV (40%) and Dynamics (35%).
+  * *"rover wheel mobility and wind corrasion"* → Prioritizes Dynamics (45%) and Thermal (20%).
+  * *"biosignature search in ancient mudstones and organic carbon"* → Prioritizes Astrobiology (45%) and Moisture (20%).
+  * *"solar powered atmospheric drone scouting"* → Prioritizes Solar/UV (35%) and Dynamics (40%).
   * *"cryogenic life support and ice harvesting"* → Prioritizes Thermal (40%) and Moisture (35%).
-  * *"in-situ resource utilization (ISRU) materials"* → Prioritizes Astrobiology (40%) and Solar (30%).
-- Clicking **Apply** immediately re-weights all 5 categories, recalculates all analog rankings, and updates the 3D viewport HUD!
+  * *"in-situ resource utilization (ISRU) materials"* → Prioritizes Moisture (40%) and Astrobiology (30%).
+- Clicking **⚡ Optimize** connects directly to the **Google Gemini API** (`gemini-2.5-flash`), which performs an in-depth planetary mission architecture analysis:
+  * **Normalized Weights**: Calculates exact integer weights across all 5 criteria summing to 100%.
+  * **🔬 Scientific Reasoning**: Generates multi-sentence causal reasoning explaining *why* each weight was selected based on environmental drivers, physical mechanics, and planetary taphonomy (not just listing percentages).
+  * **📚 Authoritative Literature Source**: Explicitly cites the official NASA mission definition report, MEPAG roadmap, or peer-reviewed literature underneath from which the deduction was derived (e.g. *NASA Mars 2020 Science Definition Team & MSL Curiosity CheMin/SAM Lacustrine Mudstone Organic Carbon Investigation*, *NASA JPL Ingenuity Flight Dynamics Report*, etc.).
+- The dashboard immediately applies the weights, re-ranks all analog sites in the Decision Matrix, and swaps the 3D viewport HUD to the matching mission texture!
 
 ### D. Synchronized 3D Viewport HUD
 - The 3D viewport HUD automatically swaps between 11 pre-rendered, high-contrast textures matching your mission focus:
