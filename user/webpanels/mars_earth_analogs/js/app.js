@@ -31,6 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
     tourTimer: null,
     hasTourEverRun: false,
     tourRestartNeeded: false,
+    isSideViewActive: false,
+    sideViewSiteKey: null,
+    sideViewTimer: null,
     categoryWeights: {
       thermal: 20,
       astrobiology: 20,
@@ -56,43 +59,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Side View Configurations:
   // Zooms camera close to the surface where imagery and 3D terrain are clear,
-  // oriented at an angle tangent to the planet surface (~1.40-1.42 rad / ~80°-82° pitch),
-  // facing the desired target landmark (yaw in radians).
+  // oriented at an angle tangent to the planet surface (~1.38-1.40 rad / ~79°-80° pitch),
+  // with yaw = 0.0 and DisableRoll = true ensuring rightside up, level horizon across all sites.
   const SIDE_VIEW_CONFIGS = {
     mars_gale: {
       camLat: -4.3800,
       camLon: 137.4417,
       camAlt: 3800.0,    // 3.8 km above datum in Aeolis Palus; surface CTX crisp
-      pitch: 1.42,       // Tangent to planetary surface looking across landscape
-      yaw: 3.14159       // Facing South directly toward Mount Sharp (Aeolis Mons)
+      pitch: 1.40,       // Tangent to planetary surface looking across landscape
+      yaw: 0.0           // Rightside up, level horizon
     },
     mcmurdo: {
-      camLat: -77.5800,
-      camLon: 164.2000,
-      camAlt: 2800.0,    // 2.8 km over New Harbour / mouth of Taylor Valley
-      pitch: 1.40,       // Tangent to surface looking along valley floor
-      yaw: 4.71239       // Facing West-Southwest up Taylor Valley toward Lake Hoare
+      camLat: -77.6200,
+      camLon: 163.5000,
+      camAlt: 2400.0,    // 2.4 km over Taylor Valley mouth
+      pitch: 1.38,       // Tangent to surface looking along valley floor
+      yaw: 0.0           // Level horizon, zero roll
     },
     lut: {
-      camLat: 30.0000,
+      camLat: 29.9500,
       camLon: 58.8000,
       camAlt: 1800.0,    // 1.8 km over southern Lut Desert
-      pitch: 1.42,       // Tangent to surface looking across yardang corridors
-      yaw: 0.0           // Facing North directly down giant Kalut yardang corridors
+      pitch: 1.40,       // Tangent to surface looking across yardang corridors
+      yaw: 0.0           // Level desert horizon
     },
     aralkum: {
-      camLat: 44.2500,
-      camLon: 59.8500,
-      camAlt: 1900.0,    // 1.9 km over southwestern Aralkum basin
+      camLat: 44.6500,
+      camLon: 59.8000,
+      camAlt: 2000.0,    // 2.0 km over Aralkum basin
       pitch: 1.40,       // Tangent to surface
-      yaw: 0.65          // Facing Northeast across dried seabed and plateau cliffs
+      yaw: 0.0           // Level horizon, zero roll
     },
     uyuni: {
-      camLat: -20.6500,
+      camLat: -20.4500,
       camLon: -67.5000,
       camAlt: 5600.0,    // 5.6 km (surface elevation is 3,656 m; ~1,940 m ground clearance)
-      pitch: 1.42,       // Tangent to surface looking across salt crust
-      yaw: 0.0           // Facing North toward Volcan Tunupa
+      pitch: 1.40,       // Tangent to surface looking across salt crust
+      yaw: 0.0           // Level horizon
     }
   };
 
@@ -202,6 +205,42 @@ document.addEventListener("DOMContentLoaded", () => {
       openSpace.setPropertyValue(`Scene.EarthTag${s}.Renderable.Enabled`, false);
       openSpace.setPropertyValue(`Scene.EarthLabel${s}.Renderable.Enabled`, false);
     });
+
+    // Ensure planetary horizon roll is strictly locked level and rotates with planet
+    openSpace.executeLuaScript(`
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
+      end
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.DisableRoll") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableRoll", true)
+      end
+    `);
+
+    // Register OpenSpace Lua keybindings for WASD surface walking & exploration
+    const wasdRegisterLua = `
+      local actions = {
+        { id = "mars_earth.walkForward", name = "Walk Forward", cmd = "openspace.navigation.addTruckMovement(25.0)", key = "W" },
+        { id = "mars_earth.walkBackward", name = "Walk Backward", cmd = "openspace.navigation.addTruckMovement(-25.0)", key = "S" },
+        { id = "mars_earth.turnLeft", name = "Turn Left", cmd = "openspace.navigation.addLocalRotation(-1.5, 0.0)", key = "A" },
+        { id = "mars_earth.turnRight", name = "Turn Right", cmd = "openspace.navigation.addLocalRotation(1.5, 0.0)", key = "D" },
+        { id = "mars_earth.walkFastForward", name = "Sprint Forward", cmd = "openspace.navigation.addTruckMovement(75.0)", key = "Shift+W" },
+        { id = "mars_earth.walkFastBackward", name = "Sprint Backward", cmd = "openspace.navigation.addTruckMovement(-75.0)", key = "Shift+S" }
+      }
+      for _, a in ipairs(actions) do
+        pcall(function()
+          openspace.action.registerAction({
+            Identifier = a.id,
+            Name = a.name,
+            Command = a.cmd,
+            Documentation = a.name,
+            GuiPath = "/Analog Surface Walk",
+            IsLocal = true
+          })
+          openspace.bindKey(a.key, a.id)
+        end)
+      end
+    `;
+    openSpace.executeLuaScript(wasdRegisterLua);
 
     // Initial camera flight to Gale Crater on Mars centered in left viewport region (~240 km altitude)
     openSpace.flyToGeo("Mars", -5.41, 137.19, 240000.0, 2.5);
@@ -827,17 +866,45 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Viewport Control Implementations (Tested & Error-Free)
   // ----------------------------------------------------
   function focusOnSurface() {
+    state.isSideViewActive = false;
+    state.sideViewSiteKey = null;
+    if (state.sideViewTimer) {
+      clearTimeout(state.sideViewTimer);
+      state.sideViewTimer = null;
+    }
+    const pill = document.getElementById("surface-walk-pill");
+    if (pill) pill.classList.remove("visible");
+
     const site = getActiveSiteData();
     const globe = site.globe || "Earth";
     const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
 
-    // When focusing down to ground terrain level, fade out Mars_Texture so surface is 100% crisp, unblotched CTX imagery
     if (globe === "Mars") {
-      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
-      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0);
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0);
     }
 
     openSpace.flyToGeo(globe, target.lat, target.lon, target.alt, 2.5);
+  }
+
+  function showWalkHintToast() {
+    let pill = document.getElementById("surface-walk-pill");
+    if (!pill) {
+      pill = document.createElement("div");
+      pill.id = "surface-walk-pill";
+      pill.className = "surface-walk-pill";
+      pill.innerHTML = `
+        <span class="walk-icon">🚶</span>
+        <span class="walk-title">Surface Walking:</span>
+        <span class="walk-keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or <kbd>Arrows</kbd> to walk & turn &bull; Hold <kbd>Shift</kbd> to sprint</span>
+      `;
+      document.body.appendChild(pill);
+    }
+    pill.classList.add("visible");
+    if (window._walkPillTimer) clearTimeout(window._walkPillTimer);
+    window._walkPillTimer = setTimeout(() => {
+      if (pill) pill.classList.remove("visible");
+    }, 6000);
   }
 
   function sideView() {
@@ -847,45 +914,86 @@ document.addEventListener("DOMContentLoaded", () => {
       camLat: (site && site.coordinates ? site.coordinates.lat - 0.12 : 0),
       camLon: (site && site.coordinates ? site.coordinates.lon : 0),
       camAlt: Math.max(2500.0, ((site && site.elevation_m) || 200.0) + 1800.0),
-      pitch: 1.42,
+      pitch: 1.40,
       yaw: 0.0
     };
 
-    // 1. When zooming close to surface on Mars, fade out low-res global texture so CTX 6m imagery is crisp
-    if (globe === "Mars") {
-      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
-      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
+    if (state.sideViewTimer) {
+      clearTimeout(state.sideViewTimer);
+      state.sideViewTimer = null;
     }
 
-    // 2. Fly camera close to surface where high-res satellite imagery and 3D terrain are clear,
-    // and ensure FollowAnchorNodeRotation is active so the camera rotates with the planet.
-    const flightScript = `
+    // 1. Ensure Mars texture is enabled and visible
+    if (globe === "Mars") {
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0);
+      openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0);
+    }
+
+    // 2. Lock roll and follow planetary rotation so horizon stays permanently level
+    const initScript = `
       if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
         openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
+      end
+      if openspace.hasProperty("NavigationHandler.OrbitalNavigator.DisableRoll") then
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableRoll", true)
       end
       if openspace.navigation and openspace.navigation.setFocus then
         openspace.navigation.setFocus('${globe}')
       end
-      openspace.navigation.flyToGeo('${globe}', ${cfg.camLat}, ${cfg.camLon}, ${cfg.camAlt}, 2.0)
     `;
-    openSpace.executeLuaScript(flightScript);
+    openSpace.executeLuaScript(initScript);
 
-    // 3. Upon arrival (2.0s), set camera pitch tangent to planetary surface (~1.40-1.42 rad / ~80°-82°)
-    // and yaw facing the landmark/exploration target. OrbitalNavigator remains active, allowing
-    // user to immediately orbit, zoom, and explore.
-    setTimeout(() => {
+    // 3. If already in side view at this site, re-level horizon immediately without re-calling flyToGeo
+    // (re-calling flyToGeo would reset camera pitch to nadir top-down)
+    if (state.isSideViewActive && state.sideViewSiteKey === state.currentSiteKey) {
       const tangentScript = `
-        local currentNavState = openspace.navigation.getNavigationState()
-        local newNavState = {
+        if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
+          if openspace.pathnavigation and openspace.pathnavigation.stopPath then
+            openspace.pathnavigation.stopPath()
+          end
+        end
+        local cur = openspace.navigation.getNavigationState()
+        local nav = {
           Pitch = ${cfg.pitch},
           Anchor = "${globe}",
-          Yaw = ${cfg.yaw},
-          Position = currentNavState["Position"],
-          Up = currentNavState["Up"]
+          Yaw = 0.0,
+          Position = cur.Position,
+          Up = cur.Up
         }
-        openspace.navigation.setNavigationState(newNavState)
+        openspace.navigation.setNavigationState(nav)
       `;
       openSpace.executeLuaScript(tangentScript);
+      showWalkHintToast();
+      return;
+    }
+
+    state.isSideViewActive = true;
+    state.sideViewSiteKey = state.currentSiteKey;
+
+    // 4. Fly camera close to surface where high-res satellite imagery and 3D terrain are clear
+    openSpace.executeLuaScript(`openspace.navigation.flyToGeo('${globe}', ${cfg.camLat}, ${cfg.camLon}, ${cfg.camAlt}, 2.0)`);
+
+    // 5. Upon arrival, orient camera tangent to planetary surface (rightside up, level horizon)
+    state.sideViewTimer = setTimeout(() => {
+      const tangentScript = `
+        if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
+          if openspace.pathnavigation and openspace.pathnavigation.stopPath then
+            openspace.pathnavigation.stopPath()
+          end
+        end
+        local cur = openspace.navigation.getNavigationState()
+        local nav = {
+          Pitch = ${cfg.pitch},
+          Anchor = "${globe}",
+          Yaw = 0.0,
+          Position = cur.Position,
+          Up = cur.Up
+        }
+        openspace.navigation.setNavigationState(nav)
+      `;
+      openSpace.executeLuaScript(tangentScript);
+      state.sideViewTimer = null;
+      showWalkHintToast();
     }, 2050);
   }
 
@@ -1203,6 +1311,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.currentSiteKey = siteKey;
     state.openStatsCatKey = null; // Reset stats disclosure to closed when switching sites
+    state.isSideViewActive = false;
+    state.sideViewSiteKey = null;
+    if (state.sideViewTimer) {
+      clearTimeout(state.sideViewTimer);
+      state.sideViewTimer = null;
+    }
+    const pill = document.getElementById("surface-walk-pill");
+    if (pill) pill.classList.remove("visible");
     const site = getActiveSiteData();
     const isMars = site.globe === "Mars";
     const marsBaseline = getMarsBaselineData();
@@ -2417,6 +2533,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnOrbitReturn) {
     btnOrbitReturn.addEventListener("click", () => {
+      state.isSideViewActive = false;
+      state.sideViewSiteKey = null;
+      if (state.sideViewTimer) {
+        clearTimeout(state.sideViewTimer);
+        state.sideViewTimer = null;
+      }
+      const pill = document.getElementById("surface-walk-pill");
+      if (pill) pill.classList.remove("visible");
+
       const site = getActiveSiteData();
       const globe = site.globe || "Earth";
       if (globe === "Mars") {
@@ -2975,6 +3100,48 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(eliminateParentDoubleScrollbar, 100);
   setTimeout(eliminateParentDoubleScrollbar, 350);
   setTimeout(eliminateParentDoubleScrollbar, 1000);
+
+  // ----------------------------------------------------
+  // WASD Surface Walking & Orientation Keyboard Controls
+  // ----------------------------------------------------
+  window.addEventListener("keydown", (e) => {
+    // If typing in input, textarea, or select, do not intercept
+    const activeEl = document.activeElement;
+    const tag = (activeEl && activeEl.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (activeEl && activeEl.isContentEditable)) {
+      return;
+    }
+
+    const key = e.key.toLowerCase();
+    const speed = e.shiftKey ? 75.0 : 25.0;
+    const rotSpeed = 1.5;
+
+    let handled = false;
+    if (key === "w" || e.key === "ArrowUp") {
+      openSpace.executeLuaScript(`openspace.navigation.addTruckMovement(${speed})`);
+      handled = true;
+    } else if (key === "s" || e.key === "ArrowDown") {
+      openSpace.executeLuaScript(`openspace.navigation.addTruckMovement(-${speed})`);
+      handled = true;
+    } else if (key === "a" || e.key === "ArrowLeft") {
+      openSpace.executeLuaScript(`openspace.navigation.addLocalRotation(-${rotSpeed}, 0.0)`);
+      handled = true;
+    } else if (key === "d" || e.key === "ArrowRight") {
+      openSpace.executeLuaScript(`openspace.navigation.addLocalRotation(${rotSpeed}, 0.0)`);
+      handled = true;
+    }
+
+    if (handled) {
+      const pill = document.getElementById("surface-walk-pill");
+      if (pill) {
+        pill.classList.add("visible");
+        if (window._walkPillTimer) clearTimeout(window._walkPillTimer);
+        window._walkPillTimer = setTimeout(() => {
+          if (pill) pill.classList.remove("visible");
+        }, 3000);
+      }
+    }
+  });
 
   // ----------------------------------------------------
   // Initial Startup: Start on Mars with Gale Crater

@@ -100,11 +100,11 @@ All parameters below are derived strictly from the 10-year in-situ daily archive
 
 Designed for a live presenter operating OpenSpace in front of dome patrons or reviewers:
 
-### Act I: The Martian Baseline (Gale Crater) & Side View Entry
+### Act I: The Martian Baseline (Gale Crater) & Side View Surface Walking
 1. **Visual**: Camera starts focused on Mars. GeoJSON boundary highlights the 154 km crater rim; 3D label identifies Bradbury Landing (`MSL-01`).
-2. **Interaction**: Click **`Side view`** in the category actions strip. Camera smoothly descends to 3,800 m in northern Aeolis Palus, tilts tangent to the horizon (`Pitch = 1.42 rad`), and points South directly facing Mount Sharp rising 5.5 km above the crater floor.
+2. **Interaction**: Click **`Side view`** in the category actions strip. Camera smoothly descends to 3,800 m in northern Aeolis Palus, tilts tangent to the horizon (`Pitch = 1.40 rad`, `Yaw = 0.0 rad`), rightside up with a perfectly level horizon, facing Mount Sharp rising 5.5 km above the crater floor. Use **W, A, S, D** keys to walk forward, step back, and turn across the terrain.
 3. **Presenter Script**:
-   > *"Welcome to Gale Crater, Mars—our planetary benchmark. For over 4,000 sols, NASA's Curiosity rover has recorded in-situ weather using its REMS instrument. Look at Mount Sharp towering before us on the dome. The baseline is extreme: an annual mean air temperature of -54°C, day-to-night swings exceeding 58°C, and an atmospheric pressure of only 0.76 kPa—less than 1% of Earth's sea level. Notice that you have full control to look around this landscape with your mouse as the planet rotates."*
+   > *"Welcome to Gale Crater, Mars—our planetary benchmark. For over 4,000 sols, NASA's Curiosity rover has recorded in-situ weather using its REMS instrument. Look at Mount Sharp towering before us on the dome. The baseline is extreme: an annual mean air temperature of -54°C, day-to-night swings exceeding 58°C, and an atmospheric pressure of only 0.76 kPa—less than 1% of Earth's sea level. Notice that our Side View is calibrated rightside up with zero roll, and you can freely walk across the Martian surface using the W, A, S, D keys as if you were on an astronaut EVA traverse."*
 
 ### Act II: Interactive Decision Matrix (MCDM) & Mission Optimization
 1. **Interaction**: Click **`Comparison Matrix ▾`** in the sidebar. The dropdown slides open.
@@ -116,19 +116,19 @@ Designed for a live presenter operating OpenSpace in front of dome patrons or re
 
 ### Act III: The Cold-Desert Cryosphere (McMurdo Valleys)
 1. **Interaction**: Click **`McMurdo Dry Valleys`**. The camera smoothly flies across interplanetary space to Antarctica.
-2. **Interaction**: Click **`Side view`**. Camera descends to 2,800 m over New Harbour, pointing West-Southwest up Taylor Valley.
+2. **Interaction**: Click **`Side view`**. Camera descends to 2,400 m over New Harbour, level and rightside up, looking up Taylor Valley framed by the Transantarctic Mountains. Press **W** to walk along the valley floor.
 3. **Presenter Script**:
    > *"Here in the McMurdo Dry Valleys of Antarctica, we find Earth's closest cold-desert thermal analog. The annual mean temperature is -27°C, with winter lows below -51°C. Most remarkably, there is zero liquid rainfall. Looking down the glacial trough of Taylor Valley at eye level, we see terrain carved by katabatic drainage winds—the ultimate proving ground for cryogenic rover mechanics and deep ice coring for Artemis and Mars."*
 
 ### Act IV: Scorching Yardangs & Desiccated Lakebeds (Lut & Aralkum)
-1. **Interaction**: Click **`Lut Desert`**, then click **`Side view`**.
+1. **Interaction**: Click **`Lut Desert`**, then click **`Side view`**. Walk between the yardangs with **W, A, S, D**.
 2. **Presenter Script**:
-   > *"In Iran's Lut Desert, our Side View places us right at the foot of the monumental Kalut yardangs. Persistent 4.1 m/s winds and surface temperatures up to 70.7°C model the abrasive aeolian environment of Mars. In Uzbekistan's Aralkum Desert, we see the dried bed of the Aral Sea—a chemical parallel to Gale Crater's ancient lakebed with near-identical soil alkalinity (pH 7.82) and toxic sulfate dust storms."*
+   > *"In Iran's Lut Desert, our Side View places us right at the foot of the monumental Kalut yardangs with a level, calibrated horizon. Persistent 4.1 m/s winds and surface temperatures up to 70.7°C model the abrasive aeolian environment of Mars. In Uzbekistan's Aralkum Desert, we see the dried bed of the Aral Sea—a chemical parallel to Gale Crater's ancient lakebed with near-identical soil alkalinity (pH 7.82) and toxic sulfate dust storms."*
 
 ### Act V: The High-Altitude UV Frontier (Salar de Uyuni)
 1. **Interaction**: Click **`Salar de Uyuni`**, then click **`Side view`**.
 2. **Presenter Script**:
-   > *"Atop the Bolivian Altiplano at 3,656 meters elevation, Salar de Uyuni provides Earth's thinnest atmospheric pressure column and highest solar UV radiation flux. Looking across the endless white salt plain toward Volcán Tunupa, autonomous navigation systems are tested without landmarks, preparing humanity for the blinding glare of the Moon and Mars."*
+   > *"Atop the Bolivian Altiplano at 3,656 meters elevation, Salar de Uyuni provides Earth's thinnest atmospheric pressure column and highest solar UV radiation flux. Looking across the endless white salt plain toward Volcán Tunupa with a level horizon, autonomous navigation systems are tested without landmarks, preparing humanity for the blinding glare of the Moon and Mars."*
 
 ### Act VI: Global Astrobiology Query (Audience Participation)
 1. **Interaction**: Click **`🧬 Find Astrobiology Data for Any Earth Location`**.

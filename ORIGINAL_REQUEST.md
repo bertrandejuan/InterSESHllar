@@ -143,13 +143,14 @@ All code must be:
 
 Subsequent iterative enhancements have expanded the system well beyond the initial brief:
 
-1. **Tangent Planetary Horizon "Side View" Navigation (`Side view`)**:
+1. **Tangent Planetary Horizon "Side View" Navigation & WASD Surface Walking (`Side view`)**:
    - Added directly adjacent to `Focus on surface` in the science category viewport action strip.
-   - Zooms camera to clear ground level (3,800 m on Mars Gale Crater, 2,800 m at McMurdo, 1,800 m at Lut, 1,900 m at Aralkum, 5,600 m at Uyuni).
-   - Uses OpenSpace Lua (`openspace.navigation.setNavigationState`) to tilt camera pitch tangent to the planetary curvature (`Pitch = 1.40–1.42 rad` / ~80°–82°), providing an eye-level horizon view across the terrain.
-   - Faces key target exploration features: Mount Sharp (South), Taylor Valley (WSW), Kalut yardangs (North), Aral seabed cliffs (NE), and Volcán Tunupa (North).
+   - Zooms camera to clear ground level (3,800 m on Mars Gale Crater, 2,400 m at McMurdo, 1,800 m at Lut, 2,000 m at Aralkum, 5,600 m at Uyuni).
+   - **Rightside-Up & Level Horizon Calibration**: Specifically calibrated with `Pitch = 1.38 – 1.40 rad`, `Yaw = 0.0 rad`, and `NavigationHandler.OrbitalNavigator.DisableRoll = true`. Sky is locked on top, terrain on bottom, strictly eliminating diagonal roll tilt and inverted pitch across all 5 analog sites.
+   - **Anti-Nadir Jump Protection**: Repeated clicks on `Side view` smoothly re-level the camera along the horizon instead of resetting straight down to nadir map view. Automatically stops path navigation dampening upon arrival to prevent camera snapback.
+   - **WASD Surface Walking Controls**: Allows walking forward (`W`), backward (`S`), and turning left/right (`A`/`D`) directly across the planetary terrain (with `Shift` sprint), registered both via native OpenSpace engine keybindings (`openspace.bindKey`) and webpanel DOM keyboard listeners.
+   - Faces key target exploration features: Mount Sharp (South), Taylor Valley, Kalut yardangs, Aral seabed cliffs, and Volcán Tunupa.
    - Enables `FollowAnchorNodeRotation` and leaves `OrbitalNavigator` active so users retain 100% mouse freedom to orbit, zoom, and pan around the landscape.
-   - Automatically manages Mars texture layer opacity (setting `Mars_Texture` opacity to 0.0) so the 6 m/px CTX mosaic and 3D elevation are razor sharp.
 
 2. **Customizable Multi-Criteria Decision Matrix (MCDM) & Mission Optimizer**:
    - Single unified toggle button with a direction-flipping indicator (`Comparison Matrix ▾` / `Close Comparison Matrix ▴`).

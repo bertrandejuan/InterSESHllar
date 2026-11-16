@@ -59,9 +59,11 @@ asset.require("mars_earth_analogs/mars_earth_analogs")
 
 ## 4. Operational Capabilities & APIs
 
-1. **Tangent "Side View" Camera**:
+1. **Tangent "Side View" Camera & WASD Surface Walking**:
    - Inside each science accordion category, click **`Side view`** (next to **`Focus on surface`**).
-   - Zooms to clear surface altitude (3.8 km on Mars, 1.8–5.6 km on Earth), pitches tangent to the horizon (`Pitch = 1.40–1.42 rad`), faces the target landmark, and leaves mouse controls active.
+   - Zooms to clear surface altitude (3.8 km on Mars, 1.8–5.6 km on Earth), pitches tangent to the horizon (`Pitch = 1.38–1.40 rad`, `Yaw = 0.0 rad`), rightside up with zero roll and a level horizon across all 5 sites.
+   - Repeated clicks re-level the camera without jumping back down to nadir.
+   - Use **W, A, S, D** or **Arrow keys** to walk forward, step back, and turn across the surface (hold **Shift** to sprint). Active both via OpenSpace engine keybinds and the webpanel UI.
 
 2. **Multi-Criteria Decision Matrix (MCDM) & Mission Optimizer**:
    - Click **`Comparison Matrix ▾`** to adjust category sliders or type percentages.

@@ -73,17 +73,27 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 
 ## 🎯 Key Capabilities
 
-### 1. Calibrated Viewport & Tangent "Side View" Navigation
+### 1. Calibrated Viewport, Tangent "Side View" & WASD Surface Walking
 - **Tangent Side View (`Side view`)**:
   - Positioned directly adjacent to `Focus on surface` in the category viewport actions strip.
   - Automatically zooms camera close to the planetary surface where 3D elevation and high-resolution textures are crystal clear:
-    * **Mars (Gale Crater)**: Zooms to 3,800 m altitude in northern Aeolis Palus, sets `Mars_Texture` opacity to 0.0 so 6 m/px CTX blended imagery is sharp, and faces **South** (`Yaw = 3.14159 rad`) directly toward **Mount Sharp** (Aeolis Mons).
-    * **McMurdo Dry Valleys**: Zooms to 2,800 m over New Harbour, pointing **West-Southwest** (`Yaw = 4.71239 rad`) straight up **Taylor Valley**.
-    * **Lut Desert**: Zooms to 1,800 m, pointing **North** (`Yaw = 0.0 rad`) down the **Kalut yardang** wind corridors.
-    * **Aralkum Desert**: Zooms to 1,900 m, pointing **Northeast** (`Yaw = 0.65 rad`) across the desiccated seabed and cliffs.
-    * **Salar de Uyuni**: Zooms to 5,600 m (~1,940 m ground clearance above the 3,656 m salt flat), pointing **North** (`Yaw = 0.0 rad`) toward **Volcán Tunupa**.
-  - **Tangent Horizon Angle**: Uses OpenSpace Lua `openspace.navigation.setNavigationState` to tilt camera pitch tangent to the planetary curvature (`Pitch = 1.40 – 1.42 rad` / ~80°–82°), providing an eye-level panoramic horizon view across the terrain.
-  - **Unconstrained User Movement**: Enables `FollowAnchorNodeRotation` and leaves `OrbitalNavigator` active so the user can immediately orbit, tilt, pan, and zoom freely with the mouse.
+    * **Mars (Gale Crater)**: Zooms to 3,800 m altitude in northern Aeolis Palus, maintaining full high-resolution CTX mosaic clarity, looking across the crater floor toward **Mount Sharp** (Aeolis Mons).
+    * **McMurdo Dry Valleys**: Zooms to 2,400 m over the mouth of Taylor Valley, looking along the ice-free glacial floor framed by the Transantarctic Mountains.
+    * **Lut Desert**: Zooms to 1,800 m, looking down the giant **Kalut yardang** wind-carved corridors.
+    * **Aralkum Desert**: Zooms to 2,000 m, looking across the white salt-crust seabed toward the Ustyurt Plateau escarpment.
+    * **Salar de Uyuni**: Zooms to 5,600 m (~1,940 m ground clearance above the 3,656 m salt flat), looking across the white lithium playa toward **Volcán Tunupa**.
+  - **Rightside-Up & Level Horizon Guarantee**:
+    * Specifically calibrated with `Pitch = 1.38 – 1.40 rad` (~79°–80° tangent to planetary curvature) and `Yaw = 0.0 rad`.
+    * Enforces `NavigationHandler.OrbitalNavigator.DisableRoll = true` and `FollowAnchorNodeRotation = true` to strictly eliminate diagonal tilt and roll inversion. Sky is always on top, terrain is on the bottom.
+    * **Idempotent / Anti-Nadir Protection**: If clicked repeatedly while at the site, it smoothly re-levels the horizon without resetting the camera straight down to nadir. Automatically stops path dampening upon arrival to prevent snapback.
+- **WASD Surface Walking Navigation**:
+  - **`W` / `ArrowUp`**: Walk forward along the line of sight across the planetary surface (`addTruckMovement(25.0)`).
+  - **`S` / `ArrowDown`**: Walk backward / step back (`addTruckMovement(-25.0)`).
+  - **`A` / `ArrowLeft`**: Turn / pan camera left (`addLocalRotation(-1.5, 0.0)`).
+  - **`D` / `ArrowRight`**: Turn / pan camera right (`addLocalRotation(1.5, 0.0)`).
+  - **`Shift + W` / `Shift + S`**: Sprint forward or backward at 3x traverse speed (`addTruckMovement(75.0)`).
+  - **Dual-Input Synchronization**: Registered natively in the OpenSpace engine (`openspace.bindKey`) and via webpanel DOM keyboard listeners, allowing seamless surface walking regardless of which window pane has focus.
+  - **HUD Surface Walking Indicator**: Displays a sleek, glassmorphic toast notification (`.surface-walk-pill`) confirming active controls and shortcuts.
 - **Focus on Surface (`Focus on surface`)**:
   - Glides camera to a centered overhead nadir view (~240 km altitude) optimized for category inspection.
 

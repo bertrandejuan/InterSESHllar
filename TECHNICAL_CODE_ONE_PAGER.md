@@ -69,58 +69,87 @@ flowchart TD
 
 ## 3. Deep Dive: Key Code Mechanisms
 
-### A. Tangent Planetary Horizon "Side View" (`app.js:840–890`)
-To provide an eye-level panoramic ground perspective facing key geological landmarks rather than a standard satellite nadir view:
+### A. Tangent Planetary Horizon "Side View" & WASD Surface Walking (`app.js:868–965`)
+To provide an eye-level panoramic ground perspective facing key geological landmarks, rightside up, with a perfectly level horizon and keyboard-driven surface walking:
 ```javascript
 function sideView() {
   const site = getActiveSiteData();
   const globe = (site && site.globe) ? site.globe : "Earth";
   const cfg = SIDE_VIEW_CONFIGS[state.currentSiteKey];
 
-  // 1. Ensure crisp 6m CTX mosaic on Mars by fading low-res baseline texture
-  if (globe === "Mars") {
-    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
-    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
+  if (state.sideViewTimer) {
+    clearTimeout(state.sideViewTimer);
+    state.sideViewTimer = null;
   }
 
-  // 2. Smooth approach flight with planetary anchor rotation tracking
-  const flightScript = `
+  // 1. Lock roll and follow planetary rotation so horizon stays permanently level
+  const initScript = `
     if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
+    end
+    if openspace.hasProperty("NavigationHandler.OrbitalNavigator.DisableRoll") then
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableRoll", true)
     end
     if openspace.navigation and openspace.navigation.setFocus then
       openspace.navigation.setFocus('${globe}')
     end
-    openspace.navigation.flyToGeo('${globe}', ${cfg.camLat}, ${cfg.camLon}, ${cfg.camAlt}, 2.0)
   `;
-  openSpace.executeLuaScript(flightScript);
+  openSpace.executeLuaScript(initScript);
 
-  // 3. Upon arrival (2.0s), tilt camera tangent to planet surface (~1.40-1.42 rad) and face target
-  setTimeout(() => {
+  // 2. Anti-Nadir Protection: If already in side view, smoothly re-level without calling flyToGeo
+  if (state.isSideViewActive && state.sideViewSiteKey === state.currentSiteKey) {
     const tangentScript = `
-      local currentNavState = openspace.navigation.getNavigationState()
-      local newNavState = {
-        Pitch = ${cfg.pitch},
-        Anchor = "${globe}",
-        Yaw = ${cfg.yaw},
-        Position = currentNavState["Position"],
-        Up = currentNavState["Up"]
-      }
-      openspace.navigation.setNavigationState(newNavState)
+      if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
+        if openspace.pathnavigation and openspace.pathnavigation.stopPath then openspace.pathnavigation.stopPath() end
+      end
+      local cur = openspace.navigation.getNavigationState()
+      local nav = { Pitch = ${cfg.pitch}, Anchor = "${globe}", Yaw = 0.0, Position = cur.Position, Up = cur.Up }
+      openspace.navigation.setNavigationState(nav)
     `;
     openSpace.executeLuaScript(tangentScript);
+    showWalkHintToast();
+    return;
+  }
+
+  state.isSideViewActive = true;
+  state.sideViewSiteKey = state.currentSiteKey;
+
+  // 3. Approach flight to calibrated close-up coordinates
+  openSpace.executeLuaScript(`openspace.navigation.flyToGeo('${globe}', ${cfg.camLat}, ${cfg.camLon}, ${cfg.camAlt}, 2.0)`);
+
+  // 4. Upon arrival, stop path dampening and set Pitch = 1.38-1.40 rad, Yaw = 0.0 rad
+  state.sideViewTimer = setTimeout(() => {
+    const tangentScript = `
+      if openspace.navigation and openspace.navigation.isFlying and openspace.navigation.isFlying() then
+        if openspace.pathnavigation and openspace.pathnavigation.stopPath then openspace.pathnavigation.stopPath() end
+      end
+      local cur = openspace.navigation.getNavigationState()
+      local nav = { Pitch = ${cfg.pitch}, Anchor = "${globe}", Yaw = 0.0, Position = cur.Position, Up = cur.Up }
+      openspace.navigation.setNavigationState(nav)
+    `;
+    openSpace.executeLuaScript(tangentScript);
+    state.sideViewTimer = null;
+    showWalkHintToast();
   }, 2050);
 }
 ```
 
 #### Side View Configuration Table:
-| Site Key | Globe | Camera Altitude | Pitch (rad) | Yaw (rad) | Target Landmark |
-|---|---|---|---|---|---|
-| `mars_gale` | Mars | 3,800 m | 1.42 (~81.4°) | 3.14159 (South) | Mount Sharp (Aeolis Mons) & Yellowknife Bay |
-| `mcmurdo` | Earth | 2,800 m | 1.40 (~80.2°) | 4.71239 (WSW) | Taylor Valley trough toward Lake Hoare |
-| `lut` | Earth | 1,800 m | 1.42 (~81.4°) | 0.0 (North) | Kalut mega-yardang wind corridors |
-| `aralkum` | Earth | 1,900 m | 1.40 (~80.2°) | 0.65 (Northeast) | Desiccated seabed salt flats & Ustyurt cliffs |
-| `uyuni` | Earth | 5,600 m | 1.42 (~81.4°) | 0.0 (North) | Salar plain toward Volcán Tunupa (5,321 m) |
+| Site Key | Globe | Camera Altitude | Pitch (rad) | Yaw (rad) | Target Landmark | Horizon Alignment |
+|---|---|---|---|---|---|---|
+| `mars_gale` | Mars | 3,800 m | 1.40 (~80.2°) | 0.0 | Mount Sharp (Aeolis Mons) & Yellowknife Bay | Rightside up, level horizon |
+| `mcmurdo` | Earth | 2,400 m | 1.38 (~79.1°) | 0.0 | Taylor Valley trough framed by mountains | Zero roll, level horizon |
+| `lut` | Earth | 1,800 m | 1.40 (~80.2°) | 0.0 | Kalut mega-yardang wind corridors | Level desert horizon |
+| `aralkum` | Earth | 2,000 m | 1.40 (~80.2°) | 0.0 | Desiccated seabed salt flats & Ustyurt cliffs | Zero roll, level horizon |
+| `uyuni` | Earth | 5,600 m | 1.40 (~80.2°) | 0.0 | Salar plain toward Volcán Tunupa (5,321 m) | Level horizon |
+
+#### WASD Surface Walking Keyboard Bindings:
+- **`W` / `ArrowUp`**: Walk forward along line of sight (`openspace.navigation.addTruckMovement(25.0)`).
+- **`S` / `ArrowDown`**: Walk backward / step back (`openspace.navigation.addTruckMovement(-25.0)`).
+- **`A` / `ArrowLeft`**: Turn / pan camera left (`openspace.navigation.addLocalRotation(-1.5, 0.0)`).
+- **`D` / `ArrowRight`**: Turn / pan camera right (`openspace.navigation.addLocalRotation(1.5, 0.0)`).
+- **`Shift + W / S`**: Sprint forward or backward at 3x speed (`addTruckMovement(75.0)`).
+- **Dual-Mode Registration**: Binds natively in OpenSpace engine via `openspace.bindKey` and in webpanel DOM via `window.addEventListener("keydown")`.
 
 ### B. Multi-Criteria Decision Matrix (MCDM) & Silent Balancing (`app.js:2410–2530`)
 Normalizes user weights across 5 categories and recalculates analog site ranking dynamically:

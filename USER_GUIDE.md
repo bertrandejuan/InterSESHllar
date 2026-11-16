@@ -30,27 +30,33 @@ Inside each of the 5 planetary comparison categories (Thermal, Astrobiology, Dyn
 └───────────────────────────────────────────────────┘
 ```
 
-### A. Side View (`Side view`)
+### A. Side View (`Side view`) & Surface Walking
 The **Side view** button executes an eye-level, low-altitude flyover oriented horizontally across the landscape:
 1. **Close-Up Surface Altitude**:
    - Flies the camera close to the surface where 3D elevation relief and high-resolution textures are at maximum fidelity:
-     * **Mars: Gale Crater**: Drops to 3,800 m altitude on the northern floor of Aeolis Palus. On approach, the system sets `Mars_Texture` opacity to 0.0 so the 6 m/px CTX mosaic and 3D MOLA terrain are razor sharp and unblotched.
-     * **McMurdo Dry Valleys**: Drops to 2,800 m altitude over New Harbour at the mouth of Taylor Valley.
+     * **Mars: Gale Crater**: Drops to 3,800 m altitude on the northern floor of Aeolis Palus, maintaining full CTX mosaic texture crispness across the central crater floor.
+     * **McMurdo Dry Valleys**: Drops to 2,400 m altitude over New Harbour at the mouth of Taylor Valley.
      * **Lut Desert**: Drops to 1,800 m altitude over the southern margin of the giant yardang field.
-     * **Aralkum Desert**: Drops to 1,900 m altitude over the southwestern seabed and plateau cliffs.
+     * **Aralkum Desert**: Drops to 2,000 m altitude over the desiccated seabed and plateau cliffs.
      * **Salar de Uyuni**: Drops to 5,600 m altitude (~1,940 m ground clearance above the 3,656 m elevation salt flat).
      * **Custom Earth Locations**: Automatically calculates safe ground clearance based on queried elevation.
-2. **Tangent Planetary Horizon Orientation**:
-   - Uses OpenSpace Lua (`openspace.navigation.setNavigationState`) to tilt camera pitch tangent to the planetary curvature (`Pitch = 1.40 – 1.42 rad` / ~80°–82°). Instead of looking straight down like a satellite, you gaze horizontally across the terrain with the horizon in view.
-3. **Landmark-Directed Heading (Yaw)**:
-   - Automatically orients camera heading toward the key exploration target:
-     * **Mars Gale Crater**: Points South directly facing the 5.5-km central mound of **Mount Sharp** (Aeolis Mons).
-     * **McMurdo Dry Valleys**: Points West-Southwest straight up the carved glacial trough of **Taylor Valley** toward Lake Hoare.
-     * **Lut Desert**: Points North directly down the wind-sculpted **Kalut yardang** corridors.
-     * **Aralkum Desert**: Points Northeast across the desiccated seabed toward the **Ustyurt plateau** cliffs.
-     * **Salar de Uyuni**: Points North across the white salt flats toward **Volcán Tunupa**.
-4. **Immediate User Mouse Movement**:
-   - The camera remains anchored with `FollowAnchorNodeRotation = true` and `OrbitalNavigator` active. As soon as the camera arrives, you can immediately click and drag to orbit, pan, or zoom freely around the landscape without being locked into a rigid camera path.
+2. **Rightside-Up & Level Horizon Guarantee**:
+   - Uses OpenSpace Lua (`openspace.navigation.setNavigationState`) to tilt camera pitch tangent to the planetary curvature (`Pitch = 1.38 – 1.40 rad` / ~79°–80°).
+   - Locks planetary roll via `NavigationHandler.OrbitalNavigator.DisableRoll = true`, guaranteeing a level horizon with ground at the bottom and sky at the top for all sites (eliminates diagonal tilt and upside-down roll inversion).
+3. **Anti-Nadir Jump Protection (Idempotent Clicking)**:
+   - Clicking **Side view** while already on the surface smoothly re-levels the horizon without resetting the camera straight down to nadir map view.
+   - Automatically halts path dampening upon arrival to prevent camera snapback.
+4. **🚶 WASD Surface Walking Keyboard Controls**:
+   - When in Side view (or anywhere near the terrain), walk and turn across the planet using your keyboard:
+     * **`W` / `ArrowUp`**: Walk forward along the line of sight across the surface (`addTruckMovement(25.0)`).
+     * **`S` / `ArrowDown`**: Walk backward / step back (`addTruckMovement(-25.0)`).
+     * **`A` / `ArrowLeft`**: Turn / pan camera left (`addLocalRotation(-1.5, 0.0)`).
+     * **`D` / `ArrowRight`**: Turn / pan camera right (`addLocalRotation(1.5, 0.0)`).
+     * **`Shift + W` / `Shift + S`**: Hold Shift to sprint forward or backward at 3x speed (`addTruckMovement(75.0)`).
+   - **Dual-Input Synchronization**: Controls are active both via native OpenSpace engine keybindings (`openspace.bindKey`) and via webpanel DOM keyboard listeners.
+   - **HUD Indicator Toast**: A sleek glassmorphic badge appears at the bottom of the screen (`.surface-walk-pill`) confirming active walking keys and shortcuts.
+5. **Immediate Mouse Controls**:
+   - Orbit, pan, and tilt freely with the mouse at any time (`OrbitalNavigator` remains active).
 
 ### B. Focus on Surface (`Focus on surface`)
 - Flies the camera to a centered, high-overhead nadir overview (~240 km altitude) optimized for inspecting regional boundaries and continuous spatial overlays.
