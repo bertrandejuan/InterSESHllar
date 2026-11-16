@@ -770,13 +770,10 @@ window.TEAM_METADATA = {
   project: "TerraMatch: Earth-Mars Analog Multi-Criteria Decision System",
   dataset_version: "2.4.0",
   last_calibrated: "2026-11-15",
-  team_research_document: "https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0",
-  github_repository: "https://github.com/bertrandejuan/InterSESHllar",
   standard_attribution: "NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.",
   mathematical_framework: {
     standard: "Multi-Attribute Utility Theory (MAUT) & Distance-Based Exponential Similarity Kernel",
     author: "InterSESHllar Project Team",
-    research_doc: "https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0",
     step2_normalized_difference: "d_j = |X_Earth,j - X_Mars,j| / T_j",
     step2b_atmospheric_pressure: "d_P = |log10(P_Earth / P_Mars)|",
     step3_rms_distance: "D_c = sqrt( (1/n) * sum_{j=1}^n d_j^2 )",
@@ -801,8 +798,6 @@ window.TEAM_METADATA = {
     statement: "Must acknowledge SI generation in descriptive text and metadata (Challenge Submission Requirement).",
     standard_attribution: "NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.",
     decision_attribution: "Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.",
-    team_document: "https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0",
-    github_repository: "https://github.com/bertrandejuan/InterSESHllar",
     engine: "Google Gemini API (Gemini 2.5 Flash, Gemini 2.0 Flash, Gemini 1.5 Flash)",
     components_assisted: [
       "Site descriptive climatology blurbs and analog synthesis (drawer-about modal)",

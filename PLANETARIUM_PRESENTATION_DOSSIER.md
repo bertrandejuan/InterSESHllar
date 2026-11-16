@@ -176,10 +176,27 @@ The **InterSESHllar** system acknowledges the integration of **Synthetic Intelli
    - **Analog Climatology Blurbs** (`#drawer-about`): `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
    - **Astrobiology & Habitability Synthesis** (`#astro-query-results`): `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
    - **Decision Matrix Mission Optimizer** (`#optimizer-rationale-box`): `Attribution: Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
-   - **Methodology & Team Credits**: Cites the [InterSESHllar Research Doc](https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0) and [GitHub Repository](https://github.com/bertrandejuan/InterSESHllar).
+   - **Methodology & Team Credits**: Credits the 5-step distance-based similarity framework (RMS category distances & exponential similarity kernel).
 
 2. **Programmatic Metadata**:
-   - Exposed in `window.TEAM_METADATA` and `window.FALLBACK_METADATA` including `team_research_document`, `github_repository`, and `standard_attribution`.
+   - Exposed in `window.TEAM_METADATA` and `window.FALLBACK_METADATA` including `standard_attribution` and `decision_attribution`.
 
 3. **Zero-Hallucination Empirical Guarantee**:
-   - All physical parameters, tolerances ($T_j$), and baseline ground-truth telemetry are anchored strictly in verified NASA and ISRIC scientific archives.
+   - All physical parameters, tolerances (\(T_j\)), and baseline ground-truth telemetry are anchored strictly in verified NASA and ISRIC scientific archives.
+
+---
+
+## 📐 Appendix: Mathematical Similarity Framework & Formulas
+
+All planetary analog evaluations strictly adhere to the 5-step distance-based similarity framework adapted from cognitive metric learning and multi-attribute utility theory (*Roads &amp; Mozer, 2019*):
+
+- **Step 2 (Normalized Environmental Difference)**:
+  \[d_j = \frac{|X_{\text{Earth}, j} - X_{\text{Mars}, j}|}{T_j}\]
+- **Step 2b (Atmospheric Surface Pressure Difference - Logarithmic Ratio)**:
+  \[d_P = \left| \log_{10}\left( \frac{P_{\text{Earth}}}{P_{\text{Mars}}} \right) \right|\]
+- **Step 3 (RMS Category Distance)**:
+  \[D_c = \sqrt{\frac{1}{n} \sum_{j=1}^n d_j^2}\]
+- **Step 5 (Exponential Similarity Kernel)**:
+  \[S_c = 100 \cdot e^{-D_c}\]
+- **Step 6 (Multi-Criteria Utility Overall Score)**:
+  \[\text{Overall Score} = \frac{\sum_{c=1}^5 w_c \cdot S_c}{\sum_{c=1}^5 w_c}\]

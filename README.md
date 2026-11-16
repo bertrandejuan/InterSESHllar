@@ -188,56 +188,13 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 
 ---
 
-## 📐 Mathematical Similarity Framework & Methodology
+## 📐 Mathematical Similarity Framework
 
-All planetary analog evaluations strictly adhere to the 5-step distance-based similarity framework and mathematical formulas developed by the team, detailed in the **[InterSESHllar Research Document](https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0)** and implemented in the **[InterSESHllar GitHub Repository](https://github.com/bertrandejuan/InterSESHllar)**:
+All planetary analog evaluations strictly adhere to a 5-step distance-based similarity framework (RMS Category Distances &amp; Exponential Similarity Kernel, adapted from cognitive metric learning and multi-attribute utility theory; *Roads &amp; Mozer, 2019*). 
 
-Adapted from cognitive metric learning and multi-attribute utility theory (*Roads &amp; Mozer, 2019, "Obtaining psychological embeddings through joint kernel and metric learning"*):
+The system computes normalized environmental differences (\(d_j\)), logarithmic atmospheric pressure ratios (\(d_P\)), root-mean-square category distances (\(D_c\)), exponential kernel similarity scores (\(S_c\)), and multi-attribute utility overall ratings (\(S_{\text{overall}}\)) continuously in real time. 
 
-### Step 2: Normalized Environmental Difference
-For each variable $j$, the absolute difference between the Earth in-situ measurement $X_{\text{Earth}, j}$ and the Mars Gale Crater reference value $X_{\text{Mars}, j}$ is divided by a scientifically calibrated tolerance $T_j$:
-$$d_j = \frac{|X_{\text{Earth}, j} - X_{\text{Mars}, j}|}{T_j}$$
-
-| Domain | Parameter Code | Parameter Label | Mars Baseline | Tolerance ($T_j$) | Units |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Thermal** | `T2M` | Mean Daily Air Temperature | -53.67 | 20.0 | °C |
-| **Thermal** | `T2M_MIN` | Mean Daily Minimum Temperature | -77.76 | 20.0 | °C |
-| **Thermal** | `T2M_MAX` | Mean Daily Maximum Temperature | -19.08 | 20.0 | °C |
-| **Thermal** | `DELTA_T` | Diurnal Thermal Range | 58.68 | 20.0 | °C |
-| **Thermal** | `TS` | Ground Surface Temperature | -42.85 | 20.0 | °C |
-| **Astrobiology** | `SOIL_PH` | Regolith / Soil pH | 7.80 | 1.5 | pH |
-| **Astrobiology** | `SOC` | Soil Organic Carbon | 0.10 | 5.0 | g/kg |
-| **Astrobiology** | `BDOD` | Regolith Bulk Density | 1.58 | 0.40 | kg/dm³ |
-| **Dynamics** | `WS10M` | Mean Surface Wind Speed | 3.50 | 5.0 | m/s |
-| **Moisture** | `RH2M` | Relative Humidity | 7.44 | 20.0 | % |
-| **Moisture** | `QV2M` | Specific Humidity | 0.694 | 5.0 | g/kg |
-| **Moisture** | `PRECTOTCORR`| Daily Precipitation | 0.00 | 1.0 | mm/day |
-| **Radiation** | `ALLSKY_SW` | Solar Radiation Flux | 14.76 | 15.0 | MJ/m²/day |
-| **Radiation** | `UVA` | UVA Irradiance | 0.619 | 5.0 | W/m² |
-| **Radiation** | `UVB` | UVB Biologically Active Irradiance | 0.200 | 0.5 | W/m² |
-
-### Step 2b: Atmospheric Surface Pressure Difference (Logarithmic Ratio)
-Because atmospheric pressure spans orders of magnitude between Earth (~101.3 kPa at sea level, 65.0 kPa at Uyuni) and Mars (~0.76 kPa at Gale Crater), the normalized distance uses a base-10 logarithmic ratio:
-$$d_P = \left| \log_{10}\left( \frac{P_{\text{Earth}}}{P_{\text{Mars}}} \right) \right|$$
-
-### Step 3: Root Mean Square (RMS) Category Distance
-Variables within each of the 5 categories are combined using root-mean-square distance, weighting individual variables evenly within the domain:
-$$D_c = \sqrt{\frac{1}{n} \sum_{j=1}^{n} d_j^2}$$
-
-### Step 5: Exponential Similarity Kernel
-The distance is converted into an intuitive percentage similarity score (0% to 100%) via an exponential kernel function (*Roads & Mozer, 2019*):
-$$S_c = 100 \cdot e^{-D_c}$$
-Smaller environmental differences produce higher similarity scores, asymptotically approaching 100% as distance approaches zero.
-
-### Step 6: Multi-Criteria Decision Matrix (MCDM) Overall Score
-The overall mission suitability score across all 5 domains is computed as the normalized weighted sum:
-$$\text{Overall Score} = \frac{\sum_{c=1}^{5} w_c \cdot S_c}{\sum_{c=1}^{5} w_c}$$
-Where $w_c \ge 0$ are the domain weights (defaulting to equal 20% each, or dynamically tuned via user sliders / AI Mission Optimizer).
-
-### Astrobiology Regolith Score (SoilGrids Global Live Query)
-For arbitrary Earth coordinates queried via the ISRIC SoilGrids REST API:
-$$d_{\text{ph}} = \frac{|\text{pH} - 7.80|}{1.5}, \quad d_{\text{soc}} = \frac{|\text{SOC} - 0.10|}{5.0}, \quad d_{\text{bdod}} = \frac{|\text{BDOD} - 1.58|}{0.40}$$
-$$D_{\text{astro}} = \sqrt{\frac{1}{3} (d_{\text{ph}}^2 + d_{\text{soc}}^2 + d_{\text{bdod}}^2)}, \quad S_{\text{astro}} = 100 \cdot e^{-D_{\text{astro}}}$$
+*(For complete equations, parameter tolerances, and mathematical proofs, see the [Mathematical Appendix at the bottom](#-appendix-mathematical-similarity-framework--formulas).)*
 
 ---
 
@@ -256,9 +213,8 @@ Wherever generative SI contributes to descriptive text or mission profile deduct
   * *Attribution*: `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
 - **Decision Matrix Mission Profile Optimizer (`#optimizer-rationale-box`)**:
   * *Attribution*: `Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
-  * *Methodology & Research Credit*: Links directly to the [InterSESHllar Research Document](https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0) and [GitHub Repository](https://github.com/bertrandejuan/InterSESHllar).
 - **Decision Matrix Footer Bar (`.matrix-credits-bar`)**:
-  * Displays full attribution to the InterSESHllar Research Doc, GitHub repository, 5-step mathematical formulas, and NASA POWER / MSL Curiosity data sources with Gemini API synthesis.
+  * Concise methodology, empirical data source, and Gemini API decision attribution.
 
 ### 2. Programmatic Metadata Attribution
 Attribution is embedded directly into the core telemetry metadata objects in both `user/webpanels/mars_earth_analogs/js/team-data.js` and `fallback-data.js`:
@@ -270,8 +226,6 @@ Attribution is embedded directly into the core telemetry metadata objects in bot
   "statement": "Must acknowledge SI generation in descriptive text and metadata (Challenge Submission Requirement).",
   "standard_attribution": "NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.",
   "decision_attribution": "Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.",
-  "team_document": "https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0",
-  "github_repository": "https://github.com/bertrandejuan/InterSESHllar",
   "engine": "Google Gemini API (Gemini 2.5 Flash, Gemini 2.0 Flash, Gemini 1.5 Flash)",
   "components_assisted": [
     "Site descriptive climatology blurbs and analog synthesis (drawer-about modal)",
@@ -298,3 +252,54 @@ While SI powers natural-language synthesis and interactive mission weighting, **
 
 See [INSTALL.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/INSTALL.md) for step-by-step setup in OpenSpace.
 See [USER_GUIDE.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/USER_GUIDE.md) for full interactive operations and presentation walkthroughs.
+
+---
+
+## 📐 Appendix: Mathematical Similarity Framework & Formulas
+
+All planetary analog evaluations strictly adhere to the 5-step distance-based similarity framework adapted from cognitive metric learning and multi-attribute utility theory (*Roads &amp; Mozer, 2019, "Obtaining psychological embeddings through joint kernel and metric learning"*):
+
+### Step 2: Normalized Environmental Difference
+For each variable \(j\), the absolute difference between the Earth in-situ measurement \(X_{\text{Earth}, j}\) and the Mars Gale Crater reference value \(X_{\text{Mars}, j}\) is divided by a scientifically calibrated tolerance \(T_j\):
+\[d_j = \frac{|X_{\text{Earth}, j} - X_{\text{Mars}, j}|}{T_j}\]
+
+| Domain | Parameter Code | Parameter Label | Mars Baseline | Tolerance (\(T_j\)) | Units |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Thermal** | `T2M` | Mean Daily Air Temperature | -53.67 | 20.0 | °C |
+| **Thermal** | `T2M_MIN` | Mean Daily Minimum Temperature | -77.76 | 20.0 | °C |
+| **Thermal** | `T2M_MAX` | Mean Daily Maximum Temperature | -19.08 | 20.0 | °C |
+| **Thermal** | `DELTA_T` | Diurnal Thermal Range | 58.68 | 20.0 | °C |
+| **Thermal** | `TS` | Ground Surface Temperature | -42.85 | 20.0 | °C |
+| **Astrobiology** | `SOIL_PH` | Regolith / Soil pH | 7.80 | 1.5 | pH |
+| **Astrobiology** | `SOC` | Soil Organic Carbon | 0.10 | 5.0 | g/kg |
+| **Astrobiology** | `BDOD` | Regolith Bulk Density | 1.58 | 0.40 | kg/dm³ |
+| **Dynamics** | `WS10M` | Mean Surface Wind Speed | 3.50 | 5.0 | m/s |
+| **Moisture** | `RH2M` | Relative Humidity | 7.44 | 20.0 | % |
+| **Moisture** | `QV2M` | Specific Humidity | 0.694 | 5.0 | g/kg |
+| **Moisture** | `PRECTOTCORR`| Daily Precipitation | 0.00 | 1.0 | mm/day |
+| **Radiation** | `ALLSKY_SW` | Solar Radiation Flux | 14.76 | 15.0 | MJ/m²/day |
+| **Radiation** | `UVA` | UVA Irradiance | 0.619 | 5.0 | W/m² |
+| **Radiation** | `UVB` | UVB Biologically Active Irradiance | 0.200 | 0.5 | W/m² |
+
+### Step 2b: Atmospheric Surface Pressure Difference (Logarithmic Ratio)
+Because atmospheric pressure spans orders of magnitude between Earth (~101.3 kPa at sea level, 65.0 kPa at Uyuni) and Mars (~0.76 kPa at Gale Crater), the normalized distance uses a base-10 logarithmic ratio:
+\[d_P = \left| \log_{10}\left( \frac{P_{\text{Earth}}}{P_{\text{Mars}}} \right) \right|\]
+
+### Step 3: Root Mean Square (RMS) Category Distance
+Variables within each of the 5 categories are combined using root-mean-square distance, weighting individual variables evenly within the domain:
+\[D_c = \sqrt{\frac{1}{n} \sum_{j=1}^{n} d_j^2}\]
+
+### Step 5: Exponential Similarity Kernel
+The distance is converted into an intuitive percentage similarity score (0% to 100%) via an exponential kernel function (*Roads &amp; Mozer, 2019*):
+\[S_c = 100 \cdot e^{-D_c}\]
+Smaller environmental differences produce higher similarity scores, asymptotically approaching 100% as distance approaches zero.
+
+### Step 6: Multi-Criteria Decision Matrix (MCDM) Overall Score
+The overall mission suitability score across all 5 domains is computed as the normalized weighted sum:
+\[\text{Overall Score} = \frac{\sum_{c=1}^{5} w_c \cdot S_c}{\sum_{c=1}^{5} w_c}\]
+Where \(w_c \ge 0\) are the domain weights (defaulting to equal 20% each, or dynamically tuned via user sliders / AI Mission Optimizer).
+
+### Astrobiology Regolith Score (SoilGrids Global Live Query)
+For arbitrary Earth coordinates queried via the ISRIC SoilGrids REST API:
+\[d_{\text{ph}} = \frac{|\text{pH} - 7.80|}{1.5}, \quad d_{\text{soc}} = \frac{|\text{SOC} - 0.10|}{5.0}, \quad d_{\text{bdod}} = \frac{|\text{BDOD} - 1.58|}{0.40}\]
+\[D_{\text{astro}} = \sqrt{\frac{1}{3} (d_{\text{ph}}^2 + d_{\text{soc}}^2 + d_{\text{bdod}}^2)}, \quad S_{\text{astro}} = 100 \cdot e^{-D_{\text{astro}}}\]

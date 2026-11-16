@@ -243,18 +243,7 @@ function tourDelay(ms) {
 - **Automated Flight on Query**: `🔬 Query SoilGrids Telemetry` executes `openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5)` directly upon query execution.
 
 ### F. Distance-Based Similarity Framework (`app.js:285–350`)
-Replaces ad-hoc linear heuristics with the cognitive metric learning similarity model (*Roads & Mozer, 2019*):
-- **Step 2 (Normalized Differences)**:
-  $$d_j = \frac{|X_{\text{Earth}, j} - X_{\text{Mars}, j}|}{T_j}$$
-  Calibrated tolerances $T_j$: Temperature $20^\circ\text{C}$, Relative Humidity $20\%$, UVA $5.0\text{ W/m}^2$, UVB $0.5\text{ W/m}^2$, Wind $5.0\text{ m/s}$, Specific Humidity $5.0\text{ g/kg}$, Rain $1.0\text{ mm/d}$, Solar $15.0\text{ MJ/m}^2\text{/d}$, pH $1.5$, SOC $5.0\text{ g/kg}$, BDOD $0.40\text{ kg/dm}^3$.
-- **Step 2b (Atmospheric Pressure Ratio)**:
-  $$d_P = \left| \log_{10}\left( \frac{P_{\text{Earth}}}{P_{\text{Mars}}} \right) \right|$$
-- **Step 3 (RMS Category Distance)**:
-  $$D_c = \sqrt{\frac{1}{n} \sum_{j=1}^n d_j^2}$$
-- **Step 5 (Exponential Similarity Kernel)**:
-  $$S_c = 100 \cdot e^{-D_c}$$
-- **Step 6 (Multi-Criteria Utility)**:
-  $$\text{Overall Score} = \frac{\sum_{c=1}^5 w_c \cdot S_c}{\sum_{c=1}^5 w_c}$$
+Replaces ad-hoc linear heuristics with the cognitive metric learning similarity model (*Roads &amp; Mozer, 2019*). Computes normalized environmental differences, logarithmic atmospheric pressure ratios, root-mean-square category distances, exponential kernel similarity scores, and multi-attribute utility overall ratings continuously in real time. Full mathematical derivations and formulas are documented in the [Mathematical Appendix](#6-mathematical-appendix-5-step-similarity-framework-formulas) at the bottom.
 
 ### G. Synthetic Intelligence (SI) Generation & Metadata Attribution
 - **Submission Requirement Fulfillment**: *"Must acknowledge SI generation in descriptive text and metadata."*
@@ -262,8 +251,8 @@ Replaces ad-hoc linear heuristics with the cognitive metric learning similarity 
   * Climatology modal drawer: `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
   * SoilGrids habitability synthesis: `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
   * MCDM mission optimizer: `Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
-  * Decision Matrix Credits Bar: Directly cites [InterSESHllar Research Doc](https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0) and [GitHub Repository](https://github.com/bertrandejuan/InterSESHllar).
-- **Programmatic Metadata**: `window.TEAM_METADATA` and `window.FALLBACK_METADATA` in `team-data.js` and `fallback-data.js` explicitly contain `team_research_document`, `github_repository`, and `standard_attribution`.
+  * Decision Matrix Credits Bar: Standardized methodology, empirical NASA data sources, and Gemini API decision attribution.
+- **Programmatic Metadata**: `window.TEAM_METADATA` and `window.FALLBACK_METADATA` in `team-data.js` and `fallback-data.js` explicitly contain `standard_attribution` and `decision_attribution`.
 - **Zero Hallucinations Guarantee**: All telemetry inputs and tolerance scalings remain anchored exclusively to NASA POWER, MERRA-2, ISRIC SoilGrids v2.0, and MSL Curiosity REMS/CheMin in-situ ground truth.
 
 ---
@@ -290,3 +279,25 @@ Replaces ad-hoc linear heuristics with the cognitive metric learning similarity 
 | **`00:20 – 00:30`** | Type *"rover mobility"* into the Mission Optimizer; click **Apply**. Viewport HUD swaps to dynamics/traverse texture. | Regex archetype classifier → `state.categoryWeights` updated → `updateMatrixViewportHUD()` updates `ScreenSpace.MatrixHUD`. |
 | **`00:30 – 00:40`** | Click **`🧬 Find Astrobiology Data`**; select **`🏜️ Atacama`** preset; click **`Query`**. Camera flies to -24.50°, -69.25°. | `querySoilGridsAstrobiology()` REST fetch → OpenSpace camera dispatch `flyToGeo("Earth", lat, lon, 250000, 2.5)`. |
 | **`00:40 – 00:50`** | View returned SoilGrids regolith properties (pH 8.1, SOC 0.2 g/kg, bulk density 1.45 kg/dm³). | Astrobiological habitability synthesis rendered into modal DOM. |
+
+---
+
+## 6. Mathematical Appendix: 5-Step Similarity Framework Formulas
+
+Adapted from cognitive metric learning and multi-attribute utility theory (*Roads &amp; Mozer, 2019*):
+
+### Step 2: Normalized Environmental Difference
+\[d_j = \frac{|X_{\text{Earth}, j} - X_{\text{Mars}, j}|}{T_j}\]
+Calibrated tolerances \(T_j\): Temperature \(20^\circ\text{C}\), Relative Humidity \(20\%\), UVA \(5.0\text{ W/m}^2\), UVB \(0.5\text{ W/m}^2\), Wind \(5.0\text{ m/s}\), Specific Humidity \(5.0\text{ g/kg}\), Rain \(1.0\text{ mm/d}\), Solar \(15.0\text{ MJ/m}^2\text{/d}\), pH \(1.5\), SOC \(5.0\text{ g/kg}\), BDOD \(0.40\text{ kg/dm}^3\).
+
+### Step 2b: Atmospheric Surface Pressure Difference (Logarithmic Ratio)
+\[d_P = \left| \log_{10}\left( \frac{P_{\text{Earth}}}{P_{\text{Mars}}} \right) \right|\]
+
+### Step 3: Root Mean Square (RMS) Category Distance
+\[D_c = \sqrt{\frac{1}{n} \sum_{j=1}^n d_j^2}\]
+
+### Step 5: Exponential Similarity Kernel
+\[S_c = 100 \cdot e^{-D_c}\]
+
+### Step 6: Multi-Criteria Utility (MCDM) Overall Score
+\[\text{Overall Score} = \frac{\sum_{c=1}^5 w_c \cdot S_c}{\sum_{c=1}^5 w_c}\]

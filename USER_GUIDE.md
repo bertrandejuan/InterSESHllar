@@ -273,7 +273,7 @@ The automated tour executes a multi-planetary sequence:
 
 In full compliance with submission requirements, this project acknowledges the utilization of **Synthetic Intelligence (SI)** via the **Google Gemini API** (`gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-1.5-flash`) for automated text synthesis and mission architecture deduction.
 
-### Descriptive UI Attributions & Methodology Citations
+### Descriptive UI Attributions
 Every user interface component featuring generative text or mission profile deduction displays concise, standardized attribution directly underneath data sources:
 1. **About Modal (`#drawer-about`)**:
    `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
@@ -281,10 +281,8 @@ Every user interface component featuring generative text or mission profile dedu
    `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
 3. **Decision Matrix Mission Optimizer (`#optimizer-rationale-box`)**:
    `Attribution: Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
-   - Methodology link to [InterSESHllar Research Doc](https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0)
-   - Code link to [GitHub Repository](https://github.com/bertrandejuan/InterSESHllar)
 4. **Decision Matrix Credits Bar (`.matrix-credits-bar`)**:
-   Directly credits the team's 5-step distance-based similarity framework, Google Doc, GitHub repo, and empirical NASA records.
+   Credits the 5-step distance-based similarity framework, empirical NASA POWER/MSL Curiosity records, and Gemini API decision optimization.
 
 ### Programmatic Metadata Integration
 - Telemetry datasets expose `window.TEAM_METADATA.si_generation_acknowledgement` and `window.FALLBACK_METADATA.si_generation_acknowledgement` detailing model engines, generated components, and human validation.
@@ -296,3 +294,24 @@ Every user interface component featuring generative text or mission profile dedu
 
 Tracked and synchronized at:  
 **`https://github.com/bertrandejuan/InterSESHllar.git` (`main` branch)**
+
+---
+
+## 📐 Appendix: Mathematical Similarity Framework & Formulas
+
+All planetary analog evaluations strictly adhere to the 5-step distance-based similarity framework adapted from cognitive metric learning and multi-attribute utility theory (*Roads &amp; Mozer, 2019*):
+
+### Step 2: Normalized Environmental Difference
+\[d_j = \frac{|X_{\text{Earth}, j} - X_{\text{Mars}, j}|}{T_j}\]
+
+### Step 2b: Atmospheric Surface Pressure Difference (Logarithmic Ratio)
+\[d_P = \left| \log_{10}\left( \frac{P_{\text{Earth}}}{P_{\text{Mars}}} \right) \right|\]
+
+### Step 3: Root Mean Square (RMS) Category Distance
+\[D_c = \sqrt{\frac{1}{n} \sum_{j=1}^n d_j^2}\]
+
+### Step 5: Exponential Similarity Kernel
+\[S_c = 100 \cdot e^{-D_c}\]
+
+### Step 6: Multi-Criteria Decision Matrix (MCDM) Overall Score
+\[\text{Overall Score} = \frac{\sum_{c=1}^5 w_c \cdot S_c}{\sum_{c=1}^5 w_c}\]

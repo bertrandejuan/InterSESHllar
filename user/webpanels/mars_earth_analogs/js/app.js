@@ -3095,9 +3095,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="optimizer-si-attribution-tag">
               <p style="margin: 0 0 3px 0; color: #a78bfa;"><strong>Attribution:</strong> Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API &amp; planetary mission architectures.</p>
               <div style="font-size: 0.65rem; color: #94a3b8; line-height: 1.4;">
-                <span>📐 <strong>Methodology &amp; Math:</strong> 5-step distance-based similarity framework (<a href="https://docs.google.com/document/d/1cvhY8s0gJgfjc1iEPC9obAFPhYmJmRHLmYDySQLQDlI/edit?tab=t.0" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">InterSESHllar Research Doc</a>)</span> &bull; 
-                <span>💻 <strong>Code:</strong> <a href="https://github.com/bertrandejuan/InterSESHllar" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">GitHub</a></span><br/>
-                <span>📊 <strong>Data:</strong> NASA POWER (2015–2025) &amp; MSL Curiosity in-situ records; synthesis: Gemini API.</span>
+                <span>📐 <strong>Methodology:</strong> 5-step distance-based similarity framework &bull; 📊 <strong>Data:</strong> NASA POWER (2015–2025) &amp; MSL Curiosity in-situ records; synthesis: Gemini API.</span>
               </div>
             </div>
             ${!result.isGeminiLive ? `
