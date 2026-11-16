@@ -250,8 +250,16 @@ While SI powers natural-language synthesis and interactive mission weighting, **
 
 ## 🚀 Quick Start & Installation
 
-See [INSTALL.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/INSTALL.md) for step-by-step setup in OpenSpace.
-See [USER_GUIDE.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/USER_GUIDE.md) for full interactive operations and presentation walkthroughs.
+1. **Prerequisite**: You have to download Git or GitHub Desktop first to obtain the project files.
+   - Install Git CLI: [git-scm.com/downloads](https://git-scm.com/downloads) (or winget install Git.Git)
+   - Install GitHub Desktop (GUI): [desktop.github.com](https://desktop.github.com/)
+2. **Clone the Repository**:
+   `ash
+   git clone https://github.com/bertrandejuan/InterSESHllar.git
+   cd InterSESHllar
+   `
+3. See [INSTALL.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/INSTALL.md) for step-by-step setup in OpenSpace.
+4. See [USER_GUIDE.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/USER_GUIDE.md) for full interactive operations and presentation walkthroughs.
 
 ---
 

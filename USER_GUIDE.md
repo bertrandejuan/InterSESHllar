@@ -4,7 +4,23 @@ Welcome to the **Mars–Earth Planetary Analogs Visualization Package** for Open
 
 ---
 
-## 🚀 1. How to Launch OpenSpace
+## 📥 1. Prerequisites: Download GitHub First
+
+Before launching and running this package, **you have to download Git / GitHub first** to acquire the project repository:
+
+1. **Download & Install Git or GitHub Desktop**:
+   - **Git CLI (Official)**: Download from [git-scm.com/downloads](https://git-scm.com/downloads) (or install via PowerShell: winget install Git.Git).
+   - **GitHub Desktop (GUI)**: Download from [desktop.github.com](https://desktop.github.com/).
+2. **Clone the Project Repository**:
+   Clone the repository to your local drive before proceeding with OpenSpace installation:
+   `powershell
+   git clone https://github.com/bertrandejuan/InterSESHllar.git
+   cd InterSESHllar
+   `
+
+---
+
+## 🚀 2. How to Launch OpenSpace
 
 Launch OpenSpace whenever you are ready:
 1. Double-click **`OpenSpace.exe`** from:
@@ -16,7 +32,7 @@ Launch OpenSpace whenever you are ready:
 
 ---
 
-## 🏔️ 2. Viewport Controls: "Focus on surface" & "Side view"
+## 🏔️ 3. Viewport Controls: "Focus on surface" & "Side view"
 
 Inside each of the 5 planetary comparison categories (Thermal, Astrobiology, Dynamics, Moisture, Solar), an interactive action strip provides dedicated viewport tools:
 
@@ -71,7 +87,7 @@ The **Side view** button executes an eye-level, low-altitude flyover oriented ho
 
 ---
 
-## ⚖️ 3. Customizable Decision Matrix (MCDM) & Mission Optimizer
+## ⚖️ 4. Customizable Decision Matrix (MCDM) & Mission Optimizer
 
 Click the **`Comparison Matrix ▾`** button in the sidebar to open the customizable Multi-Criteria Decision Matrix dropdown:
 
@@ -129,7 +145,7 @@ Click the **`Comparison Matrix ▾`** button in the sidebar to open the customiz
 
 ---
 
-## 🧬 4. Find Astrobiology Data for Any Earth Location (SoilGrids)
+## 🧬 5. Find Astrobiology Data for Any Earth Location (SoilGrids)
 
 Click the **`🧬 Find Astrobiology Data for Any Earth Location`** button located at the bottom-right of the dashboard:
 
@@ -170,7 +186,7 @@ Click the **`🧬 Find Astrobiology Data for Any Earth Location`** button locate
 
 ---
 
-## 🗺️ 5. Geographic Borders & Adaptive Zoom Pins
+## 🗺️ 6. Geographic Borders & Adaptive Zoom Pins
 
 ### A. True Encompassing Geographic Borders
 Each analog site features a **high-visibility, luminous 4.5px perimeter border**:
@@ -188,7 +204,7 @@ Each analog site features a **high-visibility, luminous 4.5px perimeter border**
 
 ---
 
-## 🎮 6. Navigation Controls & Hotkeys
+## 🎮 7. Navigation Controls & Hotkeys
 
 ### Mouse Controls
 - **Left-Click + Drag**: Rotate / orbit around the planet.
@@ -207,7 +223,7 @@ Each analog site features a **high-visibility, luminous 4.5px perimeter border**
 
 ---
 
-## 🛰️ 7. Satellite Layers & Mathematical Comparison
+## 🛰️ 8. Satellite Layers & Mathematical Comparison
 
 All similarity scores in TerraMatch are governed by the rigorous **Distance-Based Similarity Framework** (*Roads & Mozer, 2019*):
 1. **Normalized Environmental Differences**: $d_j = \frac{|X_{\text{Earth}, j} - X_{\text{Mars}, j}|}{T_j}$ with calibrated tolerances $T_j$ (Temperature $20^\circ\text{C}$, Relative Humidity $20\%$, UVA $5.0\text{ W/m}^2$, UVB $0.5\text{ W/m}^2$, Wind $5.0\text{ m/s}$, Specific Humidity $5.0\text{ g/kg}$, Precipitation $1.0\text{ mm/d}$, Solar $15.0\text{ MJ/m}^2\text{/d}$, pH $1.5$, SOC $5.0\text{ g/kg}$, BDOD $0.40\text{ kg/dm}^3$).
@@ -236,7 +252,7 @@ All similarity scores in TerraMatch are governed by the rigorous **Distance-Base
 
 ---
 
-## 🎬 8. Automated Planetary Flythrough Tours & Planetarium Presets
+## 🎬 9. Automated Planetary Flythrough Tours & Planetarium Presets
 
 Open the tour drawer by clicking **`🎬 Tour`** in the bottom-right navigation dock. The automated cinematic tour provides an unattended, synchronized sweep across Mars and all four Earth desert analogs:
 

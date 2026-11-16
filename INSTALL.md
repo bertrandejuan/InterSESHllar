@@ -1,6 +1,22 @@
 # Installation & Setup Guide
 
-## 1. Directory Placement in OpenSpace
+## 1. Prerequisites: Download GitHub First
+
+Before installing or running this project, **you have to download Git / GitHub first** to acquire the repository files:
+
+1. **Download & Install Git or GitHub Desktop**:
+   - **Git CLI (Official)**: Download from [git-scm.com/downloads](https://git-scm.com/downloads) (or install via PowerShell: winget install Git.Git).
+   - **GitHub Desktop (GUI)**: Download from [desktop.github.com](https://desktop.github.com/).
+2. **Clone the Project Repository**:
+   Open PowerShell, Command Prompt, or GitHub Desktop and clone the repository:
+   `powershell
+   git clone https://github.com/bertrandejuan/InterSESHllar.git
+   cd InterSESHllar
+   `
+
+---
+
+## 2. Directory Placement in OpenSpace
 
 Copy or symlink the project files into your OpenSpace installation directory (e.g., `C:\OpenSpace\OpenSpace-0.22.1`):
 
@@ -25,7 +41,7 @@ Copy or symlink the project files into your OpenSpace installation directory (e.
 
 ---
 
-## 2. Enabling the Asset in OpenSpace
+## 3. Enabling the Asset in OpenSpace
 
 ### Method A: Automatic via customization.lua (Recommended)
 `customization.lua` automatically initializes `mars_earth_analogs.asset` when OpenSpace opens, loads all planetary overlays, and centers the camera on Mars Gale Crater.
@@ -46,7 +62,7 @@ asset.require("mars_earth_analogs/mars_earth_analogs")
 
 ---
 
-## 3. Opening the Interactive Web Panel
+## 4. Opening the Interactive Web Panel
 
 1. **Within OpenSpace**:
    OpenSpace automatically serves files inside `user/webpanels/`. The **Planetary Analog Dashboard** is bookmarked under **User Panels** in the OpenSpace menu, or accessible at:
@@ -57,7 +73,7 @@ asset.require("mars_earth_analogs/mars_earth_analogs")
 
 ---
 
-## 4. Operational Capabilities & APIs
+## 5. Operational Capabilities & APIs
 
 1. **Tangent "Side View" Camera, Preserved Rolling & Topographic Surface Walking Engine**:
    - Inside each science accordion category, click **`Side view`** (next to **`Focus on surface`**).
@@ -81,7 +97,7 @@ asset.require("mars_earth_analogs/mars_earth_analogs")
 
 ---
 
-## 5. Keyboard Shortcuts
+## 6. Keyboard Shortcuts
 
 | Shortcut | Destination / Action | Description |
 | :--- | :--- | :--- |
