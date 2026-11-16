@@ -1128,6 +1128,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTelemetryTable();
     loadBlurb();
 
+    if (btnPresetCurrent && btnPresetCurrent.classList.contains("active") && site.coordinates && state.currentSiteKey !== "mars_gale") {
+      if (inputAstroLat) inputAstroLat.value = site.coordinates.lat.toFixed(4);
+      if (inputAstroLon) inputAstroLon.value = site.coordinates.lon.toFixed(4);
+      if (astroQueryResults && astroQueryResults.querySelector(".astro-preloaded-prompt")) {
+        showPreloadPrompt(site.name, site.coordinates.lat, site.coordinates.lon);
+      }
+    }
+
     if (flyCamera) {
       const globe = site.globe || "Earth";
       const target = SITE_CAMERA_TARGETS[siteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
@@ -1409,10 +1417,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Pre-compiled desert analogs & terrestrial soil database for offline/fallback resilience
   const KNOWN_SOIL_PRESETS = {
-    atacama: { lat: -24.50, lon: -69.25, bdod: 1.29, phh2o: 8.2, soc: 1.4, name: "Atacama Desert (Chile)" },
+    atacama: { lat: -24.08, lon: -69.87, bdod: 1.29, phh2o: 8.2, soc: 1.4, name: "Atacama Desert (Chile)" },
     death_valley: { lat: 36.53, lon: -116.93, bdod: 1.50, phh2o: 8.3, soc: 1.8, name: "Death Valley (USA)" },
     sahara: { lat: 24.00, lon: 15.00, bdod: 1.54, phh2o: 8.0, soc: 0.8, name: "Sahara Desert (Libya)" },
-    outback: { lat: -25.34, lon: 131.03, bdod: 1.51, phh2o: 7.7, soc: 2.5, name: "Australian Outback (Red Centre)" },
+    outback: { lat: -21.28, lon: 119.75, bdod: 1.48, phh2o: 7.4, soc: 2.2, name: "Pilbara Outback (Australia)" },
+    rio_tinto: { lat: 37.69, lon: -6.56, bdod: 1.42, phh2o: 2.8, soc: 3.5, name: "Rio Tinto (Spain)" },
+    devon_island: { lat: 75.38, lon: -89.67, bdod: 1.45, phh2o: 7.9, soc: 1.1, name: "Devon Island (Canada)" },
     lut: { lat: 30.55, lon: 58.80, bdod: 1.45, phh2o: 7.9, soc: 2.1, name: "Lut Desert (Dasht-e Lut, Iran)" },
     uyuni: { lat: -20.13, lon: -67.49, bdod: 1.52, phh2o: 8.4, soc: 0.5, name: "Salar de Uyuni (Bolivia)" },
     mcmurdo: { lat: -77.50, lon: 162.00, bdod: 1.55, phh2o: 7.6, soc: 0.2, name: "McMurdo Dry Valleys (Antarctica)" },
@@ -1500,6 +1510,9 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       return;
     }
+
+    // Automatically fly OpenSpace camera to queried Earth coordinates
+    openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5);
 
     astroQueryResults.style.display = "flex";
     astroQueryResults.innerHTML = `
@@ -1630,20 +1643,57 @@ document.addEventListener("DOMContentLoaded", () => {
         </p>
       </div>
 
-      <button type="button" id="btn-result-flyto" class="btn btn-primary" style="padding: 7px 10px; font-size: 0.74rem; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(90deg, #0284c7, #2563eb); border: 1px solid #38bdf8;">
-        <span>✈️ Fly Camera to This Location in OpenSpace</span>
-      </button>
-
       <div class="astro-source-tag">
         ${isOffline ? 'Calibrated ISRIC SoilGrids v2.0 & NASA EMIT Baseline' : 'Live ISRIC SoilGrids v2.0 Global Regolith Grid (0–5 cm depth)'} | MSL Curiosity Ground Truth
       </div>
     `;
+  }
 
-    const btnResultFly = document.getElementById("btn-result-flyto");
-    if (btnResultFly) {
-      btnResultFly.addEventListener("click", () => {
-        openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5);
-      });
+  // Astrobiology Preloading & Selection Helpers
+  function showPreloadPrompt(locationName, lat, lon) {
+    if (!astroQueryResults) return;
+    astroQueryResults.style.display = "flex";
+    const latStr = lat >= 0 ? `${lat.toFixed(4)}°N` : `${Math.abs(lat).toFixed(4)}°S`;
+    const lonStr = lon >= 0 ? `${lon.toFixed(4)}°E` : `${Math.abs(lon).toFixed(4)}°W`;
+    astroQueryResults.innerHTML = `
+      <div class="astro-preloaded-prompt">
+        <span class="astro-prompt-badge">📍 Preset Location Preloaded</span>
+        <span class="astro-prompt-title">${locationName}</span>
+        <span class="astro-prompt-coords">${latStr}, ${lonStr}</span>
+        <p class="astro-prompt-hint">Coordinates staged. Click <strong>Query SoilGrids Telemetry</strong> to fetch live ISRIC 0–5cm regolith data and assess astrobiological habitability match.</p>
+      </div>
+    `;
+  }
+
+  function setPresetHighlight(targetChip) {
+    document.querySelectorAll(".astro-preset-chips .chip-preset").forEach(c => c.classList.remove("active"));
+    if (targetChip) {
+      targetChip.classList.add("active");
+    }
+  }
+
+  function checkCoordinatesPresetMatch() {
+    if (!inputAstroLat || !inputAstroLon) return;
+    const lat = parseFloat(inputAstroLat.value);
+    const lon = parseFloat(inputAstroLon.value);
+    if (isNaN(lat) || isNaN(lon)) return;
+
+    let matchedChip = null;
+    document.querySelectorAll(".astro-preset-chips .chip-preset:not(#btn-preset-current)").forEach(chip => {
+      const cLat = parseFloat(chip.getAttribute("data-lat"));
+      const cLon = parseFloat(chip.getAttribute("data-lon"));
+      if (!isNaN(cLat) && !isNaN(cLon)) {
+        if (Math.abs(cLat - lat) < 0.005 && Math.abs(cLon - lon) < 0.005) {
+          matchedChip = chip;
+        }
+      }
+    });
+
+    if (matchedChip) {
+      setPresetHighlight(matchedChip);
+    } else {
+      // User moved coordinates off the preset location -> move highlight to Active Site
+      setPresetHighlight(btnPresetCurrent);
     }
   }
 
@@ -1667,8 +1717,12 @@ document.addEventListener("DOMContentLoaded", () => {
           btnToggleTour.setAttribute("aria-expanded", "false");
         }
 
-        if (!astroQueryResults.innerHTML) {
-          executeAstrobiologyQuery();
+        if (!astroQueryResults.innerHTML.trim()) {
+          const firstChip = document.querySelector(".astro-preset-chips .chip-preset");
+          if (firstChip) {
+            setPresetHighlight(firstChip);
+            showPreloadPrompt(firstChip.getAttribute("data-name") || "Atacama Desert (Chile)", -24.0800, -69.8700);
+          }
         }
       }
     });
@@ -1701,14 +1755,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  presetChips.forEach(chip => {
+  document.querySelectorAll(".astro-preset-chips .chip-preset:not(#btn-preset-current)").forEach(chip => {
     chip.addEventListener("click", () => {
       const lat = chip.getAttribute("data-lat");
       const lon = chip.getAttribute("data-lon");
+      const name = chip.getAttribute("data-name") || chip.textContent.trim();
       if (lat && lon && inputAstroLat && inputAstroLon) {
         inputAstroLat.value = lat;
         inputAstroLon.value = lon;
-        executeAstrobiologyQuery();
+        setPresetHighlight(chip);
+        showPreloadPrompt(name, parseFloat(lat), parseFloat(lon));
       }
     });
   });
@@ -1717,19 +1773,24 @@ document.addEventListener("DOMContentLoaded", () => {
     btnPresetCurrent.addEventListener("click", () => {
       const site = getActiveSiteData();
       if (!site) return;
-      if (state.currentSiteKey === "mars_gale") {
-        inputAstroLat.value = "30.5500";
-        inputAstroLon.value = "58.8000";
-      } else if (site.coordinates) {
-        inputAstroLat.value = site.coordinates.lat.toFixed(4);
-        inputAstroLon.value = site.coordinates.lon.toFixed(4);
+      let lat = 30.5500;
+      let lon = 58.8000;
+      let siteName = "Lut Desert (Dasht-e Lut, Iran)";
+      if (state.currentSiteKey !== "mars_gale" && site.coordinates) {
+        lat = site.coordinates.lat;
+        lon = site.coordinates.lon;
+        siteName = site.name || "Active Analog Site";
       }
-      executeAstrobiologyQuery();
+      inputAstroLat.value = lat.toFixed(4);
+      inputAstroLon.value = lon.toFixed(4);
+      setPresetHighlight(btnPresetCurrent);
+      showPreloadPrompt(siteName, lat, lon);
     });
   }
 
   [inputAstroLat, inputAstroLon].forEach(input => {
     if (input) {
+      input.addEventListener("input", checkCoordinatesPresetMatch);
       input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();

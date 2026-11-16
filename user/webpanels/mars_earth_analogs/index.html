@@ -189,6 +189,64 @@
       <span class="drawer-arrow">▾</span>
     </button>
 
+    <!-- Drawer 0: Astrobiology Telemetry Query for Any Earth Location (SoilGrids Global WCS/REST) -->
+    <div id="drawer-astro-lookup" class="glass-panel drawer-panel astro-lookup-panel" style="display: none;">
+      <div class="drawer-header">
+        <div class="astro-title-wrap">
+          <span class="astro-badge-icon">🌱</span>
+          <div>
+            <h4>Global Earth Astrobiology Query</h4>
+            <span class="astro-subtitle">ISRIC SoilGrids 0–5cm Regolith Layer vs Gale Crater Baseline</span>
+          </div>
+        </div>
+        <button id="btn-close-astro-lookup" class="btn-icon-close" title="Close" aria-label="Close">✕</button>
+      </div>
+
+      <div class="astro-drawer-body">
+        <!-- Preset Coordinates -->
+        <div class="astro-presets-section">
+          <span class="astro-section-label">Preset Coordinates:</span>
+          <div class="astro-preset-chips">
+            <button type="button" class="chip-preset active" data-lat="-24.0800" data-lon="-69.8700" data-name="Atacama Desert (Chile)">🏜️ Atacama</button>
+            <button type="button" class="chip-preset" data-lat="36.5300" data-lon="-116.9300" data-name="Death Valley (USA)">🔥 Death Valley</button>
+            <button type="button" class="chip-preset" data-lat="24.0000" data-lon="15.0000" data-name="Sahara Desert (Libya)">☀️ Sahara</button>
+            <button type="button" class="chip-preset" data-lat="-21.2800" data-lon="119.7500" data-name="Pilbara Outback (Australia)">🦘 Outback</button>
+            <button type="button" class="chip-preset" data-lat="37.6900" data-lon="-6.5600" data-name="Rio Tinto (Spain)">🌋 Rio Tinto</button>
+            <button type="button" class="chip-preset" data-lat="75.3800" data-lon="-89.6700" data-name="Devon Island (Canada)">🧊 Devon Island</button>
+            <button type="button" id="btn-preset-current" class="chip-preset chip-preset-cam" data-name="Active Site" title="Load current active site coordinates">📍 Active Site</button>
+          </div>
+        </div>
+
+        <!-- Coordinate Input Form -->
+        <div class="astro-coord-form">
+          <div class="astro-inputs-row">
+            <div class="coord-field">
+              <label for="input-astro-lat">Latitude (°N/S)</label>
+              <input type="number" id="input-astro-lat" step="0.0001" min="-90" max="90" value="-24.0800" placeholder="-90.0 to 90.0" />
+            </div>
+            <div class="coord-field">
+              <label for="input-astro-lon">Longitude (°E/W)</label>
+              <input type="number" id="input-astro-lon" step="0.0001" min="-180" max="180" value="-69.8700" placeholder="-180.0 to 180.0" />
+            </div>
+          </div>
+
+          <div class="astro-actions-row">
+            <button type="button" id="btn-fetch-astro-data" class="btn btn-primary btn-astro-fetch">
+              <span class="btn-icon">🔬</span>
+              <span>Query SoilGrids Telemetry</span>
+            </button>
+            <button type="button" id="btn-astro-flyto" class="btn btn-secondary btn-astro-fly" title="Fly camera in OpenSpace to these coordinates">
+              <span class="btn-icon">✈️</span>
+              <span>Fly to Coords</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Display Container -->
+        <div id="astro-query-results" class="astro-query-results" style="display: none;"></div>
+      </div>
+    </div>
+
     <div class="secondary-subgroup">
       <button id="btn-toggle-about" class="btn btn-secondary btn-drawer-toggle" aria-expanded="false">
         <span>ℹ️ About This Site</span>
@@ -201,64 +259,6 @@
       </button>
     </div>
   </section>
-
-  <!-- Drawer 0: Astrobiology Telemetry Query for Any Earth Location (SoilGrids Global WCS/REST) -->
-  <div id="drawer-astro-lookup" class="glass-panel drawer-panel astro-lookup-panel" style="display: none;">
-    <div class="drawer-header">
-      <div class="astro-title-wrap">
-        <span class="astro-badge-icon">🌱</span>
-        <div>
-          <h4>Global Earth Astrobiology Query</h4>
-          <span class="astro-subtitle">ISRIC SoilGrids 0–5cm Regolith Layer vs Gale Crater Baseline</span>
-        </div>
-      </div>
-      <button id="btn-close-astro-lookup" class="btn-icon-close" title="Close" aria-label="Close">✕</button>
-    </div>
-
-    <div class="astro-drawer-body">
-      <!-- Quick Presets -->
-      <div class="astro-presets-section">
-        <span class="astro-section-label">Quick Presets:</span>
-        <div class="astro-preset-chips">
-          <button type="button" class="chip-preset" data-lat="-24.5000" data-lon="-69.2500" data-name="Atacama Desert">🏜️ Atacama</button>
-          <button type="button" class="chip-preset" data-lat="36.5300" data-lon="-116.9300" data-name="Death Valley">🔥 Death Valley</button>
-          <button type="button" class="chip-preset" data-lat="24.0000" data-lon="15.0000" data-name="Sahara Desert">☀️ Sahara</button>
-          <button type="button" class="chip-preset" data-lat="-25.3400" data-lon="131.0300" data-name="Australian Outback">🦘 Outback</button>
-          <button type="button" class="chip-preset" data-lat="30.5500" data-lon="58.8000" data-name="Lut Desert">🌋 Lut</button>
-          <button type="button" class="chip-preset" data-lat="-20.1300" data-lon="-67.4900" data-name="Salar de Uyuni">🧂 Uyuni</button>
-          <button type="button" id="btn-preset-current" class="chip-preset chip-preset-cam" title="Load current active site coordinates">📍 Active Site</button>
-        </div>
-      </div>
-
-      <!-- Coordinate Input Form -->
-      <div class="astro-coord-form">
-        <div class="astro-inputs-row">
-          <div class="coord-field">
-            <label for="input-astro-lat">Latitude (°N/S)</label>
-            <input type="number" id="input-astro-lat" step="0.0001" min="-90" max="90" value="-24.5000" placeholder="-90.0 to 90.0" />
-          </div>
-          <div class="coord-field">
-            <label for="input-astro-lon">Longitude (°E/W)</label>
-            <input type="number" id="input-astro-lon" step="0.0001" min="-180" max="180" value="-69.2500" placeholder="-180.0 to 180.0" />
-          </div>
-        </div>
-
-        <div class="astro-actions-row">
-          <button type="button" id="btn-fetch-astro-data" class="btn btn-primary btn-astro-fetch">
-            <span class="btn-icon">🔬</span>
-            <span>Query SoilGrids Telemetry</span>
-          </button>
-          <button type="button" id="btn-astro-flyto" class="btn btn-secondary btn-astro-fly" title="Fly camera in OpenSpace to these coordinates">
-            <span class="btn-icon">✈️</span>
-            <span>Fly to Coords</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Results Display Container -->
-      <div id="astro-query-results" class="astro-query-results" style="display: none;"></div>
-    </div>
-  </div>
 
   <!-- Drawer 1: About This Site (Verified Scientific Synthesis) -->
   <div id="drawer-about" class="glass-panel drawer-panel" style="display: none;">
