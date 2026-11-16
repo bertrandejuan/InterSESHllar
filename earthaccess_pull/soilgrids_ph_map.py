@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+Generated in part with the help of SI
 Soil-pH map for any location: lat/lon in, pH map out.
 
 1. Ask for a longitude / latitude
