@@ -136,3 +136,36 @@ All code must be:
 - [ ] All Lua assets have descriptive comments
 - [ ] All JavaScript functions have JSDoc-style comments
 - [ ] File structure is logical and well-organized
+
+---
+
+## Evolution of Capabilities & Implemented Additions
+
+Subsequent iterative enhancements have expanded the system well beyond the initial brief:
+
+1. **Tangent Planetary Horizon "Side View" Navigation (`Side view`)**:
+   - Added directly adjacent to `Focus on surface` in the science category viewport action strip.
+   - Zooms camera to clear ground level (3,800 m on Mars Gale Crater, 2,800 m at McMurdo, 1,800 m at Lut, 1,900 m at Aralkum, 5,600 m at Uyuni).
+   - Uses OpenSpace Lua (`openspace.navigation.setNavigationState`) to tilt camera pitch tangent to the planetary curvature (`Pitch = 1.40–1.42 rad` / ~80°–82°), providing an eye-level horizon view across the terrain.
+   - Faces key target exploration features: Mount Sharp (South), Taylor Valley (WSW), Kalut yardangs (North), Aral seabed cliffs (NE), and Volcán Tunupa (North).
+   - Enables `FollowAnchorNodeRotation` and leaves `OrbitalNavigator` active so users retain 100% mouse freedom to orbit, zoom, and pan around the landscape.
+   - Automatically manages Mars texture layer opacity (setting `Mars_Texture` opacity to 0.0) so the 6 m/px CTX mosaic and 3D elevation are razor sharp.
+
+2. **Customizable Multi-Criteria Decision Matrix (MCDM) & Mission Optimizer**:
+   - Single unified toggle button with a direction-flipping indicator (`Comparison Matrix ▾` / `Close Comparison Matrix ▴`).
+   - Real-time manual weight sliders and numeric inputs across 5 planetary domains (Thermal, Astrobiology, Dynamics, Moisture, Solar).
+   - Silent 10-second backend auto-balancing when weights deviate from 100%, preserving the user's latest stationary slider.
+   - Real-time mathematical MCDM synthesis updating site scores and leaderboard rankings instantly.
+   - AI Mission Objective Optimizer ("What would you like to optimize your data for?"): natural-language classifier auto-tuning weights to match mission archetypes (rover mobility, sample return, solar drone scouting, cryogenic testing, ISRU).
+   - Real-time 3D viewport HUD synchronization with 11 custom-rendered mission profile textures.
+
+3. **Global SoilGrids Astrobiology & Soil Regolith Telemetry**:
+   - `soilgrids_maps.ipynb` notebook and live ISRIC SoilGrids 250m REST API client.
+   - "Find Astrobiology Data for Any Earth Location" modal supporting arbitrary lat/lon coordinates anywhere on Earth.
+   - Preset coordinate chips: Atacama Desert, Death Valley, Sahara Desert, Australian Outback, Lut Desert, Salar de Uyuni, and dynamic Active Site.
+   - Extracts regolith pH, organic carbon (SOC), bulk density (BDOD), cation exchange capacity (CEC), clay/sand/silt fractions, and nitrogen.
+   - Automated OpenSpace camera flight (`openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5)`) to queried coordinates.
+
+4. **UI Refinements & Single Scrollbar Layout**:
+   - Single, dedicated vertical scrollbar eliminating duplicate dock scrollbars.
+   - Streamlined overview layout removing redundant text summaries while keeping empirical data and category statistics.

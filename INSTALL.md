@@ -2,36 +2,43 @@
 
 ## 1. Directory Placement in OpenSpace
 
-Copy or symlink the project files into your OpenSpace installation directory:
+Copy or symlink the project files into your OpenSpace installation directory (e.g., `C:\OpenSpace\OpenSpace-0.22.1`):
 
-1. **Lua Assets & GeoJSON Data**:
-   Copy the `data/assets/mars_earth_analogs/` folder and `geojson/` folder into your OpenSpace `data/assets/` directory:
+1. **Lua Assets, HUD Textures & GeoJSON Data**:
+   Copy `data/assets/mars_earth_analogs/` (including all 11 Decision Matrix textures in `textures/`) and `geojson/` into your OpenSpace `data/assets/` directory:
    ```powershell
-   # Example OpenSpace path
-   Copy-Item -Recurse -Force "data/assets/mars_earth_analogs" "C:\OpenSpace\data\assets\"
-   Copy-Item -Recurse -Force "geojson" "C:\OpenSpace\data\assets\mars_earth_analogs\"
+   Copy-Item -Recurse -Force "data\assets\mars_earth_analogs" "C:\OpenSpace\OpenSpace-0.22.1\data\assets\"
+   Copy-Item -Recurse -Force "geojson" "C:\OpenSpace\OpenSpace-0.22.1\data\assets\mars_earth_analogs\"
    ```
 
 2. **Web Panel (CEF GUI)**:
-   Copy the `user/webpanels/mars_earth_analogs/` folder into OpenSpace's `user/webpanels/` directory:
+   Copy `user/webpanels/mars_earth_analogs/` into OpenSpace's `user/webpanels/` directory:
    ```powershell
-   Copy-Item -Recurse -Force "user/webpanels/mars_earth_analogs" "C:\OpenSpace\user\webpanels\"
+   Copy-Item -Recurse -Force "user\webpanels\mars_earth_analogs" "C:\OpenSpace\OpenSpace-0.22.1\user\webpanels\"
+   ```
+
+3. **OpenSpace Customization Startup Hook**:
+   Ensure `user/customization.lua` loads `mars_earth_analogs` automatically on launch:
+   ```powershell
+   Copy-Item -Force "user\customization.lua" "C:\OpenSpace\OpenSpace-0.22.1\user\customization.lua"
    ```
 
 ---
 
 ## 2. Enabling the Asset in OpenSpace
 
-### Method A: Via In-Engine Lua Console
+### Method A: Automatic via customization.lua (Recommended)
+`customization.lua` automatically initializes `mars_earth_analogs.asset` when OpenSpace opens, loads all planetary overlays, and centers the camera on Mars Gale Crater.
+
+### Method B: Via In-Engine Lua Console
 1. Launch OpenSpace.
 2. Press the tilde key (`~`) or `F1` to open the OpenSpace console.
-3. Run the following command:
+3. Run:
    ```lua
    openspace.asset.add("mars_earth_analogs/mars_earth_analogs")
    ```
-   *(Note: Do not include `data/assets/` or `.asset`, as OpenSpace resolves paths relative to `data/assets` automatically).*
 
-### Method B: Via Profile File (.profile)
+### Method C: Via Profile File (.profile)
 Add the asset line directly to your active OpenSpace profile (e.g., `default.profile`):
 ```lua
 asset.require("mars_earth_analogs/mars_earth_analogs")
@@ -42,28 +49,42 @@ asset.require("mars_earth_analogs/mars_earth_analogs")
 ## 3. Opening the Interactive Web Panel
 
 1. **Within OpenSpace**:
-   OpenSpace automatically serves files inside `user/webpanels/`. You can bind a key or open CEF to load:
-   `http://localhost:4680/webpanels/mars_earth_analogs/index.html` (or your configured OpenSpace web server port).
+   OpenSpace automatically serves files inside `user/webpanels/`. The **Planetary Analog Dashboard** is bookmarked under **User Panels** in the OpenSpace menu, or accessible at:
+   `http://localhost:4680/webpanels/mars_earth_analogs/index.html`
 
 2. **As an External Control Tablet or Dual Monitor Window**:
-   You can open `user/webpanels/mars_earth_analogs/index.html` directly in any Chromium-based browser (Chrome, Edge). It will connect to OpenSpace via WebSocket on `ws://localhost:4682`.
+   Open `user/webpanels/mars_earth_analogs/index.html` directly in any Chromium-based browser (Chrome, Edge). It connects seamlessly to OpenSpace via WebSocket JSON-RPC on `ws://localhost:4682`.
 
 ---
 
-## 4. Configuring Gemini API Key (Optional)
+## 4. Operational Capabilities & APIs
 
-1. Open the dashboard.
-2. Click the **⚙ Settings** button in the upper-right corner.
-3. Paste your Google AI Studio API key and click **Save Key**.
-4. The key is securely stored in your local browser storage (`localStorage`) and used for live astrobiological synthesis when picking new coordinates.
-5. If omitted, the panel uses internal NASA climatology formulas and pre-computed fallback analysis.
+1. **Tangent "Side View" Camera**:
+   - Inside each science accordion category, click **`Side view`** (next to **`Focus on surface`**).
+   - Zooms to clear surface altitude (3.8 km on Mars, 1.8–5.6 km on Earth), pitches tangent to the horizon (`Pitch = 1.40–1.42 rad`), faces the target landmark, and leaves mouse controls active.
+
+2. **Multi-Criteria Decision Matrix (MCDM) & Mission Optimizer**:
+   - Click **`Comparison Matrix ▾`** to adjust category sliders or type percentages.
+   - Includes silent 10-second backend auto-balancing and an AI natural-language Mission Objective Optimizer.
+   - Synchronizes with 11 custom 3D viewport HUD textures (`ScreenSpace.MatrixHUD`).
+
+3. **Global SoilGrids Astrobiology REST API**:
+   - Click **`🧬 Find Astrobiology Data for Any Earth Location`** to query live 250m-resolution regolith data anywhere on Earth (pH, organic carbon, bulk density, CEC).
+   - Works immediately out-of-the-box without requiring an API key.
+
+4. **Gemini API Key (Optional)**:
+   - Click **⚙ Settings** in the dashboard to enter a Google AI Studio API key for real-time generative habitability syntheses.
+   - If omitted, the panel uses empirical NASA POWER archives and pre-computed fallback models.
 
 ---
 
 ## 5. Keyboard Shortcuts
 
-- `Ctrl + Alt + M`: Fly to Mars Gale Crater (Curiosity MSL Landing Site)
-- `Ctrl + Alt + 1`: Fly to Earth Aralkum Desert
-- `Ctrl + Alt + 2`: Fly to Earth McMurdo Dry Valleys
-- `Ctrl + Alt + 3`: Fly to Earth Lut Desert
-- `Ctrl + Alt + 4`: Fly to Earth Salar de Uyuni
+| Shortcut | Destination / Action | Description |
+| :--- | :--- | :--- |
+| `Ctrl + Alt + M` | **Mars: Gale Crater** | Flies to Gale Crater (-4.59°, 137.44°, 220 km), reveals 154km rim border and CTX mosaic. |
+| `Ctrl + Alt + 1` | **Earth: Aralkum Desert** | Flies to Aralkum (44.80°, 59.80°, 320 km), reveals dried Aral basin border and ESRI tiles. |
+| `Ctrl + Alt + 2` | **Earth: McMurdo Dry Valleys** | Flies to McMurdo (-77.50°, 162.00°, 180 km), reveals polar valley border and terrain. |
+| `Ctrl + Alt + 3` | **Earth: Lut Desert** | Flies to Lut (30.50°, 58.80°, 280 km), reveals yardang border and land surface heat core. |
+| `Ctrl + Alt + 4` | **Earth: Salar de Uyuni** | Flies to Salar de Uyuni (-20.15°, -67.60°, 240 km), reveals full white salt crust border. |
+| `Ctrl + Alt + 0` | **Restore Pins & Orbit** | Pulls camera back to 8,000 km orbital overview. |

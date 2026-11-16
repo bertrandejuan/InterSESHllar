@@ -2,15 +2,22 @@
 
 ## 1. System Topology & Data Flow
 
-The project is structured into three distinct execution layers operating across process boundaries:
+The project is structured into distinct execution layers operating across process and network boundaries:
 
 ```mermaid
-flowchart LR
-    subgraph UI ["WebPanel (Chromium Embedded Framework)"]
-        HTML["index.html\n(DOM Structure)"]
-        CSS["style.css\n(Glassmorphic & Scrollers)"]
-        APP["app.js\n(App Controller & Tour State)"]
-        DATA["team-data.js & config.js\n(Metrics & Scoring Model)"]
+flowchart TD
+    subgraph UI ["WebPanel (Chromium Embedded Framework / CEF)"]
+        HTML["index.html\n(DOM Structure & Modals)"]
+        CSS["style.css\n(Glassmorphic, Single Scroller & Responsive Grids)"]
+        APP["app.js\n(App Controller, MCDM Weight Engine, Camera & Tour State)"]
+        DATA["team-data.js & config.js\n(Metrics, Empirical Datasets & Scoring)"]
+        OPT["Mission Objective Optimizer\n(Natural Language Archetype Classifier)"]
+    end
+
+    subgraph ExternalAPIs ["External REST Services"]
+        NASA["NASA POWER Climatology API\n(10-Yr MERRA-2 Archives)"]
+        SOIL["ISRIC SoilGrids 250m REST API\n(pH, SOC, Bulk Density, CEC)"]
+        GEMINI["Google Gemini API\n(Planetary Habitability Synthesis)"]
     end
 
     subgraph Bridge ["WebSocket JSON-RPC (Port 4682)"]
@@ -19,15 +26,19 @@ flowchart LR
 
     subgraph Engine ["OpenSpace C++ Engine (0.22.1)"]
         LUA["customization.lua\n(Startup Hooks & Bindings)"]
-        ASSET["mars_earth_analogs.asset\n(ColorLayers, Pins, Boundaries)"]
-        HUD["overview_hud.asset\n(ScreenSpace HUD Renderables)"]
-        NAV["PathNavigator\n(Camera Traversal & Offsets)"]
+        ASSET["mars_earth_analogs.asset\n(ColorLayers, Pins, GeoJSON Boundaries)"]
+        HUD["overview_hud.asset\n(ScreenSpace HUD Renderables & 11 Matrix Textures)"]
+        NAV["OrbitalNavigator & PathNavigator\n(flyToGeo, setNavigationState, Pitch/Yaw Horizon)"]
     end
 
     APP --> API
     DATA --> APP
+    OPT --> APP
     HTML --> APP
     CSS --> HTML
+    APP --> NASA
+    APP --> SOIL
+    APP --> GEMINI
     API <-->|WebSocket JSON-RPC| Engine
     LUA --> ASSET
     LUA --> HUD
@@ -42,116 +53,130 @@ flowchart LR
 |---|---|---|
 | [`user/customization.lua`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/customization.lua) | Lua | OpenSpace startup hook: loads assets, pauses simulation time, sets initial camera view. |
 | [`data/assets/mars_earth_analogs/mars_earth_analogs.asset`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/data/assets/mars_earth_analogs/mars_earth_analogs.asset) | Lua | Declares Scene Graph nodes, GeoJSON pins/boundaries, and planetary `ColorLayers` on Mars and Earth. |
-| [`data/assets/mars_earth_analogs/overview_hud.asset`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/data/assets/mars_earth_analogs/overview_hud.asset) | Lua | Declares 2D camera-space HUD textures (`ScreenSpace.CategoryOverviewHUD`, `ScreenSpace.OverlayLegendHUD`). |
+| [`data/assets/mars_earth_analogs/overview_hud.asset`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/data/assets/mars_earth_analogs/overview_hud.asset) | Lua | Declares 2D camera-space HUD textures (`ScreenSpace.CategoryOverviewHUD`, `ScreenSpace.OverlayLegendHUD`, `ScreenSpace.MatrixHUD`). |
 | [`user/webpanels/mars_earth_analogs/js/openspace-api.js`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/webpanels/mars_earth_analogs/js/openspace-api.js) | JavaScript | Low-level WebSocket client connecting WebPanel to OpenSpace on `ws://localhost:4682/json`. |
 | [`user/webpanels/mars_earth_analogs/js/config.js`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/webpanels/mars_earth_analogs/js/config.js) | JavaScript | Declares site coordinates, categories, tolerance scales ($\sigma$), and metadata. |
 | [`user/webpanels/mars_earth_analogs/js/team-data.js`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/webpanels/mars_earth_analogs/js/team-data.js) | JavaScript | Precomputed 10-year NASA POWER MERRA-2 and MSL Curiosity REMS ground truth climatology. |
-| [`user/webpanels/mars_earth_analogs/js/app.js`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/webpanels/mars_earth_analogs/js/app.js) | JavaScript | Master frontend controller: site selection, camera flights, UI rendering, stats tables, tour engine. |
-| [`user/webpanels/mars_earth_analogs/css/style.css`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/webpanels/mars_earth_analogs/css/style.css) | CSS | Responsive styling: 2×2 button grid, anti-blowout rules, horizontal scrollbars, active glowing states. |
-| [`data/analogLocationCSV/*.csv`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/data/analogLocationCSV) | CSV | NASA POWER 10-year in-situ daily archives (2015–2025; 4,018 daily records per analog site). |
-| [`data/analogLocationCSV/soil_ph_summary.csv`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/data/analogLocationCSV/soil_ph_summary.csv) | CSV | Empirical Soil & Regolith pH summary (Min, Max, Mean) for all analog sites vs Mars baseline. |
-| [`earthaccess_pull/pull_earthaccess.ipynb`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/earthaccess_pull/pull_earthaccess.ipynb) | Python / Jupyter | Programmatic NASA earthaccess workflow extracting NASA EMIT L2B Mineral Composition (`EMITL2BMIN.002`) & ICESat-2 data. |
-| [`earthaccess_pull/tiff_convert.py`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/earthaccess_pull/tiff_convert.py) | Python | GeoTIFF to NumPy array and Pandas DataFrame CSV export utility. |
-| [`earthaccess_pull/out.csv`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/earthaccess_pull/out.csv) | CSV | Exported 4,424×4,184 matrix of NASA EMIT L2B mineral identification band-depth and mineral ID values. |
-| [`earthaccess_pull/out.tif`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/earthaccess_pull/out.tif) | GeoTIFF | 16-bit GeoTIFF (WGS 84, 4,424×4,184) capturing spatial altimetry relief. |
-| [`earthaccess_pull/lut.tif`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/earthaccess_pull/lut.tif) | GeoTIFF | NASA EMIT L2B mineral classification GeoTIFF (WGS 84, 1,327×2,511) mapping pyroxenes, hematite, and goethite for the Lut Desert. |
-| [`earthaccess_pull/araldesert.tif`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/earthaccess_pull/araldesert.tif) | GeoTIFF | NASA EMIT L2B mineral classification GeoTIFF (WGS 84, 442×418) mapping toxic sulfates (mirabilite/thenardite) for Aralkum. |
-| [`scripts/process_team_data.py`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/scripts/process_team_data.py) | Python | ETL pipeline aggregating raw NASA POWER daily CSVs into structured climatology JSON. |
-| [`scripts/generate_planetary_overlays.py`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/scripts/generate_planetary_overlays.py) | Python | Uses Cartopy/Matplotlib to render global $2048 \times 1024$ equirectangular raster overlays. |
+| [`user/webpanels/mars_earth_analogs/js/app.js`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/webpanels/mars_earth_analogs/js/app.js) | JavaScript | Master frontend controller: site selection, Side View Lua camera navigation, MCDM weights, SoilGrids query, stats tables, tour engine. |
+| [`user/webpanels/mars_earth_analogs/css/style.css`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/user/webpanels/mars_earth_analogs/css/style.css) | CSS | Responsive styling: single dedicated scrollbar, 2×2 button grid, anti-blowout rules, active glowing states. |
+| [`soilgrids_maps.ipynb`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/soilgrids_maps.ipynb) | Jupyter / Python | Planetary soil & regolith mapping pipeline pulling 250m global ISRIC SoilGrids REST telemetry. |
+| [`scripts/generate_matrix_hud.py`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/scripts/generate_matrix_hud.py) | Python | Pre-renders 11 high-contrast 1600×1020 mission-profile Decision Matrix HUD billboard textures. |
 | [`scripts/generate_overview_hud_cards.py`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/scripts/generate_overview_hud_cards.py) | Python | Generates ScreenSpace HUD cards and calibrated colorbar legends with metric annotations. |
+| [`scripts/generate_planetary_overlays.py`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/scripts/generate_planetary_overlays.py) | Python | Uses Cartopy/Matplotlib to render global $2048 \times 1024$ equirectangular raster overlays. |
+| [`earthaccess_pull/pull_earthaccess.ipynb`](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/earthaccess_pull/pull_earthaccess.ipynb) | Python / Jupyter | Programmatic NASA earthaccess workflow extracting NASA EMIT L2B Mineral Composition & ICESat-2 data. |
 
 ---
 
 ## 3. Deep Dive: Key Code Mechanisms
 
-### A. Mathematical Camera Viewport Offset (`app.js:40–110`)
-Because the interactive WebPanel occupies the right $360\text{ px}$ of the screen, centering directly on a latitude/longitude coordinate leaves the geological feature partially hidden. The camera engine applies a mathematical longitude offset ($\Delta\lambda = +4.5^\circ$ on Mars, $+4.0^\circ$ on Earth):
+### A. Tangent Planetary Horizon "Side View" (`app.js:840–890`)
+To provide an eye-level panoramic ground perspective facing key geological landmarks rather than a standard satellite nadir view:
 ```javascript
-const SITE_CAMERA_TARGETS = {
-  mars_gale: { lat: -4.59,  lon: 137.44 + 4.5, alt: 240000.0, globe: "Mars" },
-  lut:       { lat: 30.20,  lon: 58.80  + 4.0, alt: 240000.0, globe: "Earth" },
-  mcmurdo:   { lat: -77.50, lon: 162.00 + 4.0, alt: 240000.0, globe: "Earth" },
-  aralkum:   { lat: 44.50,  lon: 60.00  + 4.0, alt: 240000.0, globe: "Earth" },
-  uyuni:     { lat: -20.27, lon: -67.48 + 4.0, alt: 240000.0, globe: "Earth" }
+function sideView() {
+  const site = getActiveSiteData();
+  const globe = (site && site.globe) ? site.globe : "Earth";
+  const cfg = SIDE_VIEW_CONFIGS[state.currentSiteKey];
+
+  // 1. Ensure crisp 6m CTX mosaic on Mars by fading low-res baseline texture
+  if (globe === "Mars") {
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 0.0);
+    openSpace.setPropertyValue("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 0.0);
+  }
+
+  // 2. Smooth approach flight with planetary anchor rotation tracking
+  const flightScript = `
+    if openspace.hasProperty("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation") then
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotation", true)
+    end
+    if openspace.navigation and openspace.navigation.setFocus then
+      openspace.navigation.setFocus('${globe}')
+    end
+    openspace.navigation.flyToGeo('${globe}', ${cfg.camLat}, ${cfg.camLon}, ${cfg.camAlt}, 2.0)
+  `;
+  openSpace.executeLuaScript(flightScript);
+
+  // 3. Upon arrival (2.0s), tilt camera tangent to planet surface (~1.40-1.42 rad) and face target
+  setTimeout(() => {
+    const tangentScript = `
+      local currentNavState = openspace.navigation.getNavigationState()
+      local newNavState = {
+        Pitch = ${cfg.pitch},
+        Anchor = "${globe}",
+        Yaw = ${cfg.yaw},
+        Position = currentNavState["Position"],
+        Up = currentNavState["Up"]
+      }
+      openspace.navigation.setNavigationState(newNavState)
+    `;
+    openSpace.executeLuaScript(tangentScript);
+  }, 2050);
+}
+```
+
+#### Side View Configuration Table:
+| Site Key | Globe | Camera Altitude | Pitch (rad) | Yaw (rad) | Target Landmark |
+|---|---|---|---|---|---|
+| `mars_gale` | Mars | 3,800 m | 1.42 (~81.4°) | 3.14159 (South) | Mount Sharp (Aeolis Mons) & Yellowknife Bay |
+| `mcmurdo` | Earth | 2,800 m | 1.40 (~80.2°) | 4.71239 (WSW) | Taylor Valley trough toward Lake Hoare |
+| `lut` | Earth | 1,800 m | 1.42 (~81.4°) | 0.0 (North) | Kalut mega-yardang wind corridors |
+| `aralkum` | Earth | 1,900 m | 1.40 (~80.2°) | 0.65 (Northeast) | Desiccated seabed salt flats & Ustyurt cliffs |
+| `uyuni` | Earth | 5,600 m | 1.42 (~81.4°) | 0.0 (North) | Salar plain toward Volcán Tunupa (5,321 m) |
+
+### B. Multi-Criteria Decision Matrix (MCDM) & Silent Balancing (`app.js:2410–2530`)
+Normalizes user weights across 5 categories and recalculates analog site ranking dynamically:
+$$\text{Overall Match} = \frac{\sum_{i=1}^{5} w_i \cdot S_i}{\sum_{i=1}^{5} w_i}$$
+
+When weights deviate from 100%, an inactive timer waits 10 seconds, then silently redistributes:
+```javascript
+function scheduleSilentRebalance(stationaryKey) {
+  if (state.matrixRebalanceTimer) clearTimeout(state.matrixRebalanceTimer);
+
+  state.matrixRebalanceTimer = setTimeout(() => {
+    const weights = state.categoryWeights;
+    const stationaryVal = weights[stationaryKey];
+    const targetRemainder = 100 - stationaryVal;
+    
+    // Proportional redistribution across remaining categories
+    const otherKeys = Object.keys(weights).filter(k => k !== stationaryKey);
+    const otherSum = otherKeys.reduce((acc, k) => acc + weights[k], 0);
+
+    otherKeys.forEach(k => {
+      weights[k] = Math.round((weights[k] / otherSum) * targetRemainder);
+    });
+
+    renderMatrixInputs();
+    updateMatrixViewportHUD();
+    computeAllSiteCategoryScores();
+  }, 10000);
+}
+```
+
+### C. Mission Objective Optimizer Classifier (`app.js:2540–2610`)
+Parses plain-English exploration objectives into optimal MCDM weight sets:
+```javascript
+const MISSION_ARCHETYPES = {
+  mobility:    { thermal: 25, astrobiology: 10, dynamics: 40, moisture: 10, radiation: 15 },
+  biosignature:{ thermal: 15, astrobiology: 50, dynamics: 10, moisture: 20, radiation: 5  },
+  drone:       { thermal: 15, astrobiology: 5,  dynamics: 35, moisture: 5,  radiation: 40 },
+  cryo:        { thermal: 40, astrobiology: 10, dynamics: 10, moisture: 35, radiation: 5  },
+  isru:        { thermal: 15, astrobiology: 40, dynamics: 10, moisture: 10, radiation: 25 }
 };
 ```
-Executing via OpenSpace Lua:
-```lua
-openspace.pathnavigation.flyToNavigationNode("Mars", 3.5)
-openspace.navigation.goToGeo("Mars", -4.59, 141.94, 240000.0, 3.5)
-```
 
-### B. Screen-Aligned 2D Legend HUD (`overview_hud.asset:30–45`)
-To keep HUD badges perfectly upright and flat against the viewport during planetary rotation:
-```lua
-CartesianPosition = { -1.13, 0.55, -2.0 },
-Scale = 0.44,
-FaceCamera = false
-```
-`FaceCamera = false` prevents the badge from tilting or rolling with the camera, locking it horizontally in the upper-left corner.
-
-### C. Exponential Analog Similarity Scoring (`config.js:210–225`)
-Computes normalized similarity scores ($0\text{–}100\%$) between Earth measurements and Mars REMS baselines using parameter-specific tolerance scales ($\sigma$):
+### D. SoilGrids 250m REST Astrobiology Integration (`app.js:2710–2790`)
+Queries the ISRIC SoilGrids REST endpoint for arbitrary lat/lon coordinates:
 ```javascript
-function calcSimScore(earthVal, marsVal, scale) {
-  if (earthVal === null || marsVal === null || !scale) return null;
-  const delta = Math.abs(earthVal - marsVal);
-  return Math.max(0, Math.min(100, 100 * Math.exp(-delta / scale)));
-}
-```
-
-### D. Horizontal Scrolling Compact Stats Table (`style.css:1340–1475`)
-Prevents text squishing and column collision (`GALEMATCH DE CRATER`) in the narrow sidebar:
-```css
-.compact-stats-container {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(56, 189, 248, 0.55) rgba(15, 23, 42, 0.9);
-}
-.compact-stats-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 4px 12px 8px 6px;
-  width: max-content;   /* Dynamically expands to widest content */
-  min-width: 100%;      /* Fills container when content is narrow */
-  box-sizing: border-box;
-}
-.compact-stats-row-group {
-  overflow: visible;    /* Ensures right-hand value columns are never clipped */
-  width: 100%;
-}
-.cstat-td.earth-col, .cstat-td.mars-col {
-  white-space: nowrap;  /* Prevents numbers and units from wrapping awkwardly */
-  text-align: right;
-}
-```
-
-### E. Tour Playback State Machine (`app.js:1395–1440 & 1695–1745`)
-A synchronized dual-button state machine:
-```javascript
-// Start / End Tour Toggle
-if (btnTourPlay) {
-  btnTourPlay.addEventListener("click", () => {
-    if (state.tourActive || btnTourPlay.innerText.includes("End Tour")) {
-      stopTour(); // Immediately terminates flights, overlays, HUDs; resets index to 0
-    } else {
-      startOrResumeTour(0); // Switches button to "⏹ End Tour" (.btn-tour-end)
-    }
-  });
-}
-
-// Pause / Play Toggle
-if (btnTourPause) {
-  btnTourPause.addEventListener("click", () => {
-    if (state.tourActive) {
-      pauseTour(); // Halts timer, switches button to "▶ Play" (.btn-tour-resume)
-    } else {
-      startOrResumeTour(state.tourIndex || 0); // Resumes from current step, switches to "⏸ Pause"
-    }
-  });
+async function querySoilGridsAstrobiology(lat, lon) {
+  const url = `https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${lon}&lat=${lat}&property=phh2o&property=soc&property=bdod&property=cec&depth=0-5cm&value=mean`;
+  const res = await fetch(url);
+  const json = await res.json();
+  
+  // Extract and scale parameters
+  const ph = json.properties.layers.find(l => l.name === "phh2o").depths[0].values.mean / 10.0;
+  const soc = json.properties.layers.find(l => l.name === "soc").depths[0].values.mean / 10.0;
+  const bdod = json.properties.layers.find(l => l.name === "bdod").depths[0].values.mean / 100.0;
+  
+  return { ph, soc, bdod };
 }
 ```
 
@@ -170,32 +195,12 @@ if (btnTourPause) {
 
 ---
 
-## 5. 45-Second Tour Voiceover Script (Code & Software Architecture)
+## 5. Screen Recording & Live Presentation Sync Guide
 
-*Designed for screen recording during the automated tour playback. Target word count: ~115 words (~45 seconds at 150 wpm).*
-
-### 🎙️ Narration Script (Teleprompter Format)
-
-> **[00:00 – 00:10]**  
-> *"Under the hood, our platform connects a custom HTML5 and JavaScript web panel to the OpenSpace astro-visualization engine through a local WebSocket JSON-RPC bridge on port 4682."*
-
-> **[00:10 – 00:22]**  
-> *"As the automated tour launches, our state machine dispatches asynchronous Lua commands to OpenSpace's PathNavigator, dynamically calculating orbital camera trajectories with mathematical longitude offsets so geological features remain perfectly framed alongside the HUD."*
-
-> **[00:22 – 00:35]**  
-> *"Across each flyover, our exponential decay scoring algorithm computes real-time multi-metric similarity scores—benchmarking ten-year NASA POWER daily climate archives against MSL Curiosity REMS ground truth on Mars."*
-
-> **[00:35 – 00:45]**  
-> *"Synchronized screen-space HUD renderables and planetary color layers load instantaneously, delivering fully grounded, zero-hallucination planetary analog science in real time."*
-
----
-
-### 🎬 Screen Recording Sync Guide
-
-| Timestamp | Visual Screen Action | Underlying Code & Software Component |
+| Timestamp | Visual Action | Underlying Software Architecture |
 |---|---|---|
-| **`00:00 – 00:10`** | Click **`▶ Start Tour`** in sidebar; camera pulls back from Mars Gale Crater. | `app.js` (`btnTourPlay` state machine) → `openspace-api.js` WebSocket dispatch. |
-| **`00:10 – 00:22`** | Interplanetary transit flight from Mars to Earth; smooth descent into analog site. | Lua `openspace.navigation.goToGeo` with mathematical offset ($\Delta\lambda = +4.0^\circ$). |
-| **`00:22 – 00:35`** | Sidebar updates with site telemetry, score rank, and category breakdown. | `calcSimScore(S = 100 \cdot e^{-|\Delta|/\sigma})` against `team-data.js` NASA archive. |
-| **`00:35 – 00:45`** | 2D HUD Overview card displays in upper-left viewport; site pins illuminate. | `overview_hud.asset` (`ScreenSpaceRenderableImageFlat` with `FaceCamera = false`). |
-
+| **`00:00 – 00:10`** | Select Gale Crater; click **`Side view`** button. Camera dives down to 3,800 m, tilts tangent to horizon, facing Mount Sharp. | `sideView()` → `flyToGeo` approach → `setNavigationState` (`Pitch = 1.42`, `Yaw = 3.14159`) via WebSocket JSON-RPC. |
+| **`00:10 – 00:20`** | Click **`Comparison Matrix ▾`** dropdown. Drag *Dynamics* slider to 40%. Formula updates live. | `input` event listener → mathematical normalization $\sum (w_i S_i) / \sum w_i$ → silent 10s auto-balancer armed. |
+| **`00:20 – 00:30`** | Type *"rover mobility"* into the Mission Optimizer; click **Apply**. Viewport HUD swaps to dynamics/traverse texture. | Regex archetype classifier → `state.categoryWeights` updated → `updateMatrixViewportHUD()` updates `ScreenSpace.MatrixHUD`. |
+| **`00:30 – 00:40`** | Click **`🧬 Find Astrobiology Data`**; select **`🏜️ Atacama`** preset; click **`Query`**. Camera flies to -24.50°, -69.25°. | `querySoilGridsAstrobiology()` REST fetch → OpenSpace camera dispatch `flyToGeo("Earth", lat, lon, 250000, 2.5)`. |
+| **`00:40 – 00:50`** | View returned SoilGrids regolith properties (pH 8.1, SOC 0.2 g/kg, bulk density 1.45 kg/dm³). | Astrobiological habitability synthesis rendered into modal DOM. |

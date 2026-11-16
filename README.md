@@ -5,9 +5,9 @@
 
 ## OpenSpace: Mars Gale Crater & Earth Desert Analogs Visualization
 
-An interactive planetary analog visualization package designed for **OpenSpace (v0.22+)** and modern planetarium presentations. This system enables side-by-side exploration of **Mars (Gale Crater / Curiosity Rover REMS baseline)** and **four premier Earth desert analogs** (Aralkum Desert, McMurdo Dry Valleys, Lut Desert, and Salar de Uyuni).
+An interactive planetary analog visualization package designed for **OpenSpace (v0.22+)** and modern planetarium presentations. This system enables side-by-side exploration of **Mars (Gale Crater / Curiosity Rover REMS baseline)** and **four premier Earth desert analogs** (Aralkum Desert, McMurdo Dry Valleys, Lut Desert, and Salar de Uyuni), alongside global astrobiological regolith telemetry for any arbitrary Earth location.
 
-Featuring automated and interactive camera navigation, custom GeoJSON boundary overlays, extruded 3D station pins, floating billboard typography, parameter similarity scale bars, scientific climatology comparison tables, and dynamic **NASA POWER API + Gemini AI** regeneration for arbitrary user coordinates.
+Featuring automated and interactive camera navigation, tangent-horizon **Side View** exploration, custom GeoJSON boundary overlays, extruded 3D station pins, floating billboard typography, a customizable **Multi-Criteria Decision Matrix (MCDM)** with an AI Mission Optimizer, parameter similarity scale bars, empirical climatology comparison tables, and dynamic **SoilGrids REST API + NASA POWER API** telemetry for any Earth coordinates.
 
 ---
 
@@ -23,6 +23,8 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 │   ├── Salar de Uyuni Daily Weather Data.csv
 │   └── soil_ph_summary.csv                  <-- Empirical Soil & Regolith pH Telemetry (Min, Max, Mean)
 │
+├── soilgrids_maps.ipynb                     <-- SoilGrids Astrobiological Regolith Mapping Notebook
+│
 ├── earthaccess_pull/                        <-- NASA earthaccess Programmatic Pipeline
 │   ├── pull_earthaccess.ipynb               <-- NASA earthaccess EMIT & ICESat-2 extraction notebook
 │   ├── tiff_convert.py                      <-- TIFF raster to matrix CSV conversion utility
@@ -35,7 +37,13 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 │   ├── mars_earth_analogs.asset             <-- Master entry asset
 │   ├── mars_gale_crater.asset               <-- Gale Crater GeoJSON & labels on Mars
 │   ├── earth_desert_analogs.asset           <-- 4 desert GeoJSONs & labels on Earth
-│   └── tour_camera_paths.asset              <-- Automated tour paths & keyboard shortcuts
+│   ├── overview_hud.asset                   <-- 2D ScreenSpace HUD billboard renderables
+│   ├── tour_camera_paths.asset              <-- Automated tour paths & keyboard shortcuts
+│   └── textures/                            <-- Viewport HUD textures & colormaps
+│       ├── hud_comparison_matrix.png        <-- Balanced 20% Decision Matrix Viewport HUD
+│       ├── hud_comparison_matrix_*.png      <-- 11 Mission-Profile Decision Matrix HUD Cards
+│       ├── hud_overview_location_*.png      <-- Site-specific 5-domain comparison cards
+│       └── earth_overlay_*.png              <-- Planetary geospatial vector overlays
 │
 ├── geojson/                                 <-- Standard RFC 7946 Geometries
 │   ├── mars_gale_crater_boundary.geojson    <-- 154 km diameter Gale Crater rim polygon
@@ -43,9 +51,15 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 │   ├── earth_desert_boundaries.geojson      <-- Polygons for Aralkum, McMurdo, Lut, Uyuni
 │   └── earth_desert_pins.geojson            <-- Extruded pins for Earth research stations
 │
+├── scripts/                                 <-- Data Processing & Texture Pipelines
+│   ├── process_team_data.py                 <-- Climatology aggregation pipeline
+│   ├── generate_matrix_hud.py               <-- Renders 11 Mission Profile Decision HUDs
+│   ├── generate_overview_hud_cards.py       <-- Renders 2D Category and Location HUD cards
+│   └── generate_planetary_overlays.py       <-- Renders Cartopy/Matplotlib globe overlays
+│
 └── user/webpanels/mars_earth_analogs/       <-- Embedded CEF Glassmorphic Web Panel
     ├── index.html                           <-- Main interactive dashboard (TerraMatch)
-    ├── css/style.css                        <-- Glassmorphic space styling & scrollers
+    ├── css/style.css                        <-- Glassmorphic space styling, single scroller, grid layout
     ├── js/config.js                         <-- Mars baseline & coordinate envelopes
     ├── js/openspace-api.js                  <-- OpenSpace JS API 1.0.0 WebSocket client
     ├── js/climate-service.js                <-- NASA POWER API client & similarity math
@@ -59,36 +73,73 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 
 ## 🎯 Key Capabilities
 
-1. **Dual Planetary Visual Overlays**:
-   - High-precision GeoJSON vector polygons delineating Gale Crater rim on Mars and all four desert expanses on Earth.
-   - 3D extruded pins rising from terrain elevations with distinct color styling.
-   - Orbitally legible `RenderableLabel` billboard typography attached via `GlobeTranslation`.
+### 1. Calibrated Viewport & Tangent "Side View" Navigation
+- **Tangent Side View (`Side view`)**:
+  - Positioned directly adjacent to `Focus on surface` in the category viewport actions strip.
+  - Automatically zooms camera close to the planetary surface where 3D elevation and high-resolution textures are crystal clear:
+    * **Mars (Gale Crater)**: Zooms to 3,800 m altitude in northern Aeolis Palus, sets `Mars_Texture` opacity to 0.0 so 6 m/px CTX blended imagery is sharp, and faces **South** (`Yaw = 3.14159 rad`) directly toward **Mount Sharp** (Aeolis Mons).
+    * **McMurdo Dry Valleys**: Zooms to 2,800 m over New Harbour, pointing **West-Southwest** (`Yaw = 4.71239 rad`) straight up **Taylor Valley**.
+    * **Lut Desert**: Zooms to 1,800 m, pointing **North** (`Yaw = 0.0 rad`) down the **Kalut yardang** wind corridors.
+    * **Aralkum Desert**: Zooms to 1,900 m, pointing **Northeast** (`Yaw = 0.65 rad`) across the desiccated seabed and cliffs.
+    * **Salar de Uyuni**: Zooms to 5,600 m (~1,940 m ground clearance above the 3,656 m salt flat), pointing **North** (`Yaw = 0.0 rad`) toward **Volcán Tunupa**.
+  - **Tangent Horizon Angle**: Uses OpenSpace Lua `openspace.navigation.setNavigationState` to tilt camera pitch tangent to the planetary curvature (`Pitch = 1.40 – 1.42 rad` / ~80°–82°), providing an eye-level panoramic horizon view across the terrain.
+  - **Unconstrained User Movement**: Enables `FollowAnchorNodeRotation` and leaves `OrbitalNavigator` active so the user can immediately orbit, tilt, pan, and zoom freely with the mouse.
+- **Focus on Surface (`Focus on surface`)**:
+  - Glides camera to a centered overhead nadir view (~240 km altitude) optimized for category inspection.
 
-2. **Automated & Interactive Camera Navigation**:
-   - Cinematic automated flight path sequentially touring Mars Gale Crater and all 4 Earth deserts.
-   - Interactive speed governor (`0.5x`, `1.0x`, `1.5x`, `2.0x`), pause/resume, and step controls.
-   - Global OpenSpace hotkeys (`Ctrl+Alt+M`, `Ctrl+Alt+1` through `4`).
+### 2. Customizable Multi-Criteria Decision Matrix (MCDM) & Mission Optimizer
+- **Interactive Matrix Dropdown**:
+  - Unified toggle button with a direction-flipping indicator (`Comparison Matrix ▾` / `Close Comparison Matrix ▴`).
+- **Manual Weight Sliders & Numeric Inputs**:
+  - Real-time controls for all 5 planetary domains: Thermal Conditions, Astrobiology & Mineralogy, Atmospheric Dynamics, Atmospheric Moisture, and Solar & UV Radiation.
+- **Silent 10-Second Auto-Balancing**:
+  - If total weight deviates from 100%, the backend waits 10 seconds after the last interaction and silently redistributes excess/deficit proportionally across the remaining categories while preserving the user's most recent stationary input.
+- **Real-Time MCDM Scoring**:
+  $$\text{Overall Match} = \frac{\sum_{i=1}^{5} w_i \cdot S_i}{\sum_{i=1}^{5} w_i}$$
+  Dynamically recalculates all site scores, leaderboard rankings, and telemetry readouts on every keystroke or slider drag.
+- **AI Mission Objective Optimizer ("What would you like to optimize your data for?")**:
+  - Natural-language input field where researchers and students can state mission goals (e.g., *"sample return astrobiology"*, *"rover wheel mobility and wind scouring"*, *"extreme cold cryogenic testing"*, *"solar array energy yield"*).
+  - Automatically calculates optimal domain weights and applies them across the entire dashboard and 3D viewport.
+- **Synchronized 3D Viewport HUD**:
+  - Dynamically updates the OpenSpace viewport HUD with 11 custom-rendered mission profile cards (Balanced, Astrobiology, Thermal, Dynamics, Moisture, Radiation, ISRU, Cryo, Drone, Traverse, Biosignature).
 
-3. **Mathematical Similarity Modeling**:
-   - Scientific comparison against Mars Curiosity Rover REMS baseline:
-     * Mean Annual Temperature ($T_{\text{mean}} = -63.0^\circ\text{C}$)
-     * Diurnal Thermal Amplitude ($\Delta T = 96.0^\circ\text{C}$)
-     * Relative Humidity ($\text{RH} = 12.0\%$)
-     * Mean Wind Velocity ($V_{\text{wind}} = 3.5\text{ m/s}$)
-     * Solar Insolation ($S_{\text{down}} = 4.10\text{ kWh/m}^2/\text{day}$)
-     * Surface Atmospheric Pressure ($P_{\text{sfc}} = 8.4\text{ hPa}$)
-   - Continuous Exponential Decay similarity metric:
-     $$S_i = 100 \times \exp\left( - \frac{|V_{\text{Earth}} - V_{\text{Mars}}|}{D_i} \right)$$
-   - Color-coded progress scale bars and formatted scientific summary table with signed deviations.
+### 3. Global SoilGrids Astrobiology & Soil Telemetry Pipeline
+- **Jupyter Notebook (`soilgrids_maps.ipynb`) & REST Integration**:
+  - Extracts global 250m-resolution regolith and soil telemetry from the ISRIC SoilGrids REST API.
+  - Telemetry parameters: Soil/Regolith pH (`SOIL_PH`), Soil Organic Carbon (`SOC`), Bulk Density (`BDOD`), Cation Exchange Capacity (`CEC`), Clay/Sand/Silt fractions, and Nitrogen.
+- **Find Astrobiology Data for Any Earth Location**:
+  - Dedicated modal tool in the web panel supporting arbitrary latitude/longitude coordinates anywhere on Earth.
+  - **Preset Coordinates**: Pre-loaded coordinate chips for premier planetary analogs and terrestrial extremes:
+    * 🏜️ **Atacama Desert** (-24.50°, -69.25°) — Hyper-arid Mars soil analog
+    * 🔥 **Death Valley** (36.53°, -116.93°) — High-heat evaporite basin
+    * ☀️ **Sahara Desert** (24.00°, 15.00°) — Vast aeolian sand transport
+    * 🐪 **Australian Outback** (-25.34°, 131.03°) — Ancient weathered ferruginous regolith
+    * 🌋 **Lut Desert** (30.55°, 58.80°) — Extreme thermal skin core
+    * 🧂 **Salar de Uyuni** (-20.13°, -67.49°) — High-elevation halite crust
+    * 📍 **Active Site** — Automatically pre-loads coordinates from whichever analog is currently selected.
+  - **Automated OpenSpace Camera Flight**:
+    - Automatically commands OpenSpace (`openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5)`) to fly directly to queried coordinates.
 
-4. **Dynamic NASA POWER API + Gemini AI Regeneration**:
-   - Real-time coordinate slider and numeric picker to select arbitrary coordinates within desert boundaries.
-   - Direct browser `fetch()` to NASA POWER Climatology API (`access-control-allow-origin: *`) fetching 6 atmospheric parameters.
-   - Real-time query to Gemini API (`gemini-2.5-flash` or `gemini-pro`) generating structured planetary analog syntheses, key geological matches, atmospheric divergences, and field instrument recommendations.
-   - Resilient offline fallback dataset if internet access is absent in a dome or planetarium.
+### 4. Dual Planetary Visual Overlays & 3D Markers
+- High-precision GeoJSON vector polygons delineating Gale Crater rim on Mars and all four desert expanses on Earth.
+- 3D extruded pins rising from terrain elevations with distinct color styling.
+- Orbitally legible `RenderableLabel` billboard typography attached via `GlobeTranslation`.
+- Independent toggles for continuous spatial vector overlays across all 5 planetary science categories.
 
-5. **Visual Overlay Toggles**:
-   - Independent checkboxes to toggle GeoJSON Boundaries, Coordinate Pins, and 3D Labels via `openspace.setPropertyValue()`.
+### 5. Automated Cinematic Tour & Keyboard Hotkeys
+- Automated flight path sequentially touring Mars Gale Crater and all 4 Earth deserts.
+- Speed governor (`0.5x`, `1.0x`, `1.5x`, `2.0x`), pause/resume, and step controls.
+- Global OpenSpace hotkeys:
+  * `Ctrl+Alt+M`: Mars Gale Crater
+  * `Ctrl+Alt+1`: Earth Aralkum Desert
+  * `Ctrl+Alt+2`: Earth McMurdo Dry Valleys
+  * `Ctrl+Alt+3`: Earth Lut Desert
+  * `Ctrl+Alt+4`: Earth Salar de Uyuni
+  * `Ctrl+Alt+0`: Restore Orbital Overview
+
+### 6. Clean, Single-Scrollbar UI Architecture
+- Streamlined layout with a single, dedicated vertical scrollbar (eliminates duplicate dock scrollbars and overlapping headers).
+- Uncluttered presentation focusing strictly on empirical telemetry, mathematical scores, and interactive camera tools.
 
 ---
 
@@ -100,17 +151,18 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
    - Provides empirical daily ground truth for Air Temperature (`T2M`), Thermal Extremes (`T2M_MIN`, `T2M_MAX`), Wind Speed (`WS10M`), Precipitation (`PRECTOTCORR`), Relative Humidity (`RH2M`), Surface Pressure (`PS`), and Solar Shortwave Insolation (`ALLSKY_SFC_SW_DWN`).
 
 2. **NASA earthaccess & ICESat-2 Topographic Pipeline (`earthaccess_pull/`)**:
-   - **Notebook (`pull_earthaccess.ipynb`)**: Automated Python extraction pipeline querying the official NASA `earthaccess` library for ICESat-2 (Ice, Cloud, and land Elevation Satellite 2) Land Ice / Land Water Surface Height data (`doi: 10.5067/ATLAS/ATL06.007`) and NASA EMIT L2B imaging spectroscopy.
-   - **GeoTIFF Elevation Raster (`out.tif`)**: 16-bit GeoTIFF (WGS 84, 4,424 × 4,184 resolution) capturing high-resolution micro-topographic relief (44 m to 78 m elevation, mean 59.94 m) across the Aralkum Desert / Aral Sea basin floor.
+   - **Notebook (`pull_earthaccess.ipynb`)**: Automated Python extraction pipeline querying the official NASA `earthaccess` library for ICESat-2 Land Ice / Land Water Surface Height data (`doi: 10.5067/ATLAS/ATL06.007`) and NASA EMIT L2B imaging spectroscopy.
+   - **GeoTIFF Elevation Raster (`out.tif`)**: 16-bit GeoTIFF (WGS 84, 4,424 × 4,184 resolution) capturing high-resolution micro-topographic relief across the Aralkum Desert floor.
    - **EMIT Mineral CSV Grid (`out.csv`)**: 4,424 × 4,184 mineral classification matrix converted from EMIT imaging spectroscopy.
-   - **EMIT Mineral GeoTIFF Raster (`lut.tif`)**: High-resolution GeoTIFF (WGS 84, 1,327 × 2,511 resolution, Lon 57°–60°E, Lat 25°–31°N) containing discrete mineral classification codes (IDs 69–84) for pyroxene, hematite, goethite, and basalt evaporite coatings across the Lut Desert, Iran.
-   - **EMIT Mineral GeoTIFF Raster (`araldesert.tif`)**: High-resolution GeoTIFF (WGS 84, 442 × 418 resolution) containing discrete mineral classification codes (IDs 45–57) for mirabilite, thenardite, gypsum, and toxic sulfate evaporites across the Aralkum Desert / Aral Sea bed.
+   - **EMIT Mineral GeoTIFF Raster (`lut.tif`)**: High-resolution GeoTIFF mapping pyroxene, hematite, goethite, and basalt evaporite coatings across the Lut Desert, Iran.
+   - **EMIT Mineral GeoTIFF Raster (`araldesert.tif`)**: High-resolution GeoTIFF mapping mirabilite, thenardite, gypsum, and toxic sulfate evaporites across the Aralkum Desert.
 
-3. **NASA EMIT, Soil pH & MSL CheMin Surface Materials**:
-   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy (`araldesert.tif`, `lut.tif` & `out.csv`), in-situ soil pH measurements (`soil_ph_summary.csv`), and Curiosity MSL CheMin/SAM in-situ instruments.
+3. **SoilGrids & Empirical Surface Chemistry (`soilgrids_maps.ipynb` & `soil_ph_summary.csv`)**:
+   - Surface mineralogy and lithology substrates verified via NASA EMIT imaging spectroscopy, SoilGrids global regolith telemetry, in-situ soil pH measurements (`soil_ph_summary.csv`), and Curiosity MSL CheMin/SAM in-situ instruments.
 
 ---
 
 ## 🚀 Quick Start & Installation
 
 See [INSTALL.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/INSTALL.md) for step-by-step setup in OpenSpace.
+See [USER_GUIDE.md](file:///C:/Users/emily/.gemini/antigravity/scratch/openspace_mars_earth/USER_GUIDE.md) for full interactive operations and presentation walkthroughs.
