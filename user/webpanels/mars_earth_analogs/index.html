@@ -450,52 +450,26 @@
   </div>
 
   <!-- Drawer 2: Camera Tour Controls -->
-  <div id="drawer-tour" class="glass-panel drawer-panel tour-drawer-panel" style="display: none;">
+  <div id="drawer-tour" class="glass-panel drawer-panel" style="display: none;">
     <div class="drawer-header">
-      <div class="tour-header-wrap">
-        <h4>Automated Planetary Flythrough Tour</h4>
-        <span class="tour-header-subtitle">Cinematic sweep across Mars & Earth analogs</span>
-      </div>
-      <button id="btn-close-tour" class="btn-icon-close" title="Close" aria-label="Close">✕</button>
+      <h4>Automated Planetary Flythrough Tour</h4>
+      <span style="font-size: 0.75rem; color: var(--text-muted);">Cinematic sweep across Mars & all 4 Earth desert analogs</span>
     </div>
     <div class="tour-controls-row">
       <button id="btn-tour-play" class="btn btn-primary">▶ Start Tour</button>
       <button id="btn-tour-pause" class="btn">⏸ Pause</button>
       <button id="btn-tour-prev" class="btn">⏮ Prev</button>
       <button id="btn-tour-next" class="btn">⏭ Next</button>
+      <select id="sel-tour-speed" class="btn" style="padding: 4px 8px;">
+        <option value="0.5">Speed: 0.5x</option>
+        <option value="1.0" selected>Speed: 1.0x</option>
+        <option value="1.5">Speed: 1.5x</option>
+        <option value="2.0">Speed: 2.0x</option>
+      </select>
     </div>
-
-    <!-- Tours Preset Selection: 30s Demo, 1m Standard, 5m Comprehensive -->
-    <div class="tour-presets-wrap">
-      <span class="tour-presets-label">Tours:</span>
-      <div class="tour-presets-btn-group">
-        <button type="button" id="btn-tour-preset-30s" class="btn btn-tour-preset" data-preset="30s" title="30-Second Planetarium Scope Demo">⏱️ 30s Demo</button>
-        <button type="button" id="btn-tour-preset-1m" class="btn btn-tour-preset active" data-preset="1m" title="1-Minute Standard Overview Tour">⏱️ 1m Standard</button>
-        <button type="button" id="btn-tour-preset-5m" class="btn btn-tour-preset" data-preset="5m" title="5-Minute Comprehensive Presentation">⏱️ 5m Comprehensive</button>
-      </div>
-    </div>
-
-    <div id="tour-status-bar" class="tour-status-bar">
-      <div class="tour-status-row">
-        <span class="tour-status-tag">Tour Phase:</span>
-        <span id="tour-status-text" class="tour-status-text">Ready to start</span>
-      </div>
-      <div class="tour-progress-bar-bg">
-        <div id="tour-progress-bar-fill" class="tour-progress-bar-fill" style="width: 0%;"></div>
-      </div>
-    </div>
-
-    <!-- Live Tour Narration & Scientific Dossier Card -->
-    <div id="tour-narration-card" class="tour-narration-card" style="display: none;">
-      <div class="tour-narration-header">
-        <span id="tour-narration-stop" class="tour-narration-stop">Stop 1/5</span>
-        <span id="tour-narration-title" class="tour-narration-title">Mars: Gale Crater</span>
-      </div>
-      <div class="tour-narration-metrics" id="tour-narration-metrics"></div>
-      <p id="tour-narration-body" class="tour-narration-body"></p>
-      <div class="tour-si-attribution-tag">
-        Synthetic Intelligence (SI) Attribution: Multi-planetary flythrough narrative and descriptive synthesis generated with Google Gemini API.
-      </div>
+    <div id="tour-status-bar" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 4px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2);">
+      <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Tour Phase:</span>
+      <span id="tour-status-text" style="font-size: 0.76rem; color: var(--accent-cyan); font-weight: 600;">Ready to start</span>
     </div>
   </div>
 

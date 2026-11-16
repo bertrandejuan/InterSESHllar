@@ -27,8 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
     activeOverlay: null,
     tourActive: false,
     tourIndex: 0,
-    tourStopIndex: 0,
-    activeTourPreset: "1m",
     tourSpeed: 1.0,
     tourTimer: null,
     hasTourEverRun: false,
@@ -162,20 +160,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const btnToggleTour = document.getElementById("btn-toggle-tour");
   const drawerTour = document.getElementById("drawer-tour");
-  const btnCloseTour = document.getElementById("btn-close-tour");
   const btnTourPlay = document.getElementById("btn-tour-play");
   const btnTourPause = document.getElementById("btn-tour-pause");
   const btnTourPrev = document.getElementById("btn-tour-prev");
   const btnTourNext = document.getElementById("btn-tour-next");
-  const btnTourPreset30s = document.getElementById("btn-tour-preset-30s");
-  const btnTourPreset1m = document.getElementById("btn-tour-preset-1m");
-  const btnTourPreset5m = document.getElementById("btn-tour-preset-5m");
-  const tourProgressBarFill = document.getElementById("tour-progress-bar-fill");
-  const tourNarrationCard = document.getElementById("tour-narration-card");
-  const tourNarrationStop = document.getElementById("tour-narration-stop");
-  const tourNarrationTitle = document.getElementById("tour-narration-title");
-  const tourNarrationMetrics = document.getElementById("tour-narration-metrics");
-  const tourNarrationBody = document.getElementById("tour-narration-body");
+  const selTourSpeed = document.getElementById("sel-tour-speed");
 
   // DOM Elements - Modal: View All Data
   const btnOpenAllData = document.getElementById("btn-open-all-data");
@@ -2342,275 +2331,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   // 10. Tour Drawer & Camera Flythrough Controls
   // ----------------------------------------------------
-  // Automated Multi-Planetary Flythrough Tour Engine
-  // Supports 30-Second Planetarium Scope Demo, 1-Minute Standard Overview,
-  // and 5-Minute Comprehensive Presentation with Synchronized HUD & Side View
+  // 10. Automated Planetary Flythrough Tour Engine
+  // Orchestrates multi-planetary flythrough, category overviews,
+  // planetary continuous data overlays, and idle motion orbits
   // ----------------------------------------------------
-  const TOUR_PRESET_CONFIGS = {
-    "30s": {
-      label: "30-Second Planetarium Demo",
-      totalDuration: 30,
-      stops: [
-        {
-          id: "mars_gale",
-          siteKey: "mars_gale",
-          durationMs: 6000,
-          title: "Mars: Gale Crater & REMS Baseline",
-          categoryKey: "thermal",
-          mode: "rems_baseline",
-          narration: "MSL Curiosity REMS ground truth: -54.2°C mean diurnal temperature, 0.76 kPa thin CO₂ atmosphere, and CheMin clay/sulfate mineralogy establishing our Martian baseline.",
-          metrics: [
-            { label: "Surface Temp", value: "-54.2°C" },
-            { label: "Atm Pressure", value: "0.76 kPa" },
-            { label: "Baseline", value: "MSL REMS" }
-          ]
-        },
-        {
-          id: "mcdm_matrix",
-          siteKey: "mars_gale",
-          durationMs: 6000,
-          title: "MCDM Decision Matrix & AI Optimizer",
-          categoryKey: null,
-          mode: "mcdm_showcase",
-          narration: "Customizable Multi-Criteria Decision Matrix (MCDM) weighted across 5 planetary categories, featuring automated AI mission archetype optimization via Gemini API.",
-          metrics: [
-            { label: "Formula", value: "Σ(w·S)/Σw" },
-            { label: "Categories", value: "5 Science" },
-            { label: "AI Engine", value: "Gemini API" }
-          ]
-        },
-        {
-          id: "mcmurdo",
-          siteKey: "mcmurdo",
-          durationMs: 6000,
-          title: "McMurdo Dry Valleys (Antarctic Cryosphere)",
-          categoryKey: "dynamics",
-          mode: "site_overview",
-          narration: "Interplanetary analog #1: McMurdo Dry Valleys, Earth's premier cryogenic Martian polar analog with sub-zero hyper-aridity (-27.6°C mean) and fierce katabatic wind regimes.",
-          metrics: [
-            { label: "Annual Temp", value: "-27.6°C" },
-            { label: "Liquid Water", value: "0 mm" },
-            { label: "Katabatic Gusts", value: "11.8 m/s" }
-          ]
-        },
-        {
-          id: "lut",
-          siteKey: "lut",
-          durationMs: 6000,
-          title: "Lut Desert (Tangent Side View & Yardangs)",
-          categoryKey: "thermal",
-          mode: "side_view",
-          narration: "Interplanetary analog #2: Lut Desert yardangs viewed via calibrated surface-tangent side view at 1,800m altitude. Earth's thermal extreme (70.7°C) mirroring Martian diurnal skin heating.",
-          metrics: [
-            { label: "Peak Skin Temp", value: "70.7°C" },
-            { label: "Solar Flux", value: "8.9 kWh/m²" },
-            { label: "Camera View", value: "Side Tangent" }
-          ]
-        },
-        {
-          id: "astrobiology_query",
-          siteKey: "lut",
-          durationMs: 6000,
-          title: "Global Earth Astrobiology Query (SoilGrids 250m)",
-          categoryKey: "astrobiology",
-          mode: "astrobiology_demo",
-          narration: "Global Earth Astrobiology Engine: Query fine-earth regolith pH, organic carbon (SOC), and bulk density anywhere on Earth at 250m resolution, scoring habitability match to Gale Crater.",
-          metrics: [
-            { label: "Resolution", value: "250m Grid" },
-            { label: "Soil Depth", value: "0–5 cm" },
-            { label: "Similarity", value: "Real-Time %" }
-          ]
-        }
-      ]
-    },
-    "1m": {
-      label: "1-Minute Standard Overview Tour",
-      totalDuration: 60,
-      stops: [
-        {
-          id: "mars_gale",
-          siteKey: "mars_gale",
-          durationMs: 10000,
-          title: "Mars: Gale Crater & MSL Curiosity Baseline",
-          categoryKey: "thermal",
-          mode: "rems_baseline",
-          narration: "MSL Curiosity baseline at Gale Crater: In-situ REMS daily records measure an average surface temperature of -54.2°C under a 0.76 kPa carbon dioxide atmosphere, with lacustrine mudstone bedrock.",
-          metrics: [
-            { label: "Surface Temp", value: "-54.2°C" },
-            { label: "Atm Pressure", value: "0.76 kPa" },
-            { label: "Diurnal Swing", value: "70.4°C ΔT" }
-          ]
-        },
-        {
-          id: "mcdm_matrix",
-          siteKey: "mars_gale",
-          durationMs: 10000,
-          title: "Multi-Criteria Decision Matrix Engine",
-          categoryKey: null,
-          mode: "mcdm_showcase",
-          narration: "Multi-Criteria Decision Matrix: Evaluate Earth analog suitability using normalized multi-attribute weights across Thermal, Astrobiological, Dynamic, Moisture, and Radiative criteria.",
-          metrics: [
-            { label: "Model", value: "MCDM Utility" },
-            { label: "Weight Sum", value: "100%" },
-            { label: "AI Tuning", value: "Gemini" }
-          ]
-        },
-        {
-          id: "mcmurdo",
-          siteKey: "mcmurdo",
-          durationMs: 10000,
-          title: "McMurdo Dry Valleys, Antarctica (Polar Cryosphere)",
-          categoryKey: "dynamics",
-          mode: "site_overview",
-          narration: "McMurdo Dry Valleys, Antarctica: Hyper-arid polar desert where sub-zero temperatures (-27.6°C mean) and fierce katabatic winds create an ideal proving ground for Martian polar caps.",
-          metrics: [
-            { label: "Mean Temp", value: "-27.6°C" },
-            { label: "Winter Min", value: "-42.8°C" },
-            { label: "Peak Gusts", value: "11.8 m/s" }
-          ]
-        },
-        {
-          id: "lut",
-          siteKey: "lut",
-          durationMs: 10000,
-          title: "Lut Desert (Dasht-e Lut, Iran) & Tangent Side View",
-          categoryKey: "thermal",
-          mode: "side_view",
-          narration: "Dasht-e Lut, Iran: Calibrated surface-tangent side view showcases giant Kalut yardangs sculpted by aeolian wind erosion, reaching Earth's highest surface skin temperature (70.7°C).",
-          metrics: [
-            { label: "Skin Temp", value: "70.7°C" },
-            { label: "Solar Insolation", value: "8.9 kWh/m²" },
-            { label: "Geomorphology", value: "Mega-Yardangs" }
-          ]
-        },
-        {
-          id: "aralkum",
-          siteKey: "aralkum",
-          durationMs: 10000,
-          title: "Aralkum & Salar de Uyuni (Desiccation & Evaporites)",
-          categoryKey: "moisture",
-          mode: "site_overview",
-          narration: "Aralkum & Salar de Uyuni: Extreme desiccation analogs featuring hypersaline crusts, mineral evaporites (halite, gypsum, borates), and toxic dust storms mimicking late Hesperian Martian basins.",
-          metrics: [
-            { label: "Relative Humidity", value: "42.0%" },
-            { label: "Mineral Crust", value: "Halite/Borate" },
-            { label: "Desiccation", value: "Aral Sea Basin" }
-          ]
-        },
-        {
-          id: "astrobiology_query",
-          siteKey: "lut",
-          durationMs: 10000,
-          title: "Global Earth Astrobiology Query (SoilGrids 250m)",
-          categoryKey: "astrobiology",
-          mode: "astrobiology_demo",
-          narration: "Global Astrobiology Telemetry: Query any geographic coordinates on Earth to fetch 250m ISRIC SoilGrids regolith telemetry, computing real-time habitability similarity to Gale Crater.",
-          metrics: [
-            { label: "Coverage", value: "Global Earth" },
-            { label: "ISRIC Depth", value: "0–5 cm" },
-            { label: "Metrics", value: "pH / SOC / BDOD" }
-          ]
-        }
-      ]
-    },
-    "5m": {
-      label: "5-Minute Comprehensive Presentation",
-      totalDuration: 300,
-      stops: [
-        {
-          id: "mars_gale",
-          siteKey: "mars_gale",
-          durationMs: 50000,
-          title: "Mars: Gale Crater & MSL In-Situ Exploration (Yellowknife Bay to Mount Sharp)",
-          categoryKey: "thermal",
-          mode: "rems_baseline",
-          narration: "Gale Crater serves as our foundational ground-truth baseline. Exploring 154 km across the crater floor, MSL Curiosity has documented fluvio-lacustrine sedimentary rock, mudstones of the Murray formation, and sulfate-bearing strata of Mount Sharp. In-situ REMS sensors record diurnal surface temperatures oscillating from -14.6°C to -85.0°C (mean -54.2°C) beneath a tenuous 0.76 kPa CO₂ atmosphere. CheMin X-ray diffraction confirms smectite clays, magnetite, and jarosite, while SAM pyrolysis reveals organic carbon fragments (~0.1 g/kg).",
-          metrics: [
-            { label: "Crater Diameter", value: "154 km" },
-            { label: "Diurnal Swing", value: "-14.6 to -85°C" },
-            { label: "Atm Pressure", value: "0.76 kPa" },
-            { label: "Sedimentary Host", value: "Lacustrine Mudstone" }
-          ]
-        },
-        {
-          id: "mcdm_matrix",
-          siteKey: "mars_gale",
-          durationMs: 50000,
-          title: "Multi-Criteria Decision Matrix Engine & AI Mission Tuning",
-          categoryKey: null,
-          mode: "mcdm_showcase",
-          narration: "The planetary analog decision matrix synthesizes multi-attribute utility theory: Overall Score = Σ(w_i · S_i) / Σw_i. Five core scientific categories (Thermal Conditions, Astrobiology & Mineralogy, Atmospheric Dynamics, Atmospheric Moisture, and Solar/UV Radiation) are individually weighted and dynamically normalized to 100%. Integrated Gemini AI allows mission planners to input specific exploration profiles—such as biosignature preservation, rover mobility & dust hazards, solar rotorcraft flight, or in-situ water extraction—automatically recalculating optimal analog site rankings.",
-          metrics: [
-            { label: "Evaluation Model", value: "MCDM Utility" },
-            { label: "Category Count", value: "5 Domains (100%)" },
-            { label: "Real-Time Math", value: "Synchronous HUD" },
-            { label: "Semantic AI", value: "Gemini Engine" }
-          ]
-        },
-        {
-          id: "mcmurdo",
-          siteKey: "mcmurdo",
-          durationMs: 50000,
-          title: "McMurdo Dry Valleys, Antarctica: Cryogenic Polar Analog Proving Ground",
-          categoryKey: "dynamics",
-          mode: "site_overview",
-          narration: "Located in Victoria Land, Antarctica, the McMurdo Dry Valleys represent Earth's closest cryogenic analog to the Martian polar regions. Shielded from the East Antarctic Ice Sheet by the Transantarctic Mountains, the valleys remain snow-free due to hyper-arid katabatic winds plunging off the polar plateau at speeds exceeding 24 m/s. 10-year NASA POWER climatology records indicate an annual mean temperature of -27.6°C, dipping below -42.8°C in winter. Permafrost cores from Friis Hills and Beacon Valley harbor ancient buried glacial ice over 8 million years old, hosting endolithic cryptoendolithic microbial communities within porous sandstones.",
-          metrics: [
-            { label: "Annual Mean Temp", value: "-27.6°C" },
-            { label: "Winter Minimum", value: "-42.8°C" },
-            { label: "Katabatic Gusts", value: "11.8–24.5 m/s" },
-            { label: "Liquid Water", value: "0 mm" }
-          ]
-        },
-        {
-          id: "lut",
-          siteKey: "lut",
-          durationMs: 50000,
-          title: "Lut Desert (Dasht-e Lut, Iran): Tangent Side View & Extreme Thermal Physics",
-          categoryKey: "thermal",
-          mode: "side_view",
-          narration: "Dasht-e Lut in southeastern Iran exhibits Earth's most severe thermal extremes and vast aeolian yardang fields. The calibrated surface-tangent side view at 1,800m altitude provides an eye-level perspective down the mega-yardang corridors (Kaluts), carved by vigorous 120-day summer Shamal winds. Satellite radiometry (MODIS) has repeatedly documented the planet's highest land surface skin temperature here at 70.7°C, paired with intense solar insolation of 8.9 kWh/m²/day. This extreme diurnal radiative heating and convective atmospheric turbulence closely mirror the thermal shock experienced by Martian surface hardware.",
-          metrics: [
-            { label: "Surface Skin Temp", value: "70.7°C" },
-            { label: "Solar Insolation", value: "8.9 kWh/m²" },
-            { label: "Yardang Height", value: "Up to 80m" },
-            { label: "Camera Perspective", value: "Tangent 1.8km" }
-          ]
-        },
-        {
-          id: "aralkum",
-          siteKey: "aralkum",
-          durationMs: 50000,
-          title: "Aralkum & Salar de Uyuni: Evaporitic Basin Desiccation & Dust Hazards",
-          categoryKey: "moisture",
-          mode: "site_overview",
-          narration: "The Aralkum Desert—formed from the rapid catastrophic desiccation of the Aral Sea—and the high-altitude Salar de Uyuni salt flat (3,656m elevation in Bolivia) model the transition of late Hesperian Martian lakes into desiccated salt basins. In both sites, receding waters deposit thick crusts of halite, thenardite, gypsum, and borates. Fine toxic salt-dust plumes are lofted into the atmosphere by high-velocity surface winds, directly simulating the abrasive, corrosive, and electrostatic challenges posed by Martian airborne regolith on mechanical bearings, optical sensors, and spacesuit seals.",
-          metrics: [
-            { label: "Mean RH", value: "42.0%" },
-            { label: "Salt Mineralogy", value: "Halite / Gypsum" },
-            { label: "Elevation (Uyuni)", value: "3,656 m" },
-            { label: "Aerosol Hazard", value: "Toxic Salt Plumes" }
-          ]
-        },
-        {
-          id: "astrobiology_query",
-          siteKey: "lut",
-          durationMs: 50000,
-          title: "Global Earth Astrobiology Query Engine: 250m Resolution ISRIC SoilGrids Telemetry",
-          categoryKey: "astrobiology",
-          mode: "astrobiology_demo",
-          narration: "Expanding beyond fixed analog sites, the Global Astrobiology Query Engine connects directly to ISRIC SoilGrids v2.0 REST and WCS services, querying 0–5 cm subaerial fine earth regolith anywhere on Earth at 250m spatial resolution. It extracts soil pH (H₂O), Soil Organic Carbon (SOC), and bulk density (BDOD), benchmarking each metric against Gale Crater's Rocknest drift and Yellowknife Bay mudstone baseline. Mathematical habitability similarity algorithms score each coordinate in real time, enabling planetary scientists to discover new, uncataloged Martian analog terrains worldwide.",
-          metrics: [
-            { label: "Global Coverage", value: "Any Lat / Lon" },
-            { label: "Spatial Resolution", value: "250 meters" },
-            { label: "Analyzed Layer", value: "0–5 cm Regolith" },
-            { label: "Gale Similarity", value: "Real-Time %" }
-          ]
-        }
-      ]
-    }
-  };
-
   if (btnToggleTour) {
     btnToggleTour.addEventListener("click", () => {
       const isOpen = drawerTour.style.display === "flex";
@@ -2628,16 +2352,6 @@ document.addEventListener("DOMContentLoaded", () => {
           btnToggleAbout.classList.remove("active");
           btnToggleAbout.setAttribute("aria-expanded", "false");
         }
-      }
-    });
-  }
-
-  if (btnCloseTour) {
-    btnCloseTour.addEventListener("click", () => {
-      drawerTour.style.display = "none";
-      if (btnToggleTour) {
-        btnToggleTour.classList.remove("active");
-        btnToggleTour.setAttribute("aria-expanded", "false");
       }
     });
   }
@@ -2681,7 +2395,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function tourDelay(ms) {
     return new Promise((resolve) => {
-      const adjustedMs = Math.max(100, Math.round(ms));
+      const speed = state.tourSpeed || 1.0;
+      const adjustedMs = Math.max(100, Math.round(ms / speed));
       state.tourTimer = setTimeout(resolve, adjustedMs);
     });
   }
@@ -2693,47 +2408,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function setActiveTourPresetHighlight(presetKey, isRunning = false) {
-    [btnTourPreset30s, btnTourPreset1m, btnTourPreset5m].forEach(b => {
-      if (b) {
-        const isMatch = b.getAttribute("data-preset") === presetKey;
-        b.classList.toggle("active", isMatch);
-        if (isMatch) {
-          b.classList.toggle("running", isRunning);
-        } else {
-          b.classList.remove("running");
-        }
-      }
-    });
-  }
-
-  function openComparisonMatrixDrawerForTour() {
-    if (drawerComparisonMatrix) drawerComparisonMatrix.style.display = "flex";
-    if (btnToggleComparisonMatrix) {
-      btnToggleComparisonMatrix.classList.add("active");
-      btnToggleComparisonMatrix.setAttribute("aria-expanded", "true");
-      const textSpan = document.getElementById("btn-comparison-matrix-text");
-      if (textSpan) textSpan.innerText = "Close Comparison Matrix";
-      const arrow = btnToggleComparisonMatrix.querySelector(".matrix-dropdown-arrow");
-      if (arrow) arrow.textContent = "▴";
-    }
-    renderDecisionMatrix();
-    updateMatrixViewportHUD();
-  }
-
-  function closeComparisonMatrixDrawerForTour() {
-    if (drawerComparisonMatrix) drawerComparisonMatrix.style.display = "none";
-    if (btnToggleComparisonMatrix) {
-      btnToggleComparisonMatrix.classList.remove("active");
-      btnToggleComparisonMatrix.setAttribute("aria-expanded", "false");
-      const textSpan = document.getElementById("btn-comparison-matrix-text");
-      if (textSpan) textSpan.innerText = "Comparison Matrix";
-      const arrow = btnToggleComparisonMatrix.querySelector(".matrix-dropdown-arrow");
-      if (arrow) arrow.textContent = "▾";
-    }
-  }
-
-  function stopTour(resetStatus = true) {
+  function stopTour() {
     state.tourActive = false;
     tourCancellation = true;
     if (state.tourTimer) {
@@ -2743,10 +2418,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setIdleMotion(false);
     clearTourOverlayQuietly();
     dismissHUD();
-    closeComparisonMatrixDrawerForTour();
-    state.tourStopIndex = 0;
+    state.tourIndex = 0;
     state.tourRestartNeeded = true;
-
     if (btnTourPlay) {
       btnTourPlay.innerText = "▶ Start Tour";
       btnTourPlay.classList.remove("btn-tour-end");
@@ -2756,14 +2429,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btnTourPause.innerText = "⏸ Pause";
       btnTourPause.classList.remove("btn-tour-resume");
     }
-
-    // Keep active preset button highlighted, but remove running pulse
-    setActiveTourPresetHighlight(state.activeTourPreset || "1m", false);
-
-    if (resetStatus) {
-      updateTourStatus("Tour Stopped");
-      if (tourProgressBarFill) tourProgressBarFill.style.width = "0%";
-    }
+    updateTourStatus("Tour Stopped");
   }
 
   function pauseTour() {
@@ -2776,7 +2442,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setIdleMotion(false);
     clearTourOverlayQuietly();
     dismissHUD();
-
     if (btnTourPlay) {
       btnTourPlay.innerText = "⏹ End Tour";
       btnTourPlay.classList.add("btn-tour-end");
@@ -2786,9 +2451,6 @@ document.addEventListener("DOMContentLoaded", () => {
       btnTourPause.innerText = "▶ Play";
       btnTourPause.classList.add("btn-tour-resume");
     }
-
-    // Preset button remains highlighted even when paused!
-    setActiveTourPresetHighlight(state.activeTourPreset || "1m", false);
     updateTourStatus("Tour Paused");
   }
 
@@ -2796,17 +2458,8 @@ document.addEventListener("DOMContentLoaded", () => {
     state.tourActive = true;
     tourCancellation = false;
     if (startIndex !== null) {
-      state.tourStopIndex = startIndex;
+      state.tourIndex = startIndex;
     }
-
-    // If no preset chosen, default to 1m
-    if (!state.activeTourPreset) {
-      state.activeTourPreset = "1m";
-    }
-
-    // Keep active preset button persistently highlighted throughout run!
-    setActiveTourPresetHighlight(state.activeTourPreset, true);
-
     if (btnTourPlay) {
       btnTourPlay.innerText = "⏹ End Tour";
       btnTourPlay.classList.add("btn-tour-end");
@@ -2816,155 +2469,261 @@ document.addEventListener("DOMContentLoaded", () => {
       btnTourPause.innerText = "⏸ Pause";
       btnTourPause.classList.remove("btn-tour-resume");
     }
-    runTourSequence(state.tourStopIndex || 0);
+    runTourSequence(state.tourIndex || 0);
   }
 
-  async function runTourSequence(startStopIndex = 0) {
+  async function runTourSequence(startSiteIndex = 0) {
     if (!state.tourActive) return;
     tourCancellation = false;
 
-    const presetKey = state.activeTourPreset || "1m";
-    const presetConfig = TOUR_PRESET_CONFIGS[presetKey] || TOUR_PRESET_CONFIGS["1m"];
-    const stops = presetConfig.stops || [];
-
-    // Ensure preset button is highlighted and running
-    setActiveTourPresetHighlight(presetKey, true);
+    const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
 
     try {
-      for (let i = startStopIndex; i < stops.length; i++) {
-        state.tourStopIndex = i;
-        const stop = stops[i];
+      for (let i = startSiteIndex; i < siteKeys.length; i++) {
+        state.tourIndex = i;
+        const siteKey = siteKeys[i];
 
         if (!state.tourActive || tourCancellation) break;
 
-        // 1. Update Tour Status & Progress Bar
-        updateTourStatus(`${i + 1}/${stops.length} ${stop.title}`);
-        if (tourProgressBarFill) {
-          const pct = Math.round((i / stops.length) * 100);
-          tourProgressBarFill.style.width = `${pct}%`;
-        }
-
-        // 2. Display Rich Narration Card
-        if (tourNarrationCard) {
-          tourNarrationCard.style.display = "flex";
-          if (tourNarrationStop) {
-            tourNarrationStop.innerText = `Stop ${i + 1}/${stops.length} (${presetKey} Tour)`;
-          }
-          if (tourNarrationTitle) {
-            tourNarrationTitle.innerText = stop.title;
-          }
-          if (tourNarrationMetrics && stop.metrics) {
-            tourNarrationMetrics.innerHTML = stop.metrics.map(m => `
-              <div class="tour-metric-pill">
-                <div class="tour-metric-pill-val">${m.value}</div>
-                <div class="tour-metric-pill-lbl">${m.label}</div>
-              </div>
-            `).join("");
-          }
-          if (tourNarrationBody) {
-            tourNarrationBody.innerText = stop.narration;
-          }
-        }
-
-        // 3. Execute Stop Choreography based on mode
-        const startTime = Date.now();
-
-        if (stop.mode === "rems_baseline") {
+        // --------------------------------------------------
+        // 1. MARS: GALE CRATER
+        // --------------------------------------------------
+        if (siteKey === "mars_gale") {
+          updateTourStatus("1/5 Mars: Gale Crater");
           clearTourOverlayQuietly();
-          closeComparisonMatrixDrawerForTour();
-          if (drawerAstroLookup) drawerAstroLookup.style.display = "none";
+          dismissHUD();
           setIdleMotion(false);
 
+          // Fly back to Mars Gale Crater if restarting tour, or if not currently on Mars
           const needsFlight = state.tourRestartNeeded || state.currentSiteKey !== "mars_gale" || state.hasTourEverRun;
           state.hasTourEverRun = true;
           state.tourRestartNeeded = false;
 
           if (needsFlight) {
+            updateTourStatus("1/5 Flying to Mars: Gale Crater...");
             selectSite("mars_gale", true);
-            await tourDelay(Math.min(3000, stop.durationMs * 0.35));
+            await tourDelay(3500);
             if (!state.tourActive || tourCancellation) break;
           } else {
             selectSite("mars_gale", false);
           }
 
-          state.openAccordionKey = "thermal";
-          renderScienceAccordion();
-          const cat = SCIENCE_CATEGORIES.find(c => c.key === "thermal");
-          if (cat) toggleCategoryHUD(cat);
-
-        } else if (stop.mode === "mcdm_showcase") {
-          clearTourOverlayQuietly();
-          if (drawerAstroLookup) drawerAstroLookup.style.display = "none";
-          setIdleMotion(false);
-
-          openComparisonMatrixDrawerForTour();
-
-        } else if (stop.mode === "site_overview") {
-          clearTourOverlayQuietly();
-          closeComparisonMatrixDrawerForTour();
-          if (drawerAstroLookup) drawerAstroLookup.style.display = "none";
-          dismissHUD();
-          setIdleMotion(false);
-
-          selectSite(stop.siteKey, true);
-          await tourDelay(Math.min(3500, stop.durationMs * 0.35));
+          updateTourStatus("1/5 Mars: Gale Crater (In Focus)");
+          // Half-second pause at the crater
+          await tourDelay(500);
           if (!state.tourActive || tourCancellation) break;
 
-          if (stop.categoryKey) {
-            state.openAccordionKey = stop.categoryKey;
+          // Toggle thermal conditions overview (keep data table for extra second: 4s) and turn off
+          updateTourStatus("1/5 Mars: Thermal Conditions Overview (4s)");
+          const thermalCat = SCIENCE_CATEGORIES.find((c) => c.key === "thermal");
+          if (thermalCat) {
+            state.openAccordionKey = "thermal";
             renderScienceAccordion();
-            const cat = SCIENCE_CATEGORIES.find(c => c.key === stop.categoryKey);
-            if (cat) toggleCategoryHUD(cat);
+            toggleCategoryHUD(thermalCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle thermal conditions overlay (linger for 1s after animation finishes)
+            updateTourStatus("1/5 Mars: Thermal Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(thermalCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on mars thermal conditions for extra second (2s)
+            updateTourStatus("1/5 Mars: Thermal Conditions Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
           }
-
-        } else if (stop.mode === "side_view") {
-          clearTourOverlayQuietly();
-          closeComparisonMatrixDrawerForTour();
-          if (drawerAstroLookup) drawerAstroLookup.style.display = "none";
-          dismissHUD();
-          setIdleMotion(false);
-
-          selectSite("lut", true);
-          await tourDelay(Math.min(2500, stop.durationMs * 0.25));
-          if (!state.tourActive || tourCancellation) break;
-
-          sideView();
-
-        } else if (stop.mode === "astrobiology_demo") {
-          clearTourOverlayQuietly();
-          closeComparisonMatrixDrawerForTour();
-          dismissHUD();
-          setIdleMotion(false);
-
-          if (drawerAstroLookup) {
-            drawerAstroLookup.style.display = "flex";
-            if (btnToggleAstroLookup) {
-              btnToggleAstroLookup.classList.add("active");
-              btnToggleAstroLookup.setAttribute("aria-expanded", "true");
-            }
-          }
-          if (inputAstroLat && inputAstroLon) {
-            inputAstroLat.value = "-24.0800";
-            inputAstroLon.value = "-69.8700";
-          }
-          const firstChip = document.querySelector(".astro-preset-chips .chip-preset");
-          if (firstChip) setPresetHighlight(firstChip);
-          executeAstrobiologyQuery();
         }
 
-        if (!state.tourActive || tourCancellation) break;
+        // --------------------------------------------------
+        // 2. LUT DESERT (IRAN)
+        // --------------------------------------------------
+        else if (siteKey === "lut") {
+          updateTourStatus("2/5 Earth: Lut Desert (Flying from Mars)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("lut", true);
 
-        // Linger for remaining time of this stop
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(500, stop.durationMs - elapsed);
-        await tourDelay(remaining);
-        if (!state.tourActive || tourCancellation) break;
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle astrobiology overview (extra second: 4s) and turn off
+          updateTourStatus("2/5 Lut Desert: Astrobiology Overview (4s)");
+          const astrobioCat = SCIENCE_CATEGORIES.find((c) => c.key === "astrobiology");
+          if (astrobioCat) {
+            state.openAccordionKey = "astrobiology";
+            renderScienceAccordion();
+            toggleCategoryHUD(astrobioCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+          }
+        }
+
+        // --------------------------------------------------
+        // 3. MCMURDO VALLEY (ANTARCTICA)
+        // --------------------------------------------------
+        else if (siteKey === "mcmurdo") {
+          updateTourStatus("3/5 Earth: McMurdo Dry Valleys (Flying to Site)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("mcmurdo", true);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle atmospheric dynamics overview (extra second: 4s) and turn off
+          updateTourStatus("3/5 McMurdo: Atmospheric Dynamics Overview (4s)");
+          const dynamicsCat = SCIENCE_CATEGORIES.find((c) => c.key === "dynamics");
+          if (dynamicsCat) {
+            state.openAccordionKey = "dynamics";
+            renderScienceAccordion();
+            toggleCategoryHUD(dynamicsCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle atmospheric dynamics overlay (linger for 1s after animation finishes)
+            updateTourStatus("3/5 Earth: Dynamics Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(dynamicsCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth atmospheric dynamics for extra second (2s)
+            updateTourStatus("3/5 Earth: Atmospheric Dynamics Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
+          }
+        }
+
+        // --------------------------------------------------
+        // 4. ARALKUM DESERT (CENTRAL ASIA)
+        // --------------------------------------------------
+        else if (siteKey === "aralkum") {
+          updateTourStatus("4/5 Earth: Aralkum Desert (Flying to Site)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("aralkum", true);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle atmospheric moisture overview (extra second: 4s) and turn off
+          updateTourStatus("4/5 Aralkum: Atmospheric Moisture Overview (4s)");
+          const moistureCat = SCIENCE_CATEGORIES.find((c) => c.key === "moisture");
+          if (moistureCat) {
+            state.openAccordionKey = "moisture";
+            renderScienceAccordion();
+            toggleCategoryHUD(moistureCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle atmospheric moisture overlay (linger for 1s after animation finishes)
+            updateTourStatus("4/5 Earth: Moisture Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(moistureCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth atmospheric moisture for extra second (2s)
+            updateTourStatus("4/5 Earth: Moisture Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
+          }
+        }
+
+        // --------------------------------------------------
+        // 5. SALAR DE UYUNI (BOLIVIA)
+        // --------------------------------------------------
+        else if (siteKey === "uyuni") {
+          updateTourStatus("5/5 Earth: Salar de Uyuni (Flying to Site)");
+          clearTourOverlayQuietly();
+          dismissHUD();
+          setIdleMotion(false);
+          selectSite("uyuni", true);
+
+          // Flight animation (3.5s) + half-second pause (500ms)
+          await tourDelay(4000);
+          if (!state.tourActive || tourCancellation) break;
+
+          // Toggle radiation overview (extra second: 4s) and turn off
+          updateTourStatus("5/5 Salar de Uyuni: Radiation Overview (4s)");
+          const radiationCat = SCIENCE_CATEGORIES.find((c) => c.key === "radiation");
+          if (radiationCat) {
+            state.openAccordionKey = "radiation";
+            renderScienceAccordion();
+            toggleCategoryHUD(radiationCat);
+            await tourDelay(4000);
+            if (!state.tourActive || tourCancellation) break;
+
+            dismissHUD();
+            await tourDelay(300);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Toggle radiation overlay (linger for 1s after animation finishes)
+            updateTourStatus("5/5 Earth: Radiation Overlay Zoom-Out (Linger 1s)");
+            toggleCategoryOverlay(radiationCat);
+            // Zoom out animation (2.5s) + linger 1s after animation
+            await tourDelay(3500);
+            if (!state.tourActive || tourCancellation) break;
+
+            // Turn idle mode on earth radiation for extra second (2s)
+            updateTourStatus("5/5 Earth: Radiation Idle Orbit (2s)");
+            setIdleMotion(true);
+            await tourDelay(2000);
+            setIdleMotion(false);
+
+            // Cut return animation short: turn off overlay quietly without going back to surface
+            clearTourOverlayQuietly();
+          }
+
+          if (!state.tourActive || tourCancellation) break;
+
+          // Final Earth Idle without overlay (extra second: 2s)
+          updateTourStatus("Earth: Final Idle Orbit Without Overlay (2s)");
+          setIdleMotion(true);
+          await tourDelay(2000);
+          setIdleMotion(false);
+        }
       }
 
       if (state.tourActive && !tourCancellation) {
         updateTourStatus("Tour Completed Successfully");
-        if (tourProgressBarFill) tourProgressBarFill.style.width = "100%";
-        stopTour(false);
+        stopTour();
       }
     } catch (err) {
       console.error("Tour sequence error:", err);
@@ -2972,32 +2731,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Tour Preset Buttons: 30s Demo, 1m Standard, 5m Comprehensive
-  [btnTourPreset30s, btnTourPreset1m, btnTourPreset5m].forEach(btn => {
-    if (btn) {
-      btn.addEventListener("click", () => {
-        const presetKey = btn.getAttribute("data-preset") || "1m";
-        state.activeTourPreset = presetKey;
-        setActiveTourPresetHighlight(presetKey, true);
-        if (state.tourActive) {
-          stopTour(false);
-        }
-        setTimeout(() => {
-          startOrResumeTour(0);
-        }, 50);
-      });
-    }
-  });
-
   if (btnTourPlay) {
     btnTourPlay.addEventListener("click", () => {
+      // If clicked while tour is active or started (showing "End Tour"), immediately stop the tour!
       if (state.tourActive || (btnTourPlay.innerText && btnTourPlay.innerText.includes("End Tour"))) {
         stopTour();
       } else {
-        if (!state.activeTourPreset) {
-          state.activeTourPreset = "1m";
-        }
-        setActiveTourPresetHighlight(state.activeTourPreset, true);
         startOrResumeTour(0);
       }
     });
@@ -3008,33 +2747,35 @@ document.addEventListener("DOMContentLoaded", () => {
       if (state.tourActive) {
         pauseTour();
       } else {
-        setActiveTourPresetHighlight(state.activeTourPreset || "1m", true);
-        startOrResumeTour(state.tourStopIndex || 0);
+        startOrResumeTour(state.tourIndex || 0);
       }
     });
   }
 
   if (btnTourNext) {
     btnTourNext.addEventListener("click", () => {
-      const presetKey = state.activeTourPreset || "1m";
-      const presetConfig = TOUR_PRESET_CONFIGS[presetKey] || TOUR_PRESET_CONFIGS["1m"];
-      const stops = presetConfig.stops || [];
-      if (stops.length === 0) return;
-      const nextIdx = (state.tourStopIndex + 1) % stops.length;
+      const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+      const nextIdx = (state.tourIndex + 1) % siteKeys.length;
       startOrResumeTour(nextIdx);
     });
   }
 
   if (btnTourPrev) {
     btnTourPrev.addEventListener("click", () => {
-      const presetKey = state.activeTourPreset || "1m";
-      const presetConfig = TOUR_PRESET_CONFIGS[presetKey] || TOUR_PRESET_CONFIGS["1m"];
-      const stops = presetConfig.stops || [];
-      if (stops.length === 0) return;
-      const prevIdx = (state.tourStopIndex - 1 + stops.length) % stops.length;
+      const siteKeys = ["mars_gale", "lut", "mcmurdo", "aralkum", "uyuni"];
+      const prevIdx = (state.tourIndex - 1 + siteKeys.length) % siteKeys.length;
       startOrResumeTour(prevIdx);
     });
   }
+
+  if (selTourSpeed) {
+    selTourSpeed.addEventListener("change", (e) => {
+      state.tourSpeed = parseFloat(e.target.value) || 1.0;
+    });
+  }
+
+  // ----------------------------------------------------
+  
 
   // ----------------------------------------------------
   // 11. Tools Menu & Settings Modals

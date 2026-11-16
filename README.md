@@ -141,12 +141,16 @@ TerraMatch: OpenSpace Mars-Earth Analogs Package
 - Orbitally legible `RenderableLabel` billboard typography attached via `GlobeTranslation`.
 - Independent toggles for continuous spatial vector overlays across all 5 planetary science categories.
 
-### 5. Automated Cinematic Tour Profiles & Planetarium Presets
-- **30-Second Planetarium Demo (`⏱️ 30s Demo`)**: Rapid, high-impact overview curated specifically for planetarium submissions, capturing the full product scope across 5 punchy 6-second stops (Mars REMS Baseline -> MCDM Decision Matrix & Gemini Optimizer -> McMurdo Cryosphere -> Lut Yardangs Side View -> Global SoilGrids Astrobiology Query).
-- **1-Minute Standard Overview (`⏱️ 1m Standard`)**: Default tour profile featuring 6 balanced 10-second stops covering Mars Gale Crater, MCDM weights, all 4 Earth desert analogs, and live SoilGrids regolith scoring.
-- **5-Minute Comprehensive Presentation (`⏱️ 5m Comprehensive`)**: Exhaustive 6-stop × 50-second planetarium presentation with deep scientific narration, geological stratigraphy, REMS diurnal cycles, katabatic wind geomorphology, and real-time habitability metrics.
-- **Persistent Selection & Playback Integration**: Clicking `▶ Start Tour` without prior selection defaults to the 1-Minute tour; chosen tour preset buttons remain highlighted throughout tour execution.
-- Global OpenSpace hotkeys:
+### 5. Automated Cinematic Camera Tour
+- **Sequential Multi-Planetary Flythrough**:
+  - Full automated cinematic sequence traversing Mars (Gale Crater) and all four Earth desert analogs (Lut, McMurdo, Aralkum, Salar de Uyuni).
+  - Orchestrates category overview disclosures, continuous planetary overlays, and idle motion orbits with smooth camera transitions.
+- **Playback & Speed Controls**:
+  - **`▶ Start Tour` / `⏹ End Tour`**: Launch or immediately stop the automated cinematic sequence.
+  - **`⏸ Pause` / `▶ Play`**: Pause and resume tour sequence seamlessly.
+  - **`⏮ Prev` / `⏭ Next`**: Step through analog destinations manually.
+  - **Speed Dropdown**: Adjustable playback speeds (`0.5x`, `1.0x`, `1.5x`, `2.0x`).
+- **Global OpenSpace hotkeys**:
   * `Ctrl+Alt+M`: Mars Gale Crater
   * `Ctrl+Alt+1`: Earth Aralkum Desert
   * `Ctrl+Alt+2`: Earth McMurdo Dry Valleys
@@ -264,7 +268,7 @@ Attribution is embedded directly into the core telemetry metadata objects in bot
   "engine": "Google Gemini API (Gemini 2.5 Flash, Gemini 2.0 Flash, Gemini 1.5 Flash)",
   "components_assisted": [
     "Site descriptive climatology blurbs and analog synthesis (drawer-about modal)",
-    "Automated multi-planetary flythrough tour narratives and duration scripting (30s, 1m, 5m presets)",
+    "Automated multi-planetary flythrough tour narratives and camera choreography",
     "Multi-Criteria Decision Matrix mission profile optimization (deduction of category weights, scientific drivers, and NASA literature references)",
     "ISRIC SoilGrids live query astrobiology & habitability narrative interpretation relative to MSL Curiosity Gale Crater baselines"
   ],

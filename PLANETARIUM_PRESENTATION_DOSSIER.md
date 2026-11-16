@@ -145,20 +145,13 @@ Designed for a live presenter operating OpenSpace in front of dome patrons or re
 
 ---
 
-## ⏱️ Automated Planetarium Demo Presets (30s, 1m, 5m)
+## 🎬 Automated Planetarium Flythrough Tour
 
-For planetarium jury submissions, auditorium demos, and dome shows, the automated tour system provides three dedicated profiles with persistent visual highlighting and synchronized telemetry:
+The automated tour system provides an unattended, synchronized multi-planetary sweep across Mars and all four Earth desert analogs:
 
-| Preset Profile | Total Time | Stop Count & Pacing | Purpose & Scope Captured |
-| :--- | :---: | :---: | :--- |
-| **⏱️ 30s Demo** | **30 sec** | **5 stops × 6.0s** | **Planetarium Submission Demo**: Rapid, high-impact demonstration capturing the complete scope of the asset in exactly 30 seconds (Mars REMS Baseline -> MCDM Decision Matrix -> McMurdo Cryosphere -> Lut Side View -> Global SoilGrids Astrobiology Query). |
-| **⏱️ 1m Standard** | **60 sec** | **6 stops × 10.0s** | **Standard Auditorium Tour**: Default playback option when clicking `▶ Start Tour`. Covers Mars, Decision Matrix, McMurdo, Lut, Aralkum/Uyuni, and Global Astrobiology Query with balanced scientific narration. |
-| **⏱️ 5m Comprehensive** | **300 sec** | **6 stops × 50.0s** | **Full Planetarium Dome Presentation**: Deep scientific exploration with detailed geological stratigraphy, REMS diurnal cycles, MCDM weighting mechanics, katabatic wind geomorphology, and real-time habitability metrics. |
-
-### Tour Playback Choreography & Persistent Highlighting:
-1. **Default Tour**: Clicking `▶ Start Tour` without selecting a button defaults to `⏱️ 1m Standard` and highlights it automatically.
-2. **Persistent Highlight**: The selected preset button (`30s Demo`, `1m Standard`, or `5m Comprehensive`) remains highlighted with an active glowing border until the end of the tour while running.
-3. **Integrated Stop Navigation**: Standard controls (`▶ Start Tour` / `⏹ End Tour`, `⏸ Pause` / `▶ Play`, `⏮ Prev`, `⏭ Next`) operate seamlessly across all preset configurations.
+- **Traverse Sequence**: Mars Gale Crater (thermal conditions overview & continuous overlay) → Earth Lut Desert (dynamics overview, surface wind speed overlay, idle orbit) → McMurdo Dry Valleys (cryogenic habitability) → Aralkum Desert (atmospheric moisture & relative humidity) → Salar de Uyuni (UV radiation column & concluding survey).
+- **Playback Controls**: Immediate play (`▶ Start Tour`), stop (`⏹ End Tour`), pause/resume (`⏸ Pause` / `▶ Play`), and manual step controls (`⏮ Prev` / `⏭ Next`).
+- **Speed Multiplier**: Adjustable playback speed dropdown (`0.5x`, `1.0x`, `1.5x`, `2.0x`) matching live planetarium presentation pacing.
 
 ---
 
@@ -181,7 +174,7 @@ The **InterSESHllar** system acknowledges the integration of **Synthetic Intelli
 
 1. **Descriptive UI Text Attribution**:
    - **Analog Climatology Blurbs** (`#drawer-about`): Acknowledges Gemini API synthesis of 10-year NASA POWER records.
-   - **Automated Flythrough Tour Narrations** (`#tour-narration-card`): Acknowledges generative multi-stop cinematic scripting across all 3 tour presets (30s, 1m, 5m).
+   - **Automated Flythrough Tour Narratives**: Acknowledges generative multi-stop cinematic scripting.
    - **Astrobiology & Habitability Synthesis** (`#astro-query-results`): Acknowledges AI interpretation of ISRIC SoilGrids 0–5 cm regolith properties.
    - **Decision Matrix Mission Optimizer** (`#optimizer-rationale-box`): Acknowledges AI deduction of category weights and scientific reasoning.
 

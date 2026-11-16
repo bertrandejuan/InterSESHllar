@@ -238,50 +238,31 @@ All similarity scores in TerraMatch are governed by the rigorous **Distance-Base
 
 ## 🎬 8. Automated Planetary Flythrough Tours & Planetarium Presets
 
-Open the tour drawer by clicking **`🎬 Tour`** in the bottom-right navigation dock. The tour controls feature three dedicated presets designed for demonstrations, audience presentations, and full planetarium dome shows:
+Open the tour drawer by clicking **`🎬 Tour`** in the bottom-right navigation dock. The automated cinematic tour provides an unattended, synchronized sweep across Mars and all four Earth desert analogs:
 
 ```
 ┌────────────────────────────────────────────────────────┐
 │  Automated Planetary Flythrough Tour                   │
 │  [ ▶ Start Tour ] [ ⏸ Pause ] [ ⏮ Prev ] [ ⏭ Next ]   │
-│                                                        │
-│  Tours:                                                │
-│  [ ⏱️ 30s Demo ]  [ ⏱️ 1m Standard ]  [ ⏱️ 5m Comprehensive ]│
+│  [ Speed: 1.0x ▾ ]                                     │
 │                                                        │
 │  Tour Phase: Ready to start                            │
-│  [=====================                     ] 45%      │
-│                                                        │
-│  Stop 1/5 (30s Tour): Mars Gale Crater & REMS Baseline │
-│  [-54.2°C Temp]   [0.76 kPa Pressure]   [MSL REMS]     │
-│  MSL Curiosity REMS ground truth: -54.2°C mean...      │
 └────────────────────────────────────────────────────────┘
 ```
 
-### A. Preset Profiles
-1. **⏱️ 30s Demo (Planetarium Submission Demo)**:
-   - **Total Duration**: Exactly 30 seconds (5 stops × 6.0 seconds each).
-   - Specifically curated to convey the full breadth and technological scope of the product in a 30-second submission:
-     * **Stop 1**: Mars Gale Crater & REMS in-situ ground truth baseline (-54.2°C, 0.76 kPa).
-     * **Stop 2**: Multi-Criteria Decision Matrix & Gemini AI Mission Archetype Optimizer.
-     * **Stop 3**: Interplanetary flight to McMurdo Dry Valleys, Antarctica (cryogenic hyper-arid proving ground).
-     * **Stop 4**: Lut Desert calibrated surface-tangent Side View at 1,800m altitude (Kalut yardang wind corridors, 70.7°C skin heat).
-     * **Stop 5**: Global Earth Astrobiology Query Engine (live 250m SoilGrids regolith telemetry & habitability scoring).
-2. **⏱️ 1m Standard (Balanced Presentation Overview)**:
-   - **Total Duration**: 60 seconds (6 stops × 10.0 seconds each).
-   - Default tour profile when clicking `▶ Start Tour` without a prior button selection.
-   - Balanced pacing across Mars Gale Crater, Decision Matrix mechanics, McMurdo Dry Valleys, Lut Desert tangent side view, Aralkum/Uyuni desiccation analogs, and global SoilGrids sampling.
-3. **⏱️ 5m Comprehensive (Full Planetarium Presentation)**:
-   - **Total Duration**: 300 seconds (6 stops × 50.0 seconds each).
-   - In-depth planetarium dome presentation with exhaustive scientific narration on geological stratigraphy, REMS diurnal cycles, MCDM weighting mechanics, katabatic wind geomorphology, evaporite salt mineralogy, and soil science astrobiology.
+### A. Tour Sequence Choreography
+The automated tour executes a multi-planetary sequence:
+1. **Mars: Gale Crater**: Drops into northern Aeolis Palus, lingers at the crater floor, expands the Thermal Conditions overview card, and activates the thermal continuous data overlay with a smooth orbital zoom-out.
+2. **Earth: Lut Desert**: Interplanetary transit to Iran's Lut Desert, expands the Atmospheric Dynamics overview, activates the surface wind speed overlay, and engages idle motion orbit.
+3. **Earth: McMurdo Dry Valleys**: Flies across the Southern Ocean to Antarctica's Taylor Valley, inspecting cryogenic habitability and mineralogy telemetry.
+4. **Earth: Aralkum Desert**: Approaches the desiccated Aral Sea basin, displaying atmospheric moisture metrics and relative humidity overlays.
+5. **Earth: Salar de Uyuni**: Climbs onto the high-altitude Bolivian Altiplano, evaluating UV index and solar irradiance overlays before concluding with an orbital survey.
 
-### B. Controls & Persistent Highlighting
-- **Auto-Selection**: Clicking `▶ Start Tour` without selecting a button defaults to `⏱️ 1m Standard` and highlights it automatically.
-- **Persistent Highlighting**: Whichever tour preset is selected remains highlighted with an active glowing cyan/emerald border throughout tour execution until completion or manual cancellation.
-- **Playback Controls**:
-  * `▶ Start Tour` / `⏹ End Tour`: Toggles the tour sequence.
-  * `⏸ Pause` / `▶ Play`: Pauses the timer and camera movement without clearing the selected preset highlight.
-  * `⏮ Prev` / `⏭ Next`: Steps backward or forward between stops within the active tour preset.
-- **Live Dossier Card**: Displays live stop titles, key metrics pills, and scientific narration synchronized with OpenSpace camera flight.
+### B. Controls & Playback Speed
+- **`▶ Start Tour` / `⏹ End Tour`**: Launches the automated cinematic camera path; clicking while active immediately ends the sequence and restores manual camera control.
+- **`⏸ Pause` / `▶ Play`**: Pauses and resumes the tour timers and animations.
+- **`⏮ Prev` / `⏭ Next`**: Skips backward or forward between analog destinations.
+- **Playback Speed**: Adjust the speed dropdown (`0.5x`, `1.0x`, `1.5x`, `2.0x`) to fit the timing requirements of live presentations.
 
 ---
 

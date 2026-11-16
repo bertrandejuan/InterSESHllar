@@ -227,16 +227,18 @@ async function querySoilGridsAstrobiology(lat, lon) {
 }
 ```
 
-### E. Multi-Preset Tour Flythrough Engine & Live Camera Sync (`app.js:2130–2570`)
-Orchestrates automated camera choreography across three distinct preset durations with persistent UI highlighting:
+### E. Automated Camera Tour Flythrough Engine & Live Camera Sync (`app.js:2330–2760`)
+Orchestrates automated camera choreography across Mars and Earth analogs with speed multiplier control:
 ```javascript
-const TOUR_PRESET_CONFIGS = {
-  "30s": { label: "30-Second Planetarium Demo", totalDuration: 30, stops: [ /* 5 stops x 6s */ ] },
-  "1m":  { label: "1-Minute Standard Overview Tour", totalDuration: 60, stops: [ /* 6 stops x 10s */ ] },
-  "5m":  { label: "5-Minute Comprehensive Presentation", totalDuration: 300, stops: [ /* 6 stops x 50s */ ] }
-};
+function tourDelay(ms) {
+  return new Promise((resolve) => {
+    const speed = state.tourSpeed || 1.0;
+    const adjustedMs = Math.max(100, Math.round(ms / speed));
+    state.tourTimer = setTimeout(resolve, adjustedMs);
+  });
+}
 ```
-- **Persistent Preset Highlighting**: The chosen preset button remains highlighted (`.active`) throughout execution, pulsing (`.running`) while the tour is actively progressing. Defaulting to `1m` if `▶ Start Tour` is triggered without a preset.
+- **Playback & Speed Multiplier**: Supports real-time speed adjustments (`0.5x`, `1.0x`, `1.5x`, `2.0x`), pause/resume, and destination skipping (`⏮ Prev` / `⏭ Next`).
 - **Live Camera Position Query (`📍 Active Site`)**: Invokes `openspace.globebrowsing.geoPositionForCamera()` via WebSocket Lua to directly extract camera latitude, longitude, and altitude matching OpenSpace's top-left HUD (`Position: <lat>, <lon>`), staging coordinates for instant query.
 - **Automated Flight on Query**: `🔬 Query SoilGrids Telemetry` executes `openSpace.flyToGeo("Earth", lat, lon, 250000.0, 2.5)` directly upon query execution.
 
