@@ -214,7 +214,7 @@ def build_rows_data(weights=None):
 
     return analogs, rows, norm_w, top_site
 
-def generate_comparison_matrix_card(weights=None):
+def generate_comparison_matrix_card(weights=None, out_filename="hud_comparison_matrix.png", title_override=None, subtitle_override=None, badge_title_override=None):
     analogs, rows_data, norm_w, top_site = build_rows_data(weights)
 
     img = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
@@ -229,8 +229,9 @@ def generate_comparison_matrix_card(weights=None):
     draw.line([20, 115, WIDTH - 20, 115], fill=(56, 189, 248, 255), width=3)
 
     is_custom = any(abs(v - 0.2) > 0.01 for v in norm_w.values())
-    title_text = "Customized Decision Matrix: Earth to Mars" if is_custom else "Earth to Mars Comparison Matrix"
-    sub_text = "Multi-Criteria Decision Evaluation (Relative to Curiosity Gale Crater Baseline)"
+    default_title = "Customized Decision Matrix: Earth to Mars" if is_custom else "Earth to Mars Comparison Matrix"
+    title_text = title_override if title_override else default_title
+    sub_text = subtitle_override if subtitle_override else "Multi-Criteria Decision Evaluation (Relative to Curiosity Gale Crater Baseline)"
     draw.text((45, 34), title_text, font=FONT_TITLE, fill=(255, 255, 255, 255))
     draw.text((45, 80), sub_text, font=FONT_SUBTITLE, fill=(160, 185, 220, 255))
 
@@ -241,7 +242,8 @@ def generate_comparison_matrix_card(weights=None):
     badge_y = 28
     draw.rounded_rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], radius=12,
                            fill=(18, 32, 60, 255), outline=(56, 189, 248, 255), width=2)
-    badge_title = "WEIGHTED DECISION MATRIX" if is_custom else "PLANETARY ANALOG SYNTHESIS"
+    default_badge_title = "WEIGHTED DECISION MATRIX" if is_custom else "PLANETARY ANALOG SYNTHESIS"
+    badge_title = badge_title_override if badge_title_override else default_badge_title
     draw.text((badge_x + 20, badge_y + 12), badge_title, font=FONT_BADGE_TITLE, fill=(140, 200, 255, 255))
     draw.text((badge_x + 20, badge_y + 34), f"WINNER: {top_site.upper()}", font=FONT_BADGE_VAL, fill=(255, 255, 255, 255))
 
@@ -346,41 +348,130 @@ def generate_comparison_matrix_card(weights=None):
     footer_text = "NASA POWER 10-Year In-Situ Daily Archive (2015-2025) & MSL Curiosity Rover REMS / CheMin Ground Truth | S = 100 · exp(-|Δ| / σ)"
     draw.text((45, HEIGHT - 42), footer_text, font=FONT_FOOTER, fill=(140, 165, 200, 255))
 
-    out_file = "hud_comparison_matrix.png"
+    out_file = out_filename
     for d in OUTPUT_DIRS:
         os.makedirs(d, exist_ok=True)
         out_path = os.path.join(d, out_file)
         img.save(out_path, "PNG")
         print(f"Generated Comparison Matrix HUD: {out_path}")
 
+PRESETS_CONFIG = {
+    'balanced': {
+        'weights': {'thermal': 20.0, 'astrobiology': 20.0, 'dynamics': 20.0, 'moisture': 20.0, 'radiation': 20.0},
+        'title': "Earth to Mars Comparison Matrix",
+        'badge': "PLANETARY ANALOG SYNTHESIS",
+        'filename': "hud_comparison_matrix_balanced.png"
+    },
+    'biosignature': {
+        'weights': {'thermal': 15.0, 'astrobiology': 50.0, 'dynamics': 5.0, 'moisture': 20.0, 'radiation': 10.0},
+        'title': "Mission Profile: Biosignature Search",
+        'badge': "FOCUS: ASTROBIOLOGY & MUDSTONES",
+        'filename': "hud_comparison_matrix_biosignature.png"
+    },
+    'traverse': {
+        'weights': {'thermal': 25.0, 'astrobiology': 5.0, 'dynamics': 45.0, 'moisture': 15.0, 'radiation': 10.0},
+        'title': "Mission Profile: Rover Traverse & Dust",
+        'badge': "FOCUS: DYNAMICS & SURFACE WINDS",
+        'filename': "hud_comparison_matrix_traverse.png"
+    },
+    'drone': {
+        'weights': {'thermal': 15.0, 'astrobiology': 5.0, 'dynamics': 35.0, 'moisture': 10.0, 'radiation': 35.0},
+        'title': "Mission Profile: Solar Aerial Flight",
+        'badge': "FOCUS: SOLAR IRRADIANCE & DYNAMICS",
+        'filename': "hud_comparison_matrix_drone.png"
+    },
+    'cryo': {
+        'weights': {'thermal': 45.0, 'astrobiology': 5.0, 'dynamics': 10.0, 'moisture': 30.0, 'radiation': 10.0},
+        'title': "Mission Profile: Polar Ice Core & Cryo",
+        'badge': "FOCUS: CRYOGENIC THERMAL SWINGS",
+        'filename': "hud_comparison_matrix_cryo.png"
+    },
+    'isru': {
+        'weights': {'thermal': 15.0, 'astrobiology': 20.0, 'dynamics': 10.0, 'moisture': 50.0, 'radiation': 5.0},
+        'title': "Mission Profile: Water Vapor & Evaporites",
+        'badge': "FOCUS: ATMOSPHERIC MOISTURE & ISRU",
+        'filename': "hud_comparison_matrix_isru.png"
+    },
+    'thermal': {
+        'weights': {'thermal': 50.0, 'astrobiology': 12.0, 'dynamics': 13.0, 'moisture': 12.0, 'radiation': 13.0},
+        'title': "Decision Matrix: Thermal Conditions Focus",
+        'badge': "DOMINANT: THERMAL REGIME",
+        'filename': "hud_comparison_matrix_thermal.png"
+    },
+    'astrobiology': {
+        'weights': {'thermal': 12.0, 'astrobiology': 50.0, 'dynamics': 13.0, 'moisture': 12.0, 'radiation': 13.0},
+        'title': "Decision Matrix: Astrobiology Focus",
+        'badge': "DOMINANT: REGOLITH & ORGANICS",
+        'filename': "hud_comparison_matrix_astrobiology.png"
+    },
+    'dynamics': {
+        'weights': {'thermal': 13.0, 'astrobiology': 12.0, 'dynamics': 50.0, 'moisture': 12.0, 'radiation': 13.0},
+        'title': "Decision Matrix: Atmospheric Dynamics Focus",
+        'badge': "DOMINANT: WINDS & PRESSURE",
+        'filename': "hud_comparison_matrix_dynamics.png"
+    },
+    'moisture': {
+        'weights': {'thermal': 13.0, 'astrobiology': 12.0, 'dynamics': 12.0, 'moisture': 50.0, 'radiation': 13.0},
+        'title': "Decision Matrix: Moisture & Aridity Focus",
+        'badge': "DOMINANT: RELATIVE HUMIDITY",
+        'filename': "hud_comparison_matrix_moisture.png"
+    },
+    'radiation': {
+        'weights': {'thermal': 13.0, 'astrobiology': 12.0, 'dynamics': 12.0, 'moisture': 13.0, 'radiation': 50.0},
+        'title': "Decision Matrix: Solar & UV Radiation Focus",
+        'badge': "DOMINANT: UV & SHORTWAVE FLUX",
+        'filename': "hud_comparison_matrix_radiation.png"
+    }
+}
+
+def generate_all_presets():
+    print("Generating all Comparison Matrix HUD variations...")
+    # 1. Base default
+    generate_comparison_matrix_card(weights=None, out_filename="hud_comparison_matrix.png")
+    # 2. All presets and domain focus cards
+    for p_key, p_cfg in PRESETS_CONFIG.items():
+        generate_comparison_matrix_card(
+            weights=p_cfg['weights'],
+            out_filename=p_cfg['filename'],
+            title_override=p_cfg['title'],
+            badge_title_override=p_cfg['badge']
+        )
+    print("All HUD variations generated successfully!")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate Earth to Mars Decision Matrix HUD")
     parser.add_argument("--weights", type=str, default=None,
                         help="Comma-separated weights (thermal,astrobiology,dynamics,moisture,radiation)")
     parser.add_argument("--preset", type=str, default=None,
-                        choices=["balanced", "astrobiology", "dynamics", "radiation", "cryo"],
                         help="Pre-configured mission weighting preset")
+    parser.add_argument("--out_filename", type=str, default="hud_comparison_matrix.png",
+                        help="Output image filename")
+    parser.add_argument("--generate_all", action="store_true",
+                        help="Generate all presets and variations")
     args = parser.parse_args()
 
-    weights = None
-    if args.preset:
-        presets = {
-            'balanced': {'thermal': 20.0, 'astrobiology': 20.0, 'dynamics': 20.0, 'moisture': 20.0, 'radiation': 20.0},
-            'astrobiology': {'thermal': 15.0, 'astrobiology': 50.0, 'dynamics': 5.0, 'moisture': 20.0, 'radiation': 10.0},
-            'dynamics': {'thermal': 25.0, 'astrobiology': 5.0, 'dynamics': 45.0, 'moisture': 15.0, 'radiation': 10.0},
-            'radiation': {'thermal': 30.0, 'astrobiology': 5.0, 'dynamics': 5.0, 'moisture': 15.0, 'radiation': 45.0},
-            'cryo': {'thermal': 45.0, 'astrobiology': 5.0, 'dynamics': 10.0, 'moisture': 30.0, 'radiation': 10.0}
-        }
-        weights = presets.get(args.preset)
-    elif args.weights:
-        parts = [float(x.strip()) for x in args.weights.split(",")]
-        if len(parts) == 5:
-            weights = {
-                'thermal': parts[0],
-                'astrobiology': parts[1],
-                'dynamics': parts[2],
-                'moisture': parts[3],
-                'radiation': parts[4]
-            }
-
-    generate_comparison_matrix_card(weights)
+    if args.generate_all:
+        generate_all_presets()
+    else:
+        weights = None
+        title = None
+        badge = None
+        out_fn = args.out_filename
+        if args.preset and args.preset in PRESETS_CONFIG:
+            cfg = PRESETS_CONFIG[args.preset]
+            weights = cfg['weights']
+            title = cfg['title']
+            badge = cfg['badge']
+            if out_fn == "hud_comparison_matrix.png":
+                out_fn = cfg['filename']
+        elif args.weights:
+            parts = [float(x.strip()) for x in args.weights.split(",")]
+            if len(parts) == 5:
+                weights = {
+                    'thermal': parts[0],
+                    'astrobiology': parts[1],
+                    'dynamics': parts[2],
+                    'moisture': parts[3],
+                    'radiation': parts[4]
+                }
+        generate_comparison_matrix_card(weights, out_filename=out_fn, title_override=title, badge_title_override=badge)

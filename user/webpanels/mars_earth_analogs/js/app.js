@@ -80,16 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnLocationHUDText = document.getElementById("btn-location-hud-text");
   const btnToggleComparisonMatrix = document.getElementById("btn-toggle-comparison-matrix");
   const drawerComparisonMatrix = document.getElementById("drawer-comparison-matrix");
-  const btnToggleMatrixHUD = document.getElementById("btn-toggle-matrix-hud");
   const matrixBalanceBadge = document.getElementById("matrix-balance-badge");
   const matrixBalanceText = document.getElementById("matrix-balance-text");
-  const matrixBalanceStatus = document.getElementById("matrix-balance-status");
   const inputMissionGoal = document.getElementById("input-mission-goal");
   const btnRunOptimizer = document.getElementById("btn-run-optimizer");
   const optimizerRationaleBox = document.getElementById("optimizer-rationale-box");
   const decisionMatrixTbody = document.getElementById("decision-matrix-tbody");
-  const matrixLeaderboardGrid = document.getElementById("matrix-leaderboard-grid");
-  const mcdmFormulaLive = document.getElementById("mcdm-formula-live");
 
   // DOM Elements - One Accordion Container
   const scienceAccordion = document.getElementById("science-accordion");
@@ -833,14 +829,18 @@ document.addEventListener("DOMContentLoaded", () => {
       btnModalComparisonHUD.setAttribute("aria-pressed", isOverviewActive ? "true" : "false");
     }
 
-    if (btnComparisonMatrixHUD) {
-      const isMatrixHUD = state.activeHUD === "hud_comparison_matrix.png";
+    if (btnToggleComparisonMatrix) {
+      const isDrawerOpen = drawerComparisonMatrix && drawerComparisonMatrix.style.display === "flex";
       const textSpan = document.getElementById("btn-comparison-matrix-text");
+      const arrow = btnToggleComparisonMatrix.querySelector(".matrix-dropdown-arrow");
       if (textSpan) {
-        textSpan.innerText = isMatrixHUD ? "Hide Matrix" : "Comparison Matrix";
+        textSpan.innerText = isDrawerOpen ? "Close Comparison Matrix" : "Comparison Matrix";
       }
-      btnComparisonMatrixHUD.classList.toggle("active", Boolean(isMatrixHUD));
-      btnComparisonMatrixHUD.setAttribute("aria-pressed", isMatrixHUD ? "true" : "false");
+      if (arrow) {
+        arrow.textContent = isDrawerOpen ? "▴" : "▾";
+      }
+      btnToggleComparisonMatrix.classList.toggle("active", Boolean(isDrawerOpen));
+      btnToggleComparisonMatrix.setAttribute("aria-expanded", isDrawerOpen ? "true" : "false");
     }
 
     if (modalHudNotice && modalTableContent) {
@@ -1390,35 +1390,27 @@ document.addEventListener("DOMContentLoaded", () => {
     btnToggleComparisonMatrix.addEventListener("click", (e) => {
       e.stopPropagation();
       const isOpen = drawerComparisonMatrix && drawerComparisonMatrix.style.display === "flex";
-      if (drawerComparisonMatrix) {
-        drawerComparisonMatrix.style.display = isOpen ? "none" : "flex";
-      }
-      btnToggleComparisonMatrix.classList.toggle("active", !isOpen);
-      btnToggleComparisonMatrix.setAttribute("aria-expanded", !isOpen ? "true" : "false");
-      const arrow = btnToggleComparisonMatrix.querySelector(".matrix-dropdown-arrow");
-      if (arrow) arrow.textContent = !isOpen ? "▴" : "▾";
-
-      if (!isOpen) {
-        renderDecisionMatrix();
-        const matrixTexture = "hud_comparison_matrix.png";
-        if (state.activeHUD !== matrixTexture) {
-          showHUDTexture(matrixTexture);
-          if (btnToggleMatrixHUD) btnToggleMatrixHUD.classList.add("active");
-        }
-      }
-    });
-  }
-
-  if (btnToggleMatrixHUD) {
-    btnToggleMatrixHUD.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const matrixTexture = "hud_comparison_matrix.png";
-      if (state.activeHUD === matrixTexture) {
+      if (isOpen) {
+        // Close Comparison Matrix drawer & dismiss 3D Viewport HUD
+        if (drawerComparisonMatrix) drawerComparisonMatrix.style.display = "none";
+        btnToggleComparisonMatrix.classList.remove("active");
+        btnToggleComparisonMatrix.setAttribute("aria-expanded", "false");
+        const textSpan = document.getElementById("btn-comparison-matrix-text");
+        if (textSpan) textSpan.innerText = "Comparison Matrix";
+        const arrow = btnToggleComparisonMatrix.querySelector(".matrix-dropdown-arrow");
+        if (arrow) arrow.textContent = "▾";
         dismissHUD();
-        btnToggleMatrixHUD.classList.remove("active");
       } else {
-        showHUDTexture(matrixTexture);
-        btnToggleMatrixHUD.classList.add("active");
+        // Open Comparison Matrix drawer & display synchronized 3D Viewport HUD
+        if (drawerComparisonMatrix) drawerComparisonMatrix.style.display = "flex";
+        btnToggleComparisonMatrix.classList.add("active");
+        btnToggleComparisonMatrix.setAttribute("aria-expanded", "true");
+        const textSpan = document.getElementById("btn-comparison-matrix-text");
+        if (textSpan) textSpan.innerText = "Close Comparison Matrix";
+        const arrow = btnToggleComparisonMatrix.querySelector(".matrix-dropdown-arrow");
+        if (arrow) arrow.textContent = "▴";
+        renderDecisionMatrix();
+        updateMatrixViewportHUD();
       }
     });
   }
@@ -2381,18 +2373,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const MISSION_PRESETS = {
     balanced: { thermal: 20, astrobiology: 20, dynamics: 20, moisture: 20, radiation: 20 },
-    astrobiology: { thermal: 15, astrobiology: 50, dynamics: 5, moisture: 20, radiation: 10 },
-    dynamics: { thermal: 25, astrobiology: 5, dynamics: 45, moisture: 15, radiation: 10 },
-    radiation: { thermal: 30, astrobiology: 5, dynamics: 5, moisture: 15, radiation: 45 },
-    cryo: { thermal: 45, astrobiology: 5, dynamics: 10, moisture: 30, radiation: 10 }
+    biosignature: { thermal: 15, astrobiology: 50, dynamics: 5, moisture: 20, radiation: 10 },
+    traverse: { thermal: 25, astrobiology: 5, dynamics: 45, moisture: 15, radiation: 10 },
+    drone: { thermal: 15, astrobiology: 5, dynamics: 35, moisture: 10, radiation: 35 },
+    cryo: { thermal: 45, astrobiology: 5, dynamics: 10, moisture: 30, radiation: 10 },
+    isru: { thermal: 15, astrobiology: 20, dynamics: 10, moisture: 50, radiation: 5 }
   };
+
+  const PRESET_TEXTURE_MAP = {
+    balanced: "hud_comparison_matrix_balanced.png",
+    biosignature: "hud_comparison_matrix_biosignature.png",
+    traverse: "hud_comparison_matrix_traverse.png",
+    drone: "hud_comparison_matrix_drone.png",
+    cryo: "hud_comparison_matrix_cryo.png",
+    isru: "hud_comparison_matrix_isru.png"
+  };
+
+  function updateMatrixViewportHUD(presetOverride = null) {
+    const isDrawerOpen = drawerComparisonMatrix && drawerComparisonMatrix.style.display === "flex";
+    const isMatrixHUDActive = state.activeHUD && state.activeHUD.startsWith("hud_comparison_matrix");
+    if (!isDrawerOpen && !isMatrixHUDActive) return;
+
+    let targetTexture = "hud_comparison_matrix.png";
+
+    if (presetOverride && PRESET_TEXTURE_MAP[presetOverride]) {
+      targetTexture = PRESET_TEXTURE_MAP[presetOverride];
+    } else {
+      const weights = state.categoryWeights || {};
+      const sorted = Object.entries(weights).sort((a, b) => b[1] - a[1]);
+      if (sorted.length > 0 && sorted[0][1] >= 35) {
+        const topCat = sorted[0][0];
+        const catTextureMap = {
+          thermal: "hud_comparison_matrix_thermal.png",
+          astrobiology: "hud_comparison_matrix_astrobiology.png",
+          dynamics: "hud_comparison_matrix_dynamics.png",
+          moisture: "hud_comparison_matrix_moisture.png",
+          radiation: "hud_comparison_matrix_radiation.png"
+        };
+        targetTexture = catTextureMap[topCat] || "hud_comparison_matrix_balanced.png";
+      } else {
+        targetTexture = "hud_comparison_matrix_balanced.png";
+      }
+    }
+
+    showHUDTexture(targetTexture);
+  }
 
   function computeAllSiteCategoryScores() {
     const mars = getMarsBaselineData();
     const siteScores = {};
 
     DECISION_MATRIX_SITES.forEach((s) => {
-      const siteData = window.PLANETARY_ANALOGS ? window.PLANETARY_ANALOGS[s.key] : null;
+      const siteData = window.TEAM_DATA ? window.TEAM_DATA[s.key] : null;
       if (!siteData) return;
       const m = siteData.metrics || {};
       const catScores = {};
@@ -2422,8 +2454,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------------------------------------
   let lastEditedCatKey = "thermal";
   let rebalanceTimerId = null;
-  let rebalanceCountdownIntervalId = null;
-  let rebalanceSecondsLeft = 10;
 
   function rebalanceWeightsAroundStationary(stationaryCatKey) {
     const cats = SCIENCE_CATEGORIES.map(c => c.key);
@@ -2485,51 +2515,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // Recalculate immediately in real time
     renderDecisionMatrix();
     updateActiveSiteScoreDisplay();
+    updateMatrixViewportHUD();
 
     // Check sum
     const totalSum = Object.values(state.categoryWeights).reduce((a, b) => a + b, 0);
 
-    // Clear active timers
+    // Clear active timer
     if (rebalanceTimerId) clearTimeout(rebalanceTimerId);
-    if (rebalanceCountdownIntervalId) clearInterval(rebalanceCountdownIntervalId);
 
     if (totalSum === 100) {
-      if (matrixBalanceStatus) {
-        matrixBalanceStatus.className = "status-balanced";
-        matrixBalanceStatus.textContent = "✓ Balanced";
-      }
       if (matrixBalanceBadge) matrixBalanceBadge.className = "matrix-balance-badge is-balanced";
       return;
     }
 
-    // Unbalanced: start 10s timer
-    rebalanceSecondsLeft = 10;
-    if (matrixBalanceStatus) {
-      matrixBalanceStatus.className = "status-unbalanced";
-      matrixBalanceStatus.textContent = `Auto-balancing in ${rebalanceSecondsLeft}s...`;
-    }
+    // Unbalanced: keep badge clean showing total percent without stressful timer countdown
+    // Silently rebalance in the backend after 10 seconds of user inactivity
     if (matrixBalanceBadge) matrixBalanceBadge.className = "matrix-balance-badge is-unbalanced";
 
-    rebalanceCountdownIntervalId = setInterval(() => {
-      rebalanceSecondsLeft--;
-      if (rebalanceSecondsLeft > 0) {
-        if (matrixBalanceStatus) {
-          matrixBalanceStatus.textContent = `Auto-balancing in ${rebalanceSecondsLeft}s...`;
-        }
-      } else {
-        clearInterval(rebalanceCountdownIntervalId);
-      }
-    }, 1000);
-
     rebalanceTimerId = setTimeout(() => {
-      clearInterval(rebalanceCountdownIntervalId);
       rebalanceWeightsAroundStationary(lastEditedCatKey);
       renderDecisionMatrix();
       updateActiveSiteScoreDisplay();
-      if (matrixBalanceStatus) {
-        matrixBalanceStatus.className = "status-balanced";
-        matrixBalanceStatus.textContent = "✓ Auto-balanced to 100%";
-      }
+      updateMatrixViewportHUD();
       if (matrixBalanceBadge) matrixBalanceBadge.className = "matrix-balance-badge is-balanced";
     }, 10000);
   }
@@ -2557,25 +2564,32 @@ document.addEventListener("DOMContentLoaded", () => {
       radiation: 20
     };
 
+    let matchedPreset = null;
+
     if (/bio|life|fossil|organ|microb|regolith|soil|clay|sam|chemin|strata|sediment|habitab/.test(query)) {
       scores.astrobiology += 55;
       scores.moisture += 15;
+      matchedPreset = "biosignature";
     }
     if (/rover|travers|drive|wheel|dust|storm|wind|dune|yardang|edl|landing|gust|pressure|aero/.test(query)) {
       scores.dynamics += 50;
       scores.thermal += 15;
+      matchedPreset = "traverse";
     }
     if (/drone|helicopter|aerial|flight|rotor|solar|photovolt|sun|insolation|uv|sky|energy/.test(query)) {
       scores.dynamics += 30;
       scores.radiation += 45;
+      matchedPreset = "drone";
     }
     if (/cryo|ice|cold|polar|frost|freez|drill|glacier|permafrost|winter|subsurface/.test(query)) {
       scores.thermal += 45;
       scores.moisture += 25;
+      matchedPreset = "cryo";
     }
     if (/water|isru|vapor|humid|rain|brine|salt|halite|evaporite|extract|hydrate/.test(query)) {
       scores.moisture += 50;
       scores.astrobiology += 20;
+      matchedPreset = "isru";
     }
 
     // Normalize to exact integers summing to 100
@@ -2596,10 +2610,10 @@ document.addEventListener("DOMContentLoaded", () => {
     state.categoryWeights = { ...newWeights };
 
     if (rebalanceTimerId) clearTimeout(rebalanceTimerId);
-    if (rebalanceCountdownIntervalId) clearInterval(rebalanceCountdownIntervalId);
 
     renderDecisionMatrix();
     updateActiveSiteScoreDisplay();
+    updateMatrixViewportHUD(matchedPreset);
 
     const sortedCats = Object.entries(newWeights).sort((a, b) => b[1] - a[1]);
     const topCatObj = SCIENCE_CATEGORIES.find(c => c.key === sortedCats[0][0]);
@@ -2764,56 +2778,6 @@ document.addEventListener("DOMContentLoaded", () => {
     rowsHtml += `</tr>`;
 
     decisionMatrixTbody.innerHTML = rowsHtml;
-
-    // 7. Build Leaderboard Grid Cards
-    if (matrixLeaderboardGrid) {
-      let lbHtml = "";
-      sortedSites.forEach((s, idx) => {
-        const rank = idx + 1;
-        const score = siteWeightedOverall[s.key];
-        const isWinner = (rank === 1);
-        const trophy = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "4️⃣";
-
-        lbHtml += `
-          <div class="leaderboard-card ${isWinner ? 'winner' : ''}">
-            <div class="lb-top-row">
-              <span style="font-size: 0.68rem; font-weight: 800; color: ${isWinner ? '#fef08a' : '#94a3b8'};">${trophy} ${rank === 1 ? '1ST PLACE' : rank === 2 ? '2ND PLACE' : rank === 3 ? '3RD PLACE' : '4TH PLACE'}</span>
-              <span class="lb-score">${score.toFixed(1)}%</span>
-            </div>
-            <span class="lb-site-name">${s.icon} ${s.name}</span>
-          </div>
-        `;
-      });
-      matrixLeaderboardGrid.innerHTML = lbHtml;
-    }
-
-    // 8. Real-Time MCDM Formula Substitution
-    if (mcdmFormulaLive) {
-      const activeSite = getActiveSiteData();
-      const siteKey = (activeSite && state.currentSiteKey !== "mars_gale") ? state.currentSiteKey : "mcmurdo";
-      const siteScores = siteCatScores[siteKey] || {};
-      const siteName = (activeSite && state.currentSiteKey !== "mars_gale") ? activeSite.name : "McMurdo Dry Valleys";
-      const finalScore = siteWeightedOverall[siteKey] || 0;
-
-      mcdmFormulaLive.innerHTML = `
-        <div class="mcdm-formula-breakdown">
-          <span class="mcdm-site-tag">Active Site: <strong>${siteName}</strong></span>
-          <div class="mcdm-terms-list">
-            <span class="mcdm-term">🌡️ (${(normWeights.thermal * 100).toFixed(0)}% × ${(siteScores.thermal || 0).toFixed(1)}%)</span>
-            <span class="mcdm-plus">+</span>
-            <span class="mcdm-term">🧬 (${(normWeights.astrobiology * 100).toFixed(0)}% × ${(siteScores.astrobiology || 0).toFixed(1)}%)</span>
-            <span class="mcdm-plus">+</span>
-            <span class="mcdm-term">💨 (${(normWeights.dynamics * 100).toFixed(0)}% × ${(siteScores.dynamics || 0).toFixed(1)}%)</span>
-            <span class="mcdm-plus">+</span>
-            <span class="mcdm-term">💧 (${(normWeights.moisture * 100).toFixed(0)}% × ${(siteScores.moisture || 0).toFixed(1)}%)</span>
-            <span class="mcdm-plus">+</span>
-            <span class="mcdm-term">☀️ (${(normWeights.radiation * 100).toFixed(0)}% × ${(siteScores.radiation || 0).toFixed(1)}%)</span>
-            <span class="mcdm-equals">=</span>
-            <span class="mcdm-final-val">${finalScore.toFixed(1)}% Match</span>
-          </div>
-        </div>
-      `;
-    }
   }
 
   // Event Listeners for Manual Weight Sliders & Number Inputs
@@ -2867,6 +2831,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const promptText = goalMap[goalKey] || chip.textContent.trim();
       if (inputMissionGoal) inputMissionGoal.value = promptText;
       runMissionOptimizer(promptText);
+      updateMatrixViewportHUD(goalKey);
     });
   });
 
