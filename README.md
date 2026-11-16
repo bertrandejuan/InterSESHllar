@@ -250,10 +250,10 @@ While SI powers natural-language synthesis and interactive mission weighting, **
 
 ## 🚀 Quick Start & Installation
 
-1. **Prerequisite**: You have to download Git or GitHub Desktop first to obtain the project files.
-   - Install Git CLI: [git-scm.com/downloads](https://git-scm.com/downloads) (or winget install Git.Git)
-   - Install GitHub Desktop (GUI): [desktop.github.com](https://desktop.github.com/)
-2. **Clone the Repository**:
+1. **Prerequisite: Download OpenSpace First**:
+   - Download **OpenSpace v0.22+** from the official site: [openspaceproject.com/download](https://www.openspaceproject.com/download)
+   - Extract to your preferred directory (e.g., C:\OpenSpace\OpenSpace-0.22.1).
+2. **Clone or Download the Repository**:
    `ash
    git clone https://github.com/bertrandejuan/InterSESHllar.git
    cd InterSESHllar

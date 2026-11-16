@@ -1,14 +1,16 @@
 # Installation & Setup Guide
 
-## 1. Prerequisites: Download GitHub First
+## 1. Prerequisites: Download OpenSpace First
 
-Before installing or running this project, **you have to download Git / GitHub first** to acquire the repository files:
+Before installing or running this visualization package, **you have to download OpenSpace first**:
 
-1. **Download & Install Git or GitHub Desktop**:
-   - **Git CLI (Official)**: Download from [git-scm.com/downloads](https://git-scm.com/downloads) (or install via PowerShell: winget install Git.Git).
-   - **GitHub Desktop (GUI)**: Download from [desktop.github.com](https://desktop.github.com/).
-2. **Clone the Project Repository**:
-   Open PowerShell, Command Prompt, or GitHub Desktop and clone the repository:
+1. **Download OpenSpace (v0.22+)**:
+   - Download the latest stable version of OpenSpace from the official site:  
+     👉 **[openspaceproject.com/download](https://www.openspaceproject.com/download)**
+   - Extract the downloaded .zip file to your preferred local folder (e.g., C:\OpenSpace\OpenSpace-0.22.1).
+
+2. **Obtain the Project Repository**:
+   - Clone or download the repository to your computer:
    `powershell
    git clone https://github.com/bertrandejuan/InterSESHllar.git
    cd InterSESHllar
