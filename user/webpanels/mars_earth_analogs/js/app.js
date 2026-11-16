@@ -287,6 +287,63 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
+  // Exact Mathematical Formulas from Challenge Specification:
+  // Step 2:  d_j = |X_Earth,j - X_Mars,j| / T_j
+  // Step 2b: d_P = |log10(P_Earth / P_Mars)| for atmospheric surface pressure
+  // Step 3:  D_c = sqrt( (1/n) * sum_{j=1}^n d_j^2 )  (RMS Distance within Category)
+  // Step 5:  S_c = 100 * exp(-D_c)  (Exponential similarity kernel: Roads & Mozer 2019)
+  // ----------------------------------------------------
+  function calcNormalizedDiff(paramKey, earthVal, marsVal, paramDef) {
+    if (earthVal === null || earthVal === undefined || isNaN(earthVal)) return null;
+    if (marsVal === null || marsVal === undefined || isNaN(marsVal)) return null;
+
+    // Step 2b: Logarithmic ratio for atmospheric pressure
+    if (paramKey === "surface_pressure_kpa" || (paramDef && paramDef.isLogPressure)) {
+      const pEarth = Number(earthVal);
+      const pMars = Number(marsVal) || 0.764;
+      if (pEarth <= 0 || pMars <= 0) return null;
+      return Math.abs(Math.log10(pEarth / pMars));
+    }
+
+    // Step 2: Normalized difference d_j = |X_Earth - X_Mars| / T_j
+    const tolerance = (paramDef && (paramDef.tolerance !== undefined ? paramDef.tolerance : paramDef.scale)) || 20.0;
+    return Math.abs(Number(earthVal) - Number(marsVal)) / tolerance;
+  }
+
+  function calcParamSimScore(paramKey, earthVal, marsVal, paramDef) {
+    const dj = calcNormalizedDiff(paramKey, earthVal, marsVal, paramDef);
+    if (dj === null) return null;
+    return 100.0 * Math.exp(-dj);
+  }
+
+  function calcCategoryDistanceAndScore(catKey, siteMetrics, marsMetrics) {
+    const cat = SCIENCE_CATEGORIES.find(c => c.key === catKey);
+    if (!cat || !siteMetrics || !marsMetrics) return { Dc: 0, Sc: null, n: 0, diffs: [] };
+
+    const diffs = [];
+    cat.parameters.forEach(p => {
+      if (p.isQualitative) return;
+      const earthVal = siteMetrics[p.key];
+      const marsVal = marsMetrics[p.key];
+      const dj = calcNormalizedDiff(p.key, earthVal, marsVal, p);
+      if (dj !== null) {
+        diffs.push({ key: p.key, dj });
+      }
+    });
+
+    if (diffs.length === 0) return { Dc: 0, Sc: null, n: 0, diffs: [] };
+
+    // Step 3: D_c = sqrt( (1/n) * sum(d_j^2) )
+    const meanSq = diffs.reduce((sum, d) => sum + d.dj * d.dj, 0) / diffs.length;
+    const Dc = Math.sqrt(meanSq);
+
+    // Step 5: S_c = 100 * exp(-D_c)
+    const Sc = 100.0 * Math.exp(-Dc);
+
+    return { Dc, Sc, n: diffs.length, diffs };
+  }
+
+  // ----------------------------------------------------
   // 3. Category Definitions Strictly Matching Whiteboard Sequence
   //   1) Thermal Conditions (NASA POWER API)
   //   2) Astrobiology / Surface Materials (NASA EMIT & MSL CheMin Mineralogy)
@@ -314,7 +371,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "°C",
           desc: "10-year MERRA-2 daily mean air temperature at 2 meters.",
           source: "NASA POWER MERRA-2 & MSL REMS (2015-2025)",
-          scale: 45.0,
+          tolerance: 20.0,
+          scale: 20.0,
           getVal: (m) => formatNumber(m.avg_2m_air_temp_c, 2) + " °C",
           getMarsVal: () => "-53.67 °C"
         },
@@ -325,7 +383,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "°C",
           desc: "Extreme nocturnal radiative cooling minimum under hyper-arid clear skies.",
           source: "NASA POWER MERRA-2 & MSL REMS",
-          scale: 50.0,
+          tolerance: 20.0,
+          scale: 20.0,
           getVal: (m) => formatNumber(m.mean_daily_min_air_temp_c, 2) + " °C",
           getMarsVal: () => "-77.76 °C"
         },
@@ -336,7 +395,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "°C",
           desc: "Maximum daily air temperature reached during daytime insolation.",
           source: "NASA POWER MERRA-2 & MSL REMS",
-          scale: 40.0,
+          tolerance: 20.0,
+          scale: 20.0,
           getVal: (m) => formatNumber(m.mean_daily_max_air_temp_c, 2) + " °C",
           getMarsVal: () => "-19.08 °C"
         },
@@ -347,7 +407,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "°C",
           desc: "Diurnal thermal swing between daytime peak heating and nighttime cooling.",
           source: "NASA POWER MERRA-2 & MSL REMS",
-          scale: 35.0,
+          tolerance: 20.0,
+          scale: 20.0,
           getVal: (m) => formatNumber(m.mean_daily_temp_range_c, 2) + " °C",
           getMarsVal: () => "58.68 °C"
         },
@@ -358,7 +419,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "°C",
           desc: "Radiometric ground brightness skin temperature.",
           source: "MERRA-2 Skin Temp & REMS Ground Temperature Sensor",
-          scale: 45.0,
+          tolerance: 20.0,
+          scale: 20.0,
           getVal: (m) => formatNumber(m.surface_temp_c, 2) + " °C",
           getMarsVal: () => "-50.89 °C"
         }
@@ -385,6 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "pH",
           desc: "Acidity / alkalinity of surface soil and regolith solution influencing mineral dissolution, clay stability, and habitability.",
           source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Polar Cryo-Regolith Surveys | Mars: MSL Curiosity CheMin Sheepbed Mudstone Early Diagenetic Fluids",
+          tolerance: 1.5,
           scale: 1.5,
           isQualitative: false,
           getVal: (m) => m.soil_ph !== null && m.soil_ph !== undefined ? `${formatNumber(m.soil_ph, 2)} pH (Range: ${m.soil_ph_min}–${m.soil_ph_max})` : "N/A (Cryogenic)",
@@ -397,6 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "g/kg",
           desc: "Mass fraction of organic carbon in regolith/soil matrix (0-5cm depth), critical for prebiotic habitability and biosignature preservation.",
           source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Antarctic Cryo-Regolith Surveys | Mars: MSL Curiosity SAM Pyrolysis in Cumberland Mudstone (50-200 ppm C)",
+          tolerance: 5.0,
           scale: 5.0,
           isQualitative: false,
           getVal: (m) => m.soil_organic_carbon_g_kg !== null && m.soil_organic_carbon_g_kg !== undefined ? `${formatNumber(m.soil_organic_carbon_g_kg, 2)} g/kg (Range: ${m.soil_organic_carbon_min}–${m.soil_organic_carbon_max})` : "N/A",
@@ -409,6 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "kg/dm³",
           desc: "Dry bulk density of surface regolith / soil (0-5cm depth) determining packing porosity, permeability, and thermal inertia.",
           source: "Earth Analogs: ISRIC SoilGrids 0-5cm WCS (soilgrids_maps.ipynb) & Polar Soil Surveys | Mars: MSL Curiosity Rocknest Sand & Cumberland Drill Core Density (1.50-1.65 kg/dm³)",
+          tolerance: 0.40,
           scale: 0.40,
           isQualitative: false,
           getVal: (m) => m.soil_bulk_density_kg_dm3 !== null && m.soil_bulk_density_kg_dm3 !== undefined ? `${formatNumber(m.soil_bulk_density_kg_dm3, 2)} kg/dm³ (Range: ${m.soil_bulk_density_min}–${m.soil_bulk_density_max})` : "N/A",
@@ -483,6 +548,7 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "m/s",
           desc: "Surface wind velocity driving aeolian sand transport, dust lifting, and yardangs.",
           source: "NASA POWER MERRA-2 & MSL REMS",
+          tolerance: 5.0,
           scale: 5.0,
           getVal: (m) => formatNumber(m.avg_wind_speed_ms, 2) + " m/s",
           getMarsVal: () => "3.50 m/s"
@@ -494,7 +560,9 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "kPa",
           desc: "Barometric air column pressure (0.76 kPa on Mars vs 101.3 kPa Earth sea-level).",
           source: "NASA POWER MERRA-2 & MSL REMS",
-          scale: 80.0,
+          isLogPressure: true,
+          tolerance: null,
+          scale: null,
           getVal: (m) => formatNumber(m.surface_pressure_kpa, 2) + " kPa",
           getMarsVal: () => "0.76 kPa"
         }
@@ -519,7 +587,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "%",
           desc: "Relative humidity bounds. Diurnal spikes at Gale allow transient deliquescence.",
           source: "NASA POWER MERRA-2 & MSL REMS",
-          scale: 40.0,
+          tolerance: 20.0,
+          scale: 20.0,
           getVal: (m) => formatNumber(m.avg_relative_humidity_pct, 2) + " %",
           getMarsVal: () => "7.44 %"
         },
@@ -530,6 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "g/kg",
           desc: "Absolute water vapor mixing ratio in the lower atmosphere.",
           source: "NASA POWER MERRA-2 (QV2M)",
+          tolerance: 5.0,
           scale: 5.0,
           getVal: (m) => formatNumber(m.specific_humidity_g_kg, 3) + " g/kg",
           getMarsVal: () => "0.694 g/kg"
@@ -541,6 +611,7 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "mm/day",
           desc: "Daily liquid rain rate. Mars experiences 0.0 mm/yr liquid precipitation.",
           source: "NASA POWER MERRA-2",
+          tolerance: 1.0,
           scale: 1.0,
           getVal: (m) => formatNumber(m.avg_precipitation_mm_day, 2) + " mm/d",
           getMarsVal: () => "0.00 mm/d"
@@ -566,6 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "MJ/m²/d",
           desc: "CERES SYN1deg satellite daily shortwave downward solar flux reaching the surface.",
           source: "CERES SYN1deg & Mars Orbit Model (1.52 AU)",
+          tolerance: 15.0,
           scale: 15.0,
           getVal: (m) => formatNumber(m.solar_radiation_mj_m2_day, 2) + " MJ/m²/d",
           getMarsVal: () => "14.76 MJ/m²/d"
@@ -577,7 +649,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "W/m²",
           desc: "Long-wave ultraviolet surface flux (315-400 nm).",
           source: "NASA POWER Surface UV & REMS UV Sensor",
-          scale: 10.0,
+          tolerance: 5.0,
+          scale: 5.0,
           getVal: (m) => formatNumber(m.uva_irradiance_w_m2, 2) + " W/m²",
           getMarsVal: () => "0.62 W/m²"
         },
@@ -588,7 +661,8 @@ document.addEventListener("DOMContentLoaded", () => {
           unit: "W/m²",
           desc: "Short-wave ultraviolet radiation (280-315 nm) driving photolysis and cellular stress.",
           source: "NASA POWER Surface UV & REMS UV Sensor",
-          scale: 0.35,
+          tolerance: 0.5,
+          scale: 0.5,
           getVal: (m) => formatNumber(m.uvb_irradiance_w_m2, 3) + " W/m²",
           getMarsVal: () => "0.200 W/m²"
         }
@@ -612,21 +686,15 @@ document.addEventListener("DOMContentLoaded", () => {
     SCIENCE_CATEGORIES.forEach((cat) => {
       const isExpanded = state.openAccordionKey === cat.key;
 
-      // Calculate category score strictly via math formula across its parameters with scale
+      // Calculate category score strictly via math formula: RMS distance Dc and Sc = 100 * exp(-Dc)
       let catScore = null;
+      let catDistance = null;
       if (!isMars) {
-        let sum = 0;
-        let count = 0;
-        cat.parameters.forEach((p) => {
-          if (p.scale && metrics[p.key] !== undefined && marsMetrics[p.key] !== undefined) {
-            const s = calcSimScore(metrics[p.key], marsMetrics[p.key], p.scale);
-            if (s !== null) {
-              sum += s;
-              count++;
-            }
-          }
-        });
-        if (count > 0) catScore = sum / count;
+        const catRes = calcCategoryDistanceAndScore(cat.key, metrics, marsMetrics);
+        if (catRes && catRes.Sc !== null) {
+          catScore = catRes.Sc;
+          catDistance = catRes.Dc;
+        }
       }
 
       const item = document.createElement("div");
@@ -805,10 +873,10 @@ document.addEventListener("DOMContentLoaded", () => {
             let matchBadgeHtml = `<span class="cstat-match-badge match-pending">—</span>`;
             if (param.isQualitative) {
               matchBadgeHtml = `<span class="cstat-match-badge match-high" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4);">Analog</span>`;
-            } else if (param.scale && metrics[param.key] !== null && metrics[param.key] !== undefined && marsMetrics[param.key] !== null && marsMetrics[param.key] !== undefined) {
+            } else if (!isMars && metrics[param.key] !== null && metrics[param.key] !== undefined && marsMetrics[param.key] !== null && marsMetrics[param.key] !== undefined) {
               const earthVal = metrics[param.key];
               const marsRef = marsMetrics[param.key];
-              const s = calcSimScore(earthVal, marsRef, param.scale);
+              const s = calcParamSimScore(param.key, earthVal, marsRef, param);
               if (s !== null) {
                 const badgeClass = s >= 60 ? "match-high" : s >= 35 ? "match-mid" : "match-low";
                 matchBadgeHtml = `<span class="cstat-match-badge ${badgeClass}">${s.toFixed(0)}% Match</span>`;
@@ -841,6 +909,24 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           // On-demand detail drawer
+          let formulaHtml = "";
+          if (param.isLogPressure) {
+            formulaHtml = `
+              <div class="cstat-detail-item"><strong>Formula:</strong> <em>d_P</em> = |log₁₀(P_Earth / P_Mars)|, &nbsp; <em>s</em> = 100 · e<sup>-d_P</sup></div>
+              <div class="cstat-detail-item"><strong>Category RMS:</strong> <em>D_c</em> = √( (1/n) Σ d_j² ), &nbsp; <em>S_c</em> = 100 · e<sup>-D_c</sup> <em>(Roads & Mozer 2019)</em></div>
+            `;
+          } else if (param.tolerance !== undefined && param.tolerance !== null) {
+            formulaHtml = `
+              <div class="cstat-detail-item"><strong>Formula:</strong> <em>d_j</em> = |X_Earth - X_Mars| / ${param.tolerance}, &nbsp; <em>s</em> = 100 · e<sup>-d_j</sup></div>
+              <div class="cstat-detail-item"><strong>Category RMS:</strong> <em>D_c</em> = √( (1/n) Σ d_j² ), &nbsp; <em>S_c</em> = 100 · e<sup>-D_c</sup> <em>(Roads & Mozer 2019)</em></div>
+            `;
+          } else if (param.scale) {
+            formulaHtml = `
+              <div class="cstat-detail-item"><strong>Formula:</strong> <em>d_j</em> = |X_Earth - X_Mars| / ${param.scale}, &nbsp; <em>s</em> = 100 · e<sup>-d_j</sup></div>
+              <div class="cstat-detail-item"><strong>Category RMS:</strong> <em>D_c</em> = √( (1/n) Σ d_j² ), &nbsp; <em>S_c</em> = 100 · e<sup>-D_c</sup> <em>(Roads & Mozer 2019)</em></div>
+            `;
+          }
+
           const detailDrawer = document.createElement("div");
           detailDrawer.className = "cstat-detail-drawer";
           detailDrawer.style.display = "none";
@@ -848,7 +934,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="cstat-detail-item"><strong>Code:</strong> [${param.code}] &nbsp;|&nbsp; <strong>Units:</strong> ${param.unit || "N/A"}</div>
             <div class="cstat-detail-item"><strong>Definition:</strong> ${param.desc}</div>
             <div class="cstat-detail-item"><strong>Source:</strong> ${param.source}</div>
-            ${param.scale ? `<div class="cstat-detail-item"><strong>Formula:</strong> S = 100 · exp(-|Δ| / ${param.scale})</div>` : ""}
+            ${formulaHtml}
           `;
           rowGroup.appendChild(detailDrawer);
 
@@ -1280,19 +1366,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SCIENCE_CATEGORIES.forEach((cat) => {
       const w = normWeights[cat.key] !== undefined ? normWeights[cat.key] : 0.2;
-      let sum = 0;
-      let count = 0;
-      cat.parameters.forEach((p) => {
-        if (p.scale && siteMetrics[p.key] !== undefined && marsMetrics[p.key] !== undefined && siteMetrics[p.key] !== null) {
-          const s = calcSimScore(siteMetrics[p.key], marsMetrics[p.key], p.scale);
-          if (s !== null) {
-            sum += s;
-            count++;
-          }
-        }
-      });
-      if (count > 0 && w > 0) {
-        weightedSum += (sum / count) * w;
+      const catRes = calcCategoryDistanceAndScore(cat.key, siteMetrics, marsMetrics);
+      if (catRes && catRes.Sc !== null && w > 0) {
+        weightedSum += catRes.Sc * w;
         weightSumUsed += w;
       }
     });
@@ -1783,10 +1859,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const { bdod, phh2o, soc, isOffline, name: locName } = data;
 
-    const scorePh = calcSoilMetricScore(phh2o, MARS_GALE_SOIL_BASELINE.ph, MARS_GALE_SOIL_BASELINE.phSigma);
-    const scoreSoc = calcSoilMetricScore(soc, MARS_GALE_SOIL_BASELINE.soc, MARS_GALE_SOIL_BASELINE.socSigma);
-    const scoreBdod = calcSoilMetricScore(bdod, MARS_GALE_SOIL_BASELINE.bdod, MARS_GALE_SOIL_BASELINE.bdodSigma);
-    const overallScore = ((scorePh + scoreSoc + scoreBdod) / 3).toFixed(1);
+    // Step 2: Normalized difference d_j = |X_Earth - X_Mars| / T_j
+    // Calibrated Tolerances: pH = 1.5, SOC = 5.0 g/kg, BDOD = 0.40 kg/dm3
+    const dPh = Math.abs(phh2o - MARS_GALE_SOIL_BASELINE.ph) / 1.5;
+    const dSoc = Math.abs(soc - MARS_GALE_SOIL_BASELINE.soc) / 5.0;
+    const dBdod = Math.abs(bdod - MARS_GALE_SOIL_BASELINE.bdod) / 0.40;
+
+    // Step 5: Individual parameter similarity scores s_j = 100 * exp(-d_j)
+    const scorePh = 100.0 * Math.exp(-dPh);
+    const scoreSoc = 100.0 * Math.exp(-dSoc);
+    const scoreBdod = 100.0 * Math.exp(-dBdod);
+
+    // Step 3: Category RMS distance D_astro = sqrt( (1/3) * (d_Ph^2 + d_Soc^2 + d_Bdod^2) )
+    const dMeanSq = (dPh * dPh + dSoc * dSoc + dBdod * dBdod) / 3.0;
+    const D_astro = Math.sqrt(dMeanSq);
+
+    // Step 5: Exponential kernel similarity S_astro = 100 * exp(-D_astro) (Roads & Mozer 2019)
+    const overallScore = (100.0 * Math.exp(-D_astro)).toFixed(1);
 
     let matchTier = "Moderate Analog Match";
     if (overallScore >= 80) {
@@ -1892,6 +1981,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="astro-source-tag">
         ${isOffline ? 'Calibrated ISRIC SoilGrids v2.0 & NASA EMIT Baseline' : 'Live ISRIC SoilGrids v2.0 Global Regolith Grid (0–5 cm depth)'} | MSL Curiosity Ground Truth
+      </div>
+      <div class="astro-si-attribution-tag">
+        Synthetic Intelligence (SI) Attribution: Habitability assessment narrative and descriptive synthesis generated via Google Gemini API & algorithmic inference.
       </div>
     `;
   }
@@ -2954,18 +3046,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const catScores = {};
 
       SCIENCE_CATEGORIES.forEach((cat) => {
-        let sum = 0;
-        let count = 0;
-        cat.parameters.forEach((p) => {
-          if (p.scale && m[p.key] !== undefined && mars.metrics && mars.metrics[p.key] !== undefined && m[p.key] !== null) {
-            const sVal = calcSimScore(m[p.key], mars.metrics[p.key], p.scale);
-            if (sVal !== null) {
-              sum += sVal;
-              count++;
-            }
-          }
-        });
-        catScores[cat.key] = count > 0 ? (sum / count) : 0;
+        const catRes = calcCategoryDistanceAndScore(cat.key, m, mars.metrics || {});
+        catScores[cat.key] = catRes && catRes.Sc !== null ? catRes.Sc : 0;
       });
       siteScores[s.key] = catScores;
     });
@@ -3133,6 +3215,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="opt-source-icon">🏛️</span>
                 <span class="opt-source-text">${escapeHtml(result.source)}</span>
               </div>
+            </div>
+
+            <div class="optimizer-si-attribution-tag">
+              Synthetic Intelligence (SI) Attribution: Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.
             </div>
             ${!result.isGeminiLive ? `
               <div style="margin-top: 4px; text-align: right;">

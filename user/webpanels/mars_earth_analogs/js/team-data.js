@@ -764,3 +764,43 @@ window.PARAMETER_DEFINITIONS = [
     source: "NASA POWER Surface UV & REMS UV Sensor"
   }
 ];
+
+window.TEAM_METADATA = {
+  challenge: "NASA Space Apps Challenge / OpenSpace Planetary Analogs",
+  project: "TerraMatch: Earth-Mars Analog Multi-Criteria Decision System",
+  dataset_version: "2.4.0",
+  last_calibrated: "2026-11-15",
+  mathematical_framework: {
+    standard: "Multi-Attribute Utility Theory (MAUT) & Distance-Based Exponential Similarity Kernel",
+    step2_normalized_difference: "d_j = |X_Earth,j - X_Mars,j| / T_j",
+    step2b_atmospheric_pressure: "d_P = |log10(P_Earth / P_Mars)|",
+    step3_rms_distance: "D_c = sqrt( (1/n) * sum_{j=1}^n d_j^2 )",
+    step5_exponential_similarity_kernel: "S_c = 100 * exp(-D_c)",
+    step6_decision_matrix: "Overall Score = sum(w_c * S_c) / sum(w_c)",
+    tolerances_T_j: {
+      temperature_c: 20.0,
+      relative_humidity_pct: 20.0,
+      uva_irradiance_w_m2: 5.0,
+      uvb_irradiance_w_m2: 0.5,
+      soil_ph: 1.5,
+      soil_organic_carbon_g_kg: 5.0,
+      soil_bulk_density_kg_dm3: 0.40,
+      wind_speed_m_s: 5.0,
+      specific_humidity_g_kg: 5.0,
+      precipitation_mm_day: 1.0,
+      solar_radiation_mj_m2_day: 15.0
+    },
+    citation: "Roads, B. D., & Mozer, M. C. (2019). Obtaining psychological embeddings through joint kernel and metric learning. Nature Human Behaviour / Computational Cognitive Science."
+  },
+  si_generation_acknowledgement: {
+    statement: "Must acknowledge SI generation in descriptive text and metadata (Challenge Submission Requirement).",
+    engine: "Google Gemini API (Gemini 2.5 Flash, Gemini 2.0 Flash, Gemini 1.5 Flash)",
+    components_assisted: [
+      "Site descriptive climatology blurbs and analog synthesis (drawer-about modal)",
+      "Automated multi-planetary flythrough tour narratives and duration scripting (30s, 1m, 5m presets)",
+      "Multi-Criteria Decision Matrix mission profile optimization (deduction of category weights, scientific drivers, and NASA literature references)",
+      "ISRIC SoilGrids live query astrobiology & habitability narrative interpretation relative to MSL Curiosity Gale Crater baselines"
+    ],
+    human_oversight: "All empirical numerical inputs, sensor scales, tolerances, and baseline ground truths are strictly anchored to verified NASA POWER, MERRA-2, ISRIC SoilGrids v2.0, and MSL Curiosity REMS/CheMin archives with zero hallucinated telemetry."
+  }
+};

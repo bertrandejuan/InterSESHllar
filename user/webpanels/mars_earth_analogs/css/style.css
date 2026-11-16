@@ -1459,6 +1459,39 @@ body {
   letter-spacing: 0.3px;
 }
 
+.si-attribution-tag,
+.astro-si-attribution-tag,
+.optimizer-si-attribution-tag,
+.tour-si-attribution-tag {
+  font-size: 0.60rem;
+  color: #94a3b8;
+  font-style: italic;
+  letter-spacing: 0.25px;
+  line-height: 1.35;
+  margin-top: 3px;
+  display: block;
+}
+
+.astro-si-attribution-tag {
+  text-align: right;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.optimizer-si-attribution-tag {
+  color: #a78bfa;
+  margin-top: 6px;
+  border-top: 1px dashed rgba(167, 139, 250, 0.25);
+  padding-top: 4px;
+}
+
+.tour-si-attribution-tag {
+  color: #94a3b8;
+  border-top: 1px dashed rgba(56, 189, 248, 0.2);
+  padding-top: 4px;
+  margin-top: 6px;
+}
+
 .drawer-header {
   display: flex;
   justify-content: space-between;
