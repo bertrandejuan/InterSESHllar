@@ -1393,15 +1393,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // Camera zoom dynamics:
     // When overlay toggled ON, zoom out to global planetary orbit to view data in full context
     // When overlay toggled OFF, zoom back in to localized feature (~240 km)
+    // Scale zoom duration when in tour mode so zoom completes briskly at high tour speeds
+    const tourSpeed = state.tourSpeed || 1.0;
+    const zoomDuration = state.tourActive ? Math.max(0.8, 1.8 / tourSpeed) : 2.5;
+
     if (enable) {
       if (isMars) {
-        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 6500000.0, 2.5);
+        openSpace.flyToGeo("Mars", -4.5895, 137.4417, 6500000.0, zoomDuration);
       } else {
-        openSpace.flyToGeo("Earth", site.coordinates.lat, site.coordinates.lon, 9000000.0, 2.5);
+        openSpace.flyToGeo("Earth", site.coordinates.lat, site.coordinates.lon, 9000000.0, zoomDuration);
       }
     } else {
       const target = SITE_CAMERA_TARGETS[state.currentSiteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
-      openSpace.flyToGeo(globeName, target.lat, target.lon, target.alt, 2.5);
+      openSpace.flyToGeo(globeName, target.lat, target.lon, target.alt, zoomDuration);
     }
 
     state.activeOverlay = enable ? layerName : null;
@@ -1571,18 +1575,38 @@ document.addEventListener("DOMContentLoaded", () => {
       const target = SITE_CAMERA_TARGETS[siteKey] || { lat: site.coordinates.lat, lon: site.coordinates.lon, alt: 240000.0 };
       const actionName = SITE_ACTIONS[siteKey];
 
-      const flightLua = `
-        if openspace.action and openspace.action.hasAction("${actionName}") then
-          openspace.action.triggerAction("${actionName}")
-        else
+      // If switching between Mars and Earth, use instant jumpToGeo fade to avoid interplanetary flight traversal
+      const currentGlobe = state.lastFocusedGlobe || (isMars ? "Mars" : "Earth");
+      const isInterplanetarySwitch = (currentGlobe === "Mars" && globe === "Earth") || (currentGlobe === "Earth" && globe === "Mars");
+
+      if (isInterplanetarySwitch) {
+        openSpace.executeLuaScript(`
           if openspace.navigation and openspace.navigation.setFocus then
             openspace.navigation.setFocus('${globe}')
           end
-          openspace.navigation.flyToGeo('${globe}', ${target.lat}, ${target.lon}, ${target.alt}, 3.5)
-        end
-      `;
-      openSpace.executeLuaScript(flightLua);
+          if openspace.navigation and openspace.navigation.jumpToGeo then
+            openspace.navigation.jumpToGeo('${globe}', ${target.lat}, ${target.lon}, ${target.alt}, 0.35)
+          else
+            openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 1.0, 0.15)
+            openspace.navigation.flyToGeo('${globe}', ${target.lat}, ${target.lon}, ${target.alt}, 0.0)
+            openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 0.0, 0.35)
+          end
+        `);
+      } else {
+        const flightLua = `
+          if openspace.action and openspace.action.hasAction("${actionName}") then
+            openspace.action.triggerAction("${actionName}")
+          else
+            if openspace.navigation and openspace.navigation.setFocus then
+              openspace.navigation.setFocus('${globe}')
+            end
+            openspace.navigation.flyToGeo('${globe}', ${target.lat}, ${target.lon}, ${target.alt}, 3.5)
+          end
+        `;
+        openSpace.executeLuaScript(flightLua);
+      }
     }
+    state.lastFocusedGlobe = site.globe || "Earth";
 
     // Isolate planetary tags and labels so labels never bleed across interplanetary space
     if (isMars) {
@@ -2366,29 +2390,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Turns off overlay layers and screen-space key HUD without triggering surface zoom flight
   function clearTourOverlayQuietly() {
-    if (state.activeOverlay) {
-      openSpace.executeLuaScript(`
-        if openspace.hasProperty("Scene.Earth.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
-          openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
-        end
-        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled") then
-          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.${state.activeOverlay}.Enabled", false)
-        end
-        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
-          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", true)
-        end
-        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
-          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0)
-        end
-        if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
-          openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0)
-        end
-        if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
-          openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
-        end
-      `);
-      state.activeOverlay = null;
-    }
+    openSpace.executeLuaScript(`
+      local earthOverlays = { "Earth_Thermal_Inertia", "Earth_Wind_Dynamics", "Earth_Soil_Moisture", "Earth_UV_Radiation" }
+      for _, name in ipairs(earthOverlays) do
+        local p = "Scene.Earth.Renderable.Layers.ColorLayers." .. name .. ".Enabled"
+        if openspace.hasProperty(p) then openspace.setPropertyValueSingle(p, false) end
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Thermal_Inertia.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Thermal_Inertia.Enabled", false)
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled") then
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Enabled", true)
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity") then
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Opacity", 1.0)
+      end
+      if openspace.hasProperty("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity") then
+        openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Mars_Texture.Settings.Opacity", 1.0)
+      end
+      if openspace.hasProperty("ScreenSpace.OverlayLegendHUD.Enabled") then
+        openspace.setPropertyValueSingle("ScreenSpace.OverlayLegendHUD.Enabled", false)
+      end
+    `);
+    state.activeOverlay = null;
   }
 
   function getScienceDisplaySec(baseMs) {
@@ -2450,6 +2474,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setIdleMotion(false);
     clearTourOverlayQuietly();
     dismissHUD();
+    openSpace.setPropertyValue("RenderEngine.GlobalBlackout.Factor", 0.0);
     state.tourIndex = 0;
     state.tourRestartNeeded = true;
     if (btnTourPlay) {
@@ -2536,9 +2561,30 @@ document.addEventListener("DOMContentLoaded", () => {
           state.tourRestartNeeded = false;
 
           if (needsFlight) {
-            updateTourStatus("1/5 Flying to Mars: Gale Crater...");
-            selectSite("mars_gale", true);
-            await tourDelay(3500);
+            updateTourStatus("1/5 Mars: Gale Crater (Fading in to Mars)...");
+            clearTourOverlayQuietly();
+            dismissHUD();
+            setIdleMotion(false);
+            selectSite("mars_gale", false);
+            openSpace.executeLuaScript(`
+              if openspace.navigation and openspace.navigation.setFocus then
+                openspace.navigation.setFocus('Mars')
+              end
+              if openspace.navigation and openspace.navigation.jumpToGeo then
+                openspace.navigation.jumpToGeo('Mars', -4.5895, 137.4417, 240000.0, 0.35)
+              else
+                openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 1.0, 0.15)
+                openspace.navigation.flyToGeo('Mars', -4.5895, 137.4417, 240000.0, 0.0)
+                openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 0.0, 0.35)
+              end
+              if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
+                openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", true)
+              end
+              if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
+                openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", true)
+              end
+            `);
+            await tourDelay(800);
             if (!state.tourActive || tourCancellation) break;
           } else {
             selectSite("mars_gale", false);
@@ -2562,13 +2608,15 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
-            // Thermal conditions overlay
-            updateTourStatus(`1/5 Mars: Thermal Overlay (${getScienceDisplaySec(3500)}s)`);
+            // Thermal conditions overlay (ensures full animation + display before advancing)
+            updateTourStatus(`1/5 Mars: Thermal Overlay (${getScienceDisplaySec(6000)}s)`);
             toggleCategoryOverlay(thermalCat);
-            await tourDelay(3500, true);
+            await tourDelay(6000, true);
             if (!state.tourActive || tourCancellation) break;
 
             clearTourOverlayQuietly();
+            await tourDelay(350);
+            if (!state.tourActive || tourCancellation) break;
           }
         }
 
@@ -2576,13 +2624,42 @@ document.addEventListener("DOMContentLoaded", () => {
         // 2. LUT DESERT (IRAN)
         // --------------------------------------------------
         else if (siteKey === "lut") {
-          updateTourStatus("2/5 Earth: Lut Desert (Flying from Mars)...");
+          updateTourStatus("2/5 Earth: Lut Desert (Fading in to Earth)...");
           clearTourOverlayQuietly();
           dismissHUD();
           setIdleMotion(false);
-          selectSite("lut", true);
 
-          await tourDelay(4000);
+          // Update UI selection, active site title, coordinates, score panel, blurb, and telemetry
+          selectSite("lut", false);
+
+          // Instant seamless blackout fade jump: Mars -> Earth Lut Desert (no interplanetary flight traversal)
+          openSpace.executeLuaScript(`
+            if openspace.navigation and openspace.navigation.setFocus then
+              openspace.navigation.setFocus('Earth')
+            end
+            if openspace.navigation and openspace.navigation.jumpToGeo then
+              openspace.navigation.jumpToGeo('Earth', 30.01, 59.42, 250000.0, 0.35)
+            else
+              openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 1.0, 0.15)
+              openspace.navigation.flyToGeo('Earth', 30.01, 59.42, 250000.0, 0.0)
+              openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 0.0, 0.35)
+            end
+            if openspace.hasProperty("Scene.MarsTagGaleCrater.Renderable.Enabled") then
+              openspace.setPropertyValueSingle("Scene.MarsTagGaleCrater.Renderable.Enabled", false)
+            end
+            if openspace.hasProperty("Scene.MarsGaleCraterLabel.Renderable.Enabled") then
+              openspace.setPropertyValueSingle("Scene.MarsGaleCraterLabel.Renderable.Enabled", false)
+            end
+            if openspace.hasProperty("Scene.EarthTagLut.Renderable.Enabled") then
+              openspace.setPropertyValueSingle("Scene.EarthTagLut.Renderable.Enabled", true)
+            end
+            if openspace.hasProperty("Scene.EarthLabelLut.Renderable.Enabled") then
+              openspace.setPropertyValueSingle("Scene.EarthLabelLut.Renderable.Enabled", true)
+            end
+          `);
+
+          // Quick wait for the fade-in to settle
+          await tourDelay(800);
           if (!state.tourActive || tourCancellation) break;
 
           const astrobioCat = SCIENCE_CATEGORIES.find((c) => c.key === "astrobiology");
@@ -2625,12 +2702,14 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
-            updateTourStatus(`3/5 Earth: Dynamics Overlay (${getScienceDisplaySec(3500)}s)`);
+            updateTourStatus(`3/5 Earth: Dynamics Overlay (${getScienceDisplaySec(6000)}s)`);
             toggleCategoryOverlay(dynamicsCat);
-            await tourDelay(3500, true);
+            await tourDelay(6000, true);
             if (!state.tourActive || tourCancellation) break;
 
             clearTourOverlayQuietly();
+            await tourDelay(350);
+            if (!state.tourActive || tourCancellation) break;
           }
         }
 
@@ -2660,12 +2739,14 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
-            updateTourStatus(`4/5 Earth: Moisture Overlay (${getScienceDisplaySec(3500)}s)`);
+            updateTourStatus(`4/5 Earth: Moisture Overlay (${getScienceDisplaySec(6000)}s)`);
             toggleCategoryOverlay(moistureCat);
-            await tourDelay(3500, true);
+            await tourDelay(6000, true);
             if (!state.tourActive || tourCancellation) break;
 
             clearTourOverlayQuietly();
+            await tourDelay(350);
+            if (!state.tourActive || tourCancellation) break;
           }
         }
 
@@ -2695,12 +2776,14 @@ document.addEventListener("DOMContentLoaded", () => {
             await tourDelay(300);
             if (!state.tourActive || tourCancellation) break;
 
-            updateTourStatus(`5/5 Earth: Radiation Overlay (${getScienceDisplaySec(3500)}s)`);
+            updateTourStatus(`5/5 Earth: Radiation Overlay (${getScienceDisplaySec(6000)}s)`);
             toggleCategoryOverlay(radiationCat);
-            await tourDelay(3500, true);
+            await tourDelay(6000, true);
             if (!state.tourActive || tourCancellation) break;
 
             clearTourOverlayQuietly();
+            await tourDelay(350);
+            if (!state.tourActive || tourCancellation) break;
           }
         }
       }
