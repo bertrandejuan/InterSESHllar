@@ -3093,7 +3093,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <div class="optimizer-si-attribution-tag">
-              <p style="margin: 0 0 3px 0; color: #a78bfa;"><strong>Attribution:</strong> Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API &amp; planetary mission architectures.</p>
+              <p style="margin: 0 0 3px 0; color: #a78bfa;">Synthesis; Exploration Archetype: Gemini API</p>
               <div style="font-size: 0.65rem; color: #94a3b8; line-height: 1.4;">
                 <span>📐 <strong>Methodology:</strong> 5-step distance-based similarity framework &bull; 📊 <strong>Data:</strong> NASA POWER (2015–2025) &amp; MSL Curiosity in-situ records; synthesis: Gemini API.</span>
               </div>

@@ -280,7 +280,7 @@ Every user interface component featuring generative text or mission profile dedu
 2. **SoilGrids Telemetry Results (`#astro-query-results`)**:
    `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
 3. **Decision Matrix Mission Optimizer (`#optimizer-rationale-box`)**:
-   `Attribution: Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
+   `Synthesis; Exploration Archetype: Gemini API`
 4. **Decision Matrix Credits Bar (`.matrix-credits-bar`)**:
    Credits the 5-step distance-based similarity framework, empirical NASA POWER/MSL Curiosity records, and Gemini API decision optimization.
 

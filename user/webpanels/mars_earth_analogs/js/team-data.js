@@ -797,7 +797,7 @@ window.TEAM_METADATA = {
   si_generation_acknowledgement: {
     statement: "Must acknowledge SI generation in descriptive text and metadata (Challenge Submission Requirement).",
     standard_attribution: "NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.",
-    decision_attribution: "Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.",
+    decision_attribution: "Synthesis; Exploration Archetype: Gemini API",
     engine: "Google Gemini API (Gemini 2.5 Flash, Gemini 2.0 Flash, Gemini 1.5 Flash)",
     components_assisted: [
       "Site descriptive climatology blurbs and analog synthesis (drawer-about modal)",

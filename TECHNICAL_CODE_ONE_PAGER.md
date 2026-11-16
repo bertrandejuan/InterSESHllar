@@ -250,7 +250,7 @@ Replaces ad-hoc linear heuristics with the cognitive metric learning similarity 
 - **Front-End Descriptive UI Attributions**:
   * Climatology modal drawer: `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
   * SoilGrids habitability synthesis: `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
-  * MCDM mission optimizer: `Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
+  * MCDM mission optimizer: `Synthesis; Exploration Archetype: Gemini API`
   * Decision Matrix Credits Bar: Standardized methodology, empirical NASA data sources, and Gemini API decision attribution.
 - **Programmatic Metadata**: `window.TEAM_METADATA` and `window.FALLBACK_METADATA` in `team-data.js` and `fallback-data.js` explicitly contain `standard_attribution` and `decision_attribution`.
 - **Zero Hallucinations Guarantee**: All telemetry inputs and tolerance scalings remain anchored exclusively to NASA POWER, MERRA-2, ISRIC SoilGrids v2.0, and MSL Curiosity REMS/CheMin in-situ ground truth.

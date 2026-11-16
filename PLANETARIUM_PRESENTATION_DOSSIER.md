@@ -175,7 +175,7 @@ The **InterSESHllar** system acknowledges the integration of **Synthetic Intelli
 1. **Descriptive UI Text Attribution**:
    - **Analog Climatology Blurbs** (`#drawer-about`): `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
    - **Astrobiology & Habitability Synthesis** (`#astro-query-results`): `NASA POWER (2015–2025) & MSL Curiosity in-situ records; synthesis: Gemini API.`
-   - **Decision Matrix Mission Optimizer** (`#optimizer-rationale-box`): `Attribution: Multi-Criteria Decision Weights, scientific reasoning, and exploration archetype deduced via Google Gemini API & planetary mission architectures.`
+   - **Decision Matrix Mission Optimizer** (`#optimizer-rationale-box`): `Synthesis; Exploration Archetype: Gemini API`
    - **Methodology & Team Credits**: Credits the 5-step distance-based similarity framework (RMS category distances & exponential similarity kernel).
 
 2. **Programmatic Metadata**:
