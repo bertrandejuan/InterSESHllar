@@ -1888,6 +1888,43 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
+  // Ensure Single Scrollbar in OpenSpace CEF / WebGui Tab
+  // Prevents parent container from overflowing and spawning a second scrollbar
+  // ----------------------------------------------------
+  function eliminateParentDoubleScrollbar() {
+    try {
+      if (window.parent && window.parent !== window && window.parent.document) {
+        const iframes = window.parent.document.querySelectorAll("iframe");
+        iframes.forEach((ifr) => {
+          if (ifr.contentWindow === window || (ifr.src && ifr.src.includes("mars_earth_analogs"))) {
+            ifr.style.height = "100%";
+            ifr.style.border = "none";
+            let el = ifr.parentElement;
+            while (el && el !== window.parent.document.body) {
+              if (el.style && (el.style.height === "100vh" || el.style.height.includes("100vh"))) {
+                el.style.height = "100%";
+                el.style.maxHeight = "100%";
+              }
+              if (el.classList && el.classList.contains("dock-content")) {
+                el.style.overflow = "hidden"; // Eliminates duplicate outer scrollbar on dock pane
+              }
+              el = el.parentElement;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      // Ignored for standalone browser use
+    }
+  }
+
+  eliminateParentDoubleScrollbar();
+  window.addEventListener("resize", eliminateParentDoubleScrollbar);
+  setTimeout(eliminateParentDoubleScrollbar, 100);
+  setTimeout(eliminateParentDoubleScrollbar, 350);
+  setTimeout(eliminateParentDoubleScrollbar, 1000);
+
+  // ----------------------------------------------------
   // Initial Startup: Start on Mars with Gale Crater
   // ----------------------------------------------------
   selectSite("mars_gale", false);

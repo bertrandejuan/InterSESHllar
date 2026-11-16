@@ -55,7 +55,7 @@ body {
   box-sizing: border-box;
   background-color: var(--bg-primary);
   color: var(--text-main);
-  padding: 10px;
+  padding: 10px 8px 10px 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -66,13 +66,14 @@ body {
   line-height: 1.4;
 }
 
-/* Custom Scrollbar */
+/* Single Unified Sleek Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(10, 15, 30, 0.6);
+  background: rgba(10, 15, 30, 0.4);
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(71, 85, 105, 0.7);
@@ -240,17 +241,10 @@ body {
    2. Location Selector (Gale Top Hero + 2x2 Earth Grid)
    ---------------------------------------------------- */
 .location-picker-section {
-  position: sticky;
-  top: 0;
-  z-index: 60;
+  position: static;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(10, 15, 29, 0.96);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border-panel);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
 .mars-hero-btn *,
