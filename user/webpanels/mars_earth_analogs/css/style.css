@@ -2751,13 +2751,15 @@ body,
 }
 
 .opt-rationale-card {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.92);
   border-left: 3px solid #34d399;
-  border-radius: 6px;
-  padding: 8px 10px;
+  border-radius: 8px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .opt-rationale-header {
@@ -2776,18 +2778,100 @@ body,
   font-weight: 800;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  padding: 1px 6px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 2px 7px;
   border-radius: 4px;
+}
+
+.opt-weights-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 2px 0;
+}
+
+.opt-weight-pill {
+  font-size: 0.63rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.opt-weight-pill.highlight {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.6);
+  background: rgba(14, 116, 144, 0.25);
+  font-weight: 700;
+}
+
+.opt-section-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.opt-reasoning-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .opt-rationale-text {
   margin: 0;
-  font-size: 0.68rem;
-  color: #e2e8f0;
-  line-height: 1.4;
+  font-size: 0.69rem;
+  color: #cbd5e1;
+  line-height: 1.45;
   white-space: normal;
   word-break: break-word;
+}
+
+.opt-source-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(71, 85, 105, 0.35);
+}
+
+.opt-source-citation {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 5px;
+  padding: 5px 8px;
+}
+
+.opt-source-icon {
+  font-size: 0.8rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.opt-source-text {
+  font-size: 0.64rem;
+  color: #fde68a;
+  line-height: 1.35;
+  font-style: italic;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.opt-cfg-btn {
+  background: none;
+  border: none;
+  color: #38bdf8;
+  cursor: pointer;
+  font-size: 0.62rem;
+  text-decoration: underline;
+  padding: 0;
+  margin-left: 6px;
 }
 
 /* ----------------------------------------------------

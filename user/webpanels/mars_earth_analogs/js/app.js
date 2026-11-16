@@ -2654,87 +2654,88 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/'/g, "&#039;");
   }
 
-  function runMissionOptimizer(promptText) {
+  async function runMissionOptimizer(promptText) {
     if (!promptText || !promptText.trim()) return;
-    const query = promptText.trim().toLowerCase();
+    const query = promptText.trim();
 
-    // Mission keyword score accumulators
-    const scores = {
-      thermal: 20,
-      astrobiology: 20,
-      dynamics: 20,
-      moisture: 20,
-      radiation: 20
-    };
-
-    let matchedPreset = null;
-
-    if (/bio|life|fossil|organ|microb|regolith|soil|clay|sam|chemin|strata|sediment|habitab/.test(query)) {
-      scores.astrobiology += 55;
-      scores.moisture += 15;
-      matchedPreset = "biosignature";
-    }
-    if (/rover|travers|drive|wheel|dust|storm|wind|dune|yardang|edl|landing|gust|pressure|aero/.test(query)) {
-      scores.dynamics += 50;
-      scores.thermal += 15;
-      matchedPreset = "traverse";
-    }
-    if (/drone|helicopter|aerial|flight|rotor|solar|photovolt|sun|insolation|uv|sky|energy/.test(query)) {
-      scores.dynamics += 30;
-      scores.radiation += 45;
-      matchedPreset = "drone";
-    }
-    if (/cryo|ice|cold|polar|frost|freez|drill|glacier|permafrost|winter|subsurface/.test(query)) {
-      scores.thermal += 45;
-      scores.moisture += 25;
-      matchedPreset = "cryo";
-    }
-    if (/water|isru|vapor|humid|rain|brine|salt|halite|evaporite|extract|hydrate/.test(query)) {
-      scores.moisture += 50;
-      scores.astrobiology += 20;
-      matchedPreset = "isru";
+    if (btnRunOptimizer) {
+      btnRunOptimizer.disabled = true;
+      btnRunOptimizer.innerHTML = `<span>✨ Analyzing with Gemini...</span>`;
     }
 
-    // Normalize to exact integers summing to 100
-    const rawSum = Object.values(scores).reduce((a, b) => a + b, 0);
-    const newWeights = {};
-    let intSum = 0;
-    SCIENCE_CATEGORIES.forEach(cat => {
-      const w = Math.round((scores[cat.key] / rawSum) * 100);
-      newWeights[cat.key] = w;
-      intSum += w;
-    });
+    try {
+      const result = await geminiService.optimizeMissionWeights(query);
+      const newWeights = result.weights || { thermal: 20, astrobiology: 20, dynamics: 20, moisture: 20, radiation: 20 };
 
-    let diff = 100 - intSum;
-    if (diff !== 0) {
-      newWeights.astrobiology += diff;
-    }
+      state.categoryWeights = { ...newWeights };
 
-    state.categoryWeights = { ...newWeights };
+      if (rebalanceTimerId) clearTimeout(rebalanceTimerId);
 
-    if (rebalanceTimerId) clearTimeout(rebalanceTimerId);
+      renderDecisionMatrix();
+      updateActiveSiteScoreDisplay();
 
-    renderDecisionMatrix();
-    updateActiveSiteScoreDisplay();
-    updateMatrixViewportHUD(matchedPreset);
+      // Determine matched preset for Viewport HUD
+      const sortedCats = Object.entries(newWeights).sort((a, b) => b[1] - a[1]);
+      const dominantCat = sortedCats[0][0];
+      const matchedPreset = result.matchedPreset || dominantCat;
+      updateMatrixViewportHUD(matchedPreset);
 
-    const sortedCats = Object.entries(newWeights).sort((a, b) => b[1] - a[1]);
-    const topCatObj = SCIENCE_CATEGORIES.find(c => c.key === sortedCats[0][0]);
-    const secondCatObj = SCIENCE_CATEGORIES.find(c => c.key === sortedCats[1][0]);
+      if (optimizerRationaleBox) {
+        optimizerRationaleBox.style.display = "block";
+        const badgeLabel = result.isGeminiLive
+          ? `✨ Gemini ${result.modelUsed || "2.5 Flash"} Live`
+          : `📚 NASA Planetary Mission Architecture`;
 
-    if (optimizerRationaleBox) {
-      optimizerRationaleBox.style.display = "block";
-      optimizerRationaleBox.innerHTML = `
-        <div class="opt-rationale-card">
-          <div class="opt-rationale-header">
-            <span>🎯 Mission Optimized: <strong>${escapeHtml(promptText)}</strong></span>
-            <span class="opt-rationale-badge">100% Normalized</span>
+        optimizerRationaleBox.innerHTML = `
+          <div class="opt-rationale-card">
+            <div class="opt-rationale-header">
+              <span>🎯 Mission Optimized: <strong>${escapeHtml(query)}</strong></span>
+              <span class="opt-rationale-badge">${badgeLabel}</span>
+            </div>
+            
+            <div class="opt-weights-summary">
+              ${SCIENCE_CATEGORIES.map(cat => {
+                const w = newWeights[cat.key] || 0;
+                const isHigh = w >= 25;
+                return `<span class="opt-weight-pill${isHigh ? " highlight" : ""}">${cat.icon} ${cat.title.split(" ")[0]}: <strong>${w}%</strong></span>`;
+              }).join("")}
+            </div>
+
+            <div class="opt-reasoning-section">
+              <div class="opt-section-label">🔬 Scientific Reasoning & Environmental Driver:</div>
+              <p class="opt-rationale-text">${escapeHtml(result.reasoning)}</p>
+            </div>
+
+            <div class="opt-source-section">
+              <div class="opt-section-label">📚 Deducted From Reference Source:</div>
+              <div class="opt-source-citation">
+                <span class="opt-source-icon">🏛️</span>
+                <span class="opt-source-text">${escapeHtml(result.source)}</span>
+              </div>
+            </div>
+            ${!result.isGeminiLive ? `
+              <div style="margin-top: 4px; text-align: right;">
+                <button type="button" class="opt-cfg-btn" id="btn-opt-open-gemini-settings">⚙ Configure Gemini API Key for live AI generation</button>
+              </div>
+            ` : ""}
           </div>
-          <p class="opt-rationale-text">
-            Weights tuned to prioritize <strong>${topCatObj ? topCatObj.title : sortedCats[0][0]} (${sortedCats[0][1]}%)</strong> and <strong>${secondCatObj ? secondCatObj.title : sortedCats[1][0]} (${sortedCats[1][1]}%)</strong> based on your exploration objective.
-          </p>
-        </div>
-      `;
+        `;
+
+        const btnCfgGemini = document.getElementById("btn-opt-open-gemini-settings");
+        if (btnCfgGemini) {
+          btnCfgGemini.addEventListener("click", () => {
+            const modal = document.getElementById("modal-gemini-settings");
+            if (modal) modal.style.display = "flex";
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Optimizer execution error:", err);
+    } finally {
+      if (btnRunOptimizer) {
+        btnRunOptimizer.disabled = false;
+        btnRunOptimizer.innerHTML = `<span>⚡ Optimize</span>`;
+      }
     }
   }
 
